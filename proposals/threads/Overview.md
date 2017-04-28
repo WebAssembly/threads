@@ -3,6 +3,10 @@
 This page describes a proposal for the post-MVP
 [threads feature :atom_symbol:][future threads].
 
+This proposal adds a new shared linear memory type and some new operations for
+atomic memory access. The responsibility of creating and joining threads is
+deferred to the embedder.
+
 ## Agents
 
 An *agent* is the execution context for a WebAssembly module. It comprises a
@@ -10,7 +14,10 @@ module, a value stack, a control flow stack, a call stack, and an executing
 thread.
 
 The agent's executing thread evaluates instructions and modifies the value
-stack, call stack, and control flow stack as specified in [Semantics.md][].
+stack, call stack, and control flow stack as specified [here][execution spec].
+
+An agent is sometimes called a *thread*, as it is meant to match the behavior
+of the general computing concept of [threads][].
 
 ## Agent Clusters
 
@@ -26,74 +33,49 @@ other agents in the cluster are deactivated indefinitely.
 An embedder may terminate an agent without any of the agent's cluster's other
 agents' prior knowledge or cooperation.
 
-## Modifications to [Portability.md][]
+## Shared Linear Memory
 
-*N.B.* Only 32-bit atomic accesses are guaranteed to be lock-free. This
-matches the
-[ECMAScript specification](https://tc39.github.io/ecma262/#sec-atomics.islockfree).
-
-...
-
-* Availability of lock-free atomic memory operators, when naturally aligned,
-  for 32-bit accesses. At a minimum this must include an atomic
-  compare-and-exchange operator (or equivalent load-linked/store-conditional).
-
-...
-
-## Modifications to [Semantics.md][]
-
-### Alignment
-
-...
-
-If the effective address of a memory access is a multiple of the alignment
-attribute value of the memory access, the memory access is considered
-*aligned*, otherwise it is considered *misaligned*.
-
-Misaligned atomic accesses trap. For non-atomic accesses, aligned and
-misaligned accesses have the same behavior.
-
-Alignment of non-atomic accesses affects performance as follows:
-
-...
-
-### Resizing
-
-...
-
-If linear memory is marked as shared, the [maximum memory size][] must be
-specified.
-
-`grow_memory` and `current_memory` have sequentially consistent ordering.
-
-`grow_memory` of a shared linear memory is allowed, but may fail if the new
-size is greater than the specified maximum size, or if reserving the additional
-memory fails. All agents in the executing agent's cluster will have access to
-the additional linear memory.
-
-...
-
-## Additions to [Semantics.md][]
-
-### Shared Linear Memory
-
-A Linear memory can be marked as shared, which allows it to be shared between
+A linear memory can be marked as shared, which allows it to be shared between
 all agents in an agent cluster. The shared memory can be imported or defined in
 the module. It is a validation error to attempt to import shared linear memory
 if the module's memory import doesn't specify that it allows shared memory.
 Similarly, it is a validation error to import non-shared memory if the
 module's memory import specifies it as being shared.
 
-### Atomic Memory Accesses
+When memory is shared between agents, modifications to the linear memory by one
+agent can be observed by another agent in the agent cluster.
+
+### Resizing
+
+If linear memory is marked as shared, the maximum memory size must be
+specified.
+
+`grow_memory` and `current_memory` have [sequentially consistent][] ordering.
+
+`grow_memory` of a shared linear memory is allowed, but may fail if the new
+size is greater than the specified maximum size, or if reserving the additional
+memory fails. All agents in the executing agent's cluster will have access to
+the additional linear memory.
+
+### Instantiation
+
+When a module has an imported linear memory, its data segments are copied into
+the linear memory when the module is instantiated.
+
+When the imported linear memory is shared, the writes are non-atomic and
+are not ordered.
+
+## Atomic Memory Accesses
 
 Atomic memory accesses are separated into three categories, load/store,
 read-modify-write, and compare-exchange. All atomic memory accesses require a
 shared linear memory. Attempting to use atomic access operators on non-shared
 linear memory is a validation error.
 
-Currently all atomic memory accesses are [sequentially
-consistent](https://en.wikipedia.org/wiki/Sequential_consistency). This
+Currently all atomic memory accesses are [sequentially consistent][]. This
 restriction may be relaxed in the future.
+
+### Load/Store
 
 Atomic load/store memory accesses behave like their non-atomic counterparts,
 with the exception that the ordering of accesses is sequentially consistent.
@@ -122,6 +104,8 @@ with the exception that the ordering of accesses is sequentially consistent.
   * `f32.atomic.store`: (no conversion) atomically store 4 bytes
   * `f64.atomic.store`: (no conversion) atomically store 8 bytes
 
+### Read-Modify-Write
+
 Atomic read-modify-write (RMW) operators atomically read a value from an
 address, modify the value, and store the resulting value to the same address.
 All RMW operators return the value read from memory before the modify operation
@@ -129,9 +113,6 @@ was performed.
 
 The RMW operators have two operands, an address and a value used in the modify
 operation.
-
-The sign-agnostic operations are further described in
-[Semantics.md][Semantics i32].
 
 | Name | Read (as `read`) | Modify | Write | Return `read` |
 | ---- | ---- | ---- | ---- | ---- |
@@ -208,6 +189,9 @@ The sign-agnostic operations are further described in
 | `i64.atomic.rmw32_u.xchg` | 4 bytes | nop | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.xchg` | 8 bytes | nop | 8 bytes | as i64 |
 
+
+### Compare Exchange
+
 The atomic compare exchange operators take three operands: an address, an
 `expected` value, and a `replacement` value. If the `loaded` value is equal to
 the `expected` value, the `replacement` value is stored to the same memory
@@ -229,17 +213,31 @@ address. If the values are not equal, no value is stored. In either case, the
 | `i64.atomic.rmw32_u.cmpxchg` | 4 bytes | `expected` wrapped from i64 to i32, 32-bit compare equal | wrapped from i64 to i32, store 4 bytes | zero-extended from i32 to i64 |
 | `i64.atomic.rmw.cmpxchg` | 8 bytes | 64-bit compare equal | 8 bytes | as i64 |
 
-### Thread operators
+### Lock-free Guarantees
 
-  * `is_lock_free`: Given an operand `N` of type `i32`, if the atomic step of
-    an atomic primitive (see [Atomic Memory Accesses](#atomic-memory-accesses))
-    on a datum of size `N` bytes will be performed without the [agent][]
-    acquiring a lock outside the `N` bytes comprising the datum, then return
-    `1`. Otherwise, return `0`. Once the value of `is_lock_free` for a given
-    value `N` has been observed for any [agent][] in an [agent cluster][], it
-    cannot change.
+Only 32-bit atomic accesses are guaranteed to be lock-free. This matches the
+[ECMAScript specification](https://tc39.github.io/ecma262/#sec-atomics.islockfree).
 
-#### Wait and Wake operators
+### Alignment
+
+Unlike normal memory accesses, misaligned atomic accesses trap. For non-atomic
+accesses, aligned and misaligned accesses have the same behavior.
+
+## Thread operators
+
+One new operator is added: `is_lock_free`. It is an optimization primitive.
+High-performance algorithms will use `is_lock_free` to determine whether to use
+locks or atomic operations in critical sections.
+
+  * `is_lock_free`: given an operand `N` of type `i32`, if the atomic step of an
+    atomic primitive (see [Atomic Memory Accesses](#atomic-memory-accesses)) on
+    a datum of size `N` bytes will be performed without the [agent][] acquiring
+    a lock outside the `N` bytes comprising the datum, then return `1`.
+    Otherwise, return `0`. Once the value of `is_lock_free` for a given value
+    `N` has been observed for any [agent][] in an [agent cluster][], it cannot
+    change.
+
+## Wait and Wake operators
 
 The wake and wait operators are optimizations over busy-waiting for a value to
 change. It is a validation error to use these operators on non-shared linear
@@ -252,7 +250,7 @@ The embedder is also permitted to suspend or wake an agent. A suspended agent
 can be woken by the embedder or the wake operator, regardless of how the agent
 was suspended (e.g. via the embedder or a wait operator).
 
-#### Wait
+### Wait
 
 The wait operator take three operands: an address operand, an expected value,
 and a relative timeout in milliseconds as an `f64`. The return value is `0`,
@@ -280,198 +278,194 @@ another agent wakes this one, this operator returns 2 ("timed-out").
   * `i32.wait`: load i32 value, compare to expected (as `i32`), and wait for wake at same address
   * `i64.wait`: load i64 value, compare to expected (as `i64`), and wait for wake at same address
 
-## Modifications to [BinaryEncoding.md][]
+### Wake
 
-### `resizable_limits`
-A packed tuple that describes the limits of a [table][Semantics Table] or
-[memory][Semantics Resizing]:
+The wake operator takes two operands: an address operand and a wake count as an
+`i32`. The operation will wake as many waiters as are waiting on the same
+effective address, up to the maximum as specified by `wake count`. The operator
+returns the number of waiters that were woken as an `i32`.
 
-| Field | Type | Description |
-| ----- |  ----- | ----- |
-| flags | `varuint7` | described below |
-| initial | `varuint32` | initial length (in units of table elements or wasm pages) |
-| maximum | `varuint32`? | only present if specified by `flags` |
+`wake count` value | Behavior |
+| ---- | ---- |
+| `wake count` < 0 | Wake all waiters |
+| `wake count` == 0 | Wake no waiters |
+| `wake count` > 0 | Wake min(`wake count`, `num waiters`) waiters |
 
-The `resizable_limits` flags field is defined by the following bits:
+  * `i32.wake`: wake up `wake count` threads waiting on the given address via `i32.wait`
 
-| Bit (counting from lsb) | If not set | If set |
-| ---- | ---- | ---- |
-| 0 | maximum field is not present | maximum field is present |
-| 1 | the table or memory is not shared | the table or memory is shared |
+## [Spec Changes][spec]
 
-The rest of the bits of the `varuint7` must be `0`. If the table or memory is
-shared, the maximum field must be present; i.e. `2` is not a valid value.
+The [limits type][] now has an additional field specifying whether
+the linear memory or table is shared:
 
-## Additions to [BinaryEncoding.md][]
+```
+limits ::= {min u32, max u32?, share}
+share  ::= notshared | shared
+```
 
-### Thread operators ([described here][Semantics Thread Operators])
+Its [encoding][limits encoding] is as follows:
 
-| Name | Opcode | Immediate | Description |
-| ---- | ---- | ---- | ---- |
-| `is_lock_free` | `0xf000` | | |
-| `wake` | `0xf001` | `memory immediate` | |
-| `i32.wait` | `0xf002` | `memory immediate` | |
-| `i64.wait` | `0xf003` | `memory immediate` | |
+```
+limits ::= 0x00 n:u32          => {min n, max e, notshared}
+           0x01 n:u32 m:u32    => {min n, max m, notshared}
+           0x11 n:u32 m:u32    => {min n, max m, shared}
+```
 
-The `memory_immediate` type is encoded as follows:
+The [instruction syntax][] is modified as follows:
 
-| Name | Type | Description |
-| ---- | ---- | ---- |
-| flags | `varuint32` | a bitfield which currently must be 0 |
-| offset | `varuint32` | the value of the offset |
+```
+atomicop ::= add | sub | and | or | xor | xchg | cmpxchg
 
-### Atomic read-modify-write operators ([described here][Semantics Atomic Memory Accesses])
+instr ::= ... |
+          is_lock_free |
 
-| Name | Opcode | Immediates | Description |
-| ---- | ---- | ---- | ---- |
-| `i32.atomic.rmw.xchg` | `0xf010` | `memory immediate` | atomic exchange with memory |
-| `i64.atomic.rmw.xchg` | `0xf011` | `memory immediate` | atomic exchange with memory |
-| `i32.atomic.rmw8_s.xchg` | `0xf012` | `memory immediate` | atomic exchange with memory |
-| `i32.atomic.rmw8_u.xchg` | `0xf013` | `memory immediate` | atomic exchange with memory |
-| `i32.atomic.rmw16_s.xchg` | `0xf014` | `memory immediate` | atomic exchange with memory |
-| `i32.atomic.rmw16_u.xchg` | `0xf015` | `memory immediate` | atomic exchange with memory |
-| `i64.atomic.rmw8_s.xchg` | `0xf016` | `memory immediate` | atomic exchange with memory |
-| `i64.atomic.rmw8_u.xchg` | `0xf017` | `memory immediate` | atomic exchange with memory |
-| `i64.atomic.rmw16_s.xchg` | `0xf018` | `memory immediate` | atomic exchange with memory |
-| `i64.atomic.rmw16_u.xchg` | `0xf019` | `memory immediate` | atomic exchange with memory |
-| `i64.atomic.rmw32_s.xchg` | `0xf01a` | `memory immediate` | atomic exchange with memory |
-| `i64.atomic.rmw32_u.xchg` | `0xf01b` | `memory immediate` | atomic exchange with memory |
-| `i32.atomic.rmw.add` | `0xf03f` | `memory immediate` | atomic add to memory |
-| `i64.atomic.rmw.add` | `0xf040` | `memory immediate` | atomic add to memory |
-| `i32.atomic.rmw8_s.add` | `0xf041` | `memory immediate` | atomic add to memory |
-| `i32.atomic.rmw8_u.add` | `0xf042` | `memory immediate` | atomic add to memory |
-| `i32.atomic.rmw16_s.add` | `0xf043` | `memory immediate` | atomic add to memory |
-| `i32.atomic.rmw16_u.add` | `0xf044` | `memory immediate` | atomic add to memory |
-| `i64.atomic.rmw8_s.add` | `0xf045` | `memory immediate` | atomic add to memory |
-| `i64.atomic.rmw8_u.add` | `0xf046` | `memory immediate` | atomic add to memory |
-| `i64.atomic.rmw16_s.add` | `0xf047` | `memory immediate` | atomic add to memory |
-| `i64.atomic.rmw16_u.add` | `0xf048` | `memory immediate` | atomic add to memory |
-| `i64.atomic.rmw32_s.add` | `0xf049` | `memory immediate` | atomic add to memory |
-| `i64.atomic.rmw32_u.add` | `0xf04a` | `memory immediate` | atomic add to memory |
-| `i32.atomic.rmw.sub` | `0xf04b` | `memory immediate` | atomic sub from memory |
-| `i64.atomic.rmw.sub` | `0xf04c` | `memory immediate` | atomic sub from memory |
-| `i32.atomic.rmw8_s.sub` | `0xf04d` | `memory immediate` | atomic sub from memory |
-| `i32.atomic.rmw8_u.sub` | `0xf04e` | `memory immediate` | atomic sub from memory |
-| `i32.atomic.rmw16_s.sub` | `0xf04f` |  `memory immediate` | atomic sub from memory |
-| `i32.atomic.rmw16_u.sub` | `0xf050` |  `memory immediate` | atomic sub from memory |
-| `i64.atomic.rmw8_s.sub` | `0xf051` | `memory immediate` | atomic sub from memory |
-| `i64.atomic.rmw8_u.sub` | `0xf052` | `memory immediate` | atomic sub from memory |
-| `i64.atomic.rmw16_s.sub` | `0xf053` |  `memory immediate` | atomic sub from memory |
-| `i64.atomic.rmw16_u.sub` | `0xf054` |  `memory immediate` | atomic sub from memory |
-| `i64.atomic.rmw32_s.sub` | `0xf055` |  `memory immediate` | atomic sub from memory |
-| `i64.atomic.rmw32_u.sub` | `0xf056` |  `memory immediate` | atomic sub from memory |
-| `i32.atomic.rmw.and` | `0xf057` | `memory immediate` | atomic and with memory |
-| `i64.atomic.rmw.and` | `0xf058` | `memory immediate` | atomic and with memory |
-| `i32.atomic.rmw8_s.and` | `0xf059` | `memory immediate` | atomic and with memory |
-| `i32.atomic.rmw8_u.and` | `0xf05a` | `memory immediate` | atomic and with memory |
-| `i32.atomic.rmw16_s.and` | `0xf05b` | `memory immediate` | atomic and with memory |
-| `i32.atomic.rmw16_u.and` | `0xf05c` | `memory immediate` | atomic and with memory |
-| `i64.atomic.rmw8_s.and` | `0xf05d` | `memory immediate` | atomic and with memory |
-| `i64.atomic.rmw8_u.and` | `0xf05e` | `memory immediate` | atomic and with memory |
-| `i64.atomic.rmw16_s.and` | `0xf05f` | `memory immediate` | atomic and with memory |
-| `i64.atomic.rmw16_u.and` | `0xf060` | `memory immediate` | atomic and with memory |
-| `i64.atomic.rmw32_s.and` | `0xf061` | `memory immediate` | atomic and with memory |
-| `i64.atomic.rmw32_u.and` | `0xf062` | `memory immediate` | atomic and with memory |
-| `i32.atomic.rmw.or` | `0xf063` | `memory immediate` | atomic or with memory |
-| `i64.atomic.rmw.or` | `0xf064` | `memory immediate` | atomic or with memory |
-| `i32.atomic.rmw8_s.or` | `0xf065` | `memory immediate` | atomic or with memory |
-| `i32.atomic.rmw8_u.or` | `0xf066` | `memory immediate` | atomic or with memory |
-| `i32.atomic.rmw16_s.or` | `0xf067` | `memory immediate` | atomic or with memory |
-| `i32.atomic.rmw16_u.or` | `0xf068` | `memory immediate` | atomic or with memory |
-| `i64.atomic.rmw8_s.or` | `0xf069` | `memory immediate` | atomic or with memory |
-| `i64.atomic.rmw8_u.or` | `0xf06a` | `memory immediate` | atomic or with memory |
-| `i64.atomic.rmw16_s.or` | `0xf06b` | `memory immediate` | atomic or with memory |
-| `i64.atomic.rmw16_u.or` | `0xf06c` | `memory immediate` | atomic or with memory |
-| `i64.atomic.rmw32_s.or` | `0xf06d` | `memory immediate` | atomic or with memory |
-| `i64.atomic.rmw32_u.or` | `0xf06e` | `memory immediate` | atomic or with memory |
-| `i32.atomic.rmw.xor` | `0xf06f` | `memory immediate` | atomic xor with memory |
-| `i64.atomic.rmw.xor` | `0xf070` | `memory immediate` | atomic xor with memory |
-| `i32.atomic.rmw8_s.xor` | `0xf071` | `memory immediate` | atomic xor with memory |
-| `i32.atomic.rmw8_u.xor` | `0xf072` | `memory immediate` | atomic xor with memory |
-| `i32.atomic.rmw16_s.xor` | `0xf073` | `memory immediate` | atomic xor with memory |
-| `i32.atomic.rmw16_u.xor` | `0xf074` | `memory immediate` | atomic xor with memory |
-| `i64.atomic.rmw8_s.xor` | `0xf075` | `memory immediate` | atomic xor with memory |
-| `i64.atomic.rmw8_u.xor` | `0xf076` | `memory immediate` | atomic xor with memory |
-| `i64.atomic.rmw16_s.xor` | `0xf077` | `memory immediate` | atomic xor with memory |
-| `i64.atomic.rmw16_u.xor` | `0xf078` | `memory immediate` | atomic xor with memory |
-| `i64.atomic.rmw32_s.xor` | `0xf079` | `memory immediate` | atomic xor with memory |
-| `i64.atomic.rmw32_u.xor` | `0xf07a` | `memory immediate` | atomic xor with memory |
+          inn.wait memarg |
+          i32.wake memarg |
 
-The `memory_immediate` type is encoded as follows:
+          inn.atomic.load memarg | fnn.atomic.load memarg |
+          inn.atomic.store memarg | fnn.atomic.store memarg |
+          inn.atomic.load8_sx memarg | inn.atomic.load16_sx memarg | i64.atomic.load32_sx memarg |
+          inn.atomic.store8 memarg | inn.atomic.store16 memarg | i64.atomic.store32 memarg |
 
-| Name | Type | Description |
-| ---- | ---- | ---- |
-| flags | `varuint32` | a bitfield which currently must be 0 |
-| offset | `varuint32` | the value of the offset |
+          inn.atomic.rmw.atomicop memarg |
+          inn.atomic.rmw8_sx.atomicop memarg |
+          inn.atomic.rmw16_sx.atomicop memarg |
+          i64.atomic.rmw32_sx.atomicop memarg |
+```
 
-### Atomic compare exchange operators ([described here][Semantics Atomic Memory Accesses])
+The [instruction binary format][] is modified as follows:
 
-| Name | Opcode | Immediate | Description |
-| ---- | ---- | ---- | ---- |
-| `i32.atomic.rmw.cmpxchg` | `0xf01c` | `memory immediate` | atomic compare exchange with memory |
-| `i64.atomic.rmw.cmpxchg` | `0xf01d` | `memory immediate` | atomic compare exchange with memory |
-| `i32.atomic.rmw8_s.cmpxchg` | `0xf01e` | `memory immediate` | atomic compare exchange with memory |
-| `i32.atomic.rmw8_u.cmpxchg` | `0xf01f` | `memory immediate` | atomic compare exchange with memory |
-| `i32.atomic.rmw16_s.cmpxchg` | `0xf020` | `memory immediate` | atomic compare exchange with memory |
-| `i32.atomic.rmw16_u.cmpxchg` | `0xf021` | `memory immediate` | atomic compare exchange with memory |
-| `i64.atomic.rmw8_s.cmpxchg` | `0xf022` | `memory immediate` | atomic compare exchange with memory |
-| `i64.atomic.rmw8_u.cmpxchg` | `0xf023` | `memory immediate` | atomic compare exchange with memory |
-| `i64.atomic.rmw16_s.cmpxchg` | `0xf024` | `memory immediate` | atomic compare exchange with memory |
-| `i64.atomic.rmw16_u.cmpxchg` | `0xf025` | `memory immediate` | atomic compare exchange with memory |
-| `i64.atomic.rmw32_s.cmpxchg` | `0xf026` | `memory immediate` | atomic compare exchange with memory |
-| `i64.atomic.rmw32_u.cmpxchg` | `0xf027` | `memory immediate` | atomic compare exchange with memory |
+```
+instr ::= ...
+        | 0xF0 0x00           =>  is_lock_free
 
-The `memory_immediate` type is encoded as follows:
+        | 0xF0 0x01 m:memarg  =>  i32.wake m
+        | 0xF0 0x02 m:memarg  =>  i32.wait m
+        | 0xF0 0x03 m:memarg  =>  i64.wait m
 
-| Name | Type | Description |
-| ---- | ---- | ---- |
-| flags | `varuint32` | a bitfield which currently must be 0 |
-| offset | `varuint32` | the value of the offset |
+        | 0xF0 0x10 m:memarg  =>  i32.atomic.rmw.xchg m
+        | 0xF0 0x11 m:memarg  =>  i64.atomic.rmw.xchg m
+        | 0xF0 0x12 m:memarg  =>  i32.atomic.rmw8_s.xchg m
+        | 0xF0 0x13 m:memarg  =>  i32.atomic.rmw8_u.xchg m
+        | 0xF0 0x14 m:memarg  =>  i32.atomic.rmw16_s.xchg m
+        | 0xF0 0x15 m:memarg  =>  i32.atomic.rmw16_u.xchg m
+        | 0xF0 0x16 m:memarg  =>  i64.atomic.rmw8_s.xchg m
+        | 0xF0 0x17 m:memarg  =>  i64.atomic.rmw8_u.xchg m
+        | 0xF0 0x18 m:memarg  =>  i64.atomic.rmw16_s.xchg m
+        | 0xF0 0x19 m:memarg  =>  i64.atomic.rmw16_u.xchg m
+        | 0xF0 0x1A m:memarg  =>  i64.atomic.rmw32_s.xchg m
+        | 0xF0 0x1B m:memarg  =>  i64.atomic.rmw32_u.xchg m
 
-### Atomic load/store operators ([described here][Semantics Atomic Memory Accesses])
+        | 0xF0 0x1C m:memarg  =>  i32.atomic.rmw.cmpxchg m
+        | 0xF0 0x1D m:memarg  =>  i64.atomic.rmw.cmpxchg m
+        | 0xF0 0x1E m:memarg  =>  i32.atomic.rmw8_s.cmpxchg m
+        | 0xF0 0x1F m:memarg  =>  i32.atomic.rmw8_u.cmpxchg m
+        | 0xF0 0x20 m:memarg  =>  i32.atomic.rmw16_s.cmpxchg m
+        | 0xF0 0x21 m:memarg  =>  i32.atomic.rmw16_u.cmpxchg m
+        | 0xF0 0x22 m:memarg  =>  i64.atomic.rmw8_s.cmpxchg m
+        | 0xF0 0x23 m:memarg  =>  i64.atomic.rmw8_u.cmpxchg m
+        | 0xF0 0x24 m:memarg  =>  i64.atomic.rmw16_s.cmpxchg m
+        | 0xF0 0x25 m:memarg  =>  i64.atomic.rmw16_u.cmpxchg m
+        | 0xF0 0x26 m:memarg  =>  i64.atomic.rmw32_s.cmpxchg m
+        | 0xF0 0x27 m:memarg  =>  i64.atomic.rmw32_u.cmpxchg m
 
-| Name | Opcode | Immediate | Description |
-| ---- | ---- | ---- | ---- |
-| `i32.atomic.load` | `0xf028` | `memory immediate` | atomic load from memory |
-| `i64.atomic.load` | `0xf029` | `memory immediate` | atomic load from memory |
-| `f32.atomic.load` | `0xf02a` | `memory immediate` | atomic load from memory |
-| `f64.atomic.load` | `0xf02b` | `memory immediate` | atomic load from memory |
-| `i32.atomic.load8_s` | `0xf02c` | `memory immediate` | atomic load from memory |
-| `i32.atomic.load8_u` | `0xf02d` | `memory immediate` | atomic load from memory |
-| `i32.atomic.load16_s` | `0xf02e` | `memory immediate` | atomic load from memory |
-| `i32.atomic.load16_u` | `0xf02f` | `memory immediate` | atomic load from memory |
-| `i64.atomic.load8_s` | `0xf030` | `memory immediate` | atomic load from memory |
-| `i64.atomic.load8_u` | `0xf031` | `memory immediate` | atomic load from memory |
-| `i64.atomic.load16_s` | `0xf032` | `memory immediate` | atomic load from memory |
-| `i64.atomic.load16_u` | `0xf033` | `memory immediate` | atomic load from memory |
-| `i64.atomic.load32_s` | `0xf034` | `memory immediate` | atomic load from memory |
-| `i64.atomic.load32_u` | `0xf035` | `memory immediate` | atomic load from memory |
-| `i32.atomic.store` | `0xf036` | `memory immediate` | atomic store to memory |
-| `i64.atomic.store` | `0xf037` | `memory immediate` | atomic store to memory |
-| `f32.atomic.store` | `0xf038` | `memory immediate` | atomic store to memory |
-| `f64.atomic.store` | `0xf039` | `memory immediate` | atomic store to memory |
-| `i32.atomic.store8` | `0xf03a` | `memory immediate` | atomic store to memory |
-| `i32.atomic.store16` | `0xf03b` | `memory immediate` | atomic store to memory |
-| `i64.atomic.store8` | `0xf03c` | `memory immediate` | atomic store to memory |
-| `i64.atomic.store16` | `0xf03d` | `memory immediate` | atomic store to memory |
-| `i64.atomic.store32` | `0xf03e` | `memory immediate` | atomic store to memory |
+        | 0xF0 0x28 m:memarg  =>  i32.atomic.load m
+        | 0xF0 0x29 m:memarg  =>  i64.atomic.load m
+        | 0xF0 0x2A m:memarg  =>  f32.atomic.load m
+        | 0xF0 0x2B m:memarg  =>  f64.atomic.load m
+        | 0xF0 0x2C m:memarg  =>  i32.atomic.load8_s m
+        | 0xF0 0x2D m:memarg  =>  i32.atomic.load8_u m
+        | 0xF0 0x2E m:memarg  =>  i32.atomic.load16_s m
+        | 0xF0 0x2F m:memarg  =>  i32.atomic.load16_u m
+        | 0xF0 0x30 m:memarg  =>  i64.atomic.load8_s m
+        | 0xF0 0x31 m:memarg  =>  i64.atomic.load8_u m
+        | 0xF0 0x32 m:memarg  =>  i64.atomic.load16_s m
+        | 0xF0 0x33 m:memarg  =>  i64.atomic.load16_u m
+        | 0xF0 0x34 m:memarg  =>  i64.atomic.load32_s m
+        | 0xF0 0x35 m:memarg  =>  i64.atomic.load32_u m
+        | 0xF0 0x36 m:memarg  =>  i32.atomic.store m
+        | 0xF0 0x37 m:memarg  =>  i64.atomic.store m
+        | 0xF0 0x38 m:memarg  =>  f32.atomic.store m
+        | 0xF0 0x39 m:memarg  =>  f64.atomic.store m
+        | 0xF0 0x3A m:memarg  =>  i32.atomic.store8 m
+        | 0xF0 0x3B m:memarg  =>  i32.atomic.store16 m
+        | 0xF0 0x3C m:memarg  =>  i64.atomic.store8 m
+        | 0xF0 0x3D m:memarg  =>  i64.atomic.store16 m
+        | 0xF0 0x3E m:memarg  =>  i64.atomic.store32 m
 
-The `memory_immediate` type is encoded as follows:
+        | 0xF0 0x3F m:memarg  =>  i32.atomic.rmw.add m
+        | 0xF0 0x40 m:memarg  =>  i64.atomic.rmw.add m
+        | 0xF0 0x41 m:memarg  =>  i32.atomic.rmw8_s.add m
+        | 0xF0 0x42 m:memarg  =>  i32.atomic.rmw8_u.add m
+        | 0xF0 0x43 m:memarg  =>  i32.atomic.rmw16_s.add m
+        | 0xF0 0x44 m:memarg  =>  i32.atomic.rmw16_u.add m
+        | 0xF0 0x45 m:memarg  =>  i64.atomic.rmw8_s.add m
+        | 0xF0 0x46 m:memarg  =>  i64.atomic.rmw8_u.add m
+        | 0xF0 0x47 m:memarg  =>  i64.atomic.rmw16_s.add m
+        | 0xF0 0x48 m:memarg  =>  i64.atomic.rmw16_u.add m
+        | 0xF0 0x49 m:memarg  =>  i64.atomic.rmw32_s.add m
+        | 0xF0 0x4A m:memarg  =>  i64.atomic.rmw32_u.add m
 
-| Name | Type | Description |
-| ---- | ---- | ---- |
-| flags | `varuint32` | a bitfield which currently must be 0 |
-| offset | `varuint32` | the value of the offset |
+        | 0xF0 0x4B m:memarg  =>  i32.atomic.rmw.sub m
+        | 0xF0 0x4C m:memarg  =>  i64.atomic.rmw.sub m
+        | 0xF0 0x4D m:memarg  =>  i32.atomic.rmw8_s.sub m
+        | 0xF0 0x4E m:memarg  =>  i32.atomic.rmw8_u.sub m
+        | 0xF0 0x4F m:memarg  =>  i32.atomic.rmw16_s.sub m
+        | 0xF0 0x50 m:memarg  =>  i32.atomic.rmw16_u.sub m
+        | 0xF0 0x51 m:memarg  =>  i64.atomic.rmw8_s.sub m
+        | 0xF0 0x52 m:memarg  =>  i64.atomic.rmw8_u.sub m
+        | 0xF0 0x53 m:memarg  =>  i64.atomic.rmw16_s.sub m
+        | 0xF0 0x54 m:memarg  =>  i64.atomic.rmw16_u.sub m
+        | 0xF0 0x55 m:memarg  =>  i64.atomic.rmw32_s.sub m
+        | 0xF0 0x56 m:memarg  =>  i64.atomic.rmw32_u.sub m
 
-[BinaryEncoding.md]: BinaryEncoding.md
-[Portability.md]: Portability.md
-[Semantics.md]: Semantics.md
-[agent]: Threads.md#agents
-[agent cluster]: Threads.md#agent-clusters
-[future threads]: FutureFeatures.md#threads
-[maximum memory size]: Modules.md#linear-memory-section
-[Semantics i32]: Semantics.md#32-bit-integer-operators
-[Semantics Table]: Semantics.md#table
-[Semantics Resizing]: Semantics.md#resizing
-[Semantics Thread Operators]: Semantics.md#thread-operators
-[Semantics Atomic Memory Accesses]: Semantics.md#atomic-memory-accesses
+        | 0xF0 0x57 m:memarg  =>  i32.atomic.rmw.and m
+        | 0xF0 0x58 m:memarg  =>  i64.atomic.rmw.and m
+        | 0xF0 0x59 m:memarg  =>  i32.atomic.rmw8_s.and m
+        | 0xF0 0x5A m:memarg  =>  i32.atomic.rmw8_u.and m
+        | 0xF0 0x5B m:memarg  =>  i32.atomic.rmw16_s.and m
+        | 0xF0 0x5C m:memarg  =>  i32.atomic.rmw16_u.and m
+        | 0xF0 0x5D m:memarg  =>  i64.atomic.rmw8_s.and m
+        | 0xF0 0x5E m:memarg  =>  i64.atomic.rmw8_u.and m
+        | 0xF0 0x5F m:memarg  =>  i64.atomic.rmw16_s.and m
+        | 0xF0 0x60 m:memarg  =>  i64.atomic.rmw16_u.and m
+        | 0xF0 0x61 m:memarg  =>  i64.atomic.rmw32_s.and m
+        | 0xF0 0x62 m:memarg  =>  i64.atomic.rmw32_u.and m
+
+        | 0xF0 0x63 m:memarg  =>  i32.atomic.rmw.or m
+        | 0xF0 0x64 m:memarg  =>  i64.atomic.rmw.or m
+        | 0xF0 0x65 m:memarg  =>  i32.atomic.rmw8_s.or m
+        | 0xF0 0x66 m:memarg  =>  i32.atomic.rmw8_u.or m
+        | 0xF0 0x67 m:memarg  =>  i32.atomic.rmw16_s.or m
+        | 0xF0 0x68 m:memarg  =>  i32.atomic.rmw16_u.or m
+        | 0xF0 0x69 m:memarg  =>  i64.atomic.rmw8_s.or m
+        | 0xF0 0x6A m:memarg  =>  i64.atomic.rmw8_u.or m
+        | 0xF0 0x6B m:memarg  =>  i64.atomic.rmw16_s.or m
+        | 0xF0 0x6C m:memarg  =>  i64.atomic.rmw16_u.or m
+        | 0xF0 0x6D m:memarg  =>  i64.atomic.rmw32_s.or m
+        | 0xF0 0x6E m:memarg  =>  i64.atomic.rmw32_u.or m
+
+        | 0xF0 0x6F m:memarg  =>  i32.atomic.rmw.xor m
+        | 0xF0 0x70 m:memarg  =>  i64.atomic.rmw.xor m
+        | 0xF0 0x71 m:memarg  =>  i32.atomic.rmw8_s.xor m
+        | 0xF0 0x72 m:memarg  =>  i32.atomic.rmw8_u.xor m
+        | 0xF0 0x73 m:memarg  =>  i32.atomic.rmw16_s.xor m
+        | 0xF0 0x74 m:memarg  =>  i32.atomic.rmw16_u.xor m
+        | 0xF0 0x75 m:memarg  =>  i64.atomic.rmw8_s.xor m
+        | 0xF0 0x76 m:memarg  =>  i64.atomic.rmw8_u.xor m
+        | 0xF0 0x77 m:memarg  =>  i64.atomic.rmw16_s.xor m
+        | 0xF0 0x78 m:memarg  =>  i64.atomic.rmw16_u.xor m
+        | 0xF0 0x79 m:memarg  =>  i64.atomic.rmw32_s.xor m
+        | 0xF0 0x7A m:memarg  =>  i64.atomic.rmw32_u.xor m
+```
+
+[agent]: Overview.md#agents
+[agent cluster]: Overview.md#agent-clusters
+[threads]: https://en.wikipedia.org/wiki/Thread_(computing)
+[execution spec]: https://webassembly.github.io/spec/execution/index.html
+[sequentially consistent]: https://en.wikipedia.org/wiki/Sequential_consistency
+[future threads]: https://github.com/WebAssembly/design/blob/master/FutureFeatures.md#threads
+[limits type]: https://webassembly.github.io/spec/syntax/types.html#limits
+[limits encoding]: https://webassembly.github.io/spec/binary/types.html#limits
+[instruction syntax]: https://webassembly.github.io/spec/syntax/instructions.html
+[spec]: https://webassembly.github.io/spec
