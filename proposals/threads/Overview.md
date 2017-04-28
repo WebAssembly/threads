@@ -223,6 +223,9 @@ Only 32-bit atomic accesses are guaranteed to be lock-free. This matches the
 Unlike normal memory accesses, misaligned atomic accesses trap. For non-atomic
 accesses on shared linear memory, misaligned accesses do not trap.
 
+It is a validation error if the alignment field of the memory access immediate
+has any other value than the natural alignment for that access size.
+
 ## Thread operators
 
 One new operator is added: `is_lock_free`. It is an optimization primitive.
@@ -291,7 +294,7 @@ returns the number of waiters that were woken as an `i32`.
 | `wake count` == 0 | Wake no waiters |
 | `wake count` > 0 | Wake min(`wake count`, `num waiters`) waiters |
 
-  * `i32.wake`: wake up `wake count` threads waiting on the given address via `i32.wait`
+  * `wake`: wake up `wake count` threads waiting on the given address via `i32.wait` or `i64.wait`
 
 ## [Spec Changes][spec]
 
@@ -320,7 +323,7 @@ instr ::= ... |
           is_lock_free |
 
           inn.wait memarg |
-          i32.wake memarg |
+          wake memarg |
 
           inn.atomic.load memarg | fnn.atomic.load memarg |
           inn.atomic.store memarg | fnn.atomic.store memarg |
@@ -336,127 +339,132 @@ instr ::= ... |
 The [instruction binary format][] is modified as follows:
 
 ```
+memarg8  ::= 0x00 o: offset     =>  {align 0, offset: o}
+memarg16 ::= 0x01 o: offset     =>  {align 1, offset: o}
+memarg32 ::= 0x02 o: offset     =>  {align 2, offset: o}
+memarg64 ::= 0x03 o: offset     =>  {align 3, offset: o}
+
 instr ::= ...
-        | 0xF0 0x00           =>  is_lock_free
+        | 0xF0 0x00             =>  is_lock_free
 
-        | 0xF0 0x01 m:memarg  =>  i32.wake m
-        | 0xF0 0x02 m:memarg  =>  i32.wait m
-        | 0xF0 0x03 m:memarg  =>  i64.wait m
+        | 0xF0 0x01 m:memarg32  =>  wake m
+        | 0xF0 0x02 m:memarg32  =>  i32.wait m
+        | 0xF0 0x03 m:memarg64  =>  i64.wait m
 
-        | 0xF0 0x10 m:memarg  =>  i32.atomic.rmw.xchg m
-        | 0xF0 0x11 m:memarg  =>  i64.atomic.rmw.xchg m
-        | 0xF0 0x12 m:memarg  =>  i32.atomic.rmw8_s.xchg m
-        | 0xF0 0x13 m:memarg  =>  i32.atomic.rmw8_u.xchg m
-        | 0xF0 0x14 m:memarg  =>  i32.atomic.rmw16_s.xchg m
-        | 0xF0 0x15 m:memarg  =>  i32.atomic.rmw16_u.xchg m
-        | 0xF0 0x16 m:memarg  =>  i64.atomic.rmw8_s.xchg m
-        | 0xF0 0x17 m:memarg  =>  i64.atomic.rmw8_u.xchg m
-        | 0xF0 0x18 m:memarg  =>  i64.atomic.rmw16_s.xchg m
-        | 0xF0 0x19 m:memarg  =>  i64.atomic.rmw16_u.xchg m
-        | 0xF0 0x1A m:memarg  =>  i64.atomic.rmw32_s.xchg m
-        | 0xF0 0x1B m:memarg  =>  i64.atomic.rmw32_u.xchg m
+        | 0xF0 0x10 m:memarg32  =>  i32.atomic.rmw.xchg m
+        | 0xF0 0x11 m:memarg64  =>  i64.atomic.rmw.xchg m
+        | 0xF0 0x12 m:memarg8   =>  i32.atomic.rmw8_s.xchg m
+        | 0xF0 0x13 m:memarg8   =>  i32.atomic.rmw8_u.xchg m
+        | 0xF0 0x14 m:memarg16  =>  i32.atomic.rmw16_s.xchg m
+        | 0xF0 0x15 m:memarg16  =>  i32.atomic.rmw16_u.xchg m
+        | 0xF0 0x16 m:memarg8   =>  i64.atomic.rmw8_s.xchg m
+        | 0xF0 0x17 m:memarg8   =>  i64.atomic.rmw8_u.xchg m
+        | 0xF0 0x18 m:memarg16  =>  i64.atomic.rmw16_s.xchg m
+        | 0xF0 0x19 m:memarg16  =>  i64.atomic.rmw16_u.xchg m
+        | 0xF0 0x1A m:memarg32  =>  i64.atomic.rmw32_s.xchg m
+        | 0xF0 0x1B m:memarg32  =>  i64.atomic.rmw32_u.xchg m
 
-        | 0xF0 0x1C m:memarg  =>  i32.atomic.rmw.cmpxchg m
-        | 0xF0 0x1D m:memarg  =>  i64.atomic.rmw.cmpxchg m
-        | 0xF0 0x1E m:memarg  =>  i32.atomic.rmw8_s.cmpxchg m
-        | 0xF0 0x1F m:memarg  =>  i32.atomic.rmw8_u.cmpxchg m
-        | 0xF0 0x20 m:memarg  =>  i32.atomic.rmw16_s.cmpxchg m
-        | 0xF0 0x21 m:memarg  =>  i32.atomic.rmw16_u.cmpxchg m
-        | 0xF0 0x22 m:memarg  =>  i64.atomic.rmw8_s.cmpxchg m
-        | 0xF0 0x23 m:memarg  =>  i64.atomic.rmw8_u.cmpxchg m
-        | 0xF0 0x24 m:memarg  =>  i64.atomic.rmw16_s.cmpxchg m
-        | 0xF0 0x25 m:memarg  =>  i64.atomic.rmw16_u.cmpxchg m
-        | 0xF0 0x26 m:memarg  =>  i64.atomic.rmw32_s.cmpxchg m
-        | 0xF0 0x27 m:memarg  =>  i64.atomic.rmw32_u.cmpxchg m
+        | 0xF0 0x1C m:memarg32  =>  i32.atomic.rmw.cmpxchg m
+        | 0xF0 0x1D m:memarg64  =>  i64.atomic.rmw.cmpxchg m
+        | 0xF0 0x1E m:memarg8   =>  i32.atomic.rmw8_s.cmpxchg m
+        | 0xF0 0x1F m:memarg8   =>  i32.atomic.rmw8_u.cmpxchg m
+        | 0xF0 0x20 m:memarg16  =>  i32.atomic.rmw16_s.cmpxchg m
+        | 0xF0 0x21 m:memarg16  =>  i32.atomic.rmw16_u.cmpxchg m
+        | 0xF0 0x22 m:memarg8   =>  i64.atomic.rmw8_s.cmpxchg m
+        | 0xF0 0x23 m:memarg8   =>  i64.atomic.rmw8_u.cmpxchg m
+        | 0xF0 0x24 m:memarg16  =>  i64.atomic.rmw16_s.cmpxchg m
+        | 0xF0 0x25 m:memarg16  =>  i64.atomic.rmw16_u.cmpxchg m
+        | 0xF0 0x26 m:memarg32  =>  i64.atomic.rmw32_s.cmpxchg m
+        | 0xF0 0x27 m:memarg32  =>  i64.atomic.rmw32_u.cmpxchg m
 
-        | 0xF0 0x28 m:memarg  =>  i32.atomic.load m
-        | 0xF0 0x29 m:memarg  =>  i64.atomic.load m
-        | 0xF0 0x2A m:memarg  =>  f32.atomic.load m
-        | 0xF0 0x2B m:memarg  =>  f64.atomic.load m
-        | 0xF0 0x2C m:memarg  =>  i32.atomic.load8_s m
-        | 0xF0 0x2D m:memarg  =>  i32.atomic.load8_u m
-        | 0xF0 0x2E m:memarg  =>  i32.atomic.load16_s m
-        | 0xF0 0x2F m:memarg  =>  i32.atomic.load16_u m
-        | 0xF0 0x30 m:memarg  =>  i64.atomic.load8_s m
-        | 0xF0 0x31 m:memarg  =>  i64.atomic.load8_u m
-        | 0xF0 0x32 m:memarg  =>  i64.atomic.load16_s m
-        | 0xF0 0x33 m:memarg  =>  i64.atomic.load16_u m
-        | 0xF0 0x34 m:memarg  =>  i64.atomic.load32_s m
-        | 0xF0 0x35 m:memarg  =>  i64.atomic.load32_u m
-        | 0xF0 0x36 m:memarg  =>  i32.atomic.store m
-        | 0xF0 0x37 m:memarg  =>  i64.atomic.store m
-        | 0xF0 0x38 m:memarg  =>  f32.atomic.store m
-        | 0xF0 0x39 m:memarg  =>  f64.atomic.store m
-        | 0xF0 0x3A m:memarg  =>  i32.atomic.store8 m
-        | 0xF0 0x3B m:memarg  =>  i32.atomic.store16 m
-        | 0xF0 0x3C m:memarg  =>  i64.atomic.store8 m
-        | 0xF0 0x3D m:memarg  =>  i64.atomic.store16 m
-        | 0xF0 0x3E m:memarg  =>  i64.atomic.store32 m
+        | 0xF0 0x28 m:memarg32  =>  i32.atomic.load m
+        | 0xF0 0x29 m:memarg64  =>  i64.atomic.load m
+        | 0xF0 0x2A m:memarg32  =>  f32.atomic.load m
+        | 0xF0 0x2B m:memarg64  =>  f64.atomic.load m
+        | 0xF0 0x2C m:memarg8   =>  i32.atomic.load8_s m
+        | 0xF0 0x2D m:memarg8   =>  i32.atomic.load8_u m
+        | 0xF0 0x2E m:memarg16  =>  i32.atomic.load16_s m
+        | 0xF0 0x2F m:memarg16  =>  i32.atomic.load16_u m
+        | 0xF0 0x30 m:memarg8   =>  i64.atomic.load8_s m
+        | 0xF0 0x31 m:memarg8   =>  i64.atomic.load8_u m
+        | 0xF0 0x32 m:memarg16  =>  i64.atomic.load16_s m
+        | 0xF0 0x33 m:memarg16  =>  i64.atomic.load16_u m
+        | 0xF0 0x34 m:memarg32  =>  i64.atomic.load32_s m
+        | 0xF0 0x35 m:memarg32  =>  i64.atomic.load32_u m
+        | 0xF0 0x36 m:memarg32  =>  i32.atomic.store m
+        | 0xF0 0x37 m:memarg64  =>  i64.atomic.store m
+        | 0xF0 0x38 m:memarg32  =>  f32.atomic.store m
+        | 0xF0 0x39 m:memarg64  =>  f64.atomic.store m
+        | 0xF0 0x3A m:memarg8   =>  i32.atomic.store8 m
+        | 0xF0 0x3B m:memarg16  =>  i32.atomic.store16 m
+        | 0xF0 0x3C m:memarg8   =>  i64.atomic.store8 m
+        | 0xF0 0x3D m:memarg16  =>  i64.atomic.store16 m
+        | 0xF0 0x3E m:memarg32  =>  i64.atomic.store32 m
 
-        | 0xF0 0x3F m:memarg  =>  i32.atomic.rmw.add m
-        | 0xF0 0x40 m:memarg  =>  i64.atomic.rmw.add m
-        | 0xF0 0x41 m:memarg  =>  i32.atomic.rmw8_s.add m
-        | 0xF0 0x42 m:memarg  =>  i32.atomic.rmw8_u.add m
-        | 0xF0 0x43 m:memarg  =>  i32.atomic.rmw16_s.add m
-        | 0xF0 0x44 m:memarg  =>  i32.atomic.rmw16_u.add m
-        | 0xF0 0x45 m:memarg  =>  i64.atomic.rmw8_s.add m
-        | 0xF0 0x46 m:memarg  =>  i64.atomic.rmw8_u.add m
-        | 0xF0 0x47 m:memarg  =>  i64.atomic.rmw16_s.add m
-        | 0xF0 0x48 m:memarg  =>  i64.atomic.rmw16_u.add m
-        | 0xF0 0x49 m:memarg  =>  i64.atomic.rmw32_s.add m
-        | 0xF0 0x4A m:memarg  =>  i64.atomic.rmw32_u.add m
+        | 0xF0 0x3F m:memarg32  =>  i32.atomic.rmw.add m
+        | 0xF0 0x40 m:memarg64  =>  i64.atomic.rmw.add m
+        | 0xF0 0x41 m:memarg8   =>  i32.atomic.rmw8_s.add m
+        | 0xF0 0x42 m:memarg8   =>  i32.atomic.rmw8_u.add m
+        | 0xF0 0x43 m:memarg16  =>  i32.atomic.rmw16_s.add m
+        | 0xF0 0x44 m:memarg16  =>  i32.atomic.rmw16_u.add m
+        | 0xF0 0x45 m:memarg8   =>  i64.atomic.rmw8_s.add m
+        | 0xF0 0x46 m:memarg8   =>  i64.atomic.rmw8_u.add m
+        | 0xF0 0x47 m:memarg16  =>  i64.atomic.rmw16_s.add m
+        | 0xF0 0x48 m:memarg16  =>  i64.atomic.rmw16_u.add m
+        | 0xF0 0x49 m:memarg32  =>  i64.atomic.rmw32_s.add m
+        | 0xF0 0x4A m:memarg32  =>  i64.atomic.rmw32_u.add m
 
-        | 0xF0 0x4B m:memarg  =>  i32.atomic.rmw.sub m
-        | 0xF0 0x4C m:memarg  =>  i64.atomic.rmw.sub m
-        | 0xF0 0x4D m:memarg  =>  i32.atomic.rmw8_s.sub m
-        | 0xF0 0x4E m:memarg  =>  i32.atomic.rmw8_u.sub m
-        | 0xF0 0x4F m:memarg  =>  i32.atomic.rmw16_s.sub m
-        | 0xF0 0x50 m:memarg  =>  i32.atomic.rmw16_u.sub m
-        | 0xF0 0x51 m:memarg  =>  i64.atomic.rmw8_s.sub m
-        | 0xF0 0x52 m:memarg  =>  i64.atomic.rmw8_u.sub m
-        | 0xF0 0x53 m:memarg  =>  i64.atomic.rmw16_s.sub m
-        | 0xF0 0x54 m:memarg  =>  i64.atomic.rmw16_u.sub m
-        | 0xF0 0x55 m:memarg  =>  i64.atomic.rmw32_s.sub m
-        | 0xF0 0x56 m:memarg  =>  i64.atomic.rmw32_u.sub m
+        | 0xF0 0x4B m:memarg32  =>  i32.atomic.rmw.sub m
+        | 0xF0 0x4C m:memarg64  =>  i64.atomic.rmw.sub m
+        | 0xF0 0x4D m:memarg8   =>  i32.atomic.rmw8_s.sub m
+        | 0xF0 0x4E m:memarg8   =>  i32.atomic.rmw8_u.sub m
+        | 0xF0 0x4F m:memarg16  =>  i32.atomic.rmw16_s.sub m
+        | 0xF0 0x50 m:memarg16  =>  i32.atomic.rmw16_u.sub m
+        | 0xF0 0x51 m:memarg8   =>  i64.atomic.rmw8_s.sub m
+        | 0xF0 0x52 m:memarg8   =>  i64.atomic.rmw8_u.sub m
+        | 0xF0 0x53 m:memarg16  =>  i64.atomic.rmw16_s.sub m
+        | 0xF0 0x54 m:memarg16  =>  i64.atomic.rmw16_u.sub m
+        | 0xF0 0x55 m:memarg32  =>  i64.atomic.rmw32_s.sub m
+        | 0xF0 0x56 m:memarg32  =>  i64.atomic.rmw32_u.sub m
 
-        | 0xF0 0x57 m:memarg  =>  i32.atomic.rmw.and m
-        | 0xF0 0x58 m:memarg  =>  i64.atomic.rmw.and m
-        | 0xF0 0x59 m:memarg  =>  i32.atomic.rmw8_s.and m
-        | 0xF0 0x5A m:memarg  =>  i32.atomic.rmw8_u.and m
-        | 0xF0 0x5B m:memarg  =>  i32.atomic.rmw16_s.and m
-        | 0xF0 0x5C m:memarg  =>  i32.atomic.rmw16_u.and m
-        | 0xF0 0x5D m:memarg  =>  i64.atomic.rmw8_s.and m
-        | 0xF0 0x5E m:memarg  =>  i64.atomic.rmw8_u.and m
-        | 0xF0 0x5F m:memarg  =>  i64.atomic.rmw16_s.and m
-        | 0xF0 0x60 m:memarg  =>  i64.atomic.rmw16_u.and m
-        | 0xF0 0x61 m:memarg  =>  i64.atomic.rmw32_s.and m
-        | 0xF0 0x62 m:memarg  =>  i64.atomic.rmw32_u.and m
+        | 0xF0 0x57 m:memarg32  =>  i32.atomic.rmw.and m
+        | 0xF0 0x58 m:memarg64  =>  i64.atomic.rmw.and m
+        | 0xF0 0x59 m:memarg8   =>  i32.atomic.rmw8_s.and m
+        | 0xF0 0x5A m:memarg8   =>  i32.atomic.rmw8_u.and m
+        | 0xF0 0x5B m:memarg16  =>  i32.atomic.rmw16_s.and m
+        | 0xF0 0x5C m:memarg16  =>  i32.atomic.rmw16_u.and m
+        | 0xF0 0x5D m:memarg8   =>  i64.atomic.rmw8_s.and m
+        | 0xF0 0x5E m:memarg8   =>  i64.atomic.rmw8_u.and m
+        | 0xF0 0x5F m:memarg16  =>  i64.atomic.rmw16_s.and m
+        | 0xF0 0x60 m:memarg16  =>  i64.atomic.rmw16_u.and m
+        | 0xF0 0x61 m:memarg32  =>  i64.atomic.rmw32_s.and m
+        | 0xF0 0x62 m:memarg32  =>  i64.atomic.rmw32_u.and m
 
-        | 0xF0 0x63 m:memarg  =>  i32.atomic.rmw.or m
-        | 0xF0 0x64 m:memarg  =>  i64.atomic.rmw.or m
-        | 0xF0 0x65 m:memarg  =>  i32.atomic.rmw8_s.or m
-        | 0xF0 0x66 m:memarg  =>  i32.atomic.rmw8_u.or m
-        | 0xF0 0x67 m:memarg  =>  i32.atomic.rmw16_s.or m
-        | 0xF0 0x68 m:memarg  =>  i32.atomic.rmw16_u.or m
-        | 0xF0 0x69 m:memarg  =>  i64.atomic.rmw8_s.or m
-        | 0xF0 0x6A m:memarg  =>  i64.atomic.rmw8_u.or m
-        | 0xF0 0x6B m:memarg  =>  i64.atomic.rmw16_s.or m
-        | 0xF0 0x6C m:memarg  =>  i64.atomic.rmw16_u.or m
-        | 0xF0 0x6D m:memarg  =>  i64.atomic.rmw32_s.or m
-        | 0xF0 0x6E m:memarg  =>  i64.atomic.rmw32_u.or m
+        | 0xF0 0x63 m:memarg32  =>  i32.atomic.rmw.or m
+        | 0xF0 0x64 m:memarg64  =>  i64.atomic.rmw.or m
+        | 0xF0 0x65 m:memarg8   =>  i32.atomic.rmw8_s.or m
+        | 0xF0 0x66 m:memarg8   =>  i32.atomic.rmw8_u.or m
+        | 0xF0 0x67 m:memarg16  =>  i32.atomic.rmw16_s.or m
+        | 0xF0 0x68 m:memarg16  =>  i32.atomic.rmw16_u.or m
+        | 0xF0 0x69 m:memarg8   =>  i64.atomic.rmw8_s.or m
+        | 0xF0 0x6A m:memarg8   =>  i64.atomic.rmw8_u.or m
+        | 0xF0 0x6B m:memarg16  =>  i64.atomic.rmw16_s.or m
+        | 0xF0 0x6C m:memarg16  =>  i64.atomic.rmw16_u.or m
+        | 0xF0 0x6D m:memarg32  =>  i64.atomic.rmw32_s.or m
+        | 0xF0 0x6E m:memarg32  =>  i64.atomic.rmw32_u.or m
 
-        | 0xF0 0x6F m:memarg  =>  i32.atomic.rmw.xor m
-        | 0xF0 0x70 m:memarg  =>  i64.atomic.rmw.xor m
-        | 0xF0 0x71 m:memarg  =>  i32.atomic.rmw8_s.xor m
-        | 0xF0 0x72 m:memarg  =>  i32.atomic.rmw8_u.xor m
-        | 0xF0 0x73 m:memarg  =>  i32.atomic.rmw16_s.xor m
-        | 0xF0 0x74 m:memarg  =>  i32.atomic.rmw16_u.xor m
-        | 0xF0 0x75 m:memarg  =>  i64.atomic.rmw8_s.xor m
-        | 0xF0 0x76 m:memarg  =>  i64.atomic.rmw8_u.xor m
-        | 0xF0 0x77 m:memarg  =>  i64.atomic.rmw16_s.xor m
-        | 0xF0 0x78 m:memarg  =>  i64.atomic.rmw16_u.xor m
-        | 0xF0 0x79 m:memarg  =>  i64.atomic.rmw32_s.xor m
-        | 0xF0 0x7A m:memarg  =>  i64.atomic.rmw32_u.xor m
+        | 0xF0 0x6F m:memarg32  =>  i32.atomic.rmw.xor m
+        | 0xF0 0x70 m:memarg64  =>  i64.atomic.rmw.xor m
+        | 0xF0 0x71 m:memarg8   =>  i32.atomic.rmw8_s.xor m
+        | 0xF0 0x72 m:memarg8   =>  i32.atomic.rmw8_u.xor m
+        | 0xF0 0x73 m:memarg16  =>  i32.atomic.rmw16_s.xor m
+        | 0xF0 0x74 m:memarg16  =>  i32.atomic.rmw16_u.xor m
+        | 0xF0 0x75 m:memarg8   =>  i64.atomic.rmw8_s.xor m
+        | 0xF0 0x76 m:memarg8   =>  i64.atomic.rmw8_u.xor m
+        | 0xF0 0x77 m:memarg16  =>  i64.atomic.rmw16_s.xor m
+        | 0xF0 0x78 m:memarg16  =>  i64.atomic.rmw16_u.xor m
+        | 0xF0 0x79 m:memarg32  =>  i64.atomic.rmw32_s.xor m
+        | 0xF0 0x7A m:memarg32  =>  i64.atomic.rmw32_u.xor m
 ```
 
 [agent]: Overview.md#agents
