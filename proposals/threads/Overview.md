@@ -221,7 +221,7 @@ Only 32-bit atomic accesses are guaranteed to be lock-free. This matches the
 ### Alignment
 
 Unlike normal memory accesses, misaligned atomic accesses trap. For non-atomic
-accesses, aligned and misaligned accesses have the same behavior.
+accesses on shared linear memory, misaligned accesses do not trap.
 
 ## Thread operators
 
@@ -468,4 +468,5 @@ instr ::= ...
 [limits type]: https://webassembly.github.io/spec/syntax/types.html#limits
 [limits encoding]: https://webassembly.github.io/spec/binary/types.html#limits
 [instruction syntax]: https://webassembly.github.io/spec/syntax/instructions.html
+[instruction binary format]: https://webassembly.github.io/spec/binary/instructions.html
 [spec]: https://webassembly.github.io/spec
