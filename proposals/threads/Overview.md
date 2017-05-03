@@ -52,10 +52,10 @@ specified.
 
 `grow_memory` and `current_memory` have [sequentially consistent][] ordering.
 
-`grow_memory` of a shared linear memory is allowed, but may fail if the new
-size is greater than the specified maximum size, or if reserving the additional
-memory fails. All agents in the executing agent's cluster will have access to
-the additional linear memory.
+`grow_memory` of a shared linear memory is allowed. Like non-shared memory, it
+fails if the new size is greater than the memory's maximum size, and it may
+also fail if reserving the additional memory fails. All agents in the executing
+agent's cluster will have access to the additional linear memory.
 
 ### Instantiation
 
@@ -247,7 +247,8 @@ change. It is a validation error to use these operators on non-shared linear
 memory. The operators have sequentially consistent ordering.
 
 Both wake and wait operators trap if the effective address of either operator
-is misaligned or out-of-bounds.
+is misaligned or out-of-bounds. The wait operators requires an alignment of
+their memory access size. The wait operator requires an alignment of 32 bits.
 
 The embedder is also permitted to suspend or wake an agent. A suspended agent
 can be woken by the embedder or the wake operator, regardless of how the agent
@@ -313,6 +314,12 @@ limits ::= 0x00 n:u32          => {min n, max e, notshared}
            0x01 n:u32 m:u32    => {min n, max m, notshared}
            0x11 n:u32 m:u32    => {min n, max m, shared}
 ```
+
+Note that shared linear memory without an explicit maximum size is not
+permitted. This allows the embedder to reserve enough virtual memory for the
+maximum size so the base address of the linear memory does not have to change.
+Modifying the base address would require suspending all threads, which is
+burdensome.
 
 The [instruction syntax][] is modified as follows:
 
