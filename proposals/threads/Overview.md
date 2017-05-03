@@ -311,15 +311,15 @@ new Memory(memoryDescriptor)
 
 However, the `memoryDescriptor` now will check for a `shared` property:
 
-If [HasProperty][]("shared"), then let `shared` be
-[ToBoolean][]([Get][](`memoryDescriptor`, "shared")). Otherwise, let `shared`
+If [HasProperty][](`"shared"`), then let `shared` be
+[ToBoolean][]([Get][](`memoryDescriptor`, `"shared"`)). Otherwise, let `shared`
 be `false`.
 
 Let `memory` be the result of calling [Memory.create][] given arguments
-`initial`, `maximum`, and `shared`. Note that initial and maximum are specified
-in units of WebAssembly pages (64KiB).
+`initial`, `maximum`, and `shared`. Note that `initial` and `maximum` are
+specified in units of WebAssembly pages (64KiB).
 
-Return the result of [CreateMemoryObject][](`memory`).
+Return the result of [`CreateMemoryObject`](#creatememoryobject)(`memory`).
 
 ### `CreateMemoryObject`
 
@@ -335,8 +335,8 @@ If `m` is shared, any attempts to [detach][] `buffer` shall throw a
 [TypeError][]. Otherwise, any attempts to [detach][] `buffer` _other_ than the
 detachment performed by `m.grow` shall throw a [TypeError][].
 
-Return a new `WebAssembly.Memory` instance with [[Memory]] set to `m` and
-[[BufferObject]] set to `buffer`.
+Return a new `WebAssembly.Memory` instance with `[[Memory]]` set to `m` and
+`[[BufferObject]]` set to `buffer`.
 
 ### `WebAssembly.Memory.prototype.grow`
 
@@ -557,6 +557,7 @@ instr ::= ...
 [Memory.create]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.ml#L47
 [Memory.memory]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.mli#L1
 [Memory.grow]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.ml#L60
+[SharedArrayBuffer]: https://tc39.github.io/ecma262/#sec-arraybuffer-objects
 [SharedArrayBuffer]: https://tc39.github.io/ecma262/#sec-sharedarraybuffer-objects
 [detach]: http://tc39.github.io/ecma262/#sec-detacharraybuffer
 [TypeError]: https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-typeerror
@@ -564,3 +565,4 @@ instr ::= ...
 [\[\[ArrayBufferData\]\]]: http://tc39.github.io/ecma262/#sec-properties-of-the-arraybuffer-prototype-object
 [\[\[ArrayBufferByteLength\]\]]: http://tc39.github.io/ecma262/#sec-properties-of-the-arraybuffer-prototype-object
 [ToNonWrappingUint32]: https://github.com/WebAssembly/design/blob/master/JS.md#tononwrappinguint32
+[IsSharedArrayBuffer]: https://tc39.github.io/ecma262/#sec-issharedarraybuffer
