@@ -332,7 +332,10 @@ internal slot [\[\[ArrayBufferByteLength\]\]][] which is set to the byte length
 of `m`.
 
 If `m` is shared, any attempts to [`detach`][] `buffer` shall throw a
-[`TypeError`][]. Otherwise, any attempts to detach `buffer` _other_ than the
+[`TypeError`][]. Note that `buffer` is never detached when `m` is shared,
+even when `m.grow` is performed.
+
+If `m` is not shared, any attempts to detach `buffer` _other_ than the
 detachment performed by `m.grow` shall throw a [`TypeError`][].
 
 Return a new `WebAssembly.Memory` instance with `[[Memory]]` set to `m` and
