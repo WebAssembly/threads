@@ -297,6 +297,69 @@ returns the number of waiters that were woken as an `i32`.
 
   * `wake`: wake up `wake count` threads waiting on the given address via `i32.wait` or `i64.wait`
 
+## [JavaScript API][] changes
+
+### `WebAssembly.Memory` Constructor
+
+See the current specification [here][WebAssembly.Memory].
+
+The WebAssembly.Memory constructor has the same signature:
+
+```
+new Memory(memoryDescriptor)
+```
+
+However, the `memoryDescriptor` now will check for a `shared` property:
+
+If [HasProperty][]("shared"), then let `shared` be
+[ToBoolean][]([Get][](`memoryDescriptor`, "shared")). Otherwise, let `shared`
+be `false`.
+
+Let `memory` be the result of calling [Memory.create][] given arguments
+`initial`, `maximum`, and `shared`. Note that initial and maximum are specified
+in units of WebAssembly pages (64KiB).
+
+Return the result of [CreateMemoryObject][](`memory`).
+
+### `CreateMemoryObject`
+
+Given a [Memory.memory][] `m`, to create a `WebAssembly.Memory`:
+
+If `m` is shared, let `buffer` be a new [SharedArrayBuffer][]. If `m` is not
+shared, let `buffer` be a new [ArrayBuffer][]. In either case, `buffer` will
+have an internal slot [\[\[ArrayBufferData\]\]][] which aliases `m` and an
+internal slot [\[\[ArrayBufferByteLength\]\]][] which is set to the byte length
+of `m`.
+
+If `m` is shared, any attempts to [detach][] `buffer` shall throw a
+[TypeError][]. Otherwise, any attempts to [detach][] `buffer` _other_ than the
+detachment performed by `m.grow` shall throw a [TypeError][].
+
+Return a new `WebAssembly.Memory` instance with [[Memory]] set to `m` and
+[[BufferObject]] set to `buffer`.
+
+### `WebAssembly.Memory.prototype.grow`
+
+Let `M` be the `this` value. If `M` is not a `WebAssembly.Memory`, a
+[TypeError][] is thrown.
+
+If [IsSharedArrayBuffer][](`M`.\[\[BufferObject\]\]) is false, then this
+function behaves as described [here][WebAssembly.Memory.prototype.grow].
+Otherwise:
+
+Let `d` be [ToNonWrappingUint32][](`delta`).
+
+Let `ret` be the current size of memory in pages (before resizing).
+
+Perform [Memory.grow][] with delta `d`. On failure, a [RangeError][] is thrown.
+
+Assign to `M.[[BufferObject]]` a new [SharedArrayBuffer][] whose
+[\[\[ArrayBufferData\]\]][] aliases `M.[[Memory]]` and whose
+[\[\[ArrayBufferByteLength\]\]][] is set to the new byte length of
+`M.[[Memory]]`.
+
+Return `ret` as a Number value.
+
 ## [Spec Changes][spec]
 
 The [limits type][] now has an additional field specifying whether
@@ -485,3 +548,19 @@ instr ::= ...
 [instruction syntax]: https://webassembly.github.io/spec/syntax/instructions.html
 [instruction binary format]: https://webassembly.github.io/spec/binary/instructions.html
 [spec]: https://webassembly.github.io/spec
+[JavaScript API]: https://github.com/WebAssembly/design/blob/master/JS.md
+[WebAssembly.Memory]: https://github.com/WebAssembly/design/blob/master/JS.md#webassemblymemory-constructor
+[WebAssembly.Memory.prototype.grow]: https://github.com/WebAssembly/design/blob/master/JS.md#webassemblymemoryprototypegrow
+[HasProperty]: https://tc39.github.io/ecma262/#sec-hasproperty
+[ToBoolean]: https://tc39.github.io/ecma262/#sec-toboolean
+[Get]: https://tc39.github.io/ecma262/#sec-get-o-p
+[Memory.create]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.ml#L47
+[Memory.memory]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.mli#L1
+[Memory.grow]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.ml#L60
+[SharedArrayBuffer]: https://tc39.github.io/ecma262/#sec-sharedarraybuffer-objects
+[detach]: http://tc39.github.io/ecma262/#sec-detacharraybuffer
+[TypeError]: https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-typeerror
+[RangeError]: https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-rangeerror
+[\[\[ArrayBufferData\]\]]: http://tc39.github.io/ecma262/#sec-properties-of-the-arraybuffer-prototype-object
+[\[\[ArrayBufferByteLength\]\]]: http://tc39.github.io/ecma262/#sec-properties-of-the-arraybuffer-prototype-object
+[ToNonWrappingUint32]: https://github.com/WebAssembly/design/blob/master/JS.md#tononwrappinguint32
