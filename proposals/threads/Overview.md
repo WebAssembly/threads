@@ -311,9 +311,8 @@ new Memory(memoryDescriptor)
 
 However, the `memoryDescriptor` now will check for a `shared` property:
 
-If [`HasProperty`][](`"shared"`), then let `shared` be
-[`ToBoolean`][]([`Get`][](`memoryDescriptor`, `"shared"`)). Otherwise, let `shared`
-be `false`.
+Let `shared` be [`ToBoolean`][]([`Get`][](`memoryDescriptor`, `"shared"`)).
+Otherwise, let `shared` be `false`.
 
 Let `memory` be the result of calling [`Memory.create`][] given arguments
 `initial`, `maximum`, and `shared`. Note that `initial` and `maximum` are
