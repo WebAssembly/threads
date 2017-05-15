@@ -539,6 +539,70 @@ instr ::= ...
         | 0xF0 0x7A m:memarg32  =>  i64.atomic.rmw32_u.xor m
 ```
 
+## An Alternative Encoding
+
+The proposal above requires many additional operations because WebAssembly has
+no i8 and i16 value types. For example: `i32.atomics.rmw8_s.add` could be
+expressed as `i8.atomics.rmw.add` followed by `i32.extend_s/i8`. This would
+reduce the number of new instructions required.
+
+### New Value Types
+
+Two new value types are added `i8` and `i16`.
+
+Open questions:
+
+* Are they allowed as parameter types or result types?
+* Are they allowed as local types?
+* Are they allowed as global types?
+
+### New Instructions
+
+The load/store memory access operators are:
+
+  * `i8.atomic.load`: atomically load 1 byte as i8
+  * `i16.atomic.load`: atomically load 2 bytes as i16
+  * `i32.atomic.load`: atomically load 4 bytes as i32
+  * `i64.atomic.load`: atomically load 8 byte as i64
+  * `f32.atomic.load`: atomically load 4 bytes as f32
+  * `f64.atomic.load`: atomically load 8 bytes as f64
+  * `i8.atomic.store`: atomically store i8 as 1 byte
+  * `i16.atomic.store`: atomically store i16 as 2 bytes
+  * `i32.atomic.store`: atomically store i32 as 4 bytes
+  * `i64.atomic.store`: atomically store i64 as 8 bytes
+  * `f32.atomic.store`: atomically store f32 as 4 bytes
+  * `f64.atomic.store`: atomically store f64 as 8 bytes
+
+The RMW operators are:
+
+| Name | Read (as `read`) | Modify | Write | Return `read` |
+| ---- | ---- | ---- | ---- | ---- |
+| `i8.atomic.rmw.add` | 1 byte | 8-bit sign-agnostic addition | 1 byte | as i8 |
+| `i16.atomic.rmw.add` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | as i16 |
+| `i32.atomic.rmw.add` | 4 bytes | 32-bit sign-agnostic addition | 4 bytes | as i32 |
+| `i64.atomic.rmw.add` | 8 bytes | 64-bit sign-agnostic addition | 8 bytes | as i64 |
+| `i8.atomic.rmw.sub` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | as i8 |
+| `i16.atomic.rmw.sub` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | as i16 |
+| `i32.atomic.rmw.sub` | 4 bytes | 32-bit sign-agnostic subtraction | 4 bytes | as i32 |
+| `i64.atomic.rmw.sub` | 8 bytes | 64-bit sign-agnostic subtraction | 8 bytes | as i64 |
+| `i8.atomic.rmw.and` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | as i8|
+| `i16.atomic.rmw.and` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | as i16 |
+| `i32.atomic.rmw.and` | 4 bytes | 32-bit sign-agnostic bitwise and | 4 bytes | as i32 |
+| `i64.atomic.rmw.and` | 8 bytes | 64-bit sign-agnostic bitwise and | 8 bytes | as i64 |
+| `i8.atomic.rmw.or` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | as i8|
+| `i16.atomic.rmw.or` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | as i16 |
+| `i32.atomic.rmw.or` | 4 bytes | 32-bit sign-agnostic bitwise inclusive or | 4 bytes | as i32 |
+| `i64.atomic.rmw.or` | 8 bytes | 64-bit sign-agnostic bitwise inclusive or | 8 bytes | as i64 |
+| `i8.atomic.rmw.xor` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | as i8|
+| `i16.atomic.rmw.xor` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | as i16 |
+| `i32.atomic.rmw.xor` | 4 bytes | 32-bit sign-agnostic bitwise exclusive or | 4 bytes | as i32 |
+| `i64.atomic.rmw.xor` | 8 bytes | 64-bit sign-agnostic bitwise exclusive or | 8 bytes | as i64 |
+| `i8.atomic.rmw.xchg` | 1 byte | nop | 1 byte | as i8|
+| `i16.atomic.rmw.xchg` | 2 bytes | nop | 2 bytes | as i16 |
+| `i32.atomic.rmw.xchg` | 4 bytes | nop | 4 bytes | as i32 |
+| `i64.atomic.rmw.xchg` | 8 bytes | nop | 8 bytes | as i64 |
+
+
 [agent]: Overview.md#agents
 [agent cluster]: Overview.md#agent-clusters
 [threads]: https://en.wikipedia.org/wiki/Thread_(computing)
