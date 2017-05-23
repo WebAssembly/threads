@@ -552,11 +552,49 @@ Two new value types are added `i8` and `i16`.
 
 Open questions:
 
-* Are they allowed as parameter types or result types?
-* Are they allowed as local types?
-* Are they allowed as global types?
+* Are the new value types allowed as:
+  - parameter types
+  - result types
+  - local types
+  - global types
+  - block types
+* Are the new value types allowed for type-parametric operators?
+  - `drop`
+  - `select`
+  - Some future operations? e.g. `dup` and `pick`?
+* Will we add `i8.wait` and `i16.wait`?
+* Will we add the missing non-atomic loads/stores for the new value types?
+  - `i8.load`
+  - `i8.store`
+  - `i16.load`
+  - `i16.store`
+  - There are no holes in the opcode space near the other loads/stores. The
+    available contiguous ranges of that size are 0x6-0xa, 0x12-0x19, 0x1c-1f,
+    and 0xc0-0xff.
+* Should we provide conversions between 8- and 16-bit value types?
+  - `i8.wrap/i16`
+  - `i16.extend_s/i8`
+  - `i16.extend_u/i8`
+* How do these new value types interact with the SIMD proposal?
+  - Does `i8x16.extract_lane_s -> i32` become `i8x16.extract_lane -> i8`?
+  - Does `i16x8.replace_lane(..., x: i32)` become `i16x8.replace_lane(..., x: i16)`?
 
 ### New Instructions
+
+New conversion operators are:
+
+  * `i8.wrap/i32`: wrap a 32-bit integer to an 8-bit integer
+  * `i8.wrap/i64`: wrap a 64-bit integer to an 8-bit integer
+  * `i16.wrap/i32`: wrap a 32-bit integer to a 16-bit integer
+  * `i16.wrap/i64`: wrap a 64-bit integer to a 16-bit integer
+  * `i32.extend_s/i8`: extend a signed 8-bit integer to a 32-bit integer
+  * `i32.extend_u/i8`: extend an unsigned 8-bit integer to a 32-bit integer
+  * `i32.extend_s/i16`: extend a signed 16-bit integer to a 32-bit integer
+  * `i32.extend_u/i16`: extend an unsigned 16-bit integer to a 32-bit integer
+  * `i64.extend_s/i8`: extend a signed 8-bit integer to a 64-bit integer
+  * `i64.extend_u/i8`: extend an unsigned 8-bit integer to a 64-bit integer
+  * `i64.extend_s/i16`: extend a signed 16-bit integer to a 64-bit integer
+  * `i64.extend_u/i16`: extend an unsigned 8-bit integer to a 64-bit integer
 
 The load/store memory access operators are:
 
@@ -602,6 +640,28 @@ The RMW operators are:
 | `i32.atomic.rmw.xchg` | 4 bytes | nop | 4 bytes | as i32 |
 | `i64.atomic.rmw.xchg` | 8 bytes | nop | 8 bytes | as i64 |
 
+The compare exchange operators are:
+
+| Name | Load (as `loaded`) | Compare `expected` with `loaded` | Conditionally Store `replacement` | Return `loaded` |
+| ---- | ---- | ---- | ---- | ---- |
+| `i8.atomic.rmw.cmpxchg` | 1 byte | 8-bit compare equal | store 1 byte | as i8 |
+| `i16.atomic.rmw.cmpxchg` | 2 bytes | 16-bit compare equal | store 2 bytes | as i16 |
+| `i32.atomic.rmw.cmpxchg` | 4 bytes | 32-bit compare equal | store 4 bytes | as i32 |
+| `i64.atomic.rmw.cmpxchg` | 8 bytes | 64-bit compare equal | store 8 bytes | as i64 |
+
+### Opcode Count Comparison
+
+Assuming the minimal number of new opcodes, and not including the opcodes that
+would be shared between either proposal, the alternate proposal requires 52 new
+opcodes. 12 of these are the new conversions, which logically would be
+unprefixed. The original proposal would require 107 new opcodes, all prefixed.
+
+If more RMW operations were to be added, the alternate proposal requires 4 new
+opcodes. The original proposal requires 10.
+
+The 8- and 16-bit non-atomic loads and stores, if added, are 4 more opcodes.
+The conversions between 8- and 16-bit value types, if added, are 3 more opcodes.
+`i8.wait` and `i16.wait`, if added, are 2 more opcodes.
 
 [agent]: Overview.md#agents
 [agent cluster]: Overview.md#agent-clusters
