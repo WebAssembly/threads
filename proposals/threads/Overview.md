@@ -749,6 +749,7 @@ The compare exchange operators are:
 ## Opcode Count Comparisons
 
 | Proposal # | Description | # New Non-Atomic Ops | # New Atomic Ops | New Ops / RMW |
+| --- | --- | --- | --- | --- |
 | 1 | No new non-atomic operators | 0 | 107 | 10 |
 | 2 | i8 and i16 value types | 12 | 40 | 4 |
 | 3 | sign-extension operators | 5 | 67 | 7 |
