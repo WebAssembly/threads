@@ -539,6 +539,224 @@ instr ::= ...
         | 0xF0 0x7A m:memarg32  =>  i64.atomic.rmw32_u.xor m
 ```
 
+## Encoding Proposal #2 (With i8 and i16 Value Types)
+
+The proposal above requires many additional operations because WebAssembly has
+no i8 and i16 value types. For example: `i32.atomics.rmw8_s.add` could be
+expressed as `i8.atomics.rmw.add` followed by `i32.extend_s/i8`. This would
+reduce the number of new instructions required.
+
+### New Value Types
+
+Two new value types are added `i8` and `i16`.
+
+Open questions:
+
+* Are the new value types allowed as:
+  - parameter types
+  - result types
+  - local types
+  - global types
+  - block types
+* Are the new value types allowed for type-parametric operators?
+  - `drop`
+  - `select`
+  - Some future operations? e.g. `dup` and `pick`?
+* Will we add `i8.wait` and `i16.wait`?
+* Will we add the missing non-atomic loads/stores for the new value types?
+  - `i8.load`
+  - `i8.store`
+  - `i16.load`
+  - `i16.store`
+  - There are no holes in the opcode space near the other loads/stores. The
+    available contiguous ranges of that size are 0x6-0xa, 0x12-0x19, 0x1c-1f,
+    and 0xc0-0xff.
+* Should we provide conversions between 8- and 16-bit value types?
+  - `i8.wrap/i16`
+  - `i16.extend_s/i8`
+  - `i16.extend_u/i8`
+* How do these new value types interact with the SIMD proposal?
+  - Does `i8x16.extract_lane_s -> i32` become `i8x16.extract_lane -> i8`?
+  - Does `i16x8.replace_lane(..., x: i32)` become `i16x8.replace_lane(..., x: i16)`?
+
+### New Instructions
+
+New conversion operators are:
+
+  * `i8.wrap/i32`: wrap a 32-bit integer to an 8-bit integer
+  * `i8.wrap/i64`: wrap a 64-bit integer to an 8-bit integer
+  * `i16.wrap/i32`: wrap a 32-bit integer to a 16-bit integer
+  * `i16.wrap/i64`: wrap a 64-bit integer to a 16-bit integer
+  * `i32.extend_s/i8`: extend a signed 8-bit integer to a 32-bit integer
+  * `i32.extend_u/i8`: extend an unsigned 8-bit integer to a 32-bit integer
+  * `i32.extend_s/i16`: extend a signed 16-bit integer to a 32-bit integer
+  * `i32.extend_u/i16`: extend an unsigned 16-bit integer to a 32-bit integer
+  * `i64.extend_s/i8`: extend a signed 8-bit integer to a 64-bit integer
+  * `i64.extend_u/i8`: extend an unsigned 8-bit integer to a 64-bit integer
+  * `i64.extend_s/i16`: extend a signed 16-bit integer to a 64-bit integer
+  * `i64.extend_u/i16`: extend an unsigned 8-bit integer to a 64-bit integer
+
+The load/store memory access operators are:
+
+  * `i8.atomic.load`: atomically load 1 byte as i8
+  * `i16.atomic.load`: atomically load 2 bytes as i16
+  * `i32.atomic.load`: atomically load 4 bytes as i32
+  * `i64.atomic.load`: atomically load 8 byte as i64
+  * `f32.atomic.load`: atomically load 4 bytes as f32
+  * `f64.atomic.load`: atomically load 8 bytes as f64
+  * `i8.atomic.store`: atomically store i8 as 1 byte
+  * `i16.atomic.store`: atomically store i16 as 2 bytes
+  * `i32.atomic.store`: atomically store i32 as 4 bytes
+  * `i64.atomic.store`: atomically store i64 as 8 bytes
+  * `f32.atomic.store`: atomically store f32 as 4 bytes
+  * `f64.atomic.store`: atomically store f64 as 8 bytes
+
+The RMW operators are:
+
+| Name | Read (as `read`) | Modify | Write | Return `read` |
+| ---- | ---- | ---- | ---- | ---- |
+| `i8.atomic.rmw.add` | 1 byte | 8-bit sign-agnostic addition | 1 byte | as i8 |
+| `i16.atomic.rmw.add` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | as i16 |
+| `i32.atomic.rmw.add` | 4 bytes | 32-bit sign-agnostic addition | 4 bytes | as i32 |
+| `i64.atomic.rmw.add` | 8 bytes | 64-bit sign-agnostic addition | 8 bytes | as i64 |
+| `i8.atomic.rmw.sub` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | as i8 |
+| `i16.atomic.rmw.sub` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | as i16 |
+| `i32.atomic.rmw.sub` | 4 bytes | 32-bit sign-agnostic subtraction | 4 bytes | as i32 |
+| `i64.atomic.rmw.sub` | 8 bytes | 64-bit sign-agnostic subtraction | 8 bytes | as i64 |
+| `i8.atomic.rmw.and` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | as i8|
+| `i16.atomic.rmw.and` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | as i16 |
+| `i32.atomic.rmw.and` | 4 bytes | 32-bit sign-agnostic bitwise and | 4 bytes | as i32 |
+| `i64.atomic.rmw.and` | 8 bytes | 64-bit sign-agnostic bitwise and | 8 bytes | as i64 |
+| `i8.atomic.rmw.or` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | as i8|
+| `i16.atomic.rmw.or` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | as i16 |
+| `i32.atomic.rmw.or` | 4 bytes | 32-bit sign-agnostic bitwise inclusive or | 4 bytes | as i32 |
+| `i64.atomic.rmw.or` | 8 bytes | 64-bit sign-agnostic bitwise inclusive or | 8 bytes | as i64 |
+| `i8.atomic.rmw.xor` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | as i8|
+| `i16.atomic.rmw.xor` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | as i16 |
+| `i32.atomic.rmw.xor` | 4 bytes | 32-bit sign-agnostic bitwise exclusive or | 4 bytes | as i32 |
+| `i64.atomic.rmw.xor` | 8 bytes | 64-bit sign-agnostic bitwise exclusive or | 8 bytes | as i64 |
+| `i8.atomic.rmw.xchg` | 1 byte | nop | 1 byte | as i8|
+| `i16.atomic.rmw.xchg` | 2 bytes | nop | 2 bytes | as i16 |
+| `i32.atomic.rmw.xchg` | 4 bytes | nop | 4 bytes | as i32 |
+| `i64.atomic.rmw.xchg` | 8 bytes | nop | 8 bytes | as i64 |
+
+The compare exchange operators are:
+
+| Name | Load (as `loaded`) | Compare `expected` with `loaded` | Conditionally Store `replacement` | Return `loaded` |
+| ---- | ---- | ---- | ---- | ---- |
+| `i8.atomic.rmw.cmpxchg` | 1 byte | 8-bit compare equal | store 1 byte | as i8 |
+| `i16.atomic.rmw.cmpxchg` | 2 bytes | 16-bit compare equal | store 2 bytes | as i16 |
+| `i32.atomic.rmw.cmpxchg` | 4 bytes | 32-bit compare equal | store 4 bytes | as i32 |
+| `i64.atomic.rmw.cmpxchg` | 8 bytes | 64-bit compare equal | store 8 bytes | as i64 |
+
+## Encoding Proposal #3 (with Sign-extension Operators)
+
+Instead of adding the i8 and i16 value types, we can achieve much the same
+effect by adding the following sign-extension instructions:
+
+  * `i32.extend_s/i8`: extend a signed 8-bit integer to a 32-bit integer
+  * `i32.extend_s/i16`: extend a signed 16-bit integer to a 32-bit integer
+  * `i64.extend_s/i8`: extend a signed 8-bit integer to a 64-bit integer
+  * `i64.extend_s/i16`: extend a signed 16-bit integer to a 64-bit integer
+  * `i64.extend_s/i32`: extend a signed 32-bit integer to a 64-bit integer
+
+We then remove the `_s` operators from proposal #1.
+
+Zero-extension operators can be added as well, but they are not required.
+
+### New Instructions
+
+The load/store memory access operators are:
+
+  * `i32.atomic.load8_u`: atomically load 1 byte and zero-extend i8 to i32
+  * `i32.atomic.load16_u`: atomically load 2 bytes and zero-extend i16 to i32
+  * `i32.atomic.load`: atomically load 4 bytes as i32
+  * `i64.atomic.load8_u`: atomically load 1 byte and zero-extend i8 to i64
+  * `i64.atomic.load16_u`: atomically load 2 bytes and zero-extend i16 to i64
+  * `i64.atomic.load32_u`: atomically load 4 bytes and zero-extend i32 to i64
+  * `i64.atomic.load`: atomically load 8 bytes as i64
+  * `f32.atomic.load`: atomically load 4 bytes as f32
+  * `f64.atomic.load`: atomically load 8 bytes as f64
+  * `i32.atomic.store8`: wrap i32 to i8 and atomically store 1 byte
+  * `i32.atomic.store16`: wrap i32 to i16 and atomically store 2 bytes
+  * `i32.atomic.store`: (no conversion) atomically store 4 bytes
+  * `i64.atomic.store8`: wrap i64 to i8 and atomically store 1 byte
+  * `i64.atomic.store16`: wrap i64 to i16 and atomically store 2 bytes
+  * `i64.atomic.store32`: wrap i64 to i32 and atomically store 4 bytes
+  * `i64.atomic.store`: (no conversion) atomically store 8 bytes
+  * `f32.atomic.store`: (no conversion) atomically store 4 bytes
+  * `f64.atomic.store`: (no conversion) atomically store 8 bytes
+
+The RMW operators are:
+
+| Name | Read (as `read`) | Modify | Write | Return `read` |
+| ---- | ---- | ---- | ---- | ---- |
+| `i32.atomic.rmw8_u.add` | 1 byte | 8-bit sign-agnostic addition | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16_u.add` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw.add` | 4 bytes | 32-bit sign-agnostic addition | 4 bytes | as i32 |
+| `i64.atomic.rmw8_u.add` | 1 byte | 8-bit sign-agnostic addition | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16_u.add` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32_u.add` | 4 bytes | 32-bit sign-agnostic addition | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw.add` | 8 bytes | 64-bit sign-agnostic addition | 8 bytes | as i64 |
+| `i32.atomic.rmw8_u.sub` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16_u.sub` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw.sub` | 4 bytes | 32-bit sign-agnostic subtraction | 4 bytes | as i32 |
+| `i64.atomic.rmw8_u.sub` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16_u.sub` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32_u.sub` | 4 bytes | 32-bit sign-agnostic subtraction | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw.sub` | 8 bytes | 64-bit sign-agnostic subtraction | 8 bytes | as i64 |
+| `i32.atomic.rmw8_u.and` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16_u.and` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw.and` | 4 bytes | 32-bit sign-agnostic bitwise and | 4 bytes | as i32 |
+| `i64.atomic.rmw8_u.and` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16_u.and` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32_u.and` | 4 bytes | 32-bit sign-agnostic bitwise and | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw.and` | 8 bytes | 64-bit sign-agnostic bitwise and | 8 bytes | as i64 |
+| `i32.atomic.rmw8_u.or` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16_u.or` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw.or` | 4 bytes | 32-bit sign-agnostic bitwise inclusive or | 4 bytes | as i32 |
+| `i64.atomic.rmw8_u.or` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16_u.or` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32_u.or` | 4 bytes | 32-bit sign-agnostic bitwise inclusive or | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw.or` | 8 bytes | 64-bit sign-agnostic bitwise inclusive or | 8 bytes | as i64 |
+| `i32.atomic.rmw8_u.xor` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16_u.xor` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw.xor` | 4 bytes | 32-bit sign-agnostic bitwise exclusive or | 4 bytes | as i32 |
+| `i64.atomic.rmw8_u.xor` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16_u.xor` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32_u.xor` | 4 bytes | 32-bit sign-agnostic bitwise exclusive or | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw.xor` | 8 bytes | 64-bit sign-agnostic bitwise exclusive or | 8 bytes | as i64 |
+| `i32.atomic.rmw8_u.xchg` | 1 byte | nop | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16_u.xchg` | 2 bytes | nop | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw.xchg` | 4 bytes | nop | 4 bytes | as i32 |
+| `i64.atomic.rmw8_u.xchg` | 1 byte | nop | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16_u.xchg` | 2 bytes | nop | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32_u.xchg` | 4 bytes | nop | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw.xchg` | 8 bytes | nop | 8 bytes | as i64 |
+
+The compare exchange operators are:
+
+| Name | Load (as `loaded`) | Compare `expected` with `loaded` | Conditionally Store `replacement` | Return `loaded` |
+| ---- | ---- | ---- | ---- | ---- |
+| `i32.atomic.rmw8_u.cmpxchg` | 1 byte | `expected` wrapped from i32 to i8, 8-bit compare equal | wrapped from i32 to i8, store 1 byte | zero-extended from i8 to i32 |
+| `i32.atomic.rmw16_u.cmpxchg` | 2 bytes | `expected` wrapped from i32 to i16, 16-bit compare equal | wrapped from i32 to i16, store 2 bytes | zero-extended from i8 to i32 |
+| `i32.atomic.rmw.cmpxchg` | 4 bytes | 32-bit compare equal | store 4 bytes | as i32 |
+| `i64.atomic.rmw8_u.cmpxchg` | 1 byte | `expected` wrapped from i64 to i8, 8-bit compare equal | wrapped from i64 to i8, store 1 byte | zero-extended from i8 to i64 |
+| `i64.atomic.rmw16_u.cmpxchg` | 2 bytes | `expected` wrapped from i64 to i16, 16-bit compare equal | wrapped from i64 to i16, store 2 bytes | zero-extended from i16 to i64 |
+| `i64.atomic.rmw32_u.cmpxchg` | 4 bytes | `expected` wrapped from i64 to i32, 32-bit compare equal | wrapped from i64 to i32, store 4 bytes | zero-extended from i32 to i64 |
+| `i64.atomic.rmw.cmpxchg` | 8 bytes | 64-bit compare equal | 8 bytes | as i64 |
+
+## Opcode Count Comparisons
+
+| Proposal # | Description | # New Non-Atomic Ops | # New Atomic Ops | New Ops / RMW |
+| --- | --- | --- | --- | --- |
+| 1 | No new non-atomic operators | 0 | 107 | 10 |
+| 2 | i8 and i16 value types | 12 | 40 | 4 |
+| 3 | sign-extension operators | 5 | 67 | 7 |
+
+The last column ("New Ops / RMW") is the number of new opcodes that must be
+used if we were to add an additional RMW operator.
+
 [agent]: Overview.md#agents
 [agent cluster]: Overview.md#agent-clusters
 [threads]: https://en.wikipedia.org/wiki/Thread_(computing)
