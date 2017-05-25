@@ -65,6 +65,34 @@ the linear memory when the module is instantiated.
 When the imported linear memory is shared, the writes are non-atomic and
 are not ordered.
 
+## Import/Export Mutable Globals
+
+Imported and exported globals can now be mutable. In the Web binding, exported
+globals are now of type `WebAssembly.Global`, rather than converted to a
+JavaScript Number.
+
+These globals are local to the agent, and cannot be shared between agents.
+Globals can therefore be used as
+[thread-local storage](https://en.wikipedia.org/wiki/Thread-local_storage).
+
+Rationale:
+
+Without the ability to import and export mutable globals, it is inconvenient to
+provide mutable thread-local values that can be dynamically linked, such as the
+C++ stack pointer (SP). Here are a few ways that are possible:
+
+1. Use a thread-local shared linear memory location as SP. Use an immutable
+   global as the address of SP. Every load/store of SP must first read the
+   global to determine SP address.
+1. Use an internal mutable global as SP. Store a shadow SP in shared linear
+   memory. Use an immutable imported global as the address of the shadow SP. At
+   module function call boundaries (e.g. imported and exported functions),
+   spill SP to the shadow in the caller, and load in the callee. After the call
+   returns to the caller, load SP from shadow SP.
+1. Use an internal mutable global as SP. Modify all imported and exported
+   functions to pass SP as a parameter. The callee stores the passed SP to its
+   internal mutable global.
+
 ## Atomic Memory Accesses
 
 Atomic memory accesses are separated into three categories, load/store,
@@ -361,6 +389,57 @@ Assign to `M.[[BufferObject]]` a new [`SharedArrayBuffer`][] whose
 `M.[[Memory]]`.
 
 Return `ret` as a Number value.
+
+### `WebAssembly.Global` Objects
+
+A `WebAssembly.Global` object contains a single `global` value which can be
+simultaneously referenced by multiple `Instance` objects. Each `Global` object
+has two internal slots:
+
+* [[Global]]: a [`value`][]
+
+#### `WebAssembly.Global` Constructor
+
+The `WebAssembly.Global` constructor has the signature:
+
+```
+new Global(globalDescriptor)
+```
+
+If the NewTarget is `undefined`, a [`TypeError`][] exception is thrown (i.e.,
+this constructor cannot be called as a function without `new`).
+
+If `Type(globalDescriptor)` is not Object, a [`TypeError`][] is thrown.
+
+Let `typeName` be [`ToString`][]([`Get`][](`globalDescriptor`, `"type"`).
+
+If `typeName` is not one of `"i32"`, `"f32"`, or `"f64"`, throw a [`TypeError`][].
+
+Let `type` be a [`value type`][]:
+
+* If `typeName` is `"i32"`, let `type` be `i32`.
+* If `typeName` is `"f32"`, let `type` be `f32`.
+* If `typeName` is `"f64"`, let `type` be `f64`.
+
+Let `value` be [`ToWebAssemblyValue`][]([`Get`][](`globalDescriptor`,
+`"value"`) coerced to `type`.
+
+Return a new `WebAssembly.Global` instance with [[Global]] set to `value`.
+
+#### `WebAssembly.Global.prototype [ @@toStringTag ]()` Property
+
+TODO
+
+#### `WebAssembly.Global.prototype [ @@toPrimitive ]` Property
+
+TODO
+
+#### `WebAssembly.Global.prototype.value` Property
+
+This property has the attributes { [[Writable]]: `true`, [[Enumerable]]:
+`true`, [[Configurable]]: `false` }.
+
+TODO
 
 ## [Spec Changes][spec]
 
@@ -773,6 +852,7 @@ used if we were to add an additional RMW operator.
 [WebAssembly.Memory.prototype.grow]: https://github.com/WebAssembly/design/blob/master/JS.md#webassemblymemoryprototypegrow
 [`HasProperty`]: https://tc39.github.io/ecma262/#sec-hasproperty
 [`ToBoolean`]: https://tc39.github.io/ecma262/#sec-toboolean
+[`ToString`]: https://tc39.github.io/ecma262/#sec-tostring
 [`Get`]: https://tc39.github.io/ecma262/#sec-get-o-p
 [`Memory.create`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.ml#L47
 [`Memory.memory`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.mli#L1
@@ -785,4 +865,6 @@ used if we were to add an additional RMW operator.
 [\[\[ArrayBufferData\]\]]: http://tc39.github.io/ecma262/#sec-properties-of-the-arraybuffer-prototype-object
 [\[\[ArrayBufferByteLength\]\]]: http://tc39.github.io/ecma262/#sec-properties-of-the-arraybuffer-prototype-object
 [`ToNonWrappingUint32`]: https://github.com/WebAssembly/design/blob/master/JS.md#tononwrappinguint32
+[`ToWebAssemblyValue`]: https://github.com/WebAssembly/design/blob/master/JS.md#towebassemblyvalue
 [`IsSharedArrayBuffer`]: https://tc39.github.io/ecma262/#sec-issharedarraybuffer
+[`value type`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/types.ml#L3
