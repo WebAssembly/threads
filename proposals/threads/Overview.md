@@ -426,7 +426,7 @@ Let `value` be [`ToWebAssemblyValue`][]([`Get`][](`globalDescriptor`,
 
 Return a new `WebAssembly.Global` instance with [[Global]] set to `value`.
 
-#### `WebAssembly.Global.prototype [ @@toStringTag ]()` Property
+#### `WebAssembly.Global.prototype [ @@toStringTag ]` Property
 
 TODO
 
@@ -440,6 +440,18 @@ This property has the attributes { [[Writable]]: `true`, [[Enumerable]]:
 `true`, [[Configurable]]: `false` }.
 
 TODO
+
+### `WebAssembly.Instance` Constructor
+
+...
+
+Let `exports` be a list of (string, JS value) pairs that is mapped from each
+[`external`][] value `e` in `instance.exports` as follows:
+
+1. ...
+1. If `e` is a [global][] `v`:
+   1. If `v` is an `i64`, throw a `WebAssembly.LinkError`. TODO: don't throw?
+   1. Return a new `WebAssembly.Global` with [[Global]] set to `v`.
 
 ## [Spec Changes][spec]
 
@@ -868,3 +880,6 @@ used if we were to add an additional RMW operator.
 [`ToWebAssemblyValue`]: https://github.com/WebAssembly/design/blob/master/JS.md#towebassemblyvalue
 [`IsSharedArrayBuffer`]: https://tc39.github.io/ecma262/#sec-issharedarraybuffer
 [`value type`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/types.ml#L3
+[`value`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/values.ml#L9
+[`external`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L24
+[global]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L15
