@@ -396,7 +396,7 @@ A `WebAssembly.Global` object contains a single `global` value which can be
 simultaneously referenced by multiple `Instance` objects. Each `Global` object
 has two internal slots:
 
-* [[Global]]: a [`value`][]
+* \[\[Global\]\]: a [`value`][]
 
 #### `WebAssembly.Global` Constructor
 
@@ -424,7 +424,7 @@ Let `type` be a [`value type`][]:
 Let `value` be [`ToWebAssemblyValue`][]([`Get`][](`globalDescriptor`,
 `"value"`) coerced to `type`.
 
-Return a new `WebAssembly.Global` instance with [[Global]] set to `value`.
+Return a new `WebAssembly.Global` instance with \[\[Global\]\] set to `value`.
 
 #### `WebAssembly.Global.prototype [ @@toStringTag ]` Property
 
