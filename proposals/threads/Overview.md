@@ -443,6 +443,18 @@ TODO
 
 ### `WebAssembly.Instance` Constructor
 
+For each [`import`][] `i` in `module.imports`:
+
+1. ...
+1. ...
+1. ...
+1. ...
+1. If `i` is a global import:
+   1. If the `global_type` of `i` is `i64`, throw a `WebAssembly.LinkError`. TODO: don't throw?
+   1. If `Type(v)` is a Number, append [`ToWebAssemblyValue`][]`(v)` to `imports`.
+   1. If `Type(v)` is `WebAssembly.Global`, append `v.[[Global]]` to `imports`.
+   1. Otherwise: throw a `WebAssembly.LinkError`.
+
 ...
 
 Let `exports` be a list of (string, JS value) pairs that is mapped from each
@@ -883,3 +895,4 @@ used if we were to add an additional RMW operator.
 [`value`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/values.ml#L9
 [`external`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L24
 [global]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L15
+[`import`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/ast.ml#L168
