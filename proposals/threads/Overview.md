@@ -394,9 +394,9 @@ Return `ret` as a Number value.
 
 A `WebAssembly.Global` object contains a single `global` value which can be
 simultaneously referenced by multiple `Instance` objects. Each `Global` object
-has two internal slots:
+has one internal slot:
 
-* \[\[Global\]\]: a [`value`][]
+* \[\[Global\]\]: a [`global instance`][]
 
 #### `WebAssembly.Global` Constructor
 
@@ -411,7 +411,7 @@ this constructor cannot be called as a function without `new`).
 
 If `Type(globalDescriptor)` is not Object, a [`TypeError`][] is thrown.
 
-Let `typeName` be [`ToString`][]([`Get`][](`globalDescriptor`, `"type"`).
+Let `typeName` be [`ToString`][]([`Get`][](`globalDescriptor`, `"type"`)).
 
 If `typeName` is not one of `"i32"`, `"f32"`, or `"f64"`, throw a [`TypeError`][].
 
@@ -421,10 +421,22 @@ Let `type` be a [`value type`][]:
 * If `typeName` is `"f32"`, let `type` be `f32`.
 * If `typeName` is `"f64"`, let `type` be `f64`.
 
-Let `value` be [`ToWebAssemblyValue`][]([`Get`][](`globalDescriptor`,
-`"value"`) coerced to `type`.
+Let `mutable` be [`ToBoolean`][]([`Get`][](`globalDescriptor`, `"mutable"`)).
 
-Return a new `WebAssembly.Global` instance with \[\[Global\]\] set to `value`.
+Let `mut` be `var` if `mutable` is true, or `const` if `mutable` is false.
+
+Let `value` be [`ToWebAssemblyValue`][]([`Get`][](`globalDescriptor`,
+`"value"`)) coerced to `type`.
+
+Return the result of `CreateGlobalObject`(`value`, `mut`).
+
+#### CreateGlobalObject
+
+Given an initial value `v`, and mutability `m`, to create a `WebAssembly.Global`:
+
+Let `g` be a new [`global instance`][] with `value` `v` and `mut` `m`.
+
+Return a new `WebAssembly.Global` with \[\[Global\]\] set to `g`.
 
 #### `WebAssembly.Global.prototype [ @@toStringTag ]` Property
 
@@ -451,7 +463,9 @@ For each [`import`][] `i` in `module.imports`:
 1. ...
 1. If `i` is a global import:
    1. If the `global_type` of `i` is `i64`, throw a `WebAssembly.LinkError`. TODO: don't throw?
-   1. If `Type(v)` is a Number, append [`ToWebAssemblyValue`][]`(v)` to `imports`.
+   1. If `Type(v)` is a Number:
+      1. Let `globalinst` be a new [`global instance`][] with value [`ToWebAssemblyValue`][](`v`) and mut `i.mut`.
+      1. Append `globalinst` to `imports`.
    1. If `Type(v)` is `WebAssembly.Global`, append `v.[[Global]]` to `imports`.
    1. Otherwise: throw a `WebAssembly.LinkError`.
 
@@ -461,9 +475,10 @@ Let `exports` be a list of (string, JS value) pairs that is mapped from each
 [`external`][] value `e` in `instance.exports` as follows:
 
 1. ...
-1. If `e` is a [global][] `v`:
-   1. If `v` is an `i64`, throw a `WebAssembly.LinkError`. TODO: don't throw?
-   1. Return a new `WebAssembly.Global` with [[Global]] set to `v`.
+1. If `e` is a [`global instance`][] `v`:
+   1. Let `type` be the `value_type` of `v.value`.
+   1. If `type` is `i64`, throw a `WebAssembly.LinkError`. TODO: don't throw?
+   1. Return a new `WebAssembly.Global` with \[\[Global\]\] set to `v`.
 
 ## [Spec Changes][spec]
 
@@ -892,7 +907,7 @@ used if we were to add an additional RMW operator.
 [`ToWebAssemblyValue`]: https://github.com/WebAssembly/design/blob/master/JS.md#towebassemblyvalue
 [`IsSharedArrayBuffer`]: https://tc39.github.io/ecma262/#sec-issharedarraybuffer
 [`value type`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/types.ml#L3
-[`value`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/values.ml#L9
+[`global instance`]: http://webassembly.github.io/spec/execution/runtime.html#global-instances
 [`external`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L24
 [global]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L15
 [`import`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/ast.ml#L168
