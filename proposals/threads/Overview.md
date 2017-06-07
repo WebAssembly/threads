@@ -255,6 +255,7 @@ is woken, the wait operator returns 0 ("ok"). If the timeout expires before
 another agent wakes this one, this operator returns 2 ("timed-out").
 
   * `i32.wait`: load i32 value, compare to expected (as `i32`), and wait for wake at same address
+  * `i64.wait`: load i64 value, compare to expected (as `i64`), and wait for wake at same address
 
 ### Wake
 
@@ -269,7 +270,7 @@ returns the number of waiters that were woken as an `i32`.
 | `wake count` == 0 | Wake no waiters |
 | `wake count` > 0 | Wake min(`wake count`, `num waiters`) waiters |
 
-  * `wake`: wake up `wake count` threads waiting on the given address via `i32.wait`
+  * `wake`: wake up `wake count` threads waiting on the given address via `i32.wait` or `i64.wait`
 
 ## [JavaScript API][] changes
 
@@ -456,7 +457,7 @@ The [instruction syntax][] is modified as follows:
 atomicop ::= add | sub | and | or | xor | xchg | cmpxchg
 
 instr ::= ... |
-          i32.wait memarg |
+          inn.wait memarg |
           wake memarg |
 
           inn.extend_s/i8 |
@@ -488,6 +489,7 @@ instr ::= ...
 
         | 0xFE 0x00 m:memarg32  =>  wake m
         | 0xFE 0x01 m:memarg32  =>  i32.wait m
+        | 0xFE 0x02 m:memarg64  =>  i64.wait m
 
         | 0xFE 0x10 m:memarg32  =>  i32.atomic.load m
         | 0xFE 0x11 m:memarg64  =>  i64.atomic.load m
