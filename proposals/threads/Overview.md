@@ -7,31 +7,17 @@ This proposal adds a new shared linear memory type and some new operations for
 atomic memory access. The responsibility of creating and joining threads is
 deferred to the embedder.
 
-## Agents
+## Agents and Agent Clusters
 
-An *agent* is the execution context for a WebAssembly module. It comprises a
-module, a value stack, a control flow stack, a call stack, and an executing
-thread.
-
-The agent's executing thread evaluates instructions and modifies the value
-stack, call stack, and control flow stack as specified [here][execution spec].
+An *agent* is the execution context for a WebAssembly module. For the web 
+embedding, it is an [ECMAScript agent][]. It is further extended to include a
+[WebAssembly stack][] and [evaluation context][].
 
 An agent is sometimes called a *thread*, as it is meant to match the behavior
 of the general computing concept of [threads][].
 
-## Agent Clusters
-
-An *agent cluster* is a maximal set of agents that can communicate by operating
-on shared memory.
-
-Every agent belongs to exactly one agent cluster.
-
-The embedder may deactivate or activate an agent without the agent's knowledge
-or cooperation, but must not leave some agents in the cluster active while
-other agents in the cluster are deactivated indefinitely.
-
-An embedder may terminate an agent without any of the agent's cluster's other
-agents' prior knowledge or cooperation.
+All agents are members of an *agent cluster*. For the web embedding, this is an
+[ECMAScript agent cluster][].
 
 ## Shared Linear Memory
 
@@ -563,6 +549,10 @@ instr ::= ...
         | 0xFE 0x4E m:memarg32  =>  i64.atomic.rmw32_u.cmpxchg m
 ```
 
+[ECMAScript agent]: https://tc39.github.io/ecma262/#sec-agents
+[ECMAScript agent cluster]: https://tc39.github.io/ecma262/#sec-agent-clusters
+[WebAssembly stack]: https://webassembly.github.io/spec/execution/runtime.html#stack
+[evaluation context]: https://webassembly.github.io/spec/execution/runtime.html#evaluation-contexts
 [agent]: Overview.md#agents
 [agent cluster]: Overview.md#agent-clusters
 [threads]: https://en.wikipedia.org/wiki/Thread_(computing)
