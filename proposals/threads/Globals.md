@@ -8,6 +8,10 @@ Without the ability to import and export mutable globals, it is inconvenient to
 provide mutable thread-local values that can be dynamically linked, such as the
 C++ stack pointer (SP).
 
+The following examples use SP as a motivating example, but a similar argument
+can be made for other thread-local variables (or the TLS pointer itself) as
+well.
+
 ### Example: Dynamically Linking SP with Single Agent
 
 Let's assume we have two modules that are dynamically linked, `m1` and
