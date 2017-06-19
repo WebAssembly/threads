@@ -299,7 +299,7 @@ restriction, we can provide a much nicer solution for thread-local values:
 With the modules instantiated as follows:
 
 ```
-let agentSp = 0x100;
+let agentSp = new WebAssembly.Global({type: 'i32', value: 0x100, mutable: true});
 
 let imports = {env: {sp: agentSp}};
 WebAssembly.instantiate(m1Bytes, {}).then(
@@ -315,6 +315,27 @@ WebAssembly.instantiate(m1Bytes, {}).then(
 The JavaScript host can now provide a different SP per agent, and share it
 between all dynamically linked modules without requiring additional storage for
 SP or modifying function signatures.
+
+Similarly, if an imported JavaScript function wants to allocate memory on the
+stack, it can modify the global as well:
+
+```
+
+let agentSp = ...;  // As above.
+
+function importedFunction() {
+  let addr = agentSp.value;
+  // Allocate an 8 byte value on the stack.
+  agentSp.value += 8;
+
+  // Fill out data at addr...
+  ...
+
+  // Call back into WebAssembly, passing stack-allocated data.
+  m1.exports.anotherFunction(addr);
+  ...
+}
+```
 
 ## Import/Export Mutable Globals
 
