@@ -44,7 +44,7 @@ Then the modules can be instantiated as follows:
 
 ```
 WebAssembly.instantiate(m1Bytes, {}).then(
-    ({_, instance}) => {
+    ({instance}) => {
         let imports = {env: {memory: instance.exports.memory}};
         WebAssembly.instantiate(m2Bytes, imports).then(...);
     });
@@ -92,7 +92,7 @@ let agentIndex = 0;
 let spAddrs = [0x0, 0x4];
 let imports = {env: {spAddr: spAddrs[agentIndex]}};
 WebAssembly.instantiate(m1Bytes, imports).then(
-    ({_, instance}) => {
+    ({instance}) => {
         let imports = {env: {
           memory: instance.exports.memory,
           spAddr: spAddrs[agentIndex],
@@ -164,7 +164,7 @@ let agentIndex = 0;
 let shadowSpAddrs = [0x0, 0x4];
 let imports = {env: {shadowSpAddr: shadowSpAddrs[agentIndex]}};
 WebAssembly.instantiate(m1Bytes, imports).then(
-    ({_, instance}) => {
+    ({instance}) => {
         let imports = {env: {
           memory: instance.exports.memory,
           shadowSpAddr: shadowSpAddrs[agentIndex],
@@ -234,7 +234,7 @@ The modules can then be instantiated as follows:
 
 ```
 WebAssembly.instantiate(m1Bytes, {}).then(
-    ({_, instance}) => {
+    ({instance}) => {
         let imports = {env: {
           memory: instance.exports.memory,
           exported: instance.exports.exported,
@@ -299,7 +299,7 @@ let agentSp = 0x100;
 
 let imports = {env: {sp: agentSp}};
 WebAssembly.instantiate(m1Bytes, {}).then(
-    ({_, instance}) => {
+    ({instance}) => {
         let imports = {env: {
           memory: instance.exports.memory,
           sp: agentSp,
