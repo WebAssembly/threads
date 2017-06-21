@@ -92,7 +92,7 @@ the SP in linear memory:
 Then the modules can be instantiated as follows:
 
 ```
-let agentIndex = 0;
+let agentIndex = ...;  // 0 or 1, depending on whether this is main thread or a Worker.
 let spAddrs = [0x0, 0x4];
 let imports = {env: {spAddr: spAddrs[agentIndex]}};
 WebAssembly.instantiate(m1Bytes, imports).then(
@@ -164,7 +164,7 @@ just show spilling before function calls and loading at function entries:
 The modules would be instantiated the same as they would in solution 1 above:
 
 ```
-let agentIndex = 0;
+let agentIndex = ...;  // 0 or 1, depending on whether this is main thread or a Worker.
 let shadowSpAddrs = [0x0, 0x4];
 let imports = {env: {shadowSpAddr: shadowSpAddrs[agentIndex]}};
 WebAssembly.instantiate(m1Bytes, imports).then(
@@ -194,12 +194,14 @@ This solution has the following drawbacks:
 
 ### Solution 3: Modify Function Signature to Pass SP as Parameter
 
-Rather than storing spilling the SP to linear memory, the SP value can be
-passed as a parameter. Because we can't tell whether an imported function will
-use the SP, we must modify all imported and exported functions.
+Rather than spilling the SP to linear memory, the SP value can be passed as 
+a parameter. Because we can't tell whether an imported function will use the
+SP, we must modify all exported functions.
 
 The SP will ultimately be saved in a mutable global, but will be loaded from
-the parameter at function entrypoints:
+the parameter at function entrypoints. This is just an optimization; we
+could pass the SP to all functions, but it is only necessary to do so in the
+exported functions:
 
 ```
 (module $m1
