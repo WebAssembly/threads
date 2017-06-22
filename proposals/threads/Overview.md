@@ -277,6 +277,10 @@ even when `m.grow` is performed.
 If `m` is not shared, any attempts to detach `buffer` _other_ than the
 detachment performed by `m.grow` shall throw a [`TypeError`][].
 
+Let `status` be the result of calling [`SetIntegrityLevel`][](`buffer`, `"frozen"`).
+
+If `status` is `false`, a [`TypeError`][] is thrown.
+
 Return a new `WebAssembly.Memory` instance with `[[Memory]]` set to `m` and
 `[[BufferObject]]` set to `buffer`.
 
@@ -303,7 +307,8 @@ Return `ret` as a Number value.
 This is an accessor property whose [[Set]] is Undefined and whose [[Get]]
 accessor function performs the following steps:
 
-1. If `this` is not a `WebAssembly.Memory`, a [`TypeError`][] is thrown.
+1. If `this` is not a `WebAssembly.Memory`, throw a [`TypeError`][] 
+   exception.
 1. Otherwise:
   1. If `m` is not shared, then return `M.[[BufferObject]]`.
   1. Otherwise:
@@ -316,6 +321,8 @@ accessor function performs the following steps:
       1. Let `buffer` be a new [`SharedArrayBuffer`][] whose
          [\[\[ArrayBufferData\]\]][] aliases `M.[[Memory]]` and whose
          [\[\[ArrayBufferByteLength\]\]][] is set to `newByteLength`.
+      1. Let `status` be [`SetIntegrityLevel`][](`buffer`, `"frozen"`).
+      1. If `status` is `false`, throw a [`TypeError`][] exception.
       1. Set `M.[[BufferObject]]` to `buffer`.
       1. Return `buffer`.
 
@@ -488,3 +495,4 @@ instr ::= ...
 [\[\[ArrayBufferByteLength\]\]]: http://tc39.github.io/ecma262/#sec-properties-of-the-arraybuffer-prototype-object
 [`ToNonWrappingUint32`]: https://github.com/WebAssembly/design/blob/master/JS.md#tononwrappinguint32
 [`IsSharedArrayBuffer`]: https://tc39.github.io/ecma262/#sec-issharedarraybuffer
+[`SetIntegrityLevel`]: https://tc39.github.io/ecma262/#sec-setintegritylevel
