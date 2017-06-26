@@ -364,10 +364,11 @@ memarg32 ::= 0x02 o: offset     =>  {align 2, offset: o}
 memarg64 ::= 0x03 o: offset     =>  {align 3, offset: o}
 
 instr ::= ...
-        | 0xC0                  =>  i32.extend_s/i8
-        | 0xC1                  =>  i32.extend_s/i16
-        | 0xC2                  =>  i64.extend_s/i8
-        | 0xC3                  =>  i64.extend_s/i16
+        | 0xC0                  =>  i32.extend8_s
+        | 0xC1                  =>  i32.extend16_s
+        | 0xC2                  =>  i64.extend8_s
+        | 0xC3                  =>  i64.extend16_s
+        | 0xC4                  =>  i64.extend32_s
 
         | 0xFE 0x00 m:memarg32  =>  wake m
         | 0xFE 0x01 m:memarg32  =>  i32.wait m
