@@ -251,6 +251,9 @@ However, the `memoryDescriptor` now will check for a `shared` property:
 Let `shared` be [`ToBoolean`][]([`Get`][](`memoryDescriptor`, `"shared"`)).
 Otherwise, let `shared` be `false`.
 
+If `shared` is `true`, and [`HasProperty`][](`"maximum"`) is `false`, then a
+[`TypeError`][] is thrown.
+
 Let `memory` be the result of calling [`Memory.create`][] given arguments
 `initial`, `maximum`, and `shared`. Note that `initial` and `maximum` are
 specified in units of WebAssembly pages (64KiB).
@@ -274,6 +277,10 @@ even when `m.grow` is performed.
 If `m` is not shared, any attempts to detach `buffer` _other_ than the
 detachment performed by `m.grow` shall throw a [`TypeError`][].
 
+Let `status` be the result of calling [`SetIntegrityLevel`][](`buffer`, `"frozen"`).
+
+If `status` is `false`, a [`TypeError`][] is thrown.
+
 Return a new `WebAssembly.Memory` instance with `[[Memory]]` set to `m` and
 `[[BufferObject]]` set to `buffer`.
 
@@ -290,14 +297,34 @@ Let `d` be [`ToNonWrappingUint32`][](`delta`).
 
 Let `ret` be the current size of memory in pages (before resizing).
 
-Perform [`Memory.grow`][] with delta `d`. On failure, a [`RangeError`][] is thrown.
-
-Assign to `M.[[BufferObject]]` a new [`SharedArrayBuffer`][] whose
-[\[\[ArrayBufferData\]\]][] aliases `M.[[Memory]]` and whose
-[\[\[ArrayBufferByteLength\]\]][] is set to the new byte length of
-`M.[[Memory]]`.
+Perform [`Memory.grow`][] with delta `d`. On failure, a [`RangeError`][] is
+thrown.
 
 Return `ret` as a Number value.
+
+### `WebAssembly.Memory.prototype.buffer`
+
+This is an accessor property whose [[Set]] is Undefined and whose [[Get]]
+accessor function performs the following steps:
+
+1. If `this` is not a `WebAssembly.Memory`, throw a [`TypeError`][] 
+   exception.
+1. Otherwise:
+  1. If `m` is not shared, then return `M.[[BufferObject]]`.
+  1. Otherwise:
+    1. Let `newByteLength` be the byte length of `M.[[Memory]]`.
+    1. Let `oldByteLength` be
+       `M.[[BufferObject]].`[\[\[ArrayBufferByteLength\]\]][].
+    1. If `newByteLength` is equal to `oldByteLength`, then return
+       `M.[[BufferObject]]`.
+    1. Otherwise:
+      1. Let `buffer` be a new [`SharedArrayBuffer`][] whose
+         [\[\[ArrayBufferData\]\]][] aliases `M.[[Memory]]` and whose
+         [\[\[ArrayBufferByteLength\]\]][] is set to `newByteLength`.
+      1. Let `status` be [`SetIntegrityLevel`][](`buffer`, `"frozen"`).
+      1. If `status` is `false`, throw a [`TypeError`][] exception.
+      1. Set `M.[[BufferObject]]` to `buffer`.
+      1. Return `buffer`.
 
 ## [Spec Changes][spec]
 
@@ -468,3 +495,4 @@ instr ::= ...
 [\[\[ArrayBufferByteLength\]\]]: http://tc39.github.io/ecma262/#sec-properties-of-the-arraybuffer-prototype-object
 [`ToNonWrappingUint32`]: https://github.com/WebAssembly/design/blob/master/JS.md#tononwrappinguint32
 [`IsSharedArrayBuffer`]: https://tc39.github.io/ecma262/#sec-issharedarraybuffer
+[`SetIntegrityLevel`]: https://tc39.github.io/ecma262/#sec-setintegritylevel
