@@ -72,8 +72,8 @@ read-modify-write, and compare-exchange. All atomic memory accesses require a
 shared linear memory. Attempting to use atomic access operators on non-shared
 linear memory is a validation error.
 
-Currently all atomic memory accesses are [sequentially consistent][]. This
-restriction may be relaxed in the future.
+Currently all atomic memory access instructions are [sequentially consistent][].
+Instructions with other memory orderings may be provided in the future.
 
 ### Load/Store
 
