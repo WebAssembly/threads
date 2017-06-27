@@ -351,7 +351,7 @@ Its [encoding][limits encoding] is as follows:
 ```
 limits ::= 0x00 n:u32          => {min n, max e, notshared}
            0x01 n:u32 m:u32    => {min n, max m, notshared}
-           0x11 n:u32 m:u32    => {min n, max m, shared}
+           0x03 n:u32 m:u32    => {min n, max m, shared}
 ```
 
 Note that shared linear memory without an explicit maximum size is not
