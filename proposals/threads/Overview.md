@@ -57,13 +57,23 @@ See [Globals.md](Globals.md).
 
 ## New Sign-extending Operators
 
-All atomic RMW operators are zero-extending. To support sign-extending, four
+All atomic RMW operators are zero-extending. To support sign-extending, five
 new sign-extension operators are added:
 
-  * `i32.extend_s/i8`: extend a signed 8-bit integer to a 32-bit integer
-  * `i32.extend_s/i16`: extend a signed 16-bit integer to a 32-bit integer
-  * `i64.extend_s/i8`: extend a signed 8-bit integer to a 64-bit integer
-  * `i64.extend_s/i16`: extend a signed 16-bit integer to a 64-bit integer
+  * `i32.extend8_s`: extend a signed 8-bit integer to a 32-bit integer
+  * `i32.extend16_s`: extend a signed 16-bit integer to a 32-bit integer
+  * `i64.extend8_s`: extend a signed 8-bit integer to a 64-bit integer
+  * `i64.extend16_s`: extend a signed 16-bit integer to a 64-bit integer
+  * `i64.extend32_s`: extend a signed 32-bit integer to a 64-bit integer
+  
+Note that `i64.extend32_s` was not originally included when this proposal was
+discussed in the May 2017 CG meeting. The reason given was that 
+the behavior matches `i64.extend_s/i32`. It was later discovered that this is
+not correct, as `i64.extend_s/i32` sign-extends an `i32` value to `i64`,
+whereas `i64.extend32_s` sign-extends an `i64` value to `i64`. The behavior
+of `i64.extend32_s` can be emulated with `i32.wrap/i64` followed by
+`i64.extend_s/i32`, but the same can be said of the sign-extending load
+operations. Therefore, `i64.extend32_s` has been added for consistency.
 
 ## Atomic Memory Accesses
 
@@ -381,10 +391,11 @@ memarg32 ::= 0x02 o: offset     =>  {align 2, offset: o}
 memarg64 ::= 0x03 o: offset     =>  {align 3, offset: o}
 
 instr ::= ...
-        | 0xC0                  =>  i32.extend_s/i8
-        | 0xC1                  =>  i32.extend_s/i16
-        | 0xC2                  =>  i64.extend_s/i8
-        | 0xC3                  =>  i64.extend_s/i16
+        | 0xC0                  =>  i32.extend8_s
+        | 0xC1                  =>  i32.extend16_s
+        | 0xC2                  =>  i64.extend8_s
+        | 0xC3                  =>  i64.extend16_s
+        | 0xC4                  =>  i64.extend32_s
 
         | 0xFE 0x00 m:memarg32  =>  wake m
         | 0xFE 0x01 m:memarg32  =>  i32.wait m
