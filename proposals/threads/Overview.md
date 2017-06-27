@@ -57,14 +57,14 @@ See [Globals.md](Globals.md).
 
 ## New Sign-extending Operators
 
-All atomic RMW operators are zero-extending. To support sign-extending, four
+All atomic RMW operators are zero-extending. To support sign-extending, five
 new sign-extension operators are added:
 
   * `i32.extend8_s`: extend a signed 8-bit integer to a 32-bit integer
   * `i32.extend16_s`: extend a signed 16-bit integer to a 32-bit integer
   * `i64.extend8_s`: extend a signed 8-bit integer to a 64-bit integer
   * `i64.extend16_s`: extend a signed 16-bit integer to a 64-bit integer
-  * `i64.extend32_s`: extend a signed 16-bit integer to a 64-bit integer
+  * `i64.extend32_s`: extend a signed 32-bit integer to a 64-bit integer
   
 Note that `i64.extend32_s` was not originally included when this proposal was
 discussed in the May 2017 CG meeting. The reason given was that 
