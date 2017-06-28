@@ -198,8 +198,9 @@ is misaligned or out-of-bounds. The wait operators requires an alignment of
 their memory access size. The wait operator requires an alignment of 32 bits.
 
 For the web embedding, the agent can also be suspended or woken via the
-[`Atomics.wait`][] and [`Atomics.wake`][] functions respectively. An agent 
-will not be suspended or woken for other reasons.
+[`Atomics.wait`][] and [`Atomics.wake`][] functions respectively. An agent will
+not be suspended for other reasons, unless all agents in that cluster are
+also suspended.
 
 ### Wait
 
@@ -229,7 +230,7 @@ another agent wakes this one, this operator returns 2 ("timed-out").
   * `i32.wait`: load i32 value, compare to expected (as `i32`), and wait for wake at same address
   * `i64.wait`: load i64 value, compare to expected (as `i64`), and wait for wake at same address
   
-For the web embedding, this is equivalent in behavior to executing the following:
+For the web embedding, `i32.wait` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
@@ -237,6 +238,26 @@ For the web embedding, this is equivalent in behavior to executing the following
 1. Let `result` be [`Atomics.wait`][](`int32array`, `address`, `expected`, `timeout`),
    where `address`, `expected`, and `timeout` are the operands to the `wait` operator
    as described above.
+1. Return an `i32` value as described in the above table:
+   ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
+   
+`i64.wait` has no equivalent in ECMAScript as it is currently specified, as there is
+no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of a
+64-bit integer. That said, the behavior can be approximated as follows:
+
+1. Let `memory` be a `WebAssembly.Memory` object for this module.
+1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
+1. Let `int64array` be `Int64Array`[](`buffer`), where `Int64Array` is a
+   typed-array constructor that allows 64-bit integer views with an element size 
+   of `8`.
+1. Let `result` be [`Atomics.wait`][](`int64array`, `address`, `expected`, `timeout`),
+   where `address`, `expected`, and `timeout` are the operands to the `wait` operator
+   as described above. The [`Atomics.wait`][] operation is modified:
+   1. `ValidateSharedIntegerTypedArray` will fail if the typed-array type is not an
+      `Int64Array`.
+   1. `value` is not converted to an `Int32`, but kept in a 64-bit integer
+      representation.
+   1. `indexedPosition` is (`i` x 8) + `offset`
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
 
@@ -255,7 +276,7 @@ returns the number of waiters that were woken as an `i32`.
 
   * `wake`: wake up `wake count` threads waiting on the given address via `i32.wait` or `i64.wait`
   
-For the web embedding, `i32.wait` is equivalent in behavior to executing the following:
+For the web embedding, `wake` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
