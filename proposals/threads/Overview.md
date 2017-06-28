@@ -197,9 +197,9 @@ Both wake and wait operators trap if the effective address of either operator
 is misaligned or out-of-bounds. The wait operators requires an alignment of
 their memory access size. The wait operator requires an alignment of 32 bits.
 
-The embedder is also permitted to suspend or wake an agent. A suspended agent
-can be woken by the embedder or the wake operator, regardless of how the agent
-was suspended (e.g. via the embedder or a wait operator).
+For the web embedding, the agent can also be suspended or woken via the
+[`Atomics.wait`][] and [`Atomics.wake`][] functions respectively. An agent 
+will not be suspended or woken for other reasons.
 
 ### Wait
 
@@ -228,6 +228,17 @@ another agent wakes this one, this operator returns 2 ("timed-out").
 
   * `i32.wait`: load i32 value, compare to expected (as `i32`), and wait for wake at same address
   * `i64.wait`: load i64 value, compare to expected (as `i64`), and wait for wake at same address
+  
+For the web embedding, this is equivalent in behavior to executing the following:
+
+1. Let `memory` be a `WebAssembly.Memory` object for this module.
+1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
+1. Let `int32array` be [`Int32Array`][](`buffer`).
+1. Let `result` be [`Atomics.wait`][](`int32array`, `address`, `expected`, `timeout`),
+   where `address`, `expected`, and `timeout` are the operands to the `wait` operator
+   as described above.
+1. Return an `i32` value as described in the above table:
+   ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
 
 ### Wake
 
@@ -243,6 +254,15 @@ returns the number of waiters that were woken as an `i32`.
 | `wake count` > 0 | Wake min(`wake count`, `num waiters`) waiters |
 
   * `wake`: wake up `wake count` threads waiting on the given address via `i32.wait` or `i64.wait`
+  
+For the web embedding, `i32.wait` is equivalent in behavior to executing the following:
+
+1. Let `memory` be a `WebAssembly.Memory` object for this module.
+1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
+1. Let `int32array` be [`Int32Array`][](`buffer`).
+1. Let `fcount` be `count` if `count` is >= 0, otherwise `∞`.
+1. Let `result` be [`Atomics.wake`][](`int32array`, `address`, `fcount`).
+1. Return `result` converted to an `i32`.
 
 ## [JavaScript API][] changes
 
@@ -507,3 +527,5 @@ instr ::= ...
 [`ToNonWrappingUint32`]: https://github.com/WebAssembly/design/blob/master/JS.md#tononwrappinguint32
 [`IsSharedArrayBuffer`]: https://tc39.github.io/ecma262/#sec-issharedarraybuffer
 [`SetIntegrityLevel`]: https://tc39.github.io/ecma262/#sec-setintegritylevel
+[`Atomics.wait`]: https://tc39.github.io/ecma262/#sec-atomics.wait
+[`Atomics.wake`]: https://tc39.github.io/ecma262/#sec-atomics.wake
