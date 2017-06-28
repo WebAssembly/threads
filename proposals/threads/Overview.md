@@ -373,13 +373,13 @@ instr ::= ... |
           inn.extend_s/i16 |
 
           inn.atomic.load memarg | inn.atomic.store memarg |
-          inn.atomic.load8_sx memarg | inn.atomic.load16_sx memarg | i64.atomic.load32_sx memarg |
+          inn.atomic.load8_u memarg | inn.atomic.load16_u memarg | i64.atomic.load32_u memarg |
           inn.atomic.store8 memarg | inn.atomic.store16 memarg | i64.atomic.store32 memarg |
 
           inn.atomic.rmw.atomicop memarg |
-          inn.atomic.rmw8_sx.atomicop memarg |
-          inn.atomic.rmw16_sx.atomicop memarg |
-          i64.atomic.rmw32_sx.atomicop memarg |
+          inn.atomic.rmw8_u.atomicop memarg |
+          inn.atomic.rmw16_u.atomicop memarg |
+          i64.atomic.rmw32_u.atomicop memarg |
 ```
 
 The [instruction binary format][] is modified as follows:
