@@ -529,3 +529,4 @@ instr ::= ...
 [`SetIntegrityLevel`]: https://tc39.github.io/ecma262/#sec-setintegritylevel
 [`Atomics.wait`]: https://tc39.github.io/ecma262/#sec-atomics.wait
 [`Atomics.wake`]: https://tc39.github.io/ecma262/#sec-atomics.wake
+[`Int32Array`]: https://tc39.github.io/ecma262/#sec-typedarray-objects
