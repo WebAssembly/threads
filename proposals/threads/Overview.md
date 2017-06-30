@@ -221,7 +221,7 @@ and a relative timeout in milliseconds as an `f64`. The return value is `0`,
 
 | Return value | Description |
 | ---- | ---- |
-| `0` | "ok", woken by another agent in the cluster or the embedder |
+| `0` | "ok", woken by another agent in the cluster |
 | `1` | "not-equal", the loaded value did not match the expected value |
 | `2` | "timed-out", not woken before timeout expired |
 
