@@ -202,6 +202,10 @@ For the web embedding, the agent can also be suspended or woken via the
 not be suspended for other reasons, unless all agents in that cluster are
 also suspended.
 
+An agent suspended via `Atomics.wait` can be woken by the WebAssembly `wake`
+operator. Similarly, an agent suspended by `i32.wait` or `i64.wait` can be
+woken by [`Atomics.wake`][].
+
 ### Wait
 
 The wait operator take three operands: an address operand, an expected value,
@@ -225,7 +229,9 @@ The wait operation begins by performing an atomic load from the given address.
 If the loaded value is not equal to the expected value, the operator returns 1
 ("not-equal"). If the values are equal, the agent is suspended. If the agent
 is woken, the wait operator returns 0 ("ok"). If the timeout expires before
-another agent wakes this one, this operator returns 2 ("timed-out").
+another agent wakes this one, this operator returns 2 ("timed-out"). Note that
+when the agent is suspended, it will not be [spuriously woken](https://en.wikipedia.org/wiki/Spurious_wakeup).
+The agent is only woken by `wake` (or [`Atomics.wake`][] in the web embedding).
 
   * `i32.wait`: load i32 value, compare to expected (as `i32`), and wait for wake at same address
   * `i64.wait`: load i64 value, compare to expected (as `i64`), and wait for wake at same address
