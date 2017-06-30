@@ -10,14 +10,14 @@
 # Configuration
 
 NAME =		wasm
-UNOPT = 	$(NAME)
-OPT =   	$(NAME).opt
+UNOPT = 	$(NAME).debug
+OPT =   	$(NAME)
 LIB =		$(NAME)
 ZIP =		$(NAME).zip
 JSLIB =		wast.js
 WINMAKE =	winmake.bat
 
-DIRS =		util spec text host host/import
+DIRS =		util syntax binary text valid exec script host main
 LIBS =		bigarray
 FLAGS = 	-cflags '-w +a-4-27-42-44-45 -warn-error +a'
 OCB =		ocamlbuild $(FLAGS) $(DIRS:%=-I %) $(LIBS:%=-libs %)
@@ -26,18 +26,29 @@ JS =		# set to JS shell command to run JS tests
 
 # Main targets
 
-.PHONY:		unopt opt libunopt libopt all land zip
+.PHONY:		default opt unopt libopt libunopt jslib all land zip
 
-unopt:		$(UNOPT)
+default:	opt
 opt:		$(OPT)
-libunopt:	_build/$(LIB).cmo
+unopt:		$(UNOPT)
 libopt:		_build/$(LIB).cmx
+libunopt:	_build/$(LIB).cmo
+jslib:		$(JSLIB)
 all:		unopt opt libunopt libopt test
 land:		all $(WINMAKE)
 zip: 		$(ZIP)
 
 
 # Building executable
+
+empty =
+space =		$(empty) $(empty)
+comma =		,
+
+.INTERMEDIATE:	_tags
+_tags:
+		echo >$@ "true: bin_annot"
+		echo >>$@ "<{$(subst $(space),$(comma),$(DIRS))}/*.cmx>: for-pack($(PACK))"
 
 $(UNOPT):	main.d.byte
 		mv $< $@
@@ -46,14 +57,16 @@ $(OPT):		main.native
 		mv $< $@
 
 .PHONY:		main.d.byte main.native
-main.d.byte:
+main.d.byte:	_tags
 		$(OCB) -quiet $@
 
-main.native:
+main.native:	_tags
 		$(OCB) -quiet $@
 
 
 # Building library
+
+PACK =		$(shell echo `echo $(LIB) | sed 's/^\(.\).*$$/\\1/g' | tr [:lower:] [:upper:]``echo $(LIB) | sed 's/^.\(.*\)$$/\\1/g'`)
 
 .INTERMEDIATE:	$(LIB).mlpack
 $(LIB).mlpack:	$(DIRS)
@@ -75,8 +88,8 @@ _build/$(LIB).cmx: $(LIB).mlpack
 .PHONY:		$(JSLIB)
 $(JSLIB):	$(UNOPT)
 		mkdir -p _build/jslib/src
-		cp jslib/* _build/jslib
-		cp $(DIRS:%=_build/%/*.ml*) jslib/*.ml _build/jslib/src
+		cp meta/jslib/* _build/jslib
+		cp $(DIRS:%=_build/%/*.ml*) meta/jslib/*.ml _build/jslib/src
 		rm _build/jslib/src/*.ml[^i]
 		(cd _build/jslib; ./build.sh ../../$@)
 
@@ -95,24 +108,35 @@ $(WINMAKE):	clean
 		>>$@
 
 
+# Executing test suite
+
+.PHONY:		test debugtest
+
+test:		$(OPT)
+		../test/core/run.py --wasm `pwd`/$(OPT) $(if $(JS),--js '$(JS)',)
+debugtest:	$(UNOPT)
+		../test/core/run.py --wasm `pwd`/$(UNOPT) $(if $(JS),--js '$(JS)',)
+
+test/%:		$(OPT)
+		../test/core/run.py --wasm `pwd`/$(OPT) $(if $(JS),--js '$(JS)',) $(@:test/%=../test/core/%.wast)
+debugtest/%:	$(UNOPT)
+		../test/core/run.py --wasm `pwd`/$(UNOPT) $(if $(JS),--js '$(JS)',) $(@:test/%=../test/core/%.wast)
+
+run/%:		$(OPT)
+		./$(OPT) $(@:run/%=../test/core/%.wast)
+debugrun/%:		$(UNOPT)
+		./$(UNOPT) $(@:run/%=../test/core/%.wast)
+
+
 # Miscellaneous targets
 
-.PHONY:		test clean
+.PHONY:		clean
 
 $(ZIP):		$(WINMAKE)
 		git archive --format=zip --prefix=$(NAME)/ -o $@ HEAD
 
-test:		$(NAME)
-		../test/core/run.py --wasm `pwd`/$(NAME) $(if $(JS),--js '$(JS)',)
-
-test/%:		$(NAME)
-		../test/core/run.py --wasm `pwd`/$(NAME) $(if $(JS),--js '$(JS)',) $(@:test/%=../test/core/%.wast)
-
-run/%:		$(NAME)
-		./$(NAME) $(@:run/%=../test/core/%.wast)
-
 clean:
-		rm -rf _build/jslib
+		rm -rf _build/jslib wasm.mlpack _tags
 		$(OCB) -clean
 
 
@@ -126,7 +150,7 @@ check:
 		ocamlfind query $(LIBS)
 
 install:	_build/$(LIB).cmx _build/$(LIB).cmo
-		ocamlfind install wasm findlib/META _build/wasm.o \
+		ocamlfind install wasm meta/findlib/META _build/wasm.o \
 		  $(wildcard _build/$(LIB).cm*) \
 		  $(wildcard $(DIRS:%=%/*.mli))
 
