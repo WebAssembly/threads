@@ -416,7 +416,8 @@ This is an accessor property. The [[Set]] accessor function, when called with va
 performs the following steps:
 
 1. If \[\[Global\]\].`mut` is `const`, throw a [`TypeError`][].
-1. If \[\[GlobalType\]\].`valtype` is `i64`, throw a [`TypeError`][].
+1. Let `type` be \[\[GlobalType\]\].`valtype`.
+1. If `type` is `i64`, throw a [`TypeError`][].
 1. Let `value` be [`ToWebAssemblyValue`][](`V`) coerced to `type`.
 1. Set \[\[Global\]\].`value` to `value`.
 
