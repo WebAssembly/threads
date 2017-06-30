@@ -353,9 +353,10 @@ Globals can therefore be used as
 
 A `WebAssembly.Global` object contains a single `global` value which can be
 simultaneously referenced by multiple `Instance` objects. Each `Global` object
-has one internal slot:
+has two internal slots:
 
 * \[\[Global\]\]: a [`global instance`][]
+* \[\[GlobalType\]\]: a [`global_type`][]
 
 #### `WebAssembly.Global` Constructor
 
@@ -387,30 +388,43 @@ Let `mut` be `var` if `mutable` is true, or `const` if `mutable` is false.
 Let `value` be [`ToWebAssemblyValue`][]([`Get`][](`globalDescriptor`,
 `"value"`)) coerced to `type`.
 
-Return the result of `CreateGlobalObject`(`value`, `mut`).
+Return the result of `CreateGlobalObject`(`value`, `mut`, `type`).
 
 #### CreateGlobalObject
 
-Given an initial value `v`, and mutability `m`, to create a `WebAssembly.Global`:
+Given an initial value `v`, mutability `m`, and type `t` to create a `WebAssembly.Global`:
 
 Let `g` be a new [`global instance`][] with `value` `v` and `mut` `m`.
+Let `gt` be a new [`global_type`][] with `mut` `m` and type `t`.
 
-Return a new `WebAssembly.Global` with \[\[Global\]\] set to `g`.
+Return a new `WebAssembly.Global` with \[\[Global\]\] set to `g` and \[\[GlobalType\]\] `gt`.
 
 #### `WebAssembly.Global.prototype [ @@toStringTag ]` Property
 
-TODO
+The initial value of the [`@@toStringTag`][] property is the String value `"WebAssembly.Global"`.
+
+This property has the attributes { [[Writable]]: `false`, [[Enumerable]]: `false`, [[Configurable]]: `true` }.
 
 #### `WebAssembly.Global.prototype [ @@toPrimitive ]` Property
 
-TODO
+1. If \[\[GlobalType\]\].`valtype` is `i64`, throw a [`TypeError`][].
+1. Return [`ToJSValue`][](\[\[Global\]\].`value`).
 
 #### `WebAssembly.Global.prototype.value` Property
 
-This property has the attributes { [[Writable]]: `true`, [[Enumerable]]:
-`true`, [[Configurable]]: `false` }.
+This is an accessor property. The [[Set]] accessor function, when called with value `V`,
+performs the following steps:
 
-TODO
+1. If \[\[Global\]\].`mut` is `const`, throw a [`TypeError`][].
+1. Let `type` be \[\[GlobalType\]\].`valtype`.
+1. If `type` is `i64`, throw a [`TypeError`][].
+1. Let `value` be [`ToWebAssemblyValue`][](`V`) coerced to `type`.
+1. Set \[\[Global\]\].`value` to `value`.
+
+The [[Get]] accessor function performs the following steps:
+
+1. If \[\[GlobalType\]\].`valtype` is `i64`, throw a [`TypeError`][].
+1. Return [`ToJSValue`][](\[\[Global\]\].`value`).
 
 ### `WebAssembly.Instance` Constructor
 
@@ -421,8 +435,8 @@ For each [`import`][] `i` in `module.imports`:
 1. ...
 1. ...
 1. If `i` is a global import:
-   1. If the `global_type` of `i` is `i64`, throw a `WebAssembly.LinkError`. TODO: don't throw?
    1. If `Type(v)` is a Number:
+      1. If the `global_type` of `i` is `i64`, throw a `WebAssembly.LinkError`.
       1. Let `globalinst` be a new [`global instance`][] with value [`ToWebAssemblyValue`][](`v`) and mut `i.mut`.
       1. Append `globalinst` to `imports`.
    1. If `Type(v)` is `WebAssembly.Global`, append `v.[[Global]]` to `imports`.
@@ -434,19 +448,20 @@ Let `exports` be a list of (string, JS value) pairs that is mapped from each
 [`external`][] value `e` in `instance.exports` as follows:
 
 1. ...
-1. If `e` is a [`global instance`][] `v`:
-   1. Let `type` be the `value_type` of `v.value`.
-   1. If `type` is `i64`, throw a `WebAssembly.LinkError`. TODO: don't throw?
-   1. Return a new `WebAssembly.Global` with \[\[Global\]\] set to `v`.
+1. If `e` is a [`global instance`][] `g` with [`global_type`][] `gt`:
+   1. Return a new `WebAssembly.Global` with \[\[Global\]\] set to `g` and \[\[GlobalType\]\] set to `gt`.
 
 [agent]: Overview.md#agents-and-agent-clusters
 [`external`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L24
 [`Get`]: https://tc39.github.io/ecma262/#sec-get-o-p
 [global]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L15
+[`global_type`]: https://webassembly.github.io/spec/syntax/types.html#global-types
 [`global instance`]: http://webassembly.github.io/spec/execution/runtime.html#global-instances
 [`import`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/ast.ml#L168
 [`ToBoolean`]: https://tc39.github.io/ecma262/#sec-toboolean
+[`ToJSValue`]: https://github.com/WebAssembly/design/blob/master/JS.md#tojsvalue
 [`ToString`]: https://tc39.github.io/ecma262/#sec-tostring
+[`@@toStringTag`]: https://tc39.github.io/ecma262/#sec-well-known-symbols
 [`ToWebAssemblyValue`]: https://github.com/WebAssembly/design/blob/master/JS.md#towebassemblyvalue
 [`TypeError`]: https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-typeerror
 [`value type`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/types.ml#L3
