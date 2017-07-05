@@ -48,8 +48,48 @@ agent's cluster will have access to the additional linear memory.
 When a module has an imported linear memory, its data segments are copied into
 the linear memory when the module is instantiated.
 
-When the imported linear memory is shared, the writes are non-atomic and
-are not ordered.
+When linear memory is not shared, the ordering of data segment initialization is
+not observable. When linear memory is shared, it is possible for another module
+(or in the web embedding, for JavaScript code) to read from the linear memory as
+it is being initialized.
+
+The data segments are therefore initialized as follows:
+
+* Data segments are initialized in their definition order
+* From low to high bits
+* At byte granularity (which can be coalesced)
+* As non-atomics
+* An entire module's data segment initialization then synchronizes with other
+  operations (effectively, followed by a barrier)
+  
+The intention is to allow the implementor to "memcpy" the initializer data into
+place.
+
+### Initializing Memory Only Once
+
+The data segments are always copied into linear memory, even if the same module
+is instantiated again in another agent. One way to ensure that linear memory is
+only initialized once is to place all data segments in a separate module that
+is only instantiated once, then share the linear memory with other modules.
+For example:
+
+```
+;; Data module
+(module $data_module
+  (memory (export "memory") 1)
+  (data (i32.const 0) "..."))
+  
+;; Main module
+(module $main_module
+  (import "env" "memory" (memory 1))
+  ...)
+
+WebAssembly.instantiate(dataModuleBytes, {}).then(
+    ({instance} => {
+        let imports = {env: {memory: instance.exports.memory}};
+        WebAssembly.instantiate(mainModuleBytes, imports).then(...);
+    });
+```
 
 ## Import/Export Mutable Globals
 
