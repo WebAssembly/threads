@@ -48,12 +48,12 @@ agent's cluster will have access to the additional linear memory.
 When a module has an imported linear memory, its data segments are copied into
 the linear memory when the module is instantiated.
 
-When linear memory is not shared, the ordering of data segment initialization is
-not observable. When linear memory is shared, it is possible for another module
-(or in the web embedding, for JavaScript code) to read from the linear memory as
-it is being initialized.
+When linear memory is shared, it is possible for another module (or in the web 
+embedding, for JavaScript code) to read from the linear memory as it is being
+initialized.
 
-The data segments are therefore initialized as follows:
+The data segments are initialized as follows, whether they apply to shared or
+non-shared linear memory:
 
 * Data segments are initialized in their definition order
 * From low to high bits
