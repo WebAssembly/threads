@@ -56,7 +56,7 @@ The data segments are initialized as follows, whether they apply to shared or
 non-shared linear memory:
 
 * Data segments are initialized in their definition order
-* From low to high bits
+* From low to high bytes
 * At byte granularity (which can be coalesced)
 * As non-atomics
 * An entire module's data segment initialization then synchronizes with other
