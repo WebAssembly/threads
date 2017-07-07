@@ -618,5 +618,6 @@ instr ::= ...
 [`Int32Array`]: https://tc39.github.io/ecma262/#sec-typedarray-objects
 [safe-passing-of-structured-data]: https://html.spec.whatwg.org/multipage/structured-data.html#safe-passing-of-structured-data
 [serializable object]: https://html.spec.whatwg.org/multipage/structured-data.html#serializable-objects
-[transferable object]: https://html.spec.whatwg.org/multipage/structured-data.html#transferable-objects
+[transferable]: https://html.spec.whatwg.org/multipage/structured-data.html#transferable-objects
 [sub-serialization]: https://html.spec.whatwg.org/multipage/structured-data.html#sub-serialization
+[sub-deserialization]: https://html.spec.whatwg.org/multipage/structured-data.html#sub-deserialization
