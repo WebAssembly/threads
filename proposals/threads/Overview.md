@@ -333,6 +333,25 @@ For the web embedding, `wake` is equivalent in behavior to executing the followi
 
 ## [JavaScript API][] changes
 
+### Structured Serialization and Deserialization of `WebAssembly.Memory`
+
+A `WebAssembly.Memory` is a [serializable object][], but not [transferable][].
+It can be serialized and deserialized following the [abstract operations described
+in the HTML standard][safe-passing-of-structured-data].
+
+The [serialization steps][], given `value`, `serialized`, and `forStorage`, are:
+
+1. If `forStorage` is `true`, throw a [`TypeError`][].
+1. Let `bufferObject` be a [sub-serialization][] of `value`'s associated `[[BufferObject]]`.
+1. Set `serialized.[[BufferObject]]` to `bufferObject`.
+1. Set `serialized.[[Memory]]` to `value`'s associated `[[Memory]]` object.
+
+The [deserialization steps][], given `serialized` and `value`, are:
+
+1. Set `value`'s associated `[[Memory]]` to `serialized.[[Memory]]`.
+1. Let `bufferObject` be a [sub-deserialization][] of `serialized.[[BufferObject]]`.
+1. Set `value`'s associated `[[BufferObject]]` to `bufferObject`.
+
 ### `WebAssembly.Memory` Constructor
 
 See the current specification [here][WebAssembly.Memory].
@@ -597,3 +616,7 @@ instr ::= ...
 [`Atomics.wait`]: https://tc39.github.io/ecma262/#sec-atomics.wait
 [`Atomics.wake`]: https://tc39.github.io/ecma262/#sec-atomics.wake
 [`Int32Array`]: https://tc39.github.io/ecma262/#sec-typedarray-objects
+[safe-passing-of-structured-data]: https://html.spec.whatwg.org/multipage/structured-data.html#safe-passing-of-structured-data
+[serializable object]: https://html.spec.whatwg.org/multipage/structured-data.html#serializable-objects
+[transferable object]: https://html.spec.whatwg.org/multipage/structured-data.html#transferable-objects
+[sub-serialization]: https://html.spec.whatwg.org/multipage/structured-data.html#sub-serialization
