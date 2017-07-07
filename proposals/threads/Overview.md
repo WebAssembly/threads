@@ -59,7 +59,7 @@ non-shared linear memory:
 * From low to high bytes
 * At byte granularity (which can be coalesced)
 * As non-atomics
-* An entire module's data segment initialization then synchronizes with other
+* An entire module's data section initialization then synchronizes with other
   operations (effectively, followed by a barrier)
   
 The intention is to allow the implementor to "memcpy" the initializer data into
