@@ -562,8 +562,8 @@ instr ::= ...
 
 [ECMAScript agent]: https://tc39.github.io/ecma262/#sec-agents
 [ECMAScript agent cluster]: https://tc39.github.io/ecma262/#sec-agent-clusters
-[WebAssembly stack]: https://webassembly.github.io/spec/execution/runtime.html#stack
-[evaluation context]: https://webassembly.github.io/spec/execution/runtime.html#evaluation-contexts
+[WebAssembly stack]: https://webassembly.github.io/spec/exec/runtime.html#stack
+[evaluation context]: https://webassembly.github.io/spec/exec/runtime.html#evaluation-contexts
 [agent]: Overview.md#agents
 [agent cluster]: Overview.md#agent-clusters
 [threads]: https://en.wikipedia.org/wiki/Thread_(computing)
