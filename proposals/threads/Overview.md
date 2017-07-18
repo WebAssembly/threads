@@ -7,6 +7,107 @@ This proposal adds a new shared linear memory type and some new operations for
 atomic memory access. The responsibility of creating and joining threads is
 deferred to the embedder.
 
+## Example
+
+Here is an example of a naive mutex implemented in WebAssembly. It uses one 
+memory location (address 0) to store the state of the lock. If its value is
+0, the mutex is unlocked. If its value is 1, the mutex is locked.
+
+```
+(module
+  ;; Import 1 page (64Kib) of shared memory. 
+  (import "env" "memory" (memory 1 1 shared))
+  
+  ;; Lock a mutex at address 0. 0 => unlocked, 1 => locked.
+  (func (export "lockMutex")
+    (block $done
+      (loop $retry
+        ;; Attempt to grab the mutex. The cmpxchg operation atomically
+        ;; does the following:
+        ;; - Loads the value at address 0.
+        ;; - If it is 0 (unlocked), set it to 1 (locked).
+        ;; - Return the originally loaded value.
+        (i32.atomic.rmw.cmpxchg
+          (i32.const 0)          ;; lock address
+          (i32.const 0)          ;; expected value (0 => unlocked)
+          (i32.const 1))         ;; replacement value (1 => locked)
+
+        ;; The top of the stack is the originally loaded value.
+        ;; If it is 0, this means we acquired the mutex and can exit
+        ;; the loop.
+        (i32.eqz)
+        (br_if $done)
+        (drop)
+        
+        ;; Wait for the other agent to finish with mutex.
+        (i32.wait
+          (i32.const 0)          ;; lock address
+          (i32.const 1)          ;; expected value ( 1=> locked)
+          (f64.const inf))       ;; infinite timeout
+        
+        ;; Try to acquire the lock again.
+        (br $retry)
+      )
+    )
+  )
+  
+  ;; Unlock a mutex at address 0.
+  (func (export "unlockMutex")
+    ;; Unlock the mutex.
+    (i32.atomic.store
+      (i32.const 0)              ;; lock address
+      (i32.const 0))             ;; 0 => unlocked
+ 
+    ;; Wake one agent that is waiting on this lock.
+    (wake
+      (i32.const 0)              ;; lock address
+      (i32.const 1))             ;; wake 1 waiter
+  )
+  
+  (func (export "tryLockMutex") ... )
+)
+```
+
+Here is an example of using this module in a JavaScript host.
+
+```JavaScript
+/// main.js ///
+let moduleBytes = ...;  // An ArrayBuffer containing the WebAssembly module above.
+let memory = new WebAssembly.Memory({initial: 1, maximum: 1, shared: true});
+let worker = new Worker('worker.js');
+
+// Send the shared memory to the worker. 
+worker.postMessage(memory);
+
+let imports = {env: {memory: memory}};
+let module = WebAssembly.instantiate(moduleBytes, imports).then(
+    ({instance}) => {
+        // Blocking on the main thread is not allowed, so we can't 
+        // call lockMutex.
+        if (instance.exports.tryLockMutex()) {
+            ...
+            instance.exports.unlockMutex();
+        }
+    });
+    
+
+/// worker.js ///
+let moduleBytes = ...;  // An ArrayBuffer containing the WebAssembly module above.
+
+// Listen for messages from the main thread.
+onmessage = function(e) {
+    let memory = e.data;
+    let imports = {env: {memory: memory}};
+    let module = WebAssembly.instantiate(moduleBytes, imports).then(
+        ({instance}) => {
+            // Blocking on a Worker thread is allowed.
+            instance.exports.lockMutex();
+            ...
+            instance.exports.unlockMutex();
+        });
+};
+```
+
 ## Agents and Agent Clusters
 
 An *agent* is the execution context for a WebAssembly module. For the web 
