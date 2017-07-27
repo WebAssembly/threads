@@ -555,8 +555,7 @@ instr ::= ... |
           inn.wait memarg |
           wake memarg |
 
-          inn.extend_s/i8 |
-          inn.extend_s/i16 |
+          inn.extend8_s | inn.extend16_s | i64.extend32_s |
 
           inn.atomic.load memarg | inn.atomic.store memarg |
           inn.atomic.load8_u memarg | inn.atomic.load16_u memarg | i64.atomic.load32_u memarg |
