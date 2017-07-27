@@ -186,7 +186,7 @@ For example:
   ...)
 
 WebAssembly.instantiate(dataModuleBytes, {}).then(
-    ({instance} => {
+    ({instance}) => {
         let imports = {env: {memory: instance.exports.memory}};
         WebAssembly.instantiate(mainModuleBytes, imports).then(...);
     });
