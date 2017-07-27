@@ -587,6 +587,45 @@ The integer result of predicates -- i.e., tests and relational operators -- is d
    \end{array}
 
 
+.. _op-extend8_s:
+
+:math:`\extend8s_{M,N}(i)`
+..........................
+
+* Return :math:`\extends_{8,n}(i)`.
+
+.. math::
+   \begin{array}{lll@{\qquad}l}
+   \extend8s_{N}(i) &=& \extends_{8,N}(i) \\
+   \end{array}
+
+
+.. _op-extend16_s:
+
+:math:`\extend16s_{M,N}(i)`
+...........................
+
+* Return :math:`\extends_{16,n}(i)`.
+
+.. math::
+   \begin{array}{lll@{\qquad}l}
+   \extend16s_{N}(i) &=& \extends_{16,N}(i) \\
+   \end{array}
+
+
+.. _op-extend32_s:
+
+:math:`\extend32s_{M,N}(i)`
+...........................
+
+* Return :math:`\extends_{32,n}(i)`.
+
+.. math::
+   \begin{array}{lll@{\qquad}l}
+   \extend32s_{N}(i) &=& \extends_{32,N}(i) \\
+   \end{array}
+
+
 Floating-Point Operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
