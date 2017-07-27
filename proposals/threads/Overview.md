@@ -350,15 +350,13 @@ woken by [`Atomics.wake`][].
 ### Wait
 
 The wait operator take three operands: an address operand, an expected value,
-and a relative timeout in milliseconds as an `f64`. The return value is `0`,
+and a relative timeout in nanoseconds as an `i64`. The return value is `0`,
 `1`, or `2`, returned as an `i32`.
 
 | `timeout` value | Behavior |
 | ---- | ---- |
-| `timeout` <= 0 | Expires immediately |
-| 0 < `timeout` < Positive infinity | Expires after `timeout` milliseconds |
-| Positive infinity | Never expires |
-| NaN | Never expires |
+| `timeout` < 0 | Never expires |
+| 0 <= `timeout` <= maximum signed i64 value | Expires after `timeout` nanoseconds |
 
 | Return value | Description |
 | ---- | ---- |
