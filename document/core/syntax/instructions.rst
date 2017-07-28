@@ -157,9 +157,7 @@ Occasionally, it is convenient to group operators together according to the foll
    \production{unary operator} & \unop &::=&
      \iunop ~|~
      \funop ~|~
-     \EXTEND\K{8\_s} ~|~
-     \EXTEND\K{16\_s} ~|~
-     \EXTEND\K{32\_s} \\
+     \EXTEND{N}\K{\_s} ~|~ \\
    \production{binary operator} & \binop &::=& \ibinop ~|~ \fbinop \\
    \production{test operator} & \testop &::=& \itestop \\
    \production{relational operator} & \relop &::=& \irelop ~|~ \frelop \\

@@ -710,6 +710,7 @@
 .. |iles| mathdef:: \xref{exec/numerics}{op-ile_s}{\F{ile\_s}}
 .. |igeu| mathdef:: \xref{exec/numerics}{op-ige_u}{\F{ige\_u}}
 .. |iges| mathdef:: \xref{exec/numerics}{op-ige_s}{\F{ige\_s}}
+.. |iextends| mathdef:: \xref{exec/numerics}{op-iextend_s}{\F{iextend{M}\_s}}
 
 .. |fadd| mathdef:: \xref{exec/numerics}{op-fadd}{\F{fadd}}
 .. |fsub| mathdef:: \xref{exec/numerics}{op-fsub}{\F{fsub}}
@@ -735,9 +736,6 @@
 .. |extend| mathdef:: \xref{exec/numerics}{op-extend_u}{\F{extend}}
 .. |extendu| mathdef:: \xref{exec/numerics}{op-extend_u}{\F{extend\_u}}
 .. |extends| mathdef:: \xref{exec/numerics}{op-extend_s}{\F{extend\_s}}
-.. |extend8s| mathdef:: \xref{exec/numerics}{op-extend8_s}{\F{extend8\_s}}
-.. |extend16s| mathdef:: \xref{exec/numerics}{op-extend16_s}{\F{extend16\_s}}
-.. |extend32s| mathdef:: \xref{exec/numerics}{op-extend32_s}{\F{extend32\_s}}
 .. |wrap| mathdef:: \xref{exec/numerics}{op-wrap}{\F{wrap}}
 .. |truncu| mathdef:: \xref{exec/numerics}{op-trunc_u}{\F{trunc\_u}}
 .. |truncs| mathdef:: \xref{exec/numerics}{op-trunc_s}{\F{trunc\_s}}
