@@ -215,6 +215,92 @@ Lexically, an |Toffset| or |Talign| phrase is considered a single :ref:`keyword 
    \end{array}
 
 
+.. index:: atomic memory instruction
+   pair: text format; instruction
+.. _text-instr-atomic-memory:
+
+Atomic Memory Instructions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. _text-atomic-load:
+.. _text-atomic-loadn:
+.. _text-atomic-store:
+.. _text-atomic-storen:
+.. _text-atomic-rmw:
+.. _text-atomic-rmwn:
+
+The offset immediate to atomic memory instructions is optional, and defaults to
+:math:`\T{0}`.
+
+.. math::
+   \begin{array}{llclll}
+   \production{instruction} & \Tplaininstr_I &::=& \dots \\ &&|&
+     \text{i32.atomic{.}load}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICLOAD~m \\ &&|&
+     \text{i64.atomic{.}load}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICLOAD~m \\ &&|&
+     \text{i32.atomic{.}load8\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICLOAD\K{8\_u}~m \\ &&|&
+     \text{i32.atomic{.}load16\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICLOAD\K{16\_u}~m \\ &&|&
+     \text{i64.atomic{.}load8\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICLOAD\K{8\_u}~m \\ &&|&
+     \text{i64.atomic{.}load16\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICLOAD\K{16\_u}~m \\ &&|&
+     \text{i64.atomic{.}load32\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICLOAD\K{32\_u}~m \\ &&|&
+     \text{i32.atomic{.}store}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICSTORE~m \\ &&|&
+     \text{i64.atomic{.}store}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICSTORE~m \\ &&|&
+     \text{i32.atomic{.}store8}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICSTORE\K{8}~m \\ &&|&
+     \text{i32.atomic{.}store16}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICSTORE\K{16}~m \\ &&|&
+     \text{i64.atomic{.}store8}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICSTORE\K{8}~m \\ &&|&
+     \text{i64.atomic{.}store16}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICSTORE\K{16}~m \\ &&|&
+     \text{i64.atomic{.}store32}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICSTORE\K{32}~m \\ &&|&
+     \text{i32.atomic{.}rmw{.}add}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICADD~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}add}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICADD~m \\ &&|&
+     \text{i32.atomic{.}rmw8\_u{.}add}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICADD~m \\ &&|&
+     \text{i32.atomic{.}rmw16\_u{.}add}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICADD~m \\ &&|&
+     \text{i64.atomic{.}rmw8\_u{.}add}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICADD~m \\ &&|&
+     \text{i64.atomic{.}rmw16\_u{.}add}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICADD~m \\ &&|&
+     \text{i64.atomic{.}rmw32\_u{.}add}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICADD~m \\ &&|&
+     \text{i32.atomic{.}rmw{.}sub}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICSUB~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}sub}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICSUB~m \\ &&|&
+     \text{i32.atomic{.}rmw8\_u{.}sub}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICSUB~m \\ &&|&
+     \text{i32.atomic{.}rmw16\_u{.}sub}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICSUB~m \\ &&|&
+     \text{i64.atomic{.}rmw8\_u{.}sub}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICSUB~m \\ &&|&
+     \text{i64.atomic{.}rmw16\_u{.}sub}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICSUB~m \\ &&|&
+     \text{i64.atomic{.}rmw32\_u{.}sub}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICSUB~m \\ &&|&
+     \text{i32.atomic{.}rmw{.}and}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICAND~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}and}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICAND~m \\ &&|&
+     \text{i32.atomic{.}rmw8\_u{.}and}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICAND~m \\ &&|&
+     \text{i32.atomic{.}rmw16\_u{.}and}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICAND~m \\ &&|&
+     \text{i64.atomic{.}rmw8\_u{.}and}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICAND~m \\ &&|&
+     \text{i64.atomic{.}rmw16\_u{.}and}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICAND~m \\ &&|&
+     \text{i64.atomic{.}rmw32\_u{.}and}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICAND~m \\ &&|&
+     \text{i32.atomic{.}rmw{.}or}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICOR~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}or}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICOR~m \\ &&|&
+     \text{i32.atomic{.}rmw8\_u{.}or}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICOR~m \\ &&|&
+     \text{i32.atomic{.}rmw16\_u{.}or}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICOR~m \\ &&|&
+     \text{i64.atomic{.}rmw8\_u{.}or}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICOR~m \\ &&|&
+     \text{i64.atomic{.}rmw16\_u{.}or}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICOR~m \\ &&|&
+     \text{i64.atomic{.}rmw32\_u{.}or}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICOR~m \\ &&|&
+     \text{i32.atomic{.}rmw{.}xor}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICXOR~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}xor}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICXOR~m \\ &&|&
+     \text{i32.atomic{.}rmw8\_u{.}xor}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICXOR~m \\ &&|&
+     \text{i32.atomic{.}rmw16\_u{.}xor}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICXOR~m \\ &&|&
+     \text{i64.atomic{.}rmw8\_u{.}xor}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICXOR~m \\ &&|&
+     \text{i64.atomic{.}rmw16\_u{.}xor}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICXOR~m \\ &&|&
+     \text{i64.atomic{.}rmw32\_u{.}xor}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICXOR~m \\ &&|&
+     \text{i32.atomic{.}rmw{.}xchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICXCHG~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}xchg}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICXCHG~m \\ &&|&
+     \text{i32.atomic{.}rmw8\_u{.}xchg}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICXCHG~m \\ &&|&
+     \text{i32.atomic{.}rmw16\_u{.}xchg}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICXCHG~m \\ &&|&
+     \text{i64.atomic{.}rmw8\_u{.}xchg}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICXCHG~m \\ &&|&
+     \text{i64.atomic{.}rmw16\_u{.}xchg}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICXCHG~m \\ &&|&
+     \text{i64.atomic{.}rmw32\_u{.}xchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICXCHG~m \\ &&|&
+     \text{i32.atomic{.}rmw{.}cmpxchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICCMPXCHG~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}cmpxchg}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICCMPXCHG~m \\ &&|&
+     \text{i32.atomic{.}rmw8\_u{.}cmpxchg}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICCMPXCHG~m \\ &&|&
+     \text{i32.atomic{.}rmw16\_u{.}cmpxchg}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICCMPXCHG~m \\ &&|&
+     \text{i64.atomic{.}rmw8\_u{.}cmpxchg}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICCMPXCHG~m \\ &&|&
+     \text{i64.atomic{.}rmw16\_u{.}cmpxchg}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICCMPXCHG~m \\ &&|&
+     \text{i64.atomic{.}rmw32\_u{.}cmpxchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICCMPXCHG~m \\
+   \end{array}
+
+
 .. index:: numeric instruction
    pair: text format; instruction
 .. _text-instr-numeric:

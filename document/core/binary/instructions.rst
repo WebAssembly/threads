@@ -160,6 +160,132 @@ Each variant of :ref:`memory instruction <syntax-instr-memory>` is encoded with 
    In future versions of WebAssembly, the additional zero bytes occurring in the encoding of the |CURRENTMEMORY| and |GROWMEMORY| instructions may be used to index additional memories.
 
 
+.. index:: atomic memory instruction
+   pair: binary format; instruction
+.. _binary-instr-atomic-memory:
+
+Atomic Memory Instructions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is encoded with a different byte code. Loads, stores and RMW instructions are followed by the encoding of their |memarg| immediate.
+
+.. _binary-atomic-load:
+.. _binary-atomic-loadn:
+.. _binary-atomic-store:
+.. _binary-atomic-storen:
+.. _binary-atomic-rmw:
+.. _binary-atomic-rmwn:
+
+.. math::
+   \begin{array}{llclll}
+   \production{instruction} & \Binstr &::=& \dots \\ &&|&
+     \hex{FE}~\hex{10}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICLOAD~m \\ &&|&
+     \hex{FE}~\hex{11}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICLOAD~m \\ &&|&
+     \hex{FE}~\hex{12}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICLOAD\K{8\_u}~m \\ &&|&
+     \hex{FE}~\hex{13}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICLOAD\K{16\_u}~m \\ &&|&
+     \hex{FE}~\hex{14}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICLOAD\K{8\_u}~m \\ &&|&
+     \hex{FE}~\hex{15}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICLOAD\K{16\_u}~m \\ &&|&
+     \hex{FE}~\hex{16}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICLOAD\K{32\_u}~m \\ &&|&
+     \hex{FE}~\hex{17}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICSTORE~m \\ &&|&
+     \hex{FE}~\hex{18}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICSTORE~m \\ &&|&
+     \hex{FE}~\hex{19}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICSTORE\K{8}~m \\ &&|&
+     \hex{FE}~\hex{1A}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICSTORE\K{16}~m \\ &&|&
+     \hex{FE}~\hex{1B}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICSTORE\K{8}~m \\ &&|&
+     \hex{FE}~\hex{1C}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICSTORE\K{16}~m \\ &&|&
+     \hex{FE}~\hex{1D}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICSTORE\K{32}~m \\
+   \end{array}
+
+
+.. math::
+   \begin{array}{llclll}
+   \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
+     \hex{FE}~\hex{1E}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICADD~m \\ &&|&
+     \hex{FE}~\hex{1F}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICADD~m \\ &&|&
+     \hex{FE}~\hex{20}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICADD~m \\ &&|&
+     \hex{FE}~\hex{21}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICADD~m \\ &&|&
+     \hex{FE}~\hex{22}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICADD~m \\ &&|&
+     \hex{FE}~\hex{23}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICADD~m \\ &&|&
+     \hex{FE}~\hex{24}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICADD~m \\
+   \end{array}
+
+
+.. math::
+   \begin{array}{llclll}
+   \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
+     \hex{FE}~\hex{25}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICSUB~m \\ &&|&
+     \hex{FE}~\hex{26}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICSUB~m \\ &&|&
+     \hex{FE}~\hex{27}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICSUB~m \\ &&|&
+     \hex{FE}~\hex{28}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICSUB~m \\ &&|&
+     \hex{FE}~\hex{29}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICSUB~m \\ &&|&
+     \hex{FE}~\hex{2A}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICSUB~m \\ &&|&
+     \hex{FE}~\hex{2B}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICSUB~m \\
+   \end{array}
+
+
+.. math::
+   \begin{array}{llclll}
+   \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
+     \hex{FE}~\hex{2C}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICAND~m \\ &&|&
+     \hex{FE}~\hex{2D}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICAND~m \\ &&|&
+     \hex{FE}~\hex{2E}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICAND~m \\ &&|&
+     \hex{FE}~\hex{2F}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICAND~m \\ &&|&
+     \hex{FE}~\hex{30}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICAND~m \\ &&|&
+     \hex{FE}~\hex{31}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICAND~m \\ &&|&
+     \hex{FE}~\hex{32}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICAND~m \\
+   \end{array}
+
+
+.. math::
+   \begin{array}{llclll}
+   \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
+     \hex{FE}~\hex{33}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICOR~m \\ &&|&
+     \hex{FE}~\hex{34}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICOR~m \\ &&|&
+     \hex{FE}~\hex{35}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICOR~m \\ &&|&
+     \hex{FE}~\hex{36}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICOR~m \\ &&|&
+     \hex{FE}~\hex{37}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICOR~m \\ &&|&
+     \hex{FE}~\hex{38}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICOR~m \\ &&|&
+     \hex{FE}~\hex{39}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICOR~m \\
+   \end{array}
+
+
+.. math::
+   \begin{array}{llclll}
+   \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
+     \hex{FE}~\hex{3A}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICXOR~m \\ &&|&
+     \hex{FE}~\hex{3B}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICXOR~m \\ &&|&
+     \hex{FE}~\hex{3C}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICXOR~m \\ &&|&
+     \hex{FE}~\hex{3D}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICXOR~m \\ &&|&
+     \hex{FE}~\hex{3E}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICXOR~m \\ &&|&
+     \hex{FE}~\hex{3F}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICXOR~m \\ &&|&
+     \hex{FE}~\hex{40}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICXOR~m \\
+   \end{array}
+
+
+.. math::
+   \begin{array}{llclll}
+   \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
+     \hex{FE}~\hex{41}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICXCHG~m \\ &&|&
+     \hex{FE}~\hex{42}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICXCHG~m \\ &&|&
+     \hex{FE}~\hex{43}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICXCHG~m \\ &&|&
+     \hex{FE}~\hex{44}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICXCHG~m \\ &&|&
+     \hex{FE}~\hex{45}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICXCHG~m \\ &&|&
+     \hex{FE}~\hex{46}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICXCHG~m \\ &&|&
+     \hex{FE}~\hex{47}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICXCHG~m \\
+   \end{array}
+
+
+.. math::
+   \begin{array}{llclll}
+   \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
+     \hex{FE}~\hex{48}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICCMPXCHG~m \\ &&|&
+     \hex{FE}~\hex{49}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICCMPXCHG~m \\ &&|&
+     \hex{FE}~\hex{4A}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICCMPXCHG~m \\ &&|&
+     \hex{FE}~\hex{4B}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICCMPXCHG~m \\ &&|&
+     \hex{FE}~\hex{4C}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICCMPXCHG~m \\ &&|&
+     \hex{FE}~\hex{4D}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICCMPXCHG~m \\ &&|&
+     \hex{FE}~\hex{4E}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICCMPXCHG~m \\
+   \end{array}
+
 .. index:: numeric instruction
    pair: binary format; instruction
 .. _binary-instr-numeric:

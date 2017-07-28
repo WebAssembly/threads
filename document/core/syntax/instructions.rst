@@ -271,6 +271,58 @@ Both instructions operate in units of :ref:`page size <page-size>`.
    all memory instructions implicitly operate on :ref:`memory <syntax-mem>` :ref:`index <syntax-memidx>` :math:`0`.
    This restriction may be lifted in future versions.
 
+.. index:: ! atomic memory instruction, ! rmw
+   pair: abstract syntax; instruction
+.. _syntax-instr-atomicop:
+.. _syntax-instr-atomic-memory:
+
+Atomic Memory Instructions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Instructions in this group are concerned with accessing :ref:`linear memory <syntax-mem>` atomically.
+
+.. math::
+   \begin{array}{llll}
+   \production{atomic operator} & \atomicop &::=&
+     \ATOMICADD ~|~
+     \ATOMICSUB ~|~
+     \ATOMICAND ~|~
+     \ATOMICOR ~|~
+     \ATOMICXOR ~|~
+     \ATOMICXCHG ~|~
+     \ATOMICCMPXCHG \\
+   \production{instruction} & \instr &::=&
+     \dots ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\ATOMICLOAD~\memarg ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\ATOMICSTORE~\memarg ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\ATOMICLOAD\K{8\_u}~\memarg ~|~
+     \K{i}\X{nn}\K{.}\ATOMICLOAD\K{16\_u}~\memarg ~|~
+     \K{i64.}\ATOMICLOAD\K{32\_u}~\memarg ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\ATOMICSTORE\K{8}~\memarg ~|~
+     \K{i}\X{nn}\K{.}\ATOMICSTORE\K{16}~\memarg ~|~
+     \K{i64.}\ATOMICSTORE\K{32}~\memarg ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{.}\atomicop~\memarg ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{8\_u.}\atomicop~\memarg ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{16\_u.}\atomicop~\memarg ~|~ \\&&&
+     \K{i64.}\ATOMICRMW\K{32\_u.}\atomicop~\memarg \\&&&
+   \end{array}
+
+Memory is accessed atomically using the |ATOMICLOAD|, |ATOMICSTORE|, and
+|ATOMICRMW| instructions. All instructions take a *memory immediate*
+|memarg|, just like their non-atomic equivalents. Unlike non-atomic memory
+access instructions, only integer :ref:`value types <syntax-valtype>` can be
+used. Also unlike non-atomic memory access instructions, there are no
+sign extension modes; atomic memory accesses are always zero-extending.
+
+The |ATOMICRMW| instructions are `read-modify-write <https://en.wikipedia.org/wiki/Read-modify-write>`_
+instructions. They each have an :ref:`atomicop <syntax-instr-atomicop>`, which
+specifies how memory will be modified. Each instruction returns the value read
+from memory before modification. The |ATOMICXCHG| :ref:`atomicop <syntax-instr-atomicop>`
+doesn't use the read value, but instead stores its argument unmodified. The
+|ATOMICCMPXCHG| :ref:`atomicop <syntax-instr-atomicop>` is similar, but only
+performs this action conditionally, if the read value is equal to a provided
+comparison argument. All other :ref:`atomicops <syntax-instr-atomicop>` have
+behavior of the :ref:`ibinop <syntax-ibinop>` of the same name.
 
 .. index:: ! control instruction, ! structured control, ! label, ! block, ! branch, ! unwinding, result type, label index, function index, type index, vector, trap, function, table, function type
    pair: abstract syntax; instruction
