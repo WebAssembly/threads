@@ -286,6 +286,7 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
      \hex{FE}~\hex{4E}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICCMPXCHG~m \\
    \end{array}
 
+
 .. index:: numeric instruction
    pair: binary format; instruction
 .. _binary-instr-numeric:

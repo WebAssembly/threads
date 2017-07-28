@@ -424,6 +424,7 @@ Memory Instructions
      C \vdash \GROWMEMORY : [\I32] \to [\I32]
    }
 
+
 .. index:: atomic memory instruction
    pair: validation; instruction
    single: abstract syntax; instruction

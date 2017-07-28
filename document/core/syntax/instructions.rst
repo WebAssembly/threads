@@ -324,6 +324,7 @@ performs this action conditionally, if the read value is equal to a provided
 comparison argument. All other :ref:`atomicops <syntax-instr-atomicop>` have
 behavior of the :ref:`ibinop <syntax-ibinop>` of the same name.
 
+
 .. index:: ! control instruction, ! structured control, ! label, ! block, ! branch, ! unwinding, result type, label index, function index, type index, vector, trap, function, table, function type
    pair: abstract syntax; instruction
 .. _syntax-nop:
