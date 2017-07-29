@@ -623,6 +623,19 @@ The integer result of predicates -- i.e., :ref:`tests <syntax-testop>` and :ref:
    \end{array}
 
 
+.. _op-ixchg:
+
+:math:`\ixchg_N(i_1, i_2)`
+..........................
+
+* Return :math:`i_2` modulo :math:`2^N`.
+
+.. math::
+   \begin{array}{@{}lcll}
+   \ixchg_N(i_1, i_2) &=& i_2 \mod 2^N
+   \end{array}
+
+
 .. index:: floating-point, IEEE 754
 
 Floating-Point Operations

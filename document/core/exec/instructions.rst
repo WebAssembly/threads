@@ -614,6 +614,385 @@ Memory Instructions
    In practice, the choice depends on the resources available to the :ref:`embedder <embedder>`.
 
 
+.. index:: atomic memory instruction
+   pair: execution; instruction
+   single: abstract syntax; instruction
+.. _exec-instr-atomic-memory:
+
+Atomic Memory Instructions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. _exec-atomic-load:
+.. _exec-atomic-loadn:
+
+:math:`t\K{.}\ATOMICLOAD~\memarg` and :math:`t\K{.}\ATOMICLOAD{N}\K{\_u}~\memarg`
+.................................................................................
+
+1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+2. Assert: due to :ref:`validation <valid-atomic-loadn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+3. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+4. Assert: due to :ref:`validation <valid-atomic-loadn>`, :math:`S.\SMEMS[a]` exists.
+
+5. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
+
+6. Assert: due to :ref:`validation <valid-atomic-loadn>`, a value :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+
+7. Pop the value :math:`\I32.\CONST~i` from the stack.
+
+8. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+
+9. If :math:`N` is not part of the instruction, then:
+
+   a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
+
+10. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
+
+    a. Trap.
+
+11. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
+
+    a. Trap.
+
+12. Let :math:`b^\ast` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea}:N/8]`.
+
+13. Let :math:`c` be the constant for which :math:`\bytes_t(c) = b^\ast`.
+
+14. Push the value :math:`t.\CONST~c` to the stack.
+
+.. math::
+   \begin{array}{l}
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\ATOMICLOAD~\memarg) &\stepto& S; F; (t.\CONST~c)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
+     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
+     \wedge & \X{ea} \mod |t|/8 = 0 \\
+     \wedge & \bytes_t(c) = S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice |t|/8])
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\ATOMICLOAD{N}\K{\_u}~\memarg) &\stepto& S; F; (t.\CONST~c))
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
+     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
+     \wedge & \X{ea} \mod N/8 = 0 \\
+     \wedge & \bytes_{\iN}(c) = S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice N/8])
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~k)~(t.\ATOMICLOAD({N}\K{\_u})^?~\memarg) &\stepto& S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     (\otherwise) \\
+   \end{array}
+
+
+.. _exec-atomic-store:
+.. _exec-atomic-storen:
+
+:math:`t\K{.}\ATOMICSTORE~\memarg` and :math:`t\K{.}\ATOMICSTORE{N}~\memarg`
+............................................................................
+
+1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+2. Assert: due to :ref:`validation <valid-atomic-storen>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+3. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+4. Assert: due to :ref:`validation <valid-atomic-storen>`, :math:`S.\SMEMS[a]` exists.
+
+5. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
+
+6. Assert: due to :ref:`validation <valid-atomic-storen>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
+
+7. Pop the value :math:`t.\CONST~c` from the stack.
+
+8. Assert: due to :ref:`validation <valid-atomic-storen>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+
+9. Pop the value :math:`\I32.\CONST~i` from the stack.
+
+10. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+
+11. If :math:`N` is not part of the instruction, then:
+
+    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
+
+12. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
+
+    a. Trap.
+
+13. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
+
+    a. Trap.
+
+14. If :math:`N` is part of the instruction, then:
+
+    a. Let :math:`n` be the result of computing :math:`\wrap_{|t|,N}(c)`.
+
+    b. Let :math:`b^\ast` be the byte sequence :math:`\bytes_{\iN}(n)`.
+
+15. Else:
+
+    a. Let :math:`b^\ast` be the byte sequence :math:`\bytes_t(c)`.
+
+16. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast`.
+
+.. math::
+   ~\\[-1ex]
+   \begin{array}{l}
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\ATOMICSTORE~\memarg) &\stepto& S'; F; \epsilon
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
+     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
+     \wedge & \X{ea} \mod |t|/8 = 0 \\
+     \wedge & S' = S \with \MIMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice |t|/8] = \bytes_t(c)
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\ATOMICSTORE{N}~\memarg) &\stepto& S'; F; \epsilon
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
+     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
+     \wedge & \X{ea} \mod N/8 = 0 \\
+     \wedge & S' = S \with \SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice N/8] = \bytes_{\iN}(\wrap_{|t|,N}(c))
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMICSTORE{N}^?~\memarg) &\stepto& S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     (\otherwise) \\
+   \end{array}
+
+
+.. _exec-atomic-rmw:
+.. _exec-atomic-rmwn:
+
+:math:`t\K{.}\ATOMICRMW{.}\atomicop~\memarg` and :math:`t\K{.}\ATOMICRMW{N}\K{\_u.}\atomicop~\memarg`
+.....................................................................................................
+
+1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+2. Assert: due to :ref:`validation <valid-atomic-rmwn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+3. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+4. Assert: due to :ref:`validation <valid-atomic-rmwn>`, :math:`S.\SMEMS[a]` exists.
+
+5. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
+
+6. Assert: due to :ref:`validation <valid-atomic-rmwn>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
+
+7. Pop the value :math:`t.\CONST~c2` from the stack.
+
+8. Assert: due to :ref:`validation <valid-atomic-rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+
+9. Pop the value :math:`\I32.\CONST~i` from the stack.
+
+10. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+
+11. If :math:`N` is not part of the instruction, then:
+
+    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
+
+12. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
+
+    a. Trap.
+
+13. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
+
+    a. Trap.
+
+14. Let :math:`b^\ast_r` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
+
+15. Let :math:`c1` be the integer for which :math:`bytes_{\iN}(m) = b^\ast_r`.
+
+16. Let :math:`m` be the result of computing :math:`\atomicop_t(c1, c2)`.
+
+17. If :math:`N` is part of the instruction, then:
+
+    a. Let :math:`n` be the result of computing :math:`\wrap_{|t|,N}(m)`.
+
+    b. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_{\iN}(n)`.
+
+18. Else:
+
+    a. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_t(m)`.
+
+19. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast_w`.
+
+20. Push the value :math:`t.\CONST~c1` to the stack.
+
+.. math::
+   \begin{array}{l}
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\ATOMICRMW.\atomicop~\memarg) &\stepto& S'; F; (t.\CONST~c1)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
+     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
+     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[a].\MIDATA| \\
+     \wedge & \X{ea} \mod |t|/8 = 0 \\
+     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
+     \wedge & m = \atomicop_t(c1, c2) \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:|t|/8] = \bytes_t(m)
+     \end{array} \\
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\ATOMICRMW{N}\K{\_u}.\atomicop~\memarg) &\stepto& S'; F; (t.\CONST~c1)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
+     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
+     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[a].\MIDATA| \\
+     \wedge & \X{ea} \mod N/8 = 0 \\
+     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
+     \wedge & m = \atomicop_t(c1, c2) \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:N/8] = \bytes_{\iN}(\wrap_{|t|,N}(m))
+     \end{array} \\
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMICRMW({N}\K{\_u})^?.\atomicop~\memarg) &\stepto& S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     (\mbox{otherwise}) \\
+   \end{array}
+
+
+.. _exec-atomic-rmw-cmpxchg:
+.. _exec-atomic-rmwn-cmpxchg:
+
+:math:`t\K{.}\ATOMICRMW{.}\ATOMICCMPXCHG~\memarg` and :math:`t\K{.}\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg`
+...............................................................................................................
+
+1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+2. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+3. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+4. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, :math:`S.\SMEMS[a]` exists.
+
+5. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
+
+6. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
+
+7. Pop the value :math:`t.\CONST~c3` from the stack.
+
+8. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
+
+9. Pop the value :math:`t.\CONST~c2` from the stack.
+
+10. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+
+11. Pop the value :math:`\I32.\CONST~i` from the stack.
+
+12. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+
+13. If :math:`N` is not part of the instruction, then:
+
+    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
+
+14. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
+
+    a. Trap.
+
+15. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
+
+    a. Trap.
+
+16. Let :math:`b^\ast_r` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
+
+17. Let :math:`c1` be the integer for which :math:`bytes_{\iN}(m) = b^\ast_r`.
+
+18. If :math:`N` is part of the instruction, then:
+
+    a. Let :math:`n` be the result of computing :math:`\wrap_{|t|,N}(c3)`.
+
+    b. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_{\iN}(n)`.
+
+19. Else:
+
+    a. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_t(c3)`.
+
+20. If :math:`c1 = c2`, then:
+
+    a. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast_w`.
+
+21. Push the value :math:`t.\CONST~c1` to the stack.
+
+.. math::
+   \begin{array}{l}
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\CONST~c3)~(t.\ATOMICRMW.\ATOMICCMPXCHG~\memarg) &\stepto& S'; F; (t.\CONST~c1)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
+     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
+     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[a].\MIDATA| \\
+     \wedge & \X{ea} \mod |t|/8 = 0 \\
+     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
+     \wedge & c1 = c2 \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:|t|/8] = \bytes_t(c3)
+     \end{array} \\
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\CONST~c3)~(t.\ATOMICRMW.\ATOMICCMPXCHG~\memarg) &\stepto& S; F; (t.\CONST~c1)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
+     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
+     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[a].\MIDATA| \\
+     \wedge & \X{ea} \mod |t|/8 = 0 \\
+     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
+     \wedge & c1 \ne c2 \\
+     \end{array} \\
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\CONST~c3)~(t.\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg) &\stepto& S'; F; (t.\CONST~c1)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
+     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
+     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[a].\MIDATA| \\
+     \wedge & \X{ea} \mod N/8 = 0 \\
+     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
+     \wedge & c1 = c2 \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:N/8] = \bytes_{\iN}(\wrap_{|t|,N}(c3))
+     \end{array} \\
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\CONST~c3)~(t.\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg) &\stepto& S; F; (t.\CONST~c1)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
+     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
+     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[a].\MIDATA| \\
+     \wedge & \X{ea} \mod N/8 = 0 \\
+     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
+     \wedge & c1 \ne c2 \\
+     \end{array} \\
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\CONST~c3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATOMICCMPXCHG~\memarg) &\stepto& S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     (\mbox{otherwise}) \\
+   \end{array}
+
+
 .. index:: control instructions, structured control, label, block, branch, result type, label index, function index, type index, vector, address, table address, table instance, store, frame
    pair: execution; instruction
    single: abstract syntax; instruction
