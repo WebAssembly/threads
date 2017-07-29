@@ -36,6 +36,7 @@ extensions = [
   'sphinx.ext.ifconfig',
   'sphinx.ext.githubpages',
   'mathdef',
+  'pseudo-lexer'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -156,6 +157,7 @@ html_sidebars = {
     'searchbox.html',
   ]
 }
+
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
