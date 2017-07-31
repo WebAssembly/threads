@@ -198,9 +198,9 @@ Instruction                          Opcode            Type                     
 :math:`\I64.\REINTERPRET\K{/}\F64`   :math:`\hex{BD}`  :math:`[\F64] \to [\I64]`                   :ref:`validation <valid-cvtop>`           :ref:`execution <exec-cvtop>`, :ref:`operator <op-reinterpret>`
 :math:`\F32.\REINTERPRET\K{/}\I32`   :math:`\hex{BE}`  :math:`[\I32] \to [\F32]`                   :ref:`validation <valid-cvtop>`           :ref:`execution <exec-cvtop>`, :ref:`operator <op-reinterpret>`
 :math:`\F64.\REINTERPRET\K{/}\I64`   :math:`\hex{BF}`  :math:`[\I64] \to [\F64]`                   :ref:`validation <valid-cvtop>`           :ref:`execution <exec-cvtop>`, :ref:`operator <op-reinterpret>`
-:math:`\I32.\EXTEND\K{8\_s}`         :math:`\hex{C0}`  :math:`[\I32] \to [\I32]`                   :ref:`validation <valid-unop>`            :ref:`execution <exec-unop>`, :ref:`operator <op-iextend_s>`
-:math:`\I32.\EXTEND\K{16\_s}`        :math:`\hex{C1}`  :math:`[\I32] \to [\I32]`                   :ref:`validation <valid-unop>`            :ref:`execution <exec-unop>`, :ref:`operator <op-iextend_s>`
-:math:`\I64.\EXTEND\K{8\_s}`         :math:`\hex{C2}`  :math:`[\I64] \to [\I64]`                   :ref:`validation <valid-unop>`            :ref:`execution <exec-unop>`, :ref:`operator <op-iextend_s>`
-:math:`\I64.\EXTEND\K{16\_s}`        :math:`\hex{C3}`  :math:`[\I64] \to [\I64]`                   :ref:`validation <valid-unop>`            :ref:`execution <exec-unop>`, :ref:`operator <op-iextend_s>`
-:math:`\I64.\EXTEND\K{32\_s}`        :math:`\hex{C4}`  :math:`[\I64] \to [\I64]`                   :ref:`validation <valid-unop>`            :ref:`execution <exec-unop>`, :ref:`operator <op-iextend_s>`
+:math:`\I32.\EXTEND\K{8\_s}`         :math:`\hex{C0}`  :math:`[\I32] \to [\I32]`                   :ref:`validation <valid-unop>`            :ref:`execution <exec-unop>`, :ref:`operator <op-iextendn_s>`
+:math:`\I32.\EXTEND\K{16\_s}`        :math:`\hex{C1}`  :math:`[\I32] \to [\I32]`                   :ref:`validation <valid-unop>`            :ref:`execution <exec-unop>`, :ref:`operator <op-iextendn_s>`
+:math:`\I64.\EXTEND\K{8\_s}`         :math:`\hex{C2}`  :math:`[\I64] \to [\I64]`                   :ref:`validation <valid-unop>`            :ref:`execution <exec-unop>`, :ref:`operator <op-iextendn_s>`
+:math:`\I64.\EXTEND\K{16\_s}`        :math:`\hex{C3}`  :math:`[\I64] \to [\I64]`                   :ref:`validation <valid-unop>`            :ref:`execution <exec-unop>`, :ref:`operator <op-iextendn_s>`
+:math:`\I64.\EXTEND\K{32\_s}`        :math:`\hex{C4}`  :math:`[\I64] \to [\I64]`                   :ref:`validation <valid-unop>`            :ref:`execution <exec-unop>`, :ref:`operator <op-iextendn_s>`
 ===================================  ================  ==========================================  ========================================  ===============================================================
