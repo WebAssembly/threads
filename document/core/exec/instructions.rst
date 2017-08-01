@@ -795,7 +795,7 @@ Atomic Memory Instructions
 
 6. Assert: due to :ref:`validation <valid-atomic-rmwn>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
 
-7. Pop the value :math:`t.\CONST~c2` from the stack.
+7. Pop the value :math:`t.\CONST~c_2` from the stack.
 
 8. Assert: due to :ref:`validation <valid-atomic-rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
 
@@ -817,9 +817,9 @@ Atomic Memory Instructions
 
 14. Let :math:`b^\ast_r` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
 
-15. Let :math:`c1` be the integer for which :math:`bytes_{\iN}(m) = b^\ast_r`.
+15. Let :math:`c_1` be the integer for which :math:`bytes_{\iN}(m) = b^\ast_r`.
 
-16. Let :math:`m` be the result of computing :math:`\atomicop_t(c1, c2)`.
+16. Let :math:`m` be the result of computing :math:`\atomicop_t(c_1, c_2)`.
 
 17. If :math:`N` is part of the instruction, then:
 
@@ -833,12 +833,12 @@ Atomic Memory Instructions
 
 19. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast_w`.
 
-20. Push the value :math:`t.\CONST~c1` to the stack.
+20. Push the value :math:`t.\CONST~c_1` to the stack.
 
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\ATOMICRMW.\atomicop~\memarg) &\stepto& S'; F; (t.\CONST~c1)
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\ATOMICRMW.\atomicop~\memarg) &\stepto& S'; F; (t.\CONST~c_1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -846,12 +846,12 @@ Atomic Memory Instructions
      \wedge & F.\AMODULE.\MIMEMS[0] = a \\
      \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[a].\MIDATA| \\
      \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
-     \wedge & m = \atomicop_t(c1, c2) \\
+     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
+     \wedge & m = \atomicop_t(c_1, c_2) \\
      \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:|t|/8] = \bytes_t(m)
      \end{array} \\
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\ATOMICRMW{N}\K{\_u}.\atomicop~\memarg) &\stepto& S'; F; (t.\CONST~c1)
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\ATOMICRMW{N}\K{\_u}.\atomicop~\memarg) &\stepto& S'; F; (t.\CONST~c_1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -859,8 +859,8 @@ Atomic Memory Instructions
      \wedge & F.\AMODULE.\MIMEMS[0] = a \\
      \wedge & \X{ea} + N/8 \leq |S.\SMEMS[a].\MIDATA| \\
      \wedge & \X{ea} \mod N/8 = 0 \\
-     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
-     \wedge & m = \atomicop_t(c1, c2) \\
+     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
+     \wedge & m = \atomicop_t(c_1, c_2) \\
      \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:N/8] = \bytes_{\iN}(\wrap_{|t|,N}(m))
      \end{array} \\
    \begin{array}{lcl@{\qquad}l}
@@ -889,11 +889,11 @@ Atomic Memory Instructions
 
 6. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
 
-7. Pop the value :math:`t.\CONST~c3` from the stack.
+7. Pop the value :math:`t.\CONST~c_3` from the stack.
 
 8. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
 
-9. Pop the value :math:`t.\CONST~c2` from the stack.
+9. Pop the value :math:`t.\CONST~c_2` from the stack.
 
 10. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
 
@@ -915,28 +915,28 @@ Atomic Memory Instructions
 
 16. Let :math:`b^\ast_r` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
 
-17. Let :math:`c1` be the integer for which :math:`bytes_{\iN}(m) = b^\ast_r`.
+17. Let :math:`c_1` be the integer for which :math:`bytes_{\iN}(m) = b^\ast_r`.
 
 18. If :math:`N` is part of the instruction, then:
 
-    a. Let :math:`n` be the result of computing :math:`\wrap_{|t|,N}(c3)`.
+    a. Let :math:`n` be the result of computing :math:`\wrap_{|t|,N}(c_3)`.
 
     b. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_{\iN}(n)`.
 
 19. Else:
 
-    a. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_t(c3)`.
+    a. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_t(c_3)`.
 
-20. If :math:`c1 = c2`, then:
+20. If :math:`c_1 = c_2`, then:
 
     a. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast_w`.
 
-21. Push the value :math:`t.\CONST~c1` to the stack.
+21. Push the value :math:`t.\CONST~c_1` to the stack.
 
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\CONST~c3)~(t.\ATOMICRMW.\ATOMICCMPXCHG~\memarg) &\stepto& S'; F; (t.\CONST~c1)
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW.\ATOMICCMPXCHG~\memarg) &\stepto& S'; F; (t.\CONST~c_1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -944,12 +944,12 @@ Atomic Memory Instructions
      \wedge & F.\AMODULE.\MIMEMS[0] = a \\
      \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[a].\MIDATA| \\
      \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
-     \wedge & c1 = c2 \\
-     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:|t|/8] = \bytes_t(c3)
+     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
+     \wedge & c_1 = c_2 \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:|t|/8] = \bytes_t(c_3)
      \end{array} \\
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\CONST~c3)~(t.\ATOMICRMW.\ATOMICCMPXCHG~\memarg) &\stepto& S; F; (t.\CONST~c1)
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW.\ATOMICCMPXCHG~\memarg) &\stepto& S; F; (t.\CONST~c_1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -957,11 +957,11 @@ Atomic Memory Instructions
      \wedge & F.\AMODULE.\MIMEMS[0] = a \\
      \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[a].\MIDATA| \\
      \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
-     \wedge & c1 \ne c2 \\
+     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
+     \wedge & c_1 \ne c_2 \\
      \end{array} \\
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\CONST~c3)~(t.\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg) &\stepto& S'; F; (t.\CONST~c1)
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg) &\stepto& S'; F; (t.\CONST~c_1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -969,12 +969,12 @@ Atomic Memory Instructions
      \wedge & F.\AMODULE.\MIMEMS[0] = a \\
      \wedge & \X{ea} + N/8 \leq |S.\SMEMS[a].\MIDATA| \\
      \wedge & \X{ea} \mod N/8 = 0 \\
-     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
-     \wedge & c1 = c2 \\
-     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:N/8] = \bytes_{\iN}(\wrap_{|t|,N}(c3))
+     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
+     \wedge & c_1 = c_2 \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:N/8] = \bytes_{\iN}(\wrap_{|t|,N}(c_3))
      \end{array} \\
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c2)~(t.\CONST~c3)~(t.\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg) &\stepto& S; F; (t.\CONST~c1)
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg) &\stepto& S; F; (t.\CONST~c_1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -982,11 +982,11 @@ Atomic Memory Instructions
      \wedge & F.\AMODULE.\MIMEMS[0] = a \\
      \wedge & \X{ea} + N/8 \leq |S.\SMEMS[a].\MIDATA| \\
      \wedge & \X{ea} \mod N/8 = 0 \\
-     \wedge & \bytes_t(c1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
-     \wedge & c1 \ne c2 \\
+     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
+     \wedge & c_1 \ne c_2 \\
      \end{array} \\
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\CONST~c3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATOMICCMPXCHG~\memarg) &\stepto& S; F; \TRAP
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATOMICCMPXCHG~\memarg) &\stepto& S; F; \TRAP
    \end{array}
    \\ \qquad
      (\mbox{otherwise}) \\
