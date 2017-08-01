@@ -550,14 +550,24 @@ it holds that <span class="math">\(i_1 = i_2\cdot\href{../exec/numerics.html#op-
 \end{array}\]</div>
 </div>
 <div class="section" id="op-iextendn-s">
-<span id="id30"></span><h3><span class="math">\(\href{../exec/numerics.html#op-iextendn-s}{\mathrm{iextend}M\mathrm{\_s}}}_N(i)\)</span><a class="headerlink" href="#op-iextendn-s" title="Permalink to this headline">¶</a></h3>
+<span id="id30"></span><h3><span class="math">\(\href{../exec/numerics.html#op-iextendn-s}{\mathrm{iextend}M\mathrm{\_s}}_N(i)\)</span><a class="headerlink" href="#op-iextendn-s" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Return <span class="math">\(\href{../exec/numerics.html#op-extend-s}{\mathrm{extend\_s}}_{M,N}(i)\)</span>.</li>
 </ul>
 <div class="math">
 \[\begin{split}\begin{array}{lll&#64;{\qquad}l}
-\href{../exec/numerics.html#op-iextendn-s}{\mathrm{iextend}M\mathrm{\_s}}}_{N}(i) &amp;=&amp; \href{../exec/numerics.html#op-extend-s}{\mathrm{extend\_s}}_{M,N}(i) \\
+\href{../exec/numerics.html#op-iextendn-s}{\mathrm{iextend}M\mathrm{\_s}}_N(i) &amp;=&amp; \href{../exec/numerics.html#op-extend-s}{\mathrm{extend\_s}}_{M,N}(i) \\
 \end{array}\end{split}\]</div>
+</div>
+<div class="section" id="op-ixchg">
+<span id="id31"></span><h3><span class="math">\(\href{../exec/numerics.html#op-ixchg}{\mathrm{ixchg}}_N(i_1, i_2)\)</span><a class="headerlink" href="#op-ixchg" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Return <span class="math">\(i_2\)</span> modulo <span class="math">\(2^N\)</span>.</li>
+</ul>
+<div class="math">
+\[\begin{array}{&#64;{}lcll}
+\href{../exec/numerics.html#op-ixchg}{\mathrm{ixchg}}_N(i_1, i_2) &amp;=&amp; i_2 \mathbin{\mathrm{mod}} 2^N
+\end{array}\]</div>
 </div>
 </div>
 <div class="section" id="floating-point-operations">
@@ -652,7 +662,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fadd">
-<span id="id31"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fadd}{\mathrm{fadd}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fadd" title="Permalink to this headline">¶</a></h3>
+<span id="id32"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fadd}{\mathrm{fadd}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fadd" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z_1, z_2\}\)</span>.</li>
 <li>Else if both <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> are infinities of opposite signs, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z_1, z_2\}\)</span>.</li>
@@ -681,7 +691,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fsub">
-<span id="id32"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fsub}{\mathrm{fsub}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fsub" title="Permalink to this headline">¶</a></h3>
+<span id="id33"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fsub}{\mathrm{fsub}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fsub" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z_1, z_2\}\)</span>.</li>
 <li>Else if both <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> are infinities of equal signs, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z_1, z_2\}\)</span>.</li>
@@ -716,7 +726,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 </div>
 </div>
 <div class="section" id="op-fmul">
-<span id="id33"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fmul}{\mathrm{fmul}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fmul" title="Permalink to this headline">¶</a></h3>
+<span id="id34"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fmul}{\mathrm{fmul}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fmul" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z_1, z_2\}\)</span>.</li>
 <li>Else if one of <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> is a zero and the other an infinity, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z_1, z_2\}\)</span>.</li>
@@ -748,7 +758,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fdiv">
-<span id="id34"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fdiv}{\mathrm{fdiv}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fdiv" title="Permalink to this headline">¶</a></h3>
+<span id="id35"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fdiv}{\mathrm{fdiv}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fdiv" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z_1, z_2\}\)</span>.</li>
 <li>Else if both <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> are infinities, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z_1, z_2\}\)</span>.</li>
@@ -783,7 +793,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fmin">
-<span id="id35"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fmin}{\mathrm{fmin}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fmin" title="Permalink to this headline">¶</a></h3>
+<span id="id36"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fmin}{\mathrm{fmin}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fmin" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z_1, z_2\}\)</span>.</li>
 <li>Else if one of <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a negative infinity, then return negative infinity.</li>
@@ -805,7 +815,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fmax">
-<span id="id36"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fmax}{\mathrm{fmax}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fmax" title="Permalink to this headline">¶</a></h3>
+<span id="id37"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fmax}{\mathrm{fmax}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fmax" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z_1, z_2\}\)</span>.</li>
 <li>Else if one of <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a positive infinity, then return positive infinity.</li>
@@ -827,7 +837,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fcopysign">
-<span id="id37"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fcopysign}{\mathrm{fcopysign}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fcopysign" title="Permalink to this headline">¶</a></h3>
+<span id="id38"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fcopysign}{\mathrm{fcopysign}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fcopysign" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> have the same sign, then return <span class="math">\(z_1\)</span>.</li>
 <li>Else return <span class="math">\(z_1\)</span> with negated sign.</li>
@@ -839,7 +849,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fabs">
-<span id="id38"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fabs}{\mathrm{fabs}}_N(z)\)</span><a class="headerlink" href="#op-fabs" title="Permalink to this headline">¶</a></h3>
+<span id="id39"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fabs}{\mathrm{fabs}}_N(z)\)</span><a class="headerlink" href="#op-fabs" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a NaN, then return <span class="math">\(z\)</span> with positive sign.</li>
 <li>Else if <span class="math">\(z\)</span> is an infinity, then return positive infinity.</li>
@@ -856,7 +866,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fneg">
-<span id="id39"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fneg}{\mathrm{fneg}}_N(z)\)</span><a class="headerlink" href="#op-fneg" title="Permalink to this headline">¶</a></h3>
+<span id="id40"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fneg}{\mathrm{fneg}}_N(z)\)</span><a class="headerlink" href="#op-fneg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a NaN, then return <span class="math">\(z\)</span> with negated sign.</li>
 <li>Else if <span class="math">\(z\)</span> is an infinity, then return that infinity negated.</li>
@@ -872,7 +882,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fsqrt">
-<span id="id40"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fsqrt}{\mathrm{fsqrt}}_N(z)\)</span><a class="headerlink" href="#op-fsqrt" title="Permalink to this headline">¶</a></h3>
+<span id="id41"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fsqrt}{\mathrm{fsqrt}}_N(z)\)</span><a class="headerlink" href="#op-fsqrt" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z\}\)</span>.</li>
 <li>Else if <span class="math">\(z\)</span> has a negative sign, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z\}\)</span>.</li>
@@ -891,7 +901,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fceil">
-<span id="id41"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fceil}{\mathrm{fceil}}_N(z)\)</span><a class="headerlink" href="#op-fceil" title="Permalink to this headline">¶</a></h3>
+<span id="id42"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fceil}{\mathrm{fceil}}_N(z)\)</span><a class="headerlink" href="#op-fceil" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z\}\)</span>.</li>
 <li>Else if <span class="math">\(z\)</span> is an infinity, then return <span class="math">\(z\)</span>.</li>
@@ -909,7 +919,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-ffloor">
-<span id="id42"></span><h3><span class="math">\(\href{../exec/numerics.html#op-ffloor}{\mathrm{ffloor}}_N(z)\)</span><a class="headerlink" href="#op-ffloor" title="Permalink to this headline">¶</a></h3>
+<span id="id43"></span><h3><span class="math">\(\href{../exec/numerics.html#op-ffloor}{\mathrm{ffloor}}_N(z)\)</span><a class="headerlink" href="#op-ffloor" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z\}\)</span>.</li>
 <li>Else if <span class="math">\(z\)</span> is an infinity, then return <span class="math">\(z\)</span>.</li>
@@ -927,7 +937,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-ftrunc">
-<span id="id43"></span><h3><span class="math">\(\href{../exec/numerics.html#op-ftrunc}{\mathrm{ftrunc}}_N(z)\)</span><a class="headerlink" href="#op-ftrunc" title="Permalink to this headline">¶</a></h3>
+<span id="id44"></span><h3><span class="math">\(\href{../exec/numerics.html#op-ftrunc}{\mathrm{ftrunc}}_N(z)\)</span><a class="headerlink" href="#op-ftrunc" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z\}\)</span>.</li>
 <li>Else if <span class="math">\(z\)</span> is an infinity, then return <span class="math">\(z\)</span>.</li>
@@ -947,7 +957,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fnearest">
-<span id="id44"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fnearest}{\mathrm{fnearest}}_N(z)\)</span><a class="headerlink" href="#op-fnearest" title="Permalink to this headline">¶</a></h3>
+<span id="id45"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fnearest}{\mathrm{fnearest}}_N(z)\)</span><a class="headerlink" href="#op-fnearest" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{z\}\)</span>.</li>
 <li>Else if <span class="math">\(z\)</span> is an infinity, then return <span class="math">\(z\)</span>.</li>
@@ -968,7 +978,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-feq">
-<span id="id45"></span><h3><span class="math">\(\href{../exec/numerics.html#op-feq}{\mathrm{feq}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-feq" title="Permalink to this headline">¶</a></h3>
+<span id="id46"></span><h3><span class="math">\(\href{../exec/numerics.html#op-feq}{\mathrm{feq}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-feq" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return <span class="math">\(0\)</span>.</li>
 <li>Else if both <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> are zeroes, then return <span class="math">\(1\)</span>.</li>
@@ -984,7 +994,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fne">
-<span id="id46"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fne}{\mathrm{fne}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fne" title="Permalink to this headline">¶</a></h3>
+<span id="id47"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fne}{\mathrm{fne}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fne" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return <span class="math">\(0\)</span>.</li>
 <li>Else if both <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> are zeroes, then return <span class="math">\(0\)</span>.</li>
@@ -1000,7 +1010,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-flt">
-<span id="id47"></span><h3><span class="math">\(\href{../exec/numerics.html#op-flt}{\mathrm{flt}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-flt" title="Permalink to this headline">¶</a></h3>
+<span id="id48"></span><h3><span class="math">\(\href{../exec/numerics.html#op-flt}{\mathrm{flt}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-flt" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return <span class="math">\(0\)</span>.</li>
 <li>Else if <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> are the same value, then return <span class="math">\(0\)</span>.</li>
@@ -1026,7 +1036,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fgt">
-<span id="id48"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fgt}{\mathrm{fgt}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fgt" title="Permalink to this headline">¶</a></h3>
+<span id="id49"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fgt}{\mathrm{fgt}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fgt" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return <span class="math">\(0\)</span>.</li>
 <li>Else if <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> are the same value, then return <span class="math">\(0\)</span>.</li>
@@ -1052,7 +1062,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fle">
-<span id="id49"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fle}{\mathrm{fle}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fle" title="Permalink to this headline">¶</a></h3>
+<span id="id50"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fle}{\mathrm{fle}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fle" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return <span class="math">\(0\)</span>.</li>
 <li>Else if <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> are the same value, then return <span class="math">\(1\)</span>.</li>
@@ -1078,7 +1088,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-fge">
-<span id="id50"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fge}{\mathrm{fge}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fge" title="Permalink to this headline">¶</a></h3>
+<span id="id51"></span><h3><span class="math">\(\href{../exec/numerics.html#op-fge}{\mathrm{fge}}_N(z_1, z_2)\)</span><a class="headerlink" href="#op-fge" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If either <span class="math">\(z_1\)</span> or <span class="math">\(z_2\)</span> is a NaN, then return <span class="math">\(0\)</span>.</li>
 <li>Else if <span class="math">\(z_1\)</span> and <span class="math">\(z_2\)</span> are the same value, then return <span class="math">\(1\)</span>.</li>
@@ -1107,7 +1117,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 <div class="section" id="conversions">
 <h2>Conversions<a class="headerlink" href="#conversions" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="op-extend-u">
-<span id="id51"></span><h3><span class="math">\(\href{../exec/numerics.html#op-extend-u}{\mathrm{extend\_u}}_{M,N}(i)\)</span><a class="headerlink" href="#op-extend-u" title="Permalink to this headline">¶</a></h3>
+<span id="id52"></span><h3><span class="math">\(\href{../exec/numerics.html#op-extend-u}{\mathrm{extend\_u}}_{M,N}(i)\)</span><a class="headerlink" href="#op-extend-u" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Return <span class="math">\(i\)</span>.</li>
 </ul>
@@ -1121,7 +1131,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 </div>
 </div>
 <div class="section" id="op-extend-s">
-<span id="id52"></span><h3><span class="math">\(\href{../exec/numerics.html#op-extend-s}{\mathrm{extend\_s}}_{M,N}(i)\)</span><a class="headerlink" href="#op-extend-s" title="Permalink to this headline">¶</a></h3>
+<span id="id53"></span><h3><span class="math">\(\href{../exec/numerics.html#op-extend-s}{\mathrm{extend\_s}}_{M,N}(i)\)</span><a class="headerlink" href="#op-extend-s" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Let <span class="math">\(j\)</span> be the <a class="reference internal" href="#aux-signed"><span class="std std-ref">signed interpretation</span></a> of <span class="math">\(i\)</span> of size <span class="math">\(M\)</span>.</li>
 <li>Return the two’s complement of <span class="math">\(j\)</span> relative to size <span class="math">\(N\)</span>.</li>
@@ -1132,7 +1142,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-wrap">
-<span id="id53"></span><h3><span class="math">\(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{M,N}(i)\)</span><a class="headerlink" href="#op-wrap" title="Permalink to this headline">¶</a></h3>
+<span id="id54"></span><h3><span class="math">\(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{M,N}(i)\)</span><a class="headerlink" href="#op-wrap" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Return <span class="math">\(i\)</span> modulo <span class="math">\(N\)</span>.</li>
 </ul>
@@ -1142,7 +1152,7 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-trunc-u">
-<span id="id54"></span><h3><span class="math">\(\href{../exec/numerics.html#op-trunc-u}{\mathrm{trunc\_u}}_{M,N}(z)\)</span><a class="headerlink" href="#op-trunc-u" title="Permalink to this headline">¶</a></h3>
+<span id="id55"></span><h3><span class="math">\(\href{../exec/numerics.html#op-trunc-u}{\mathrm{trunc\_u}}_{M,N}(z)\)</span><a class="headerlink" href="#op-trunc-u" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a NaN, then the result is undefined.</li>
 <li>Else if <span class="math">\(z\)</span> is an infinity, then the result is undefined.</li>
@@ -1163,7 +1173,7 @@ It is not defined for NaNs, infinities, or values for which the result is out of
 </div>
 </div>
 <div class="section" id="op-trunc-s">
-<span id="id55"></span><h3><span class="math">\(\href{../exec/numerics.html#op-trunc-s}{\mathrm{trunc\_s}}_{M,N}(z)\)</span><a class="headerlink" href="#op-trunc-s" title="Permalink to this headline">¶</a></h3>
+<span id="id56"></span><h3><span class="math">\(\href{../exec/numerics.html#op-trunc-s}{\mathrm{trunc\_s}}_{M,N}(z)\)</span><a class="headerlink" href="#op-trunc-s" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a NaN, then the result is undefined.</li>
 <li>Else if <span class="math">\(z\)</span> is an infinity, then the result is undefined.</li>
@@ -1184,7 +1194,7 @@ It is not defined for NaNs, infinities, or values for which the result is out of
 </div>
 </div>
 <div class="section" id="op-promote">
-<span id="id56"></span><h3><span class="math">\(\href{../exec/numerics.html#op-promote}{\mathrm{promote}}_{M,N}(z)\)</span><a class="headerlink" href="#op-promote" title="Permalink to this headline">¶</a></h3>
+<span id="id57"></span><h3><span class="math">\(\href{../exec/numerics.html#op-promote}{\mathrm{promote}}_{M,N}(z)\)</span><a class="headerlink" href="#op-promote" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a <a class="reference internal" href="../syntax/values.html#canonical-nan"><span class="std std-ref">canonical NaN</span></a>, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{\}\)</span> (i.e., a canonical NaN of size <span class="math">\(N\)</span>).</li>
 <li>Else if <span class="math">\(z\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{\pm \href{../syntax/values.html#syntax-float}{\mathsf{nan}}(1)\}\)</span> (i.e., any NaN of size <span class="math">\(N\)</span>).</li>
@@ -1198,7 +1208,7 @@ It is not defined for NaNs, infinities, or values for which the result is out of
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-demote">
-<span id="id57"></span><h3><span class="math">\(\href{../exec/numerics.html#op-demote}{\mathrm{demote}}_{M,N}(z)\)</span><a class="headerlink" href="#op-demote" title="Permalink to this headline">¶</a></h3>
+<span id="id58"></span><h3><span class="math">\(\href{../exec/numerics.html#op-demote}{\mathrm{demote}}_{M,N}(z)\)</span><a class="headerlink" href="#op-demote" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>If <span class="math">\(z\)</span> is a <a class="reference internal" href="../syntax/values.html#canonical-nan"><span class="std std-ref">canonical NaN</span></a>, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{\}\)</span> (i.e., a canonical NaN of size <span class="math">\(N\)</span>).</li>
 <li>Else if <span class="math">\(z\)</span> is a NaN, then return an element of <span class="math">\(\href{../exec/numerics.html#aux-nans}{\mathrm{nans}}_N\{\pm \href{../syntax/values.html#syntax-float}{\mathsf{nan}}(1)\}\)</span> (i.e., any NaN of size <span class="math">\(N\)</span>).</li>
@@ -1216,7 +1226,7 @@ It is not defined for NaNs, infinities, or values for which the result is out of
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-convert-u">
-<span id="id58"></span><h3><span class="math">\(\href{../exec/numerics.html#op-convert-u}{\mathrm{convert\_u}}_{M,N}(i)\)</span><a class="headerlink" href="#op-convert-u" title="Permalink to this headline">¶</a></h3>
+<span id="id59"></span><h3><span class="math">\(\href{../exec/numerics.html#op-convert-u}{\mathrm{convert\_u}}_{M,N}(i)\)</span><a class="headerlink" href="#op-convert-u" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Return <span class="math">\(\href{../exec/numerics.html#aux-ieee}{\mathrm{float}}_N(i)\)</span>.</li>
 </ul>
@@ -1226,7 +1236,7 @@ It is not defined for NaNs, infinities, or values for which the result is out of
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-convert-s">
-<span id="id59"></span><h3><span class="math">\(\href{../exec/numerics.html#op-convert-s}{\mathrm{convert\_s}}_{M,N}(i)\)</span><a class="headerlink" href="#op-convert-s" title="Permalink to this headline">¶</a></h3>
+<span id="id60"></span><h3><span class="math">\(\href{../exec/numerics.html#op-convert-s}{\mathrm{convert\_s}}_{M,N}(i)\)</span><a class="headerlink" href="#op-convert-s" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Let <span class="math">\(j\)</span> be the <a class="reference internal" href="#aux-signed"><span class="std std-ref">signed interpretation</span></a> of <span class="math">\(i\)</span>.</li>
 <li>Return <span class="math">\(\href{../exec/numerics.html#aux-ieee}{\mathrm{float}}_N(j)\)</span>.</li>
@@ -1237,7 +1247,7 @@ It is not defined for NaNs, infinities, or values for which the result is out of
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="op-reinterpret">
-<span id="id60"></span><h3><span class="math">\(\href{../exec/numerics.html#op-reinterpret}{\mathrm{reinterpret}}_{t_1,t_2}(c)\)</span><a class="headerlink" href="#op-reinterpret" title="Permalink to this headline">¶</a></h3>
+<span id="id61"></span><h3><span class="math">\(\href{../exec/numerics.html#op-reinterpret}{\mathrm{reinterpret}}_{t_1,t_2}(c)\)</span><a class="headerlink" href="#op-reinterpret" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Let <span class="math">\(d^\ast\)</span> be the bit sequence <span class="math">\(\href{../exec/numerics.html#aux-bits}{\mathrm{bits}}_{t_1}(c)\)</span>.</li>
 <li>Return the constant <span class="math">\(c'\)</span> for which <span class="math">\(\href{../exec/numerics.html#aux-bits}{\mathrm{bits}}_{t_2}(c') = d^\ast\)</span>.</li>
