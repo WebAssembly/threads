@@ -839,6 +839,7 @@
 .. |igeu| mathdef:: \xref{exec/numerics}{op-ige_u}{\F{ige\_u}}
 .. |iges| mathdef:: \xref{exec/numerics}{op-ige_s}{\F{ige\_s}}
 .. |iextendns| mathdef:: \xref{exec/numerics}{op-iextendn_s}{\F{iextend}M\F{\_s}}
+.. |ixchg| mathdef:: \xref{exec/numerics}{op-ixchg}{\F{ixchg}}
 
 .. |fadd| mathdef:: \xref{exec/numerics}{op-fadd}{\F{fadd}}
 .. |fsub| mathdef:: \xref{exec/numerics}{op-fsub}{\F{fsub}}
