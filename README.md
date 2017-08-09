@@ -1,5 +1,16 @@
 [![Build Status](https://travis-ci.org/WebAssembly/spec.svg?branch=master)](https://travis-ci.org/WebAssembly/spec)
 
+# Threads Proposal for WebAssembly
+
+This repository is a clone of github.com/WebAssembly/spec/. It is meant for discussion, prototype specification and implementation of a proposal to threads support to WebAssembly.
+
+See the [overview](proposals/threads/Overview.md) for a summary of the proposal.
+
+A formatted version of the spec with proposed changes is available here:
+[webassembly.github.io/threads](https://webassembly.github.io/threads/).
+
+Original README from upstream repository follows...
+
 # spec
 
 This repository holds the sources for the WebAssembly draft specification
