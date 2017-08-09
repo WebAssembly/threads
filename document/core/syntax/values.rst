@@ -96,7 +96,7 @@ Every value has a *sign* and a *magnitude*.
 
 Magnitudes can either be expressed as *normal* numbers of the form :math:`m_0.m_1m_2\dots m_M \cdot2^e`, where :math:`e` is the exponent and :math:`m` is the *significand* whose most signifcant bit :math:`m_0` is :math:`1`,
 or as a *subnormal* number where the exponent is fixed to the smallest possible value and :math:`m_0` is :math:`0`; among the subnormals are positive and negative zero values.
-Since the significands are binary values, normals are represented in the form :math:`(1 + m\cdot 2^{-M})`, where :math:`M` is the bit width of :math:`m`; similarly for subnormals.
+Since the significands are binary values, normals are represented in the form :math:`(1 + m\cdot 2^{-M}) \cdot 2^e`, where :math:`M` is the bit width of :math:`m`; similarly for subnormals.
 
 Possible magnitudes also include the special values :math:`\infty` (infinity) and |NAN| (*NaN*, not a number).
 NaN values have a *payload* that describes the mantissa bits in the underlying :ref:`binary representation <aux-fbits>`.
@@ -137,6 +137,8 @@ A *canonical NaN* is a floating-point value :math:`\pm\NAN(\canon_N)` where :mat
 
 An *arithmetic NaN*  is a floating-point value :math:`\pm\NAN(n)` with :math:`n \geq \canon_N`, such that the most significant bit is :math:`1` while all others are arbitrary.
 
+.. note::
+   In the abstract syntax, subnormals are distinguished by the leading 0 of the significand. The exponent of subnormals has the same value as the smallest possible exponent of a normal number. Only in the :ref:`binary representation <binary-float>` the exponent of a subnormal is encoded differently than the exponent of any normal number.
 
 Conventions
 ...........
