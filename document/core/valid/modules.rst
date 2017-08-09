@@ -396,7 +396,6 @@ Imports :math:`\import` and import descriptions :math:`\importdesc` are classifi
 
 
 :math:`\IDMEM~\memtype`
-.......................
 
 * The memory type :math:`\memtype` must be :ref:`valid <valid-memtype>`.
 

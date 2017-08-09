@@ -90,13 +90,20 @@ Limits
 Memory Types
 ~~~~~~~~~~~~
 
-:ref:`Memory types <syntax-memtype>` are encoded with their :ref:`limits <binary-limits>`.
+:ref:`Memory types <syntax-memtype>` are encoded with their :ref:`limits <binary-limits>` that includes an extra value to specify whether the the memory is shared.
 
 .. math::
    \begin{array}{llclll@{\qquad\qquad}l}
    \production{memory type} & \Bmemtype &::=&
-     \X{lim}{:}\Blimits &\Rightarrow& \X{lim} \\
+     \hex{00}~~n{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~\epsilon \}~\MNOTSHARED \\ &&|&
+     \hex{01}~~n{:}\Bu32~~m{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~m \}~\MNOTSHARED \\ &&|&
+     \hex{03}~~n{:}\Bu32~~m{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~m \}~\MSHARED \\
    \end{array}
+
+.. note::
+    The value :math:`\hex{02}` is not currently allowed, as it represents
+    shared storage without a maximum size. In future versions of WebAssembly,
+    this may be allowed.
 
 
 .. index:: table type, element type, limits

@@ -105,11 +105,12 @@ Limits
 If no maximum is given, the respective storage can grow to any size.
 
 
-.. index:: ! memory type, limits, page size, memory
+.. index:: ! memory type, limits, page size, memory, share
    pair: abstract syntax; memory type
    pair: memory; type
    pair: memory; limits
 .. _syntax-memtype:
+.. _syntax-share:
 
 Memory Types
 ~~~~~~~~~~~~
@@ -119,11 +120,15 @@ Memory Types
 .. math::
    \begin{array}{llll}
    \production{memory type} & \memtype &::=&
-     \limits \\
+     \limits~\share \\
+   \production{share} & \share &::=&
+     \MSHARED ~|~
+     \MNOTSHARED \\
    \end{array}
 
 The limits constrain the minimum and optionally the maximum size of a memory.
 The limits are given in units of :ref:`page size <page-size>`.
+The memory type also determines whether this memory is shared.
 
 
 .. index:: ! table type, ! element type, limits, table, element

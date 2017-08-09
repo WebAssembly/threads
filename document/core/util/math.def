@@ -136,6 +136,8 @@
 .. |ETMEM| mathdef:: \xref{syntax/types}{syntax-externtype}{\K{mem}}
 .. |ETGLOBAL| mathdef:: \xref{syntax/types}{syntax-externtype}{\K{global}}
 
+.. |MSHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{shared}}
+.. |MNOTSHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{notshared}}
 
 .. Types, non-terminals
 
@@ -148,6 +150,7 @@
 .. |memtype| mathdef:: \xref{syntax/types}{syntax-memtype}{\X{memtype}}
 
 .. |limits| mathdef:: \xref{syntax/types}{syntax-limits}{\X{limits}}
+.. |share| mathdef:: \xref{syntax/types}{syntax-share}{\X{share}}
 .. |mut| mathdef:: \xref{syntax/types}{syntax-mut}{\X{mut}}
 
 .. |externtype| mathdef:: \xref{syntax/types}{syntax-externtype}{\X{externtype}}
@@ -750,6 +753,7 @@
 
 .. |MIDATA| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{data}}
 .. |MIMAX| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{max}}
+.. |MISHARE| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{share}}
 
 .. |GIVALUE| mathdef:: \xref{exec/runtime}{syntax-globalinst}{\K{value}}
 .. |GIMUT| mathdef:: \xref{exec/runtime}{syntax-globalinst}{\K{mut}}
