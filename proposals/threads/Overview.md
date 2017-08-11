@@ -43,7 +43,7 @@ memory location (address 0) to store the state of the lock. If its value is
         (i32.wait
           (i32.const 0)          ;; lock address
           (i32.const 1)          ;; expected value ( 1=> locked)
-          (f64.const inf))       ;; infinite timeout
+          (i64.const -1))        ;; infinite timeout
         
         ;; Try to acquire the lock again.
         (br $retry)
