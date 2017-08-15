@@ -199,6 +199,12 @@ let i64_reinterpret_f64 = Convert (I64 I64Op.ReinterpretFloat)
 let f32_reinterpret_i32 = Convert (F32 F32Op.ReinterpretInt)
 let f64_reinterpret_i64 = Convert (F64 F64Op.ReinterpretInt)
 
+let i32_extend8_s = Unary (I32 I32Op.Extend8S)
+let i32_extend16_s = Unary (I32 I32Op.Extend16S)
+let i64_extend8_s = Unary (I64 I64Op.Extend8S)
+let i64_extend16_s = Unary (I64 I64Op.Extend16S)
+let i64_extend32_s = Unary (I64 I64Op.Extend32S)
+
 let current_memory = CurrentMemory
 let grow_memory = GrowMemory
 
