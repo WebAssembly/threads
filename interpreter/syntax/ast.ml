@@ -23,7 +23,7 @@ open Types
 
 module IntOp =
 struct
-  type unop = Clz | Ctz | Popcnt
+  type unop = Clz | Ctz | Popcnt | Extend8S | Extend16S | Extend32S
   type binop = Add | Sub | Mul | DivS | DivU | RemS | RemU
              | And | Or | Xor | Shl | ShrS | ShrU | Rotl | Rotr
   type testop = Eqz
