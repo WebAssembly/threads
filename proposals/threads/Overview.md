@@ -46,7 +46,7 @@ mutex is unlocked. If its value is 1, the mutex is locked.
       (loop $retry
         ;; Try to lock the mutex. $tryLockMutex returns 1 if the mutex
         ;; was locked, and 0 otherwise.
-        (call $tryLockMutex)
+        (call $tryLockMutex (get_local $mutexAddr))
         (br_if $done)
         (drop)
         
