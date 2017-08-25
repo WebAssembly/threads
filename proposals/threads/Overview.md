@@ -10,39 +10,50 @@ deferred to the embedder.
 ## Example
 
 Here is an example of a naive mutex implemented in WebAssembly. It uses one 
-memory location (address 0) to store the state of the lock. If its value is
-0, the mutex is unlocked. If its value is 1, the mutex is locked.
+i32 in linear memory to store the state of the lock. If its value is 0, the
+mutex is unlocked. If its value is 1, the mutex is locked.
 
 ```
 (module
   ;; Import 1 page (64Kib) of shared memory. 
   (import "env" "memory" (memory 1 1 shared))
+ 
+  ;; Try to lock a mutex at the given address.
+  ;; Returns 1 if the mutex was successfully locked, and 0 otherwise.
+  (func $tryLockMutex (export "tryLockMutex")
+    (param $mutexAddr i32) (result i32)
+    ;; Attempt to grab the mutex. The cmpxchg operation atomically
+    ;; does the following:
+    ;; - Loads the value at address 0.
+    ;; - If it is 0 (unlocked), set it to 1 (locked).
+    ;; - Return the originally loaded value.
+    (i32.atomic.rmw.cmpxchg
+      (get_local $mutexAddr) ;; mutex address
+      (i32.const 0)          ;; expected value (0 => unlocked)
+      (i32.const 1))         ;; replacement value (1 => locked)
+      
+    ;; The top of the stack is the originally loaded value.
+    ;; If it is 0, this means we acquired the mutex. We want to
+    ;; return the inverse (1 means mutex acquired), so use i32.eqz
+    ;; as a logical not.
+    (i32.eqz)
+  )
   
-  ;; Lock a mutex at address 0. 0 => unlocked, 1 => locked.
+  ;; Lock a mutex at the given address, retrying until successful.
   (func (export "lockMutex")
+    (param $mutexAddr i32)
     (block $done
       (loop $retry
-        ;; Attempt to grab the mutex. The cmpxchg operation atomically
-        ;; does the following:
-        ;; - Loads the value at address 0.
-        ;; - If it is 0 (unlocked), set it to 1 (locked).
-        ;; - Return the originally loaded value.
-        (i32.atomic.rmw.cmpxchg
-          (i32.const 0)          ;; lock address
-          (i32.const 0)          ;; expected value (0 => unlocked)
-          (i32.const 1))         ;; replacement value (1 => locked)
-
-        ;; The top of the stack is the originally loaded value.
-        ;; If it is 0, this means we acquired the mutex and can exit
-        ;; the loop.
-        (i32.eqz)
+        ;; Try to lock the mutex. $tryLockMutex returns 1 if the mutex
+        ;; was locked, and 0 otherwise.
+        (call $tryLockMutex)
         (br_if $done)
         (drop)
         
         ;; Wait for the other agent to finish with mutex.
         (i32.wait
-          (i32.const 0)          ;; lock address
-          (i32.const 1)          ;; expected value ( 1=> locked)
+          (get_local $mutexAddr) ;; mutex address
+          (i32.const 1)          ;; expected value (1 => locked)
           (i64.const -1))        ;; infinite timeout
         
         ;; Try to acquire the lock again.
@@ -51,20 +62,19 @@ memory location (address 0) to store the state of the lock. If its value is
     )
   )
   
-  ;; Unlock a mutex at address 0.
+  ;; Unlock a mutex at the given address.
   (func (export "unlockMutex")
+    (param $mutexAddr i32)
     ;; Unlock the mutex.
     (i32.atomic.store
-      (i32.const 0)              ;; lock address
+      (get_local $mutexAddr)     ;; mutex address
       (i32.const 0))             ;; 0 => unlocked
  
     ;; Wake one agent that is waiting on this lock.
     (wake
-      (i32.const 0)              ;; lock address
+      (get_local $mutexAddr)     ;; mutex address
       (i32.const 1))             ;; wake 1 waiter
   )
-  
-  (func (export "tryLockMutex") ... )
 )
 ```
 
@@ -75,6 +85,7 @@ Here is an example of using this module in a JavaScript host.
 let moduleBytes = ...;  // An ArrayBuffer containing the WebAssembly module above.
 let memory = new WebAssembly.Memory({initial: 1, maximum: 1, shared: true});
 let worker = new Worker('worker.js');
+const mutexAddr = 0;
 
 // Send the shared memory to the worker. 
 worker.postMessage(memory);
@@ -84,15 +95,16 @@ let module = WebAssembly.instantiate(moduleBytes, imports).then(
     ({instance}) => {
         // Blocking on the main thread is not allowed, so we can't 
         // call lockMutex.
-        if (instance.exports.tryLockMutex()) {
+        if (instance.exports.tryLockMutex(mutexAddr)) {
             ...
-            instance.exports.unlockMutex();
+            instance.exports.unlockMutex(mutexAddr);
         }
     });
     
 
 /// worker.js ///
 let moduleBytes = ...;  // An ArrayBuffer containing the WebAssembly module above.
+const mutexAddr = 0;
 
 // Listen for messages from the main thread.
 onmessage = function(e) {
@@ -101,9 +113,9 @@ onmessage = function(e) {
     let module = WebAssembly.instantiate(moduleBytes, imports).then(
         ({instance}) => {
             // Blocking on a Worker thread is allowed.
-            instance.exports.lockMutex();
+            instance.exports.lockMutex(mutexAddr);
             ...
-            instance.exports.unlockMutex();
+            instance.exports.unlockMutex(mutexAddr);
         });
 };
 ```
