@@ -24,7 +24,7 @@ mutex is unlocked. If its value is 1, the mutex is locked.
     (param $mutexAddr i32) (result i32)
     ;; Attempt to grab the mutex. The cmpxchg operation atomically
     ;; does the following:
-    ;; - Loads the value at address 0.
+    ;; - Loads the value at $mutexAddr.
     ;; - If it is 0 (unlocked), set it to 1 (locked).
     ;; - Return the originally loaded value.
     (i32.atomic.rmw.cmpxchg
