@@ -123,7 +123,7 @@ Memory Types
      \limits~\share \\
    \production{share} & \share &::=&
      \MSHARED ~|~
-     \MNOTSHARED \\
+     \MUNSHARED \\
    \end{array}
 
 The limits constrain the minimum and optionally the maximum size of a memory.

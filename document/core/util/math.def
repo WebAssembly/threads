@@ -137,7 +137,7 @@
 .. |ETGLOBAL| mathdef:: \xref{syntax/types}{syntax-externtype}{\K{global}}
 
 .. |MSHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{shared}}
-.. |MNOTSHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{notshared}}
+.. |MUNSHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{unshared}}
 
 .. Types, non-terminals
 

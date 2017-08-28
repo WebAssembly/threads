@@ -89,7 +89,7 @@ Memory Types
 ~~~~~~~~~~~~
 
 :math:`\limits~\share`
-...............
+......................
 
 * The limits :math:`\limits` must be :ref:`valid <valid-limits>`.
 
