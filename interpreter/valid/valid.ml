@@ -140,7 +140,7 @@ let type_cvtop at = function
 
 let check_unop unop at =
   match unop with
-  | Values.I32 I32Op.Extend32S -> error at "invalid unary op"
+  | Values.I32 I32Op.Extend32S -> error at "invalid unary operator"
   | _ -> ()
 
 let check_memop (c : context) (memop : 'a memop) get_sz at =
