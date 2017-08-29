@@ -78,8 +78,10 @@ Limits
 .. math::
    \begin{array}{llclll}
    \production{limits} & \Blimits &::=&
-     \hex{00}~~n{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~\epsilon \} \\ &&|&
-     \hex{01}~~n{:}\Bu32~~m{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~m \} \\
+     \hex{00}~~n{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~\epsilon \}, 0 \\ &&|&
+     \hex{01}~~n{:}\Bu32~~m{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~m \}, 0  \\ &&|&
+     \hex{02}~~n{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~\epsilon \}, 1 \\ &&|&
+     \hex{03}~~n{:}\Bu32~~m{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~m \}, 1 \\
    \end{array}
 
 
@@ -95,15 +97,14 @@ Memory Types
 .. math::
    \begin{array}{llclll@{\qquad\qquad}l}
    \production{memory type} & \Bmemtype &::=&
-     \hex{00}~~n{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~\epsilon \}~\MUNSHARED \\ &&|&
-     \hex{01}~~n{:}\Bu32~~m{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~m \}~\MUNSHARED \\ &&|&
-     \hex{03}~~n{:}\Bu32~~m{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~m \}~\MSHARED \\
+     \X{lim},0{:}\Blimits &\Rightarrow& \X{lim}~\MUNSHARED \\ &&|&
+     \X{lim},1{:}\Blimits &\Rightarrow& \X{lim}~\MSHARED
+       \qquad (\iff lim.\LMAX \ne \epsilon) \\
    \end{array}
 
 .. note::
-    The value :math:`\hex{02}` is not currently allowed, as it represents
-    shared storage without a maximum size. In future versions of WebAssembly,
-    this may be allowed.
+    Shared storage requires a maximum size to be specified. In future versions
+    of WebAssembly, shared storage without a maximum size may be allowed.
 
 
 .. index:: table type, element type, limits
@@ -120,7 +121,7 @@ Table Types
 .. math::
    \begin{array}{llclll}
    \production{table type} & \Btabletype &::=&
-     \X{et}{:}\Belemtype~~\X{lim}{:}\Blimits &\Rightarrow& \X{lim}~\X{et} \\
+     \X{et}{:}\Belemtype~~\X{lim},0{:}\Blimits &\Rightarrow& \X{lim}~\X{et} \\
    \production{element type} & \Belemtype &::=&
      \hex{70} &\Rightarrow& \ANYFUNC \\
    \end{array}
