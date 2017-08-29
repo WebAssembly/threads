@@ -10,7 +10,7 @@ See the [overview](proposals/threads/Overview.md) for a summary of the proposal.
 
 There are two related proposals that are also contained in this repository:
 
-* [Mutable Globals](proposals/threads/Globals.md)
+* [Import/Export Mutable Globals](proposals/threads/Globals.md)
 * [Conditional Segment Initialization](proposals/threads/ConditionalSegmentInitialization.md)
 
 A formatted version of the spec with proposed changes is available here:
