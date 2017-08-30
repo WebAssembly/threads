@@ -24,7 +24,7 @@ For example:
   (memory (export "memory") 1)
 
   ;; Some value used as a counter.
-  (data (i32.const 1) "\0")
+  (data (i32.const 0) "\0")
 
   ;; Add one to the counter.
   (func (export "addOne")
