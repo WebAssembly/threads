@@ -19,7 +19,7 @@ the previous initializations.
 For example:
 
 ```webassembly
-// The module.
+;; The module.
 (module
   (memory (export "memory") 1)
 
