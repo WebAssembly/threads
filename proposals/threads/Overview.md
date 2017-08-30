@@ -541,14 +541,14 @@ the linear memory or table is shared:
 
 ```
 limits ::= {min u32, max u32?, share}
-share  ::= notshared | shared
+share  ::= unshared | shared
 ```
 
 Its [encoding][limits encoding] is as follows:
 
 ```
-limits ::= 0x00 n:u32          => {min n, max e, notshared}
-           0x01 n:u32 m:u32    => {min n, max m, notshared}
+limits ::= 0x00 n:u32          => {min n, max e, unshared}
+           0x01 n:u32 m:u32    => {min n, max m, unshared}
            0x03 n:u32 m:u32    => {min n, max m, shared}
 ```
 

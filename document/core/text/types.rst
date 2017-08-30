@@ -102,7 +102,8 @@ Memory Types
 .. math::
    \begin{array}{llclll@{\qquad\qquad}l}
    \production{memory type} & \Tmemtype &::=&
-     \X{lim}{:}\Tlimits &\Rightarrow& \X{lim} \\
+     \X{lim}{:}\Tlimits &\Rightarrow& \X{lim}~\MUNSHARED \\ &&|&
+     \text{(}~\text{shared}~~\X{lim}{:}\Tlimits~~\text{)} &\Rightarrow& \X{lim}~\MSHARED \\
    \end{array}
 
 

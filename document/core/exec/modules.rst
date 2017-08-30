@@ -59,15 +59,15 @@ The following auxiliary typing rules specify this typing relation relative to a 
 :math:`\EVMEM~a`
 ................
 
-* The store entry :math:`S.\SMEMS[a]` must be a :ref:`memory instance <syntax-meminst>` :math:`\{\MIDATA~b^{n\cdot64\,\F{Ki}}, \MIMAX~m^?\}`, for some :math:`n`.
+* The store entry :math:`S.\SMEMS[a]` must be a :ref:`memory instance <syntax-meminst>` :math:`\{\MIDATA~b^{n\cdot64\,\F{Ki}}, \MIMAX~m^?, \MISHARE~s\}`, for some :math:`n`.
 
-* Then :math:`\EVMEM~a` is valid with :ref:`external type <syntax-externtype>` :math:`\ETMEM~(\{\LMIN~n, \LMAX~m^?\})`.
+* Then :math:`\EVMEM~a` is valid with :ref:`external type <syntax-externtype>` :math:`\ETMEM~(\{\LMIN~n, \LMAX~m^?\}~s)`.
 
 .. math::
    \frac{
-     S.\SMEMS[a] = \{ \MIDATA~b^{n\cdot64\,\F{Ki}}, \MIMAX~m^? \}
+     S.\SMEMS[a] = \{ \MIDATA~b^{n\cdot64\,\F{Ki}}, \MIMAX~m^?, \MISHARE~s\}
    }{
-     S \vdashexternval \EVMEM~a : \ETMEM~\{\LMIN~n, \LMAX~m^?\}
+     S \vdashexternval \EVMEM~a : \ETMEM~\{\LMIN~n, \LMAX~m^?\}~s
    }
 
 
@@ -321,11 +321,11 @@ New instances of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tablei
 
 1. Let :math:`\memtype` be the :ref:`memory type <syntax-memtype>` to allocate.
 
-2. Let :math:`\{\LMIN~n, \LMAX~m^?\}` be the structure of :ref:`memory type <syntax-memtype>` :math:`\memtype`.
+2. Let :math:`\{\LMIN~n, \LMAX~m^?\}~s` be the structure of :ref:`memory type <syntax-memtype>` :math:`\memtype`.
 
 3. Let :math:`a` be the first free :ref:`memory address <syntax-memaddr>` in :math:`S`.
 
-4. Let :math:`\meminst` be the :ref:`memory instance <syntax-meminst>` :math:`\{ \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}}, \MIMAX~m^? \}` that contains :math:`n` pages of zeroed :ref:`bytes <syntax-byte>`.
+4. Let :math:`\meminst` be the :ref:`memory instance <syntax-meminst>` :math:`\{ \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}}, \MIMAX~m^?, \MISHARE~s\}` that contains :math:`n` pages of zeroed :ref:`bytes <syntax-byte>`.
 
 5. Append :math:`\meminst` to the |SMEMS| of :math:`S`.
 
@@ -335,9 +335,9 @@ New instances of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tablei
    \begin{array}{rlll}
    \allocmem(S, \memtype) &=& S', \memaddr \\[1ex]
    \mbox{where:} \hfill \\
-   \memtype &=& \{\LMIN~n, \LMAX~m^?\} \\
+   \memtype &=& \{\LMIN~n, \LMAX~m^?\}~s \\
    \memaddr &=& |S.\SMEMS| \\
-   \meminst &=& \{ \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}}, \MIMAX~m^? \} \\
+   \meminst &=& \{ \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}}, \MIMAX~m^?, \MISHARE~s\} \\
    S' &=& S \compose \{\SMEMS~\meminst\} \\
    \end{array}
 

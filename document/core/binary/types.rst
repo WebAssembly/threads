@@ -78,8 +78,10 @@ Limits
 .. math::
    \begin{array}{llclll}
    \production{limits} & \Blimits &::=&
-     \hex{00}~~n{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~\epsilon \} \\ &&|&
-     \hex{01}~~n{:}\Bu32~~m{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~m \} \\
+     \hex{00}~~n{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~\epsilon \}, 0 \\ &&|&
+     \hex{01}~~n{:}\Bu32~~m{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~m \}, 0  \\ &&|&
+     \hex{02}~~n{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~\epsilon \}, 1 \\ &&|&
+     \hex{03}~~n{:}\Bu32~~m{:}\Bu32 &\Rightarrow& \{ \LMIN~n, \LMAX~m \}, 1 \\
    \end{array}
 
 
@@ -90,13 +92,19 @@ Limits
 Memory Types
 ~~~~~~~~~~~~
 
-:ref:`Memory types <syntax-memtype>` are encoded with their :ref:`limits <binary-limits>`.
+:ref:`Memory types <syntax-memtype>` are encoded with their :ref:`limits <binary-limits>` that includes an extra value to specify whether the the memory is shared.
 
 .. math::
    \begin{array}{llclll@{\qquad\qquad}l}
    \production{memory type} & \Bmemtype &::=&
-     \X{lim}{:}\Blimits &\Rightarrow& \X{lim} \\
+     \X{lim},0{:}\Blimits &\Rightarrow& \X{lim}~\MUNSHARED \\ &&|&
+     \X{lim},1{:}\Blimits &\Rightarrow& \X{lim}~\MSHARED
+       \qquad (\iff lim.\LMAX \ne \epsilon) \\
    \end{array}
+
+.. note::
+    Shared storage requires a maximum size to be specified. In future versions
+    of WebAssembly, shared storage without a maximum size may be allowed.
 
 
 .. index:: table type, element type, limits
@@ -113,7 +121,7 @@ Table Types
 .. math::
    \begin{array}{llclll}
    \production{table type} & \Btabletype &::=&
-     \X{et}{:}\Belemtype~~\X{lim}{:}\Blimits &\Rightarrow& \X{lim}~\X{et} \\
+     \X{et}{:}\Belemtype~~\X{lim},0{:}\Blimits &\Rightarrow& \X{lim}~\X{et} \\
    \production{element type} & \Belemtype &::=&
      \hex{70} &\Rightarrow& \ANYFUNC \\
    \end{array}

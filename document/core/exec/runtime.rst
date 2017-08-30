@@ -217,12 +217,12 @@ Memory Instances
 ~~~~~~~~~~~~~~~~
 
 A *memory instance* is the runtime representation of a linear :ref:`memory <syntax-mem>`.
-It holds a vector of :ref:`bytes <syntax-byte>` and an optional maximum size, if one was specified at the definition site of the memory.
+It holds a vector of :ref:`bytes <syntax-byte>` and an optional maximum size, if one was specified at the definition site of the memory. It also contains a flag for whether the memory can be shared.
 
 .. math::
    \begin{array}{llll}
    \production{(memory instance)} & \meminst &::=&
-     \{ \MIDATA~\vec(\byte), \MIMAX~\u32^? \} \\
+     \{ \MIDATA~\vec(\byte), \MIMAX~\u32^?, \MISHARE~\share \} \\
    \end{array}
 
 The length of the vector always is a multiple of the WebAssembly *page size*, which is defined to be the constant :math:`65536` -- abbreviated :math:`64\,\F{Ki}`.
