@@ -10,6 +10,7 @@ type offset = int32
 
 type mem_size = Mem8 | Mem16 | Mem32
 type extension = SX | ZX
+type rmwop = Add | Sub | And | Or | Xor | Xchg
 
 exception Type
 exception Bounds
@@ -42,3 +43,22 @@ val load_packed :
 val store_packed :
   mem_size -> memory -> address -> offset -> value -> unit
     (* raises Type, Bounds *)
+
+ (* raise Bounds *)
+val atomic_load : memory -> address -> offset -> value_type -> value
+ (* raise Bounds *)
+val atomic_store : memory -> address -> offset -> value -> unit
+ (* raise Type, Bounds *)
+val atomic_load_packed :
+  mem_size -> memory -> address -> offset -> value_type -> value
+ (* raise Type, Bounds *)
+val atomic_store_packed :
+  mem_size -> memory -> address -> offset -> value -> unit
+
+(*
+ (* raise Bounds *)
+val atomic_rmw : rmwop -> memory -> address -> offset -> value -> value
+ (* raise Type, Bounds *)
+val atomic_rmw_packed :
+  rmwop -> mem_size -> memory -> address -> offset -> value -> value
+*)

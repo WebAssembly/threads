@@ -292,6 +292,22 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     let t1, t2 = type_cvtop e.at cvtop in
     [t1] --> [t2]
 
+  | AtomicLoad memop ->
+    check_memop c memop (fun sz -> sz) e.at;
+    [I32Type] --> [memop.ty]
+
+  | AtomicStore memop ->
+    check_memop c memop (fun sz -> sz) e.at;
+    [I32Type; memop.ty] --> []
+
+  | AtomicRmw (rmwop, memop) ->
+    check_memop c memop (fun sz -> sz) e.at;
+    [I32Type; memop.ty] --> [memop.ty]
+
+  | AtomicRmwCmpXchg memop ->
+    check_memop c memop (fun sz -> sz) e.at;
+    [I32Type; memop.ty; memop.ty] --> [memop.ty]
+
 and check_seq (c : context) (es : instr list) : infer_stack_type =
   match es with
   | [] ->

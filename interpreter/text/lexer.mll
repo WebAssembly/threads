@@ -85,6 +85,16 @@ let ext e s u =
   | 'u' -> u
   | _ -> assert false
 
+let rmwop rmw =
+  match rmw with
+  | "add" -> Ast.RmwOp.Add
+  | "sub" -> Ast.RmwOp.Sub
+  | "and" -> Ast.RmwOp.And
+  | "or" -> Ast.RmwOp.Or
+  | "xor" -> Ast.RmwOp.Xor
+  | "xchg" -> Ast.RmwOp.Xchg
+  | _ -> assert false
+
 let opt = Lib.Option.get
 }
 
@@ -144,6 +154,7 @@ let mixx = "i" ("8" | "16" | "32" | "64")
 let mfxx = "f" ("32" | "64")
 let sign = "s" | "u"
 let mem_size = "8" | "16" | "32"
+let rmw = "add" | "sub" | "and" | "or" | "xor" | "xchg"
 
 rule token = parse
   | "(" { LPAR }
@@ -231,6 +242,69 @@ rule token = parse
             (i64_store8 (opt a 0))
             (i64_store16 (opt a 1))
             (i64_store32 (opt a 2)) o)) }
+
+  | (ixx as t)".atomic.load"
+    { ATOMIC_LOAD (fun a o ->
+        intop t (i32_atomic_load (opt a 2)) (i64_atomic_load (opt a 3)) o) }
+  | (ixx as t)".atomic.store"
+    { ATOMIC_STORE (fun a o ->
+        intop t (i32_atomic_store (opt a 2)) (i64_atomic_store (opt a 3)) o) }
+  | (ixx as t)".atomic.load"(mem_size as sz)"_u"
+    { if t = "i32" && sz = "32" then error lexbuf "unknown operator";
+      ATOMIC_LOAD (fun a o ->
+        intop t
+          (memsz sz
+            (i32_atomic_load8_u (opt a 0))
+            (i32_atomic_load16_u (opt a 1))
+            (fun _ -> unreachable) o)
+          (memsz sz
+            (i64_atomic_load8_u (opt a 0))
+            (i64_atomic_load16_u (opt a 1))
+            (i64_atomic_load32_u (opt a 2)) o)) }
+  | (ixx as t)".atomic.store"(mem_size as sz)
+    { if t = "i32" && sz = "32" then error lexbuf "unknown operator";
+      ATOMIC_STORE (fun a o ->
+        intop t
+          (memsz sz
+            (i32_atomic_store8 (opt a 0))
+            (i32_atomic_store16 (opt a 1))
+            (fun _ -> unreachable) o)
+          (memsz sz
+            (i64_atomic_store8 (opt a 0))
+            (i64_atomic_store16 (opt a 1))
+            (i64_atomic_store32 (opt a 2)) o)) }
+  | (ixx as t)".atomic.rmw."(rmw as r)
+    { ATOMIC_RMW (fun a o ->
+        intop t (i32_atomic_rmw (rmwop r) (opt a 2))
+                (i64_atomic_rmw (rmwop r) (opt a 3)) o) }
+  | (ixx as t)".atomic.rmw"(mem_size as sz)"_u."(rmw as r)
+    { if t = "i32" && sz = "32" then error lexbuf "unknown operator";
+      ATOMIC_RMW (fun a o ->
+        intop t
+          (memsz sz
+            (i32_atomic_rmw8_u (rmwop r) (opt a 0))
+            (i32_atomic_rmw16_u (rmwop r) (opt a 1))
+            (fun _ -> unreachable) o)
+          (memsz sz
+            (i64_atomic_rmw8_u (rmwop r) (opt a 0))
+            (i64_atomic_rmw16_u (rmwop r) (opt a 1))
+            (i64_atomic_rmw32_u (rmwop r) (opt a 2)) o)) }
+  | (ixx as t)".atomic.rmw.cmpxchg"
+    { ATOMIC_RMW_CMPXCHG (fun a o ->
+        intop t (i32_atomic_rmw_cmpxchg (opt a 2))
+                (i64_atomic_rmw_cmpxchg (opt a 3)) o) }
+  | (ixx as t)".atomic.rmw"(mem_size as sz)"_u.cmpxchg"
+    { if t = "i32" && sz = "32" then error lexbuf "unknown operator";
+      ATOMIC_RMW_CMPXCHG (fun a o ->
+        intop t
+          (memsz sz
+            (i32_atomic_rmw8_u_cmpxchg (opt a 0))
+            (i32_atomic_rmw16_u_cmpxchg (opt a 1))
+            (fun _ -> unreachable) o)
+          (memsz sz
+            (i64_atomic_rmw8_u_cmpxchg (opt a 0))
+            (i64_atomic_rmw16_u_cmpxchg (opt a 1))
+            (i64_atomic_rmw32_u_cmpxchg (opt a 2)) o)) }
 
   | "offset="(nat as s) { OFFSET_EQ_NAT s }
   | "align="(nat as s) { ALIGN_EQ_NAT s }

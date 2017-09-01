@@ -60,6 +60,13 @@ type 'a memop =
 type loadop = (Memory.mem_size * Memory.extension) memop
 type storeop = Memory.mem_size memop
 
+module RmwOp =
+struct
+  type op = Add | Sub | And | Or | Xor | Xchg
+end
+
+type atomicmemop = storeop
+
 
 (* Expressions *)
 
@@ -97,6 +104,10 @@ and instr' =
   | Unary of unop                     (* unary numeric operator *)
   | Binary of binop                   (* binary numeric operator *)
   | Convert of cvtop                  (* conversion *)
+  | AtomicLoad of atomicmemop         (* atomically read memory at address *)
+  | AtomicStore of atomicmemop        (* atomically write memory at address *)
+  | AtomicRmw of RmwOp.op * atomicmemop  (* atomically read, modify, write memory at address *)
+  | AtomicRmwCmpXchg of atomicmemop   (* atomically compare and exchange memory at address *)
 
 
 (* Globals & Functions *)

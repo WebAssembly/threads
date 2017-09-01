@@ -199,6 +199,14 @@ let extension = function
   | Memory.SX -> "_s"
   | Memory.ZX -> "_u"
 
+let rmw = function
+  | RmwOp.Add -> "add"
+  | RmwOp.Sub -> "sub"
+  | RmwOp.And -> "and"
+  | RmwOp.Or -> "or"
+  | RmwOp.Xor -> "xor"
+  | RmwOp.Xchg -> "xchg"
+
 let memop name {ty; align; offset; _} =
   value_type ty ^ "." ^ name ^
   (if offset = 0l then "" else " offset=" ^ nat32 offset) ^
@@ -213,6 +221,26 @@ let storeop op =
   match op.sz with
   | None -> memop "store" op
   | Some sz -> memop ("store" ^ mem_size sz) op
+
+let atomicloadop op =
+  match op.sz with
+  | None -> memop "atomic.load" op
+  | Some sz -> memop ("atomic.load" ^ mem_size sz ^ "_u") op
+
+let atomicstoreop op =
+  match op.sz with
+  | None -> memop "atomic.store" op
+  | Some sz -> memop ("atomic.store" ^ mem_size sz) op
+
+let atomicrmwop op rmwop =
+  match op.sz with
+  | None -> memop "atomic.rmw." op
+  | Some sz -> memop ("atomic.rmw" ^ mem_size sz ^ "_u." ^ rmw rmwop) op
+
+let atomicrmwcmpxchgop op =
+  match op.sz with
+  | None -> memop "atomic.rmw." op
+  | Some sz -> memop ("atomic.rmw" ^ mem_size sz ^ "_u.cmpxchg") op
 
 
 (* Expressions *)
@@ -255,6 +283,10 @@ let rec instr e =
     | Unary op -> unop op, []
     | Binary op -> binop op, []
     | Convert op -> cvtop op, []
+    | AtomicLoad op -> atomicloadop op, []
+    | AtomicStore op -> atomicstoreop op, []
+    | AtomicRmw (rmwop, op) -> atomicrmwop op rmwop, []
+    | AtomicRmwCmpXchg op -> atomicrmwcmpxchgop op, []
   in Node (head, inner)
 
 let const c =

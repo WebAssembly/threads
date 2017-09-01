@@ -214,6 +214,28 @@ let rec step (c : config) : config =
           vs', []
         with exn -> vs', [Trapped (memory_error e.at exn) @@ e.at]);
 
+      | AtomicLoad {offset; ty; sz; _}, I32 i :: vs' ->
+        let mem = memory frame.inst (0l @@ e.at) in
+        let addr = I64_convert.extend_u_i32 i in
+        (try
+          let v =
+            match sz with
+            | None -> Memory.atomic_load mem addr offset ty
+            | Some sz -> Memory.atomic_load_packed sz mem addr offset ty
+          in v :: vs', []
+        with exn -> vs', [Trapped (memory_error e.at exn) @@ e.at])
+
+      | AtomicStore {offset; sz; _}, v :: I32 i :: vs' ->
+        let mem = memory frame.inst (0l @@ e.at) in
+        let addr = I64_convert.extend_u_i32 i in
+        (try
+          (match sz with
+          | None -> Memory.atomic_store mem addr offset v
+          | Some sz -> Memory.atomic_store_packed sz mem addr offset v
+          );
+          vs', []
+        with exn -> vs', [Trapped (memory_error e.at exn) @@ e.at]);
+
       | CurrentMemory, vs ->
         let mem = memory frame.inst (0l @@ e.at) in
         I32 (Memory.size mem) :: vs, []

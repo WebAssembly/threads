@@ -9,6 +9,7 @@ type offset = int32
 
 type mem_size = Mem8 | Mem16 | Mem32
 type extension = SX | ZX
+type rmwop = Add | Sub | And | Or | Xor | Xchg
 
 type memory' = (int, int8_unsigned_elt, c_layout) Array1.t
 type memory = {mutable content : memory'; max : size option}
@@ -143,3 +144,9 @@ let store_packed sz mem a o v =
     | I64 x -> x
     | _ -> raise Type
   in storen mem a o n x
+
+(* For now, there is no distinction between atomic and non-atomic accesses *)
+let atomic_load mem a o t = load_value mem a o t
+let atomic_store mem a o v = store_value mem a o v
+let atomic_load_packed sz mem a o t = load_packed sz ZX mem a o t
+let atomic_store_packed sz mem a o v = store_packed sz mem a o v

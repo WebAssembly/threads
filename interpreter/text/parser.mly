@@ -150,6 +150,7 @@ let inline_type_explicit (c : context) x ft at =
 %token CALL CALL_INDIRECT RETURN
 %token GET_LOCAL SET_LOCAL TEE_LOCAL GET_GLOBAL SET_GLOBAL
 %token LOAD STORE OFFSET_EQ_NAT ALIGN_EQ_NAT
+%token ATOMIC_LOAD ATOMIC_STORE ATOMIC_RMW ATOMIC_RMW_CMPXCHG
 %token CONST UNARY BINARY TEST COMPARE CONVERT
 %token UNREACHABLE CURRENT_MEMORY GROW_MEMORY
 %token FUNC START TYPE PARAM RESULT LOCAL GLOBAL
@@ -175,6 +176,10 @@ let inline_type_explicit (c : context) x ft at =
 %token<Ast.instr'> CONVERT
 %token<int option -> Memory.offset -> Ast.instr'> LOAD
 %token<int option -> Memory.offset -> Ast.instr'> STORE
+%token<int option -> Memory.offset -> Ast.instr'> ATOMIC_LOAD
+%token<int option -> Memory.offset -> Ast.instr'> ATOMIC_STORE
+%token<int option -> Memory.offset -> Ast.instr'> ATOMIC_RMW
+%token<int option -> Memory.offset -> Ast.instr'> ATOMIC_RMW_CMPXCHG
 %token<string> OFFSET_EQ_NAT
 %token<string> ALIGN_EQ_NAT
 
