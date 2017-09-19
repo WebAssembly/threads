@@ -200,7 +200,7 @@ let memop s =
   let offset = vu32 s in
   Int32.to_int align, offset
 
-let atomic_prefix s =
+let atomic_instr s =
   let pos = pos s in
   match op s with
   | 0x10 -> let a, o = memop s in i32_atomic_load a o
@@ -506,7 +506,7 @@ let rec instr s =
   | 0xc3 -> i64_extend16_s
   | 0xc4 -> i64_extend32_s
 
-  | 0xfe -> atomic_prefix s
+  | 0xfe -> atomic_instr s
 
   | b -> illegal s pos b
 
