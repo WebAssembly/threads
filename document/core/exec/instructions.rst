@@ -24,6 +24,13 @@ The mapping of numeric instructions to their underlying operators is expressed b
    \X{op}_{\K{f}N}(z) &=& \F{f}\X{op}_N(z) \\
    \end{array}
 
+And for :ref:`conversion operators <exec-cvtop>`:
+
+.. math::
+   \begin{array}{lll@{\qquad}l}
+   \X{cvtop}_{t_1,t_2}(c) &=& \X{cvtop}_{|t_1|,|t_2|}(c) \\
+   \end{array}
+
 Where the underlying operators are partial, the corresponding instruction will :ref:`trap <trap>` when the result is not defined.
 Where the underlying operators are non-deterministic, because they may return one of multiple possible :ref:`NaN <syntax-nan>` values, so are the corresponding instructions.
 
@@ -352,6 +359,9 @@ Variable Instructions
    (\iff S' = S \with \SGLOBALS[F.\AMODULE.\MIGLOBALS[x]].\GIVALUE = \val) \\
    \end{array}
 
+.. note::
+   :ref:`Validation <valid-set_global>` ensures that the global is, in fact, marked as mutable.
+
 
 .. index:: memory instruction, memory index, store, frame, address, memory address, memory instance, store, frame, value, integer, limits, value type, bit width
    pair: execution; instruction
@@ -361,6 +371,14 @@ Variable Instructions
 
 Memory Instructions
 ~~~~~~~~~~~~~~~~~~~
+
+.. note::
+   The alignment :math:`\memarg.\ALIGN` in load and store instructions does not affect the semantics.
+   It is an indication that the offset :math:`\X{ea}` at which the memory is accessed is intended to satisfy the property :math:`\X{ea} \mod 2^{\memarg.\ALIGN} = 0`.
+   A WebAssembly implementation can use this hint to optimize for the intended use.
+   Unaligned access violating that property is still allowed and must succeed regardless of the annotation.
+   However, it may be substantially slower on some hardware.
+
 
 .. _exec-load:
 .. _exec-loadn:
@@ -436,11 +454,6 @@ Memory Instructions
    \\ \qquad
      (\otherwise) \\
    \end{array}
-
-.. note::
-   The alignment :math:`\memarg.\ALIGN` does not affect the semantics.
-   Unaligned access is supported for all types, and succeeds regardless of the annotation.
-   The only purpose of the annotation is to provide optimizatons hints.
 
 
 .. _exec-store:
@@ -1467,31 +1480,24 @@ Furthermore, the resulting store must be :ref:`valid <valid-store>`, i.e., all d
    ~\\[-1ex]
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; \val_1^n~(\INVOKE~a) &\stepto& S'; \val_2^m
+   S; \val^n~(\INVOKE~a) &\stepto& S'; \result
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & S.\SFUNCS[a] = \{ \FITYPE~[t_1^n] \to [t_2^m], \FIHOSTCODE~\dots \} \\
-     \wedge & \val_1^n = (t_1.\CONST~c_1)^n \\
-     \wedge & \val_2^m = (t_2.\CONST~c_2)^m \\
-     \wedge & \vdashstoreextends S \extendsto S' \\
-     \wedge & \vdashstore S' \ok) \\
-     \end{array}
-   \\[1ex]
-   \begin{array}{lcl@{\qquad}l}
-   S; \val^n~(\INVOKE~a) &\stepto& S'; \TRAP
-   \end{array}
-   \\ \qquad
-     \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & S.\SFUNCS[a] = \{ \FITYPE~\X{ft}, \FIHOSTCODE~\dots \} \\ 
-     \wedge & \vdashstoreextends S \extendsto S' \\
-     \wedge & \vdashstore S' \ok) \\
+     (\mbox{if} & S.\SFUNCS[a] = \{ \FITYPE~[t_1^n] \to [t_2^m], \FIHOSTCODE~\X{hf} \} \\
+     \wedge & \X{hf}(S; \val^n) = S'; \result) \\
      \end{array} \\
    \end{array}
 
-Here, :math:`S \extendsto S'` expresses that the new store :math:`S'` is an :ref:`extension <extend>` of :math:`S`.
-Moreover, :math:`\vdashstore S' \ok` restricts :math:`S'` to be a :ref:`valid <valid-store>` store.
-Both notions are defined in the :ref:`Appendix <properties>`.
+Here, :math:`\X{hf}(S; \val^n)` denotes the implementation-defined execution of host function :math:`\X{hf}` in current store :math:`S` with arguments :math:`\val^n`.
+The outcome is a pair of a modified store :math:`S'` and a :ref:`result <syntax-result>`.
+
+For a WebAssembly implementation to be :ref:`sound <soundness>` in the presence of host functions,
+every :ref:`host function instance <syntax-funcinst>` must be :ref:`valid <valid-hostfuncinst>`,
+which means that it adheres to suitable pre- and post-conditions:
+under a :ref:`valid store <valid-store>` :math:`S`, and given arguments :math:`\val^n` matching the ascribed parameter types :math:`t_1^n`,
+executing the host function must produce a valid store :math:`S'` that is an :ref:`extension <extend-store>` of :math:`S` and a result matching the ascribed return types :math:`t_2^m`.
+All these notions are made precise in the :ref:`Appendix <soundness>`.
 
 .. note::
    A host function can call back into WebAssembly by :ref:`invoking <exec-invocation>` a function :ref:`exported <syntax-export>` from a :ref:`module <syntax-module>`.

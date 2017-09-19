@@ -22,7 +22,7 @@ The name section should appear only once in a module, and only after the :ref:`d
 The purpose of this section is to attach printable names to definitions in a module, which e.g. can be used by a debugger or when parts of the module are to be rendered in :ref:`text form <text>`.
 
 .. note::
-   All :ref:`names <binary-name>` are represented in `Unicode <http://www.unicode.org/versions/latest/>`_ encoded in UTF-8.
+   All :ref:`names <binary-name>` are represented in |Unicode|_ encoded in UTF-8.
    Names need not be unique.
 
 
@@ -135,6 +135,6 @@ It consists of an :ref:`indirect name map <binary-indirectnamemap>` assigning lo
 
 .. math::
    \begin{array}{llclll}
-   \production{function name subsection} & \Bfuncnamesubsec &::=&
+   \production{local name subsection} & \Blocalnamesubsec &::=&
      \Bnamesubsection_2(\Bindirectnamemap) \\
    \end{array}
