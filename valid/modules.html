@@ -378,7 +378,9 @@ Export descriptions <span class="math">\(\href{../syntax/modules.html#syntax-exp
 }{
   C \href{../valid/modules.html#valid-importdesc}{\vdash} \href{../syntax/modules.html#syntax-importdesc}{\mathsf{table}}~\href{../syntax/types.html#syntax-tabletype}{\mathit{tabletype}} : \href{../syntax/types.html#syntax-externtype}{\mathsf{table}}~\href{../syntax/types.html#syntax-tabletype}{\mathit{tabletype}}
 }\]</div>
-<p><span class="math">\(\href{../syntax/modules.html#syntax-importdesc}{\mathsf{mem}}~\href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}\)</span></p>
+</div>
+<div class="section" id="id16">
+<h3><span class="math">\(\href{../syntax/modules.html#syntax-importdesc}{\mathsf{mem}}~\href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}\)</span><a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The memory type <span class="math">\(\href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}\)</span> must be <a class="reference internal" href="types.html#valid-memtype"><span class="std std-ref">valid</span></a>.</li>
 <li>Then the import description is valid with type <span class="math">\(\href{../syntax/types.html#syntax-externtype}{\mathsf{mem}}~\href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}\)</span>.</li>
@@ -390,8 +392,8 @@ Export descriptions <span class="math">\(\href{../syntax/modules.html#syntax-exp
   C \href{../valid/modules.html#valid-importdesc}{\vdash} \href{../syntax/modules.html#syntax-importdesc}{\mathsf{mem}}~\href{../syntax/types.html#syntax-memtype}{\mathit{memtype}} : \href{../syntax/types.html#syntax-externtype}{\mathsf{mem}}~\href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
 }\]</div>
 </div>
-<div class="section" id="id16">
-<h3><span class="math">\(\href{../syntax/modules.html#syntax-importdesc}{\mathsf{global}}~\href{../syntax/types.html#syntax-globaltype}{\mathit{globaltype}}\)</span><a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id17">
+<h3><span class="math">\(\href{../syntax/modules.html#syntax-importdesc}{\mathsf{global}}~\href{../syntax/types.html#syntax-globaltype}{\mathit{globaltype}}\)</span><a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The global type <span class="math">\(\href{../syntax/types.html#syntax-globaltype}{\mathit{globaltype}}\)</span> must be <a class="reference internal" href="types.html#valid-globaltype"><span class="std std-ref">valid</span></a>.</li>
 <li>The mutability of <span class="math">\(\href{../syntax/types.html#syntax-globaltype}{\mathit{globaltype}}\)</span> must be <span class="math">\(\href{../syntax/types.html#syntax-mut}{\mathsf{const}}\)</span>.</li>
@@ -406,7 +408,7 @@ Export descriptions <span class="math">\(\href{../syntax/modules.html#syntax-exp
 </div>
 </div>
 <div class="section" id="valid-module">
-<span id="index-9"></span><span id="id17"></span><h2>Modules<a class="headerlink" href="#valid-module" title="Permalink to this headline">¶</a></h2>
+<span id="index-9"></span><span id="id18"></span><h2>Modules<a class="headerlink" href="#valid-module" title="Permalink to this headline">¶</a></h2>
 <p>A module is entirely <em>closed</em>,
 that is, its components can only refer to definitions that appear in the module itself.
 Consequently, no initial <a class="reference internal" href="conventions.html#context"><span class="std std-ref">context</span></a> is required.
