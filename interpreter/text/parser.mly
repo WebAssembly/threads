@@ -330,6 +330,10 @@ plain_instr :
   | UNARY { fun c -> $1 }
   | BINARY { fun c -> $1 }
   | CONVERT { fun c -> $1 }
+  | ATOMIC_LOAD offset_opt align_opt { fun c -> $1 $3 $2 }
+  | ATOMIC_STORE offset_opt align_opt { fun c -> $1 $3 $2 }
+  | ATOMIC_RMW offset_opt align_opt { fun c -> $1 $3 $2 }
+  | ATOMIC_RMW_CMPXCHG offset_opt align_opt { fun c -> $1 $3 $2 }
 
 block_instr :
   | BLOCK labeling_opt block END labeling_end_opt
