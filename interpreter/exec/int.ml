@@ -55,6 +55,7 @@ sig
   val shr_u : t -> t -> t
   val rotl : t -> t -> t
   val rotr : t -> t -> t
+  val xchg : t -> t -> t
   val clz : t -> t
   val ctz : t -> t
   val popcnt : t -> t
@@ -172,6 +173,8 @@ struct
   let rotr x y =
     let n = clamp_rotate_count y in
     or_ (Rep.shift_right_logical x n) (Rep.shift_left x (Rep.bitwidth - n))
+
+  let xchg x y = y
 
   (* clz is defined for all values, including all-zeros. *)
   let clz x =

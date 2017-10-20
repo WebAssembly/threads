@@ -31,6 +31,7 @@ struct
   type cvtop = ExtendSI32 | ExtendUI32 | WrapI64
              | TruncSF32 | TruncUF32 | TruncSF64 | TruncUF64
              | ReinterpretFloat
+  type rmwop = RmwAdd | RmwSub | RmwAnd | RmwOr | RmwXor | RmwXchg
 end
 
 module FloatOp =
@@ -42,6 +43,7 @@ struct
   type cvtop = ConvertSI32 | ConvertUI32 | ConvertSI64 | ConvertUI64
              | PromoteF32 | DemoteF64
              | ReinterpretInt
+  type rmwop
 end
 
 module I32Op = IntOp
@@ -64,6 +66,8 @@ module RmwOp =
 struct
   type op = Add | Sub | And | Or | Xor | Xchg
 end
+
+type rmwop = (I32Op.rmwop, I64Op.rmwop, F32Op.rmwop, F64Op.rmwop) Values.op
 
 type atomicmemop = storeop
 

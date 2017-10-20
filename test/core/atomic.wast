@@ -132,9 +132,5 @@
 
 (invoke "init" (i64.const 0x0123456789abcdef))
 
-(assert_return (invoke "i32.atomic.rmw.add" (i32.const 0) (i32.const 1)) (i32.const 0x01234567))
-
-;; 6  7  8  9  0  1  2  3
-;; ef cd ab 89 67 45 23 01
-;; ef 42 ab 89 67 45 23 01
-;; ef 42 ab 89 44 88 23 01
+(assert_return (invoke "i32.atomic.rmw.add" (i32.const 0) (i32.const 1)) (i32.const 0x89abcdef))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x0123456789abcdf0))

@@ -220,8 +220,8 @@ let rec step (c : config) : config =
         (try
           let v =
             match sz with
-            | None -> Memory.atomic_load mem addr offset ty
-            | Some sz -> Memory.atomic_load_packed sz mem addr offset ty
+            | None -> Memory.load_value mem addr offset ty
+            | Some sz -> Memory.load_packed sz Memory.ZX mem addr offset ty
           in v :: vs', []
         with exn -> vs', [Trapped (memory_error e.at exn) @@ e.at])
 
@@ -230,11 +230,42 @@ let rec step (c : config) : config =
         let addr = I64_convert.extend_u_i32 i in
         (try
           (match sz with
-          | None -> Memory.atomic_store mem addr offset v
-          | Some sz -> Memory.atomic_store_packed sz mem addr offset v
+          | None -> Memory.store_value mem addr offset v
+          | Some sz -> Memory.store_packed sz mem addr offset v
           );
           vs', []
         with exn -> vs', [Trapped (memory_error e.at exn) @@ e.at]);
+
+      | AtomicRmw (rmwop, {offset; ty; sz; _}), v :: I32 i :: vs' ->
+        let mem = memory frame.inst (0l @@ e.at) in
+        let addr = I64_convert.extend_u_i32 i in
+        (try
+          let op =
+            match ty, rmwop with
+            | I32Type, Ast.RmwOp.Add -> I32 I32Op.RmwAdd
+            | I64Type, Ast.RmwOp.Add -> I64 I64Op.RmwAdd
+            | I32Type, Ast.RmwOp.Sub -> I32 I32Op.RmwSub
+            | I64Type, Ast.RmwOp.Sub -> I64 I64Op.RmwSub
+            | I32Type, Ast.RmwOp.And -> I32 I32Op.RmwAnd
+            | I64Type, Ast.RmwOp.And -> I64 I64Op.RmwAnd
+            | I32Type, Ast.RmwOp.Or -> I32 I32Op.RmwOr
+            | I64Type, Ast.RmwOp.Or -> I64 I64Op.RmwOr
+            | I32Type, Ast.RmwOp.Xor -> I32 I32Op.RmwXor
+            | I64Type, Ast.RmwOp.Xor -> I64 I64Op.RmwXor
+            | I32Type, Ast.RmwOp.Xchg -> I32 I32Op.RmwXchg
+            | I64Type, Ast.RmwOp.Xchg -> I64 I64Op.RmwXchg
+            | _ -> assert false
+          in let v1 =
+            match sz with
+            | None -> Memory.load_value mem addr offset ty
+            | Some sz -> Memory.load_packed sz Memory.ZX mem addr offset ty
+          in let v2 = Eval_numeric.eval_rmwop op v1 v in
+          (match sz with
+          | None -> Memory.store_value mem addr offset v2
+          | Some sz -> Memory.store_packed sz mem addr offset v2
+          );
+          v1 :: vs', []
+        with exn -> vs', [Trapped (memory_error e.at exn) @@ e.at])
 
       | CurrentMemory, vs ->
         let mem = memory frame.inst (0l @@ e.at) in
