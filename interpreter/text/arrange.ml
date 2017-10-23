@@ -200,18 +200,12 @@ let extension = function
   | Memory.ZX -> "_u"
 
 let rmw = function
-  | I32 I32Op.RmwAdd -> "add"
-  | I64 I64Op.RmwAdd -> "add"
-  | I32 I32Op.RmwSub -> "sub"
-  | I64 I64Op.RmwSub -> "sub"
-  | I32 I32Op.RmwAnd -> "and"
-  | I64 I64Op.RmwAnd -> "and"
-  | I32 I32Op.RmwOr -> "or"
-  | I64 I64Op.RmwOr -> "or"
-  | I32 I32Op.RmwXor -> "xor"
-  | I64 I64Op.RmwXor -> "xor"
-  | I32 I32Op.RmwXchg -> "xchg"
-  | I64 I64Op.RmwXchg -> "xchg"
+  | I32 I32Op.RmwAdd | I64 I64Op.RmwAdd -> "add"
+  | I32 I32Op.RmwSub | I64 I64Op.RmwSub -> "sub"
+  | I32 I32Op.RmwAnd | I64 I64Op.RmwAnd -> "and"
+  | I32 I32Op.RmwOr | I64 I64Op.RmwOr -> "or"
+  | I32 I32Op.RmwXor | I64 I64Op.RmwXor -> "xor"
+  | I32 I32Op.RmwXchg | I64 I64Op.RmwXchg -> "xchg"
   | _ -> assert false
 
 let memop name {ty; align; offset; _} =
