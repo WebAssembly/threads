@@ -119,18 +119,251 @@
 (assert_return (invoke "i32.atomic.store16" (i32.const 4) (i32.const 0x8844)))
 (assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x0123884489ab42ef))
 
-(assert_return (invoke "i64.atomic.store8" (i32.const 1) (i32.const 0x99)))
+(assert_return (invoke "i64.atomic.store8" (i32.const 1) (i64.const 0x99)))
 (assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x0123884489ab99ef))
 
-(assert_return (invoke "i64.atomic.store16" (i32.const 4) (i32.const 0xcafe)))
+(assert_return (invoke "i64.atomic.store16" (i32.const 4) (i64.const 0xcafe)))
 (assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x0123cafe89ab99ef))
 
-(assert_return (invoke "i64.atomic.store32" (i32.const 4) (i32.const 0xdeadbeef)))
+(assert_return (invoke "i64.atomic.store32" (i32.const 4) (i64.const 0xdeadbeef)))
 (assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0xdeadbeef89ab99ef))
 
 ;; *.atomic.rmw*.add
 
-(invoke "init" (i64.const 0x0123456789abcdef))
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw.add" (i32.const 0) (i32.const 0x12345678)) (i32.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111123456789))
 
-(assert_return (invoke "i32.atomic.rmw.add" (i32.const 0) (i32.const 1)) (i32.const 0x89abcdef))
-(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x0123456789abcdf0))
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw.add" (i32.const 0) (i64.const 0x0101010102020202)) (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1212121213131313))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw8_u.add" (i32.const 0) (i32.const 0xcdcdcdcd)) (i32.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111111111de))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw16_u.add" (i32.const 0) (i32.const 0xcafecafe)) (i32.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x111111111111dc0f))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw8_u.add" (i32.const 0) (i64.const 0x4242424242424242)) (i64.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111153))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw16_u.add" (i32.const 0) (i64.const 0xbeefbeefbeefbeef)) (i64.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x111111111111d000))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw32_u.add" (i32.const 0) (i64.const 0xcabba6e5cabba6e5)) (i64.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111dbccb7f6))
+
+;; *.atomic.rmw*.sub
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw.sub" (i32.const 0) (i32.const 0x12345678)) (i32.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111fedcba99))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw.sub" (i32.const 0) (i64.const 0x0101010102020202)) (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x101010100f0f0f0f))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw8_u.sub" (i32.const 0) (i32.const 0xcdcdcdcd)) (i32.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111144))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw16_u.sub" (i32.const 0) (i32.const 0xcafecafe)) (i32.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111114613))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw8_u.sub" (i32.const 0) (i64.const 0x4242424242424242)) (i64.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111111111cf))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw16_u.sub" (i32.const 0) (i64.const 0xbeefbeefbeefbeef)) (i64.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111115222))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw32_u.sub" (i32.const 0) (i64.const 0xcabba6e5cabba6e5)) (i64.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111146556a2c))
+
+;; *.atomic.rmw*.and
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw.and" (i32.const 0) (i32.const 0x12345678)) (i32.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111110101010))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw.and" (i32.const 0) (i64.const 0x0101010102020202)) (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x0101010100000000))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw8_u.and" (i32.const 0) (i32.const 0xcdcdcdcd)) (i32.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111101))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw16_u.and" (i32.const 0) (i32.const 0xcafecafe)) (i32.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111110010))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw8_u.and" (i32.const 0) (i64.const 0x4242424242424242)) (i64.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111100))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw16_u.and" (i32.const 0) (i64.const 0xbeefbeefbeefbeef)) (i64.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111001))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw32_u.and" (i32.const 0) (i64.const 0xcabba6e5cabba6e5)) (i64.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111100110001))
+
+;; *.atomic.rmw*.or
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw.or" (i32.const 0) (i32.const 0x12345678)) (i32.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111113355779))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw.or" (i32.const 0) (i64.const 0x0101010102020202)) (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111113131313))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw8_u.or" (i32.const 0) (i32.const 0xcdcdcdcd)) (i32.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111111111dd))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw16_u.or" (i32.const 0) (i32.const 0xcafecafe)) (i32.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x111111111111dbff))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw8_u.or" (i32.const 0) (i64.const 0x4242424242424242)) (i64.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111153))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw16_u.or" (i32.const 0) (i64.const 0xbeefbeefbeefbeef)) (i64.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x111111111111bfff))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw32_u.or" (i32.const 0) (i64.const 0xcabba6e5cabba6e5)) (i64.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111dbbbb7f5))
+
+;; *.atomic.rmw*.xor
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw.xor" (i32.const 0) (i32.const 0x12345678)) (i32.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111103254769))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw.xor" (i32.const 0) (i64.const 0x0101010102020202)) (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1010101013131313))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw8_u.xor" (i32.const 0) (i32.const 0xcdcdcdcd)) (i32.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111111111dc))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw16_u.xor" (i32.const 0) (i32.const 0xcafecafe)) (i32.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x111111111111dbef))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw8_u.xor" (i32.const 0) (i64.const 0x4242424242424242)) (i64.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111153))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw16_u.xor" (i32.const 0) (i64.const 0xbeefbeefbeefbeef)) (i64.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x111111111111affe))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw32_u.xor" (i32.const 0) (i64.const 0xcabba6e5cabba6e5)) (i64.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111dbaab7f4))
+
+;; *.atomic.rmw*.xchg
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw.xchg" (i32.const 0) (i32.const 0x12345678)) (i32.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111112345678))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw.xchg" (i32.const 0) (i64.const 0x0101010102020202)) (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x0101010102020202))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw8_u.xchg" (i32.const 0) (i32.const 0xcdcdcdcd)) (i32.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111111111cd))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw16_u.xchg" (i32.const 0) (i32.const 0xcafecafe)) (i32.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x111111111111cafe))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw8_u.xchg" (i32.const 0) (i64.const 0x4242424242424242)) (i64.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111142))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw16_u.xchg" (i32.const 0) (i64.const 0xbeefbeefbeefbeef)) (i64.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x111111111111beef))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw32_u.xchg" (i32.const 0) (i64.const 0xcabba6e5cabba6e5)) (i64.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111cabba6e5))
+
+;; *.atomic.rmw*.cmpxchg (compare false)
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw.cmpxchg" (i32.const 0) (i32.const 0) (i32.const 0x12345678)) (i32.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw.cmpxchg" (i32.const 0) (i64.const 0) (i64.const 0x0101010102020202)) (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw8_u.cmpxchg" (i32.const 0) (i32.const 0) (i32.const 0xcdcdcdcd)) (i32.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw16_u.cmpxchg" (i32.const 0) (i32.const 0) (i32.const 0xcafecafe)) (i32.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw8_u.cmpxchg" (i32.const 0) (i64.const 0) (i64.const 0x4242424242424242)) (i64.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw16_u.cmpxchg" (i32.const 0) (i64.const 0) (i64.const 0xbeefbeefbeefbeef)) (i64.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw32_u.cmpxchg" (i32.const 0) (i64.const 0) (i64.const 0xcabba6e5cabba6e5)) (i64.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+;; *.atomic.rmw*.cmpxchg (compare true)
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw.cmpxchg" (i32.const 0) (i32.const 0x11111111) (i32.const 0x12345678)) (i32.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111112345678))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw.cmpxchg" (i32.const 0) (i64.const 0x1111111111111111) (i64.const 0x0101010102020202)) (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x0101010102020202))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw8_u.cmpxchg" (i32.const 0) (i32.const 0x11) (i32.const 0xcdcdcdcd)) (i32.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111111111cd))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw16_u.cmpxchg" (i32.const 0) (i32.const 0x1111) (i32.const 0xcafecafe)) (i32.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x111111111111cafe))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw8_u.cmpxchg" (i32.const 0) (i64.const 0x11) (i64.const 0x4242424242424242)) (i64.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111142))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw16_u.cmpxchg" (i32.const 0) (i64.const 0x1111) (i64.const 0xbeefbeefbeefbeef)) (i64.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x111111111111beef))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw32_u.cmpxchg" (i32.const 0) (i64.const 0x11111111) (i64.const 0xcabba6e5cabba6e5)) (i64.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x11111111cabba6e5))

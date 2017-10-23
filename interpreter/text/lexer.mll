@@ -85,14 +85,21 @@ let ext e s u =
   | 'u' -> u
   | _ -> assert false
 
-let rmwop rmw =
-  match rmw with
-  | "add" -> Ast.RmwOp.Add
-  | "sub" -> Ast.RmwOp.Sub
-  | "and" -> Ast.RmwOp.And
-  | "or" -> Ast.RmwOp.Or
-  | "xor" -> Ast.RmwOp.Xor
-  | "xchg" -> Ast.RmwOp.Xchg
+let rmwop t rmw =
+  let open Ast in
+  match t, rmw with
+  | "i32", "add" -> Values.I32 I32Op.RmwAdd
+  | "i64", "add" -> Values.I64 I64Op.RmwAdd
+  | "i32", "sub" -> Values.I32 I32Op.RmwSub
+  | "i64", "sub" -> Values.I64 I64Op.RmwSub
+  | "i32", "and" -> Values.I32 I32Op.RmwAnd
+  | "i64", "and" -> Values.I64 I64Op.RmwAnd
+  | "i32", "or" -> Values.I32 I32Op.RmwOr
+  | "i64", "or" -> Values.I64 I64Op.RmwOr
+  | "i32", "xor" -> Values.I32 I32Op.RmwXor
+  | "i64", "xor" -> Values.I64 I64Op.RmwXor
+  | "i32", "xchg" -> Values.I32 I32Op.RmwXchg
+  | "i64", "xchg" -> Values.I64 I64Op.RmwXchg
   | _ -> assert false
 
 let opt = Lib.Option.get
@@ -275,20 +282,20 @@ rule token = parse
             (i64_atomic_store32 (opt a 2)) o)) }
   | (ixx as t)".atomic.rmw."(rmw as r)
     { ATOMIC_RMW (fun a o ->
-        intop t (i32_atomic_rmw (rmwop r) (opt a 2))
-                (i64_atomic_rmw (rmwop r) (opt a 3)) o) }
+        intop t (i32_atomic_rmw (rmwop t r) (opt a 2))
+                (i64_atomic_rmw (rmwop t r) (opt a 3)) o) }
   | (ixx as t)".atomic.rmw"(mem_size as sz)"_u."(rmw as r)
     { if t = "i32" && sz = "32" then error lexbuf "unknown operator";
       ATOMIC_RMW (fun a o ->
         intop t
           (memsz sz
-            (i32_atomic_rmw8_u (rmwop r) (opt a 0))
-            (i32_atomic_rmw16_u (rmwop r) (opt a 1))
+            (i32_atomic_rmw8_u (rmwop t r) (opt a 0))
+            (i32_atomic_rmw16_u (rmwop t r) (opt a 1))
             (fun _ -> unreachable) o)
           (memsz sz
-            (i64_atomic_rmw8_u (rmwop r) (opt a 0))
-            (i64_atomic_rmw16_u (rmwop r) (opt a 1))
-            (i64_atomic_rmw32_u (rmwop r) (opt a 2)) o)) }
+            (i64_atomic_rmw8_u (rmwop t r) (opt a 0))
+            (i64_atomic_rmw16_u (rmwop t r) (opt a 1))
+            (i64_atomic_rmw32_u (rmwop t r) (opt a 2)) o)) }
   | (ixx as t)".atomic.rmw.cmpxchg"
     { ATOMIC_RMW_CMPXCHG (fun a o ->
         intop t (i32_atomic_rmw_cmpxchg (opt a 2))
