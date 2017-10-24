@@ -27,6 +27,16 @@ let mem_size = function
   | Mem16 -> 2
   | Mem32 -> 4
 
+let mem_size_opt t sz =
+  match sz with
+  | None -> Types.size t
+  | Some s -> mem_size s
+
+let is_aligned a t sz =
+  let align = mem_size_opt t sz in
+  let mask = align - 1 in
+  Int64.(logand a (of_int mask)) = 0L
+
 let within_limits n = function
   | None -> true
   | Some max -> I32.le_u n max

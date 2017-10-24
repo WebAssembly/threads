@@ -199,6 +199,15 @@ let extension = function
   | Memory.SX -> "_s"
   | Memory.ZX -> "_u"
 
+let rmw = function
+  | I32 I32Op.RmwAdd | I64 I64Op.RmwAdd -> "add"
+  | I32 I32Op.RmwSub | I64 I64Op.RmwSub -> "sub"
+  | I32 I32Op.RmwAnd | I64 I64Op.RmwAnd -> "and"
+  | I32 I32Op.RmwOr | I64 I64Op.RmwOr -> "or"
+  | I32 I32Op.RmwXor | I64 I64Op.RmwXor -> "xor"
+  | I32 I32Op.RmwXchg | I64 I64Op.RmwXchg -> "xchg"
+  | _ -> assert false
+
 let memop name {ty; align; offset; _} =
   value_type ty ^ "." ^ name ^
   (if offset = 0l then "" else " offset=" ^ nat32 offset) ^
@@ -213,6 +222,26 @@ let storeop op =
   match op.sz with
   | None -> memop "store" op
   | Some sz -> memop ("store" ^ mem_size sz) op
+
+let atomicloadop op =
+  match op.sz with
+  | None -> memop "atomic.load" op
+  | Some sz -> memop ("atomic.load" ^ mem_size sz ^ "_u") op
+
+let atomicstoreop op =
+  match op.sz with
+  | None -> memop "atomic.store" op
+  | Some sz -> memop ("atomic.store" ^ mem_size sz) op
+
+let atomicrmwop op rmwop =
+  match op.sz with
+  | None -> memop ("atomic.rmw." ^ rmw rmwop) op
+  | Some sz -> memop ("atomic.rmw" ^ mem_size sz ^ "_u." ^ rmw rmwop) op
+
+let atomicrmwcmpxchgop op =
+  match op.sz with
+  | None -> memop "atomic.rmw.cmpxchg" op
+  | Some sz -> memop ("atomic.rmw" ^ mem_size sz ^ "_u.cmpxchg") op
 
 
 (* Expressions *)
@@ -255,6 +284,10 @@ let rec instr e =
     | Unary op -> unop op, []
     | Binary op -> binop op, []
     | Convert op -> cvtop op, []
+    | AtomicLoad op -> atomicloadop op, []
+    | AtomicStore op -> atomicstoreop op, []
+    | AtomicRmw (rmwop, op) -> atomicrmwop op rmwop, []
+    | AtomicRmwCmpXchg op -> atomicrmwcmpxchgop op, []
   in Node (head, inner)
 
 let const c =

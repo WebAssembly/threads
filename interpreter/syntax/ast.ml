@@ -31,6 +31,7 @@ struct
   type cvtop = ExtendSI32 | ExtendUI32 | WrapI64
              | TruncSF32 | TruncUF32 | TruncSF64 | TruncUF64
              | ReinterpretFloat
+  type rmwop = RmwAdd | RmwSub | RmwAnd | RmwOr | RmwXor | RmwXchg
 end
 
 module FloatOp =
@@ -42,6 +43,7 @@ struct
   type cvtop = ConvertSI32 | ConvertUI32 | ConvertSI64 | ConvertUI64
              | PromoteF32 | DemoteF64
              | ReinterpretInt
+  type rmwop
 end
 
 module I32Op = IntOp
@@ -54,11 +56,16 @@ type binop = (I32Op.binop, I64Op.binop, F32Op.binop, F64Op.binop) Values.op
 type testop = (I32Op.testop, I64Op.testop, F32Op.testop, F64Op.testop) Values.op
 type relop = (I32Op.relop, I64Op.relop, F32Op.relop, F64Op.relop) Values.op
 type cvtop = (I32Op.cvtop, I64Op.cvtop, F32Op.cvtop, F64Op.cvtop) Values.op
+type rmwop = (I32Op.rmwop, I64Op.rmwop, F32Op.rmwop, F64Op.rmwop) Values.op
 
 type 'a memop =
   {ty : value_type; align : int; offset : Memory.offset; sz : 'a option}
 type loadop = (Memory.mem_size * Memory.extension) memop
 type storeop = Memory.mem_size memop
+type atomicloadop = storeop (* Memory.extension isn't used. *)
+type atomicstoreop = storeop
+type atomicrmwop = rmwop * storeop
+type atomicrmwcmpxchgop = storeop
 
 
 (* Expressions *)
@@ -97,6 +104,10 @@ and instr' =
   | Unary of unop                     (* unary numeric operator *)
   | Binary of binop                   (* binary numeric operator *)
   | Convert of cvtop                  (* conversion *)
+  | AtomicLoad of atomicloadop        (* atomically read memory at address *)
+  | AtomicStore of atomicstoreop      (* atomically write memory at address *)
+  | AtomicRmw of atomicrmwop          (* atomically read, modify, write memory at address *)
+  | AtomicRmwCmpXchg of atomicrmwcmpxchgop   (* atomically compare and exchange memory at address *)
 
 
 (* Globals & Functions *)

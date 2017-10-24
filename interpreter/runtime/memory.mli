@@ -19,6 +19,7 @@ exception OutOfMemory
 
 val page_size : int64
 val mem_size : mem_size -> int
+val is_aligned : address -> value_type -> mem_size option -> bool
 
 val alloc : memory_type -> memory (* raises SizeOverflow, OutOfMemory *)
 val type_of : memory -> memory_type

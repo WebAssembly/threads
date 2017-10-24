@@ -208,6 +208,154 @@ let encode m =
       | Store ({ty = I64Type; sz = Some Mem32; _} as mo) -> op 0x3e; memop mo
       | Store {ty = F32Type | F64Type; sz = Some _; _} -> assert false
 
+      | AtomicLoad ({ty = I32Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x10; memop mo
+      | AtomicLoad ({ty = I64Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x11; memop mo
+      | AtomicLoad ({ty = I32Type; sz = Some Mem8; _} as mo) ->
+        op 0xfe; op 0x12; memop mo
+      | AtomicLoad ({ty = I32Type; sz = Some Mem16; _} as mo) ->
+        op 0xfe; op 0x13; memop mo
+      | AtomicLoad {ty = I32Type; sz = Some Mem32; _} -> assert false
+      | AtomicLoad ({ty = I64Type; sz = Some Mem8; _} as mo) ->
+        op 0xfe; op 0x14; memop mo
+      | AtomicLoad ({ty = I64Type; sz = Some Mem16; _} as mo) ->
+        op 0xfe; op 0x15; memop mo
+      | AtomicLoad ({ty = I64Type; sz = Some Mem32; _} as mo) ->
+        op 0xfe; op 0x16; memop mo
+      | AtomicLoad {ty = F32Type | F64Type; _} -> assert false
+
+      | AtomicStore ({ty = I32Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x17; memop mo
+      | AtomicStore ({ty = I64Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x18; memop mo
+      | AtomicStore ({ty = I32Type; sz = Some Mem8; _} as mo) ->
+        op 0xfe; op 0x19; memop mo
+      | AtomicStore ({ty = I32Type; sz = Some Mem16; _} as mo) ->
+        op 0xfe; op 0x1a; memop mo
+      | AtomicStore {ty = I32Type; sz = Some Mem32; _} -> assert false
+      | AtomicStore ({ty = I64Type; sz = Some Mem8; _} as mo) ->
+        op 0xfe; op 0x1b; memop mo
+      | AtomicStore ({ty = I64Type; sz = Some Mem16; _} as mo) ->
+        op 0xfe; op 0x1c; memop mo
+      | AtomicStore ({ty = I64Type; sz = Some Mem32; _} as mo) ->
+        op 0xfe; op 0x1d; memop mo
+      | AtomicStore {ty = F32Type | F64Type; _} -> assert false
+
+      | AtomicRmw (I32 I32Op.RmwAdd, ({ty = I32Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x1e; memop mo
+      | AtomicRmw (I64 I64Op.RmwAdd, ({ty = I64Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x1f; memop mo
+      | AtomicRmw (I32 I32Op.RmwAdd, ({ty = I32Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x20; memop mo
+      | AtomicRmw (I32 I32Op.RmwAdd, ({ty = I32Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x21; memop mo
+      | AtomicRmw (I64 I64Op.RmwAdd, ({ty = I64Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x22; memop mo
+      | AtomicRmw (I64 I64Op.RmwAdd, ({ty = I64Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x23; memop mo
+      | AtomicRmw (I64 I64Op.RmwAdd, ({ty = I64Type; sz = Some Mem32; _} as mo)) ->
+        op 0xfe; op 0x24; memop mo
+
+      | AtomicRmw (I32 I32Op.RmwSub, ({ty = I32Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x25; memop mo
+      | AtomicRmw (I64 I64Op.RmwSub, ({ty = I64Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x26; memop mo
+      | AtomicRmw (I32 I32Op.RmwSub, ({ty = I32Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x27; memop mo
+      | AtomicRmw (I32 I32Op.RmwSub, ({ty = I32Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x28; memop mo
+      | AtomicRmw (I64 I64Op.RmwSub, ({ty = I64Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x29; memop mo
+      | AtomicRmw (I64 I64Op.RmwSub, ({ty = I64Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x2a; memop mo
+      | AtomicRmw (I64 I64Op.RmwSub, ({ty = I64Type; sz = Some Mem32; _} as mo)) ->
+        op 0xfe; op 0x2b; memop mo
+
+      | AtomicRmw (I32 I32Op.RmwAnd, ({ty = I32Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x2c; memop mo
+      | AtomicRmw (I64 I64Op.RmwAnd, ({ty = I64Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x2d; memop mo
+      | AtomicRmw (I32 I32Op.RmwAnd, ({ty = I32Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x2e; memop mo
+      | AtomicRmw (I32 I32Op.RmwAnd, ({ty = I32Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x2f; memop mo
+      | AtomicRmw (I64 I64Op.RmwAnd, ({ty = I64Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x30; memop mo
+      | AtomicRmw (I64 I64Op.RmwAnd, ({ty = I64Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x31; memop mo
+      | AtomicRmw (I64 I64Op.RmwAnd, ({ty = I64Type; sz = Some Mem32; _} as mo)) ->
+        op 0xfe; op 0x32; memop mo
+
+      | AtomicRmw (I32 I32Op.RmwOr, ({ty = I32Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x33; memop mo
+      | AtomicRmw (I64 I64Op.RmwOr, ({ty = I64Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x34; memop mo
+      | AtomicRmw (I32 I32Op.RmwOr, ({ty = I32Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x35; memop mo
+      | AtomicRmw (I32 I32Op.RmwOr, ({ty = I32Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x36; memop mo
+      | AtomicRmw (I64 I64Op.RmwOr, ({ty = I64Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x37; memop mo
+      | AtomicRmw (I64 I64Op.RmwOr, ({ty = I64Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x38; memop mo
+      | AtomicRmw (I64 I64Op.RmwOr, ({ty = I64Type; sz = Some Mem32; _} as mo)) ->
+        op 0xfe; op 0x39; memop mo
+
+      | AtomicRmw (I32 I32Op.RmwXor, ({ty = I32Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x3a; memop mo
+      | AtomicRmw (I64 I64Op.RmwXor, ({ty = I64Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x3b; memop mo
+      | AtomicRmw (I32 I32Op.RmwXor, ({ty = I32Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x3c; memop mo
+      | AtomicRmw (I32 I32Op.RmwXor, ({ty = I32Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x3d; memop mo
+      | AtomicRmw (I64 I64Op.RmwXor, ({ty = I64Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x3e; memop mo
+      | AtomicRmw (I64 I64Op.RmwXor, ({ty = I64Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x3f; memop mo
+      | AtomicRmw (I64 I64Op.RmwXor, ({ty = I64Type; sz = Some Mem32; _} as mo)) ->
+        op 0xfe; op 0x40; memop mo
+
+      | AtomicRmw (I32 I32Op.RmwXchg, ({ty = I32Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x41; memop mo
+      | AtomicRmw (I64 I64Op.RmwXchg, ({ty = I64Type; sz = None; _} as mo)) ->
+        op 0xfe; op 0x42; memop mo
+      | AtomicRmw (I32 I32Op.RmwXchg, ({ty = I32Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x43; memop mo
+      | AtomicRmw (I32 I32Op.RmwXchg, ({ty = I32Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x44; memop mo
+      | AtomicRmw (I64 I64Op.RmwXchg, ({ty = I64Type; sz = Some Mem8; _} as mo)) ->
+        op 0xfe; op 0x45; memop mo
+      | AtomicRmw (I64 I64Op.RmwXchg, ({ty = I64Type; sz = Some Mem16; _} as mo)) ->
+        op 0xfe; op 0x46; memop mo
+      | AtomicRmw (I64 I64Op.RmwXchg, ({ty = I64Type; sz = Some Mem32; _} as mo)) ->
+        op 0xfe; op 0x47; memop mo
+
+      | AtomicRmw (I32 _, {ty = I64Type; _}) -> assert false
+      | AtomicRmw (I64 _, {ty = I32Type; _}) -> assert false
+      | AtomicRmw ((F32 _ | F64 _), _) -> assert false
+      | AtomicRmw (_, {ty = I32Type; sz = Some Mem32; _}) -> assert false
+      | AtomicRmw (_, {ty = F32Type | F64Type; _}) -> assert false
+
+      | AtomicRmwCmpXchg ({ty = I32Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x48; memop mo
+      | AtomicRmwCmpXchg ({ty = I64Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x49; memop mo
+      | AtomicRmwCmpXchg ({ty = I32Type; sz = Some Mem8; _} as mo) ->
+        op 0xfe; op 0x4a; memop mo
+      | AtomicRmwCmpXchg ({ty = I32Type; sz = Some Mem16; _} as mo) ->
+        op 0xfe; op 0x4b; memop mo
+      | AtomicRmwCmpXchg {ty = I32Type; sz = Some Mem32; _} -> assert false
+      | AtomicRmwCmpXchg ({ty = I64Type; sz = Some Mem8; _} as mo) ->
+        op 0xfe; op 0x4c; memop mo
+      | AtomicRmwCmpXchg ({ty = I64Type; sz = Some Mem16; _} as mo) ->
+        op 0xfe; op 0x4d; memop mo
+      | AtomicRmwCmpXchg ({ty = I64Type; sz = Some Mem32; _} as mo) ->
+        op 0xfe; op 0x4e; memop mo
+      | AtomicRmwCmpXchg {ty = F32Type | F64Type; _} -> assert false
+
+
       | CurrentMemory -> op 0x3f; u8 0x00
       | GrowMemory -> op 0x40; u8 0x00
 
