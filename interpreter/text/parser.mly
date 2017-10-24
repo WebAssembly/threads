@@ -145,7 +145,7 @@ let inline_type_explicit (c : context) x ft at =
 
 %}
 
-%token NAT INT FLOAT STRING VAR VALUE_TYPE ANYFUNC MUT LPAR RPAR
+%token NAT INT FLOAT STRING VAR VALUE_TYPE ANYFUNC MUT SHARED LPAR RPAR
 %token NOP DROP BLOCK END IF THEN ELSE SELECT LOOP BR BR_IF BR_TABLE
 %token CALL CALL_INDIRECT RETURN
 %token GET_LOCAL SET_LOCAL TEE_LOCAL GET_GLOBAL SET_GLOBAL
@@ -235,7 +235,8 @@ table_sig :
   | limits elem_type { TableType ($1, $2) }
 
 memory_sig :
-  | limits { MemoryType $1 }
+  | limits { MemoryType ($1, Unshared) }
+  | LPAR SHARED limits RPAR { MemoryType ($3, Shared) }
 
 limits :
   | NAT { {min = nat32 $1 (ati 1); max = None} }
@@ -532,7 +533,7 @@ memory_fields :
   | LPAR DATA string_list RPAR  /* Sugar */
     { fun c x at ->
       let size = Int32.(div (add (of_int (String.length $3)) 65535l) 65536l) in
-      [{mtype = MemoryType {min = size; max = Some size}} @@ at],
+      [{mtype = MemoryType ({min = size; max = Some size}, Unshared)} @@ at],
       [{index = x;
         offset = [i32_const (0l @@ at) @@ at] @@ at; init = $3} @@ at],
       [], [] }

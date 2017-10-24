@@ -155,6 +155,12 @@ let check_memop (c : context) (memop : 'a memop) get_sz at =
   require (1 lsl memop.align <= size) at
     "alignment must not be larger than natural"
 
+let check_atomic_memop (c : context) (memop : 'a memop) get_sz at =
+  check_memop c memop get_sz at;
+  let MemoryType (lim, share) = memory c (0l @@ at) in
+  require (share = Shared) at "atomic accesses require shared memory"
+
+
 let check_arity n at =
   require (n <= 1) at "invalid result arity, larger than 1 is not (yet) allowed"
 
@@ -293,19 +299,19 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     [t1] --> [t2]
 
   | AtomicLoad memop ->
-    check_memop c memop (fun sz -> sz) e.at;
+    check_atomic_memop c memop (fun sz -> sz) e.at;
     [I32Type] --> [memop.ty]
 
   | AtomicStore memop ->
-    check_memop c memop (fun sz -> sz) e.at;
+    check_atomic_memop c memop (fun sz -> sz) e.at;
     [I32Type; memop.ty] --> []
 
   | AtomicRmw (rmwop, memop) ->
-    check_memop c memop (fun sz -> sz) e.at;
+    check_atomic_memop c memop (fun sz -> sz) e.at;
     [I32Type; memop.ty] --> [memop.ty]
 
   | AtomicRmwCmpXchg memop ->
-    check_memop c memop (fun sz -> sz) e.at;
+    check_atomic_memop c memop (fun sz -> sz) e.at;
     [I32Type; memop.ty; memop.ty] --> [memop.ty]
 
 and check_seq (c : context) (es : instr list) : infer_stack_type =
@@ -354,7 +360,7 @@ let check_memory_size (sz : I32.t) at =
     "memory size must be at most 65536 pages (4GiB)"
 
 let check_memory_type (mt : memory_type) at =
-  let MemoryType lim = mt in
+  let MemoryType (lim, _) = mt in
   check_limits lim at;
   check_memory_size lim.min at;
   Lib.Option.app (fun max -> check_memory_size max at) lim.max

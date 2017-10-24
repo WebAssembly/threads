@@ -193,6 +193,7 @@ rule token = parse
     }
   | "anyfunc" { ANYFUNC }
   | "mut" { MUT }
+  | "shared" { SHARED }
 
   | "nop" { NOP }
   | "unreachable" { UNREACHABLE }
