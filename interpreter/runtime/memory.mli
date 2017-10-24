@@ -16,7 +16,6 @@ exception Bounds
 exception SizeOverflow
 exception SizeLimit
 exception OutOfMemory
-exception UnalignedAtomic
 
 val page_size : int64
 val mem_size : mem_size -> int

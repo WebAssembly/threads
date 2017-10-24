@@ -21,7 +21,6 @@ let memory_error at = function
   | Memory.Bounds -> "out of bounds memory access"
   | Memory.SizeOverflow -> "memory size overflow"
   | Memory.SizeLimit -> "memory size limit reached"
-  | Memory.UnalignedAtomic -> "unaligned atomic memory access"
   | Memory.Type -> Crash.error at "type mismatch at memory access"
   | exn -> raise exn
 
@@ -101,8 +100,9 @@ let take n (vs : 'a stack) at =
 let drop n (vs : 'a stack) at =
   try Lib.List.drop n vs with Failure _ -> Crash.error at "stack underflow"
 
-let check_align addr ty sz =
-  if not (Memory.is_aligned addr ty sz) then raise Memory.UnalignedAtomic
+let check_align addr ty sz at =
+  if not (Memory.is_aligned addr ty sz) then
+    Trap.error at "unaligned atomic memory access"
 
 
 (* Evaluation *)
@@ -222,7 +222,7 @@ let rec step (c : config) : config =
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_u_i32 i in
         (try
-          check_align addr ty sz;
+          check_align addr ty sz e.at;
           let v =
             match sz with
             | None -> Memory.load_value mem addr offset ty
@@ -234,7 +234,7 @@ let rec step (c : config) : config =
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_u_i32 i in
         (try
-          check_align addr ty sz;
+          check_align addr ty sz e.at;
           (match sz with
           | None -> Memory.store_value mem addr offset v
           | Some sz -> Memory.store_packed sz mem addr offset v
@@ -246,7 +246,7 @@ let rec step (c : config) : config =
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_u_i32 i in
         (try
-          check_align addr ty sz;
+          check_align addr ty sz e.at;
           let v1 =
             match sz with
             | None -> Memory.load_value mem addr offset ty
@@ -263,7 +263,7 @@ let rec step (c : config) : config =
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_u_i32 i in
         (try
-          check_align addr ty sz;
+          check_align addr ty sz e.at;
           let v1 =
             match sz with
             | None -> Memory.load_value mem addr offset ty

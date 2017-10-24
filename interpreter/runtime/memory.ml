@@ -19,7 +19,6 @@ exception Bounds
 exception SizeOverflow
 exception SizeLimit
 exception OutOfMemory
-exception UnalignedAtomic
 
 let page_size = 0x10000L (* 64 KiB *)
 

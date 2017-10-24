@@ -68,14 +68,13 @@ struct
     in fun v1 v2 -> f (of_value 1 v1) (of_value 2 v2)
 
   let rmwop op =
-    let xchg x y = y in (* Return the "new" value, y *)
     let f = match op with
       | RmwAdd -> IXX.add
       | RmwSub -> IXX.sub
       | RmwAnd -> IXX.and_
       | RmwOr -> IXX.or_
       | RmwXor -> IXX.xor
-      | RmwXchg -> xchg
+      | RmwXchg -> fun x y -> y (* Return the "new" value, y *)
     in fun v1 v2 -> to_value (f (of_value 1 v1) (of_value 2 v2))
 end
 
