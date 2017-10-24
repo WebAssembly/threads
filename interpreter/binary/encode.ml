@@ -108,14 +108,14 @@ let encode m =
     let func_type = function
       | FuncType (ins, out) -> vs7 (-0x20); vec value_type ins; vec value_type out
 
-    let limits f1 {min; max} =
-      bool2 (max <> None) f1; vu32 min; opt vu32 max
+    let limits vu f1 {min; max} =
+      bool2 (max <> None) f1; vu min; opt vu max
 
     let table_type = function
-      | TableType (lim, t) -> elem_type t; limits false lim
+      | TableType (lim, t) -> elem_type t; limits vu32 false lim
 
     let memory_type = function
-      | MemoryType (lim, share) -> limits (share = Shared) lim
+      | MemoryType (lim, share) -> limits vu32 (share = Shared) lim
 
     let mutability = function
       | Immutable -> u8 0
