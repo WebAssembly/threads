@@ -142,8 +142,8 @@ let check_unop unop at =
   | Values.I32 I32Op.Extend32S -> error at "invalid unary operator"
   | _ -> ()
 
-let check_memop (c : context) (memop : 'a memop) get_sz at =
-  ignore (memory c (0l @@ at));
+let check_memop (c : context) (memop : 'a memop) get_sz sh at =
+  let MemoryType (_, share) = memory c (0l @@ at) in
   let size =
     match get_sz memop.sz with
     | None -> size memop.ty
@@ -153,13 +153,8 @@ let check_memop (c : context) (memop : 'a memop) get_sz at =
       Memory.mem_size sz
   in
   require (1 lsl memop.align <= size) at
-    "alignment must not be larger than natural"
-
-let check_atomic_memop (c : context) (memop : 'a memop) get_sz at =
-  check_memop c memop get_sz at;
-  let MemoryType (lim, share) = memory c (0l @@ at) in
-  require (share = Shared) at "atomic accesses require shared memory"
-
+    "alignment must not be larger than natural";
+  require (sh = None || sh = Some share) at "atomic accesses require shared memory"
 
 let check_arity n at =
   require (n <= 1) at "invalid result arity, larger than 1 is not (yet) allowed"
@@ -258,11 +253,11 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     [t] --> []
 
   | Load memop ->
-    check_memop c memop (Lib.Option.map fst) e.at;
+    check_memop c memop (Lib.Option.map fst) None e.at;
     [I32Type] --> [memop.ty]
 
   | Store memop ->
-    check_memop c memop (fun sz -> sz) e.at;
+    check_memop c memop (fun sz -> sz) None e.at;
     [I32Type; memop.ty] --> []
 
   | CurrentMemory ->
@@ -299,19 +294,19 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     [t1] --> [t2]
 
   | AtomicLoad memop ->
-    check_atomic_memop c memop (fun sz -> sz) e.at;
+    check_memop c memop (fun sz -> sz) (Some Shared) e.at;
     [I32Type] --> [memop.ty]
 
   | AtomicStore memop ->
-    check_atomic_memop c memop (fun sz -> sz) e.at;
+    check_memop c memop (fun sz -> sz) (Some Shared) e.at;
     [I32Type; memop.ty] --> []
 
   | AtomicRmw (rmwop, memop) ->
-    check_atomic_memop c memop (fun sz -> sz) e.at;
+    check_memop c memop (fun sz -> sz) (Some Shared) e.at;
     [I32Type; memop.ty] --> [memop.ty]
 
   | AtomicRmwCmpXchg memop ->
-    check_atomic_memop c memop (fun sz -> sz) e.at;
+    check_memop c memop (fun sz -> sz) (Some Shared) e.at;
     [I32Type; memop.ty; memop.ty] --> [memop.ty]
 
 and check_seq (c : context) (es : instr list) : infer_stack_type =
@@ -360,9 +355,11 @@ let check_memory_size (sz : I32.t) at =
     "memory size must be at most 65536 pages (4GiB)"
 
 let check_memory_type (mt : memory_type) at =
-  let MemoryType (lim, _) = mt in
+  let MemoryType (lim, share) = mt in
   check_limits lim at;
   check_memory_size lim.min at;
+  require (share = Unshared || lim.max <> None) at
+    "shared memory must have maximum";
   Lib.Option.app (fun max -> check_memory_size max at) lim.max
 
 let check_global_type (gt : global_type) at =

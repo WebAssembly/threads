@@ -323,7 +323,7 @@ let table off i tab =
 
 let memory_type = function
   | MemoryType (lim, Unshared) -> atom (limits nat32) lim
-  | MemoryType (lim, Shared) -> Node ("share", [atom (limits nat32) lim])
+  | MemoryType (lim, Shared) -> Node ("shared", [atom (limits nat32) lim])
 
 let memory off i mem =
   let {mtype} = mem.it in

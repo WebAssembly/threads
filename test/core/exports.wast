@@ -169,6 +169,13 @@
 (module (export "a" (memory $a)) (memory $a 0))
 (module (export "a" (memory $a)) (memory $a 0 1))
 
+(module (memory (export "a") (shared 0 1)))
+(module (memory (shared 0 1)) (export "a" (memory 0)))
+(module (memory $a (export "a") (shared 0 1)))
+(module (memory $a (shared 0 1)) (export "a" (memory $a)))
+(module (export "a" (memory 0)) (memory (shared 0 1)))
+(module (export "a" (memory $a)) (memory $a (shared 0 1)))
+
 (; TODO: access memory ;)
 
 (assert_invalid

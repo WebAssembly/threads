@@ -41,7 +41,7 @@ let match_table_type (TableType (lim1, et1)) (TableType (lim2, et2)) =
   et1 = et2 && match_limits lim1 lim2
 
 let match_memory_type (MemoryType (lim1, sh1)) (MemoryType (lim2, sh2)) =
-  sh1 == sh2 && match_limits lim1 lim2
+  sh1 = sh2 && match_limits lim1 lim2
 
 let match_global_type gt1 gt2 =
   gt1 = gt2

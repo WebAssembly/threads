@@ -3,6 +3,8 @@
 (module (memory 0 1))
 (module (memory 1 256))
 (module (memory 0 65536))
+(module (memory (shared 0 0)))
+(module (memory (shared 1 2)))
 (module (memory 0 0) (data (i32.const 0)))
 (module (memory 0 0) (data (i32.const 0) ""))
 (module (memory 1 1) (data (i32.const 0) "a"))
@@ -15,6 +17,9 @@
 ;; Use of internal globals in constant expressions is not allowed in MVP.
 ;; (module (memory 1) (data (get_global 0) "a") (global i32 (i32.const 0)))
 ;; (module (memory 1) (data (get_global $g) "a") (global $g i32 (i32.const 0)))
+
+;; Shared memory must have a maximum size
+(assert_invalid (module (memory (shared 1))) "shared memory must have maximum")
 
 (assert_invalid (module (memory 0) (memory 0)) "multiple memories")
 (assert_invalid (module (memory (import "spectest" "memory") 0) (memory 0)) "multiple memories")
