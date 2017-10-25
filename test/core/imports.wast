@@ -490,6 +490,10 @@
   (module (import "spectest" "shared_memory" (memory 1 2)))
   "incompatible import type")
 
+(assert_unlinkable
+  (module (import "spectest" "memory" (memory (shared 1 2))))
+  "incompatible import type")
+
 
 ;; Syntax errors
 

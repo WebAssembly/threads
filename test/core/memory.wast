@@ -18,7 +18,6 @@
 ;; (module (memory 1) (data (get_global 0) "a") (global i32 (i32.const 0)))
 ;; (module (memory 1) (data (get_global $g) "a") (global $g i32 (i32.const 0)))
 
-;; Shared memory must have a maximum size
 (assert_invalid (module (memory (shared 1))) "shared memory must have maximum")
 
 (assert_invalid (module (memory 0) (memory 0)) "multiple memories")
