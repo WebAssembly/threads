@@ -357,10 +357,10 @@ let check_memory_size (sz : I32.t) at =
     "memory size must be at most 65536 pages (4GiB)"
 
 let check_memory_type (mt : memory_type) at =
-  let MemoryType (lim, share) = mt in
+  let MemoryType (lim, shared) = mt in
   check_limits lim at;
   check_memory_size lim.min at;
-  require (share = Unshared || lim.max <> None) at
+  require (shared = Unshared || lim.max <> None) at
     "shared memory must have maximum";
   Lib.Option.app (fun max -> check_memory_size max at) lim.max
 
