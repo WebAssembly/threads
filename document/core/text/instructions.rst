@@ -222,6 +222,8 @@ Lexically, an |Toffset| or |Talign| phrase is considered a single :ref:`keyword 
 Atomic Memory Instructions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. _text-wake:
+.. _text-wait:
 .. _text-atomic-load:
 .. _text-atomic-loadn:
 .. _text-atomic-store:
@@ -234,7 +236,15 @@ The offset immediate to atomic memory instructions is optional, and defaults to
 
 .. math::
    \begin{array}{llclll}
-   \production{instruction} & \Tplaininstr_I &::=& \dots \\ &&|&
+   \production{instruction} & \Tplaininstr_I &::=& \dots \phantom{thisshouldbeenoughnowitissee} && \phantom{thisshouldbeenough} \\ &&|&
+     \text{wake}~~m{:}\Tmemarg_4 &\Rightarrow& \WAKE~m \\ &&|&
+     \text{i32.wait}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\WAIT~m \\ &&|&
+     \text{i64.wait}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\WAIT~m \\
+   \end{array}
+
+.. math::
+   \begin{array}{llclll}
+   \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \text{i32.atomic{.}load}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICLOAD~m \\ &&|&
      \text{i64.atomic{.}load}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICLOAD~m \\ &&|&
      \text{i32.atomic{.}load8\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICLOAD\K{8\_u}~m \\ &&|&

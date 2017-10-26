@@ -292,6 +292,8 @@ Instructions in this group are concerned with accessing :ref:`linear memory <syn
      \ATOMICXCHG \\
    \production{instruction} & \instr &::=&
      \dots ~|~ \\&&&
+     \WAKE~\memarg ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\WAIT~\memarg ~|~ \\&&&
      \K{i}\X{nn}\K{.}\ATOMICLOAD~\memarg ~|~ \\&&&
      \K{i}\X{nn}\K{.}\ATOMICSTORE~\memarg ~|~ \\&&&
      \K{i}\X{nn}\K{.}\ATOMICLOAD\K{8\_u}~\memarg ~|~
@@ -326,6 +328,13 @@ doesn't use the read value, but instead stores its argument unmodified. The
 this action conditionally, if the read value is equal to a provided comparison
 argument. All other :ref:`atomicops <syntax-atomicop>` have behavior of the
 :ref:`ibinop <syntax-ibinop>` of the same name.
+
+The |WAKE| and |WAIT| instructions provide primitive synchronization between
+:ref:`threads <syntax-thread>`. The |WAIT| instructions atomically load a value
+from the calculated *effective address* and compare it to an expected value. If
+they are equal, the thread is then suspended until a given timeout expires or
+another thread wakes it. The |WAKE| instruction wakes threads that are waiting
+on a given address, up to a given maximum.
 
 
 .. index:: ! control instruction, ! structured control, ! label, ! block, ! branch, ! unwinding, result type, label index, function index, type index, vector, trap, function, table, function type
