@@ -436,7 +436,7 @@ Atomic Memory Instructions
 :math:`\WAKE~\memarg`
 .....................
 
-* The memory :math:`C.\MEMS[0]` must be defined in the context.
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`4`.
 
@@ -444,7 +444,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\MEMS[0] = \memtype
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = 4
    }{
@@ -456,7 +456,7 @@ Atomic Memory Instructions
 :math:`t\K{.}\WAIT~\memarg`
 ...........................
 
-* The memory :math:`C.\MEMS[0]` must be defined in the context.
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
@@ -464,7 +464,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\MEMS[0] = \memtype
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
