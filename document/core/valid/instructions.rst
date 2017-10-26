@@ -436,7 +436,7 @@ Atomic Memory Instructions
 :math:`t\K{.}\ATOMICLOAD~\memarg`
 .................................
 
-* The memory :math:`C.\MEMS[0]` must be defined in the context.
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
@@ -444,7 +444,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\MEMS[0] = \memtype
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -457,7 +457,7 @@ Atomic Memory Instructions
 :math:`t\K{.}\ATOMICLOAD{N}\K{\_u}~\memarg`
 ...........................................
 
-* The memory :math:`C.\MEMS[0]` must be defined in the context.
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
@@ -465,7 +465,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\MEMS[0] = \memtype
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
@@ -478,7 +478,7 @@ Atomic Memory Instructions
 :math:`t\K{.}\ATOMICSTORE~\memarg`
 ..................................
 
-* The memory :math:`C.\MEMS[0]` must be defined in the context.
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
@@ -486,7 +486,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\MEMS[0] = \memtype
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -499,7 +499,7 @@ Atomic Memory Instructions
 :math:`t\K{.}\ATOMICSTORE{N}~\memarg`
 ............................................
 
-* The memory :math:`C.\MEMS[0]` must be defined in the context.
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
@@ -507,7 +507,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\MEMS[0] = \memtype
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
@@ -520,7 +520,7 @@ Atomic Memory Instructions
 :math:`t\K{.}\ATOMICRMW\K{.}\atomicop~\memarg`
 ..............................................
 
-* The memory :math:`C.\MEMS[0]` must be defined in the context.
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
@@ -528,7 +528,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\MEMS[0] = \memtype
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -540,7 +540,7 @@ Atomic Memory Instructions
 :math:`t\K{.}\ATOMICRMW{N}\K{\_u.}\atomicop~\memarg`
 ....................................................
 
-* The memory :math:`C.\MEMS[0]` must be defined in the context.
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
@@ -548,7 +548,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\MEMS[0] = \memtype
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
@@ -560,7 +560,7 @@ Atomic Memory Instructions
 :math:`t\K{.}\ATOMICRMW\K{.}\ATOMICCMPXCHG~\memarg`
 ...................................................
 
-* The memory :math:`C.\MEMS[0]` must be defined in the context.
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
@@ -568,7 +568,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\MEMS[0] = \memtype
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -580,7 +580,7 @@ Atomic Memory Instructions
 :math:`t\K{.}\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg`
 .........................................................
 
-* The memory :math:`C.\MEMS[0]` must be defined in the context.
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
@@ -588,7 +588,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\MEMS[0] = \memtype
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
