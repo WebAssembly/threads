@@ -142,8 +142,9 @@ let check_unop unop at =
   | Values.I32 I32Op.Extend32S -> error at "invalid unary operator"
   | _ -> ()
 
-let check_memop (c : context) (memop : 'a memop) get_sz sh at =
-  let MemoryType (_, share) = memory c (0l @@ at) in
+let check_memop (c : context) (memop : 'a memop) (sh: sharability option)
+    get_sz at =
+  let MemoryType (_, shared) = memory c (0l @@ at) in
   let size =
     match get_sz memop.sz with
     | None -> size memop.ty
@@ -154,7 +155,8 @@ let check_memop (c : context) (memop : 'a memop) get_sz sh at =
   in
   require (1 lsl memop.align <= size) at
     "alignment must not be larger than natural";
-  require (sh = None || sh = Some share) at "atomic accesses require shared memory"
+  require (sh = None || sh = Some shared) at
+    "atomic accesses require shared memory"
 
 let check_arity n at =
   require (n <= 1) at "invalid result arity, larger than 1 is not (yet) allowed"
@@ -253,11 +255,11 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     [t] --> []
 
   | Load memop ->
-    check_memop c memop (Lib.Option.map fst) None e.at;
+    check_memop c memop None (Lib.Option.map fst) e.at;
     [I32Type] --> [memop.ty]
 
   | Store memop ->
-    check_memop c memop (fun sz -> sz) None e.at;
+    check_memop c memop None (fun sz -> sz) e.at;
     [I32Type; memop.ty] --> []
 
   | CurrentMemory ->
@@ -294,19 +296,19 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     [t1] --> [t2]
 
   | AtomicLoad memop ->
-    check_memop c memop (fun sz -> sz) (Some Shared) e.at;
+    check_memop c memop (Some Shared) (fun sz -> sz) e.at;
     [I32Type] --> [memop.ty]
 
   | AtomicStore memop ->
-    check_memop c memop (fun sz -> sz) (Some Shared) e.at;
+    check_memop c memop (Some Shared) (fun sz -> sz) e.at;
     [I32Type; memop.ty] --> []
 
   | AtomicRmw (rmwop, memop) ->
-    check_memop c memop (fun sz -> sz) (Some Shared) e.at;
+    check_memop c memop (Some Shared) (fun sz -> sz) e.at;
     [I32Type; memop.ty] --> [memop.ty]
 
   | AtomicRmwCmpXchg memop ->
-    check_memop c memop (fun sz -> sz) (Some Shared) e.at;
+    check_memop c memop (Some Shared) (fun sz -> sz) e.at;
     [I32Type; memop.ty; memop.ty] --> [memop.ty]
 
 and check_seq (c : context) (es : instr list) : infer_stack_type =

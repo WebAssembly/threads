@@ -96,7 +96,6 @@ let rec vsN n s =
   then (if b land 0x40 = 0 then x else Int64.(logor x (logxor (-1L) 0x7fL)))
   else Int64.(logor x (shift_left (vsN (n - 7) s) 7))
 
-let vu2 s = Int64.to_int (vuN 2 s)
 let vu32 s = Int64.to_int32 (vuN 32 s)
 let vs7 s = Int64.to_int (vsN 7 s)
 let vs32 s = Int64.to_int32 (vsN 32 s)
@@ -110,7 +109,10 @@ let len32 s =
   if n <= Int32.of_int (len s) then Int32.to_int n else
     error s pos "length out of bounds"
 
-let bool2 s = let n = vu2 s in (n land 1 = 1), (n land 2 = 2)
+let bool2 s = let n = u8 s in
+  require (n land 0xfc = 0) s (pos s - 1) "high six bits must be zero";
+  (n land 1 = 1), (n land 2 = 2)
+
 let string s = let n = len32 s in get_string n s
 let rec list f n s = if n = 0 then [] else let x = f s in x :: list f (n - 1) s
 let opt f b s = if b then Some (f s) else None
@@ -167,13 +169,13 @@ let limits vu s =
 
 let table_type s =
   let t = elem_type s in
-  match limits vu32 s with
-  | lim, false -> TableType (lim, t)
-  | _, true -> error s (pos s - 1) "invalid table type"
+  let lim, shared = limits vu32 s in
+  require (not shared) s (pos s - 1) "tables can not be shared";
+  TableType (lim, t)
 
 let memory_type s =
-  let lim, share = limits vu32 s in
-  MemoryType (lim, if share then Shared else Unshared)
+  let lim, shared = limits vu32 s in
+  MemoryType (lim, if shared then Shared else Unshared)
 
 let mutability s =
   match u8 s with

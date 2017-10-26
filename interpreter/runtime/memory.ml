@@ -11,7 +11,8 @@ type mem_size = Mem8 | Mem16 | Mem32
 type extension = SX | ZX
 
 type memory' = (int, int8_unsigned_elt, c_layout) Array1.t
-type memory = {mutable content : memory'; max : size option; shared: sharability}
+type memory =
+  {mutable content : memory'; max : size option; shared: sharability}
 type t = memory
 
 exception Type

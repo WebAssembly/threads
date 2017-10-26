@@ -484,14 +484,14 @@
 
 ;; Shared Memory
 
-(module (import "spectest" "shared_memory" (memory (shared 1 2))))
+(module (import "spectest" "shared_memory" (memory 1 2 shared)))
 
 (assert_unlinkable
   (module (import "spectest" "shared_memory" (memory 1 2)))
   "incompatible import type")
 
 (assert_unlinkable
-  (module (import "spectest" "memory" (memory (shared 1 2))))
+  (module (import "spectest" "memory" (memory 1 2 shared)))
   "incompatible import type")
 
 

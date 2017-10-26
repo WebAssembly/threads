@@ -1,7 +1,7 @@
 ;; atomic operations
 
 (module
-  (memory (shared 1 1))
+  (memory 1 1 shared)
 
   (func (export "init") (param $value i64) (i64.store (i32.const 0) (get_local $value)))
 

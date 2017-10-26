@@ -236,7 +236,7 @@ table_sig :
 
 memory_sig :
   | limits { MemoryType ($1, Unshared) }
-  | LPAR SHARED limits RPAR { MemoryType ($3, Shared) }
+  | limits SHARED { MemoryType ($1, Shared) }
 
 limits :
   | NAT { {min = nat32 $1 (ati 1); max = None} }

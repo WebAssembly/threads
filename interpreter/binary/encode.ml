@@ -115,7 +115,7 @@ let encode m =
       | TableType (lim, t) -> elem_type t; limits vu32 false lim
 
     let memory_type = function
-      | MemoryType (lim, share) -> limits vu32 (share = Shared) lim
+      | MemoryType (lim, shared) -> limits vu32 (shared = Shared) lim
 
     let mutability = function
       | Immutable -> u8 0
