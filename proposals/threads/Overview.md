@@ -13,11 +13,11 @@ Here is an example of a naive mutex implemented in WebAssembly. It uses one
 i32 in linear memory to store the state of the lock. If its value is 0, the
 mutex is unlocked. If its value is 1, the mutex is locked.
 
-```
+```wasm
 (module
-  ;; Import 1 page (64Kib) of shared memory. 
+  ;; Import 1 page (64Kib) of shared memory.
   (import "env" "memory" (memory 1 1 shared))
- 
+
   ;; Try to lock a mutex at the given address.
   ;; Returns 1 if the mutex was successfully locked, and 0 otherwise.
   (func $tryLockMutex (export "tryLockMutex")
@@ -31,14 +31,14 @@ mutex is unlocked. If its value is 1, the mutex is locked.
       (get_local $mutexAddr) ;; mutex address
       (i32.const 0)          ;; expected value (0 => unlocked)
       (i32.const 1))         ;; replacement value (1 => locked)
-      
+
     ;; The top of the stack is the originally loaded value.
     ;; If it is 0, this means we acquired the mutex. We want to
     ;; return the inverse (1 means mutex acquired), so use i32.eqz
     ;; as a logical not.
     (i32.eqz)
   )
-  
+
   ;; Lock a mutex at the given address, retrying until successful.
   (func (export "lockMutex")
     (param $mutexAddr i32)
@@ -48,20 +48,29 @@ mutex is unlocked. If its value is 1, the mutex is locked.
         ;; was locked, and 0 otherwise.
         (call $tryLockMutex (get_local $mutexAddr))
         (br_if $done)
-        (drop)
-        
+
         ;; Wait for the other agent to finish with mutex.
         (i32.wait
           (get_local $mutexAddr) ;; mutex address
           (i32.const 1)          ;; expected value (1 => locked)
           (i64.const -1))        ;; infinite timeout
-        
+
+        ;; i32.wait returns:
+        ;;   0 => "ok", woken by another agent.
+        ;;   1 => "not-equal", loaded value != expected value
+        ;;   2 => "timed-out", the timeout expired
+        ;;
+        ;; Since there is an infinite timeout, only 0 or 1 will be returned. In
+        ;; either case we should try to acquire the mutex again, so we can
+        ;; ignore the result.
+        (drop)
+
         ;; Try to acquire the lock again.
         (br $retry)
       )
     )
   )
-  
+
   ;; Unlock a mutex at the given address.
   (func (export "unlockMutex")
     (param $mutexAddr i32)
@@ -69,12 +78,12 @@ mutex is unlocked. If its value is 1, the mutex is locked.
     (i32.atomic.store
       (get_local $mutexAddr)     ;; mutex address
       (i32.const 0))             ;; 0 => unlocked
- 
+
     ;; Wake one agent that is waiting on this lock.
     (drop
       (wake
         (get_local $mutexAddr)   ;; mutex address
-        (i64.const 1))           ;; wake 1 waiter
+        (i64.const 1)))          ;; wake 1 waiter
   )
 )
 ```
