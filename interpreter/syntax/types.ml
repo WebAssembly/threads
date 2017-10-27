@@ -88,7 +88,7 @@ let string_of_limits {min; max} =
 
 let string_of_memory_type = function
   | MemoryType (lim, Unshared) -> string_of_limits lim
-  | MemoryType (lim, Shared) -> "(shared " ^ string_of_limits lim ^ ")"
+  | MemoryType (lim, Shared) -> string_of_limits lim ^ " shared"
 
 let string_of_table_type = function
   | TableType (lim, t) -> string_of_limits lim ^ " " ^ string_of_elem_type t

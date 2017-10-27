@@ -109,7 +109,8 @@ let len32 s =
   if n <= Int32.of_int (len s) then Int32.to_int n else
     error s pos "length out of bounds"
 
-let bool2 s = let n = u8 s in
+let bool2 s =
+  let n = u8 s in
   require (n land 0xfc = 0) s (pos s - 1) "high six bits must be zero";
   (n land 1 = 1), (n land 2 = 2)
 
