@@ -431,9 +431,9 @@ Memory Instructions
 Atomic Memory Instructions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _valid-wake:
+.. _valid-atomic-wake:
 
-:math:`\WAKE~\memarg`
+:math:`\ATOMICWAKE~\memarg`
 .....................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
@@ -448,12 +448,12 @@ Atomic Memory Instructions
      \qquad
      2^{\memarg.\ALIGN} = 4
    }{
-     C \vdash \WAKE~\memarg : [\I32~\I64] \to [\I64]
+     C \vdash \ATOMICWAKE~\memarg : [\I32~\I64] \to [\I64]
    }
 
-.. _valid-wait:
+.. _valid-atomic-wait:
 
-:math:`t\K{.}\WAIT~\memarg`
+:math:`t\K{.}\ATOMICWAIT~\memarg`
 ...........................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
@@ -468,7 +468,7 @@ Atomic Memory Instructions
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
-     C \vdash t\K{.}\WAIT~\memarg : [\I32~t~\I64] \to [\I32]
+     C \vdash t\K{.}\ATOMICWAIT~\memarg : [\I32~t~\I64] \to [\I32]
    }
 
 .. _valid-atomic-load:

@@ -172,8 +172,8 @@ Atomic Memory Instructions
 
 Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is encoded with a different byte code. Loads, stores and RMW instructions are followed by the encoding of their |memarg| immediate.
 
-.. _binary-wake:
-.. _binary-wait:
+.. _binary-atomic-wake:
+.. _binary-atomic-wait:
 .. _binary-atomic-load:
 .. _binary-atomic-loadn:
 .. _binary-atomic-store:
@@ -184,9 +184,9 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
 .. math::
    \begin{array}{llclll}
    \production{instruction} & \Binstr &::=& \dots && \phantom{thisshouldbeenough} \\ &&|&
-     \hex{FE}~\hex{00}~~m{:}\Bmemarg &\Rightarrow& \WAKE~m \\ &&|&
-     \hex{FE}~\hex{01}~~m{:}\Bmemarg &\Rightarrow& \I32.\WAKE~m \\ &&|&
-     \hex{FE}~\hex{02}~~m{:}\Bmemarg &\Rightarrow& \I64.\WAKE~m \\
+     \hex{FE}~\hex{00}~~m{:}\Bmemarg &\Rightarrow& \ATOMICWAKE~m \\ &&|&
+     \hex{FE}~\hex{01}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICWAIT~m \\ &&|&
+     \hex{FE}~\hex{02}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICWAIT~m \\
    \end{array}
 
 
