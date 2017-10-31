@@ -431,6 +431,46 @@ Memory Instructions
 Atomic Memory Instructions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. _valid-atomic-wake:
+
+:math:`\ATOMICWAKE~\memarg`
+.....................
+
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
+
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`4`.
+
+* Then the instruction is valid with type :math:`[\I32~\I64] \to [\I64]`.
+
+.. math::
+   \frac{
+     C.\CMEMS[0] = \memtype
+     \qquad
+     2^{\memarg.\ALIGN} = 4
+   }{
+     C \vdash \ATOMICWAKE~\memarg : [\I32~\I64] \to [\I64]
+   }
+
+.. _valid-atomic-wait:
+
+:math:`t\K{.}\ATOMICWAIT~\memarg`
+...........................
+
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
+
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
+
+* Then the instruction is valid with type :math:`[\I32~t~\I64] \to [\I32]`.
+
+.. math::
+   \frac{
+     C.\CMEMS[0] = \memtype
+     \qquad
+     2^{\memarg.\ALIGN} = |t|/8
+   }{
+     C \vdash t\K{.}\ATOMICWAIT~\memarg : [\I32~t~\I64] \to [\I32]
+   }
+
 .. _valid-atomic-load:
 
 :math:`t\K{.}\ATOMICLOAD~\memarg`

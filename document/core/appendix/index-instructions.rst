@@ -204,6 +204,9 @@ Instruction                                              Binary Opcode          
 :math:`\I64.\EXTEND\K{8\_s}`                             :math:`\hex{C2}`           :math:`[\I64] \to [\I64]`                   :ref:`validation <valid-unop>`                 :ref:`execution <exec-unop>`, :ref:`operator <op-iextendn_s>`
 :math:`\I64.\EXTEND\K{16\_s}`                            :math:`\hex{C3}`           :math:`[\I64] \to [\I64]`                   :ref:`validation <valid-unop>`                 :ref:`execution <exec-unop>`, :ref:`operator <op-iextendn_s>`
 :math:`\I64.\EXTEND\K{32\_s}`                            :math:`\hex{C4}`           :math:`[\I64] \to [\I64]`                   :ref:`validation <valid-unop>`                 :ref:`execution <exec-unop>`, :ref:`operator <op-iextendn_s>`
+:math:`\ATOMICWAKE~\memarg`                              :math:`\hex{FE}~\hex{00}`  :math:`[\I32~\I64] \to [\I64]`              :ref:`validation <valid-atomic-wake>`
+:math:`\I32.\ATOMICWAIT~\memarg`                         :math:`\hex{FE}~\hex{01}`  :math:`[\I32~\I32~\I64] \to [\I32]`         :ref:`validation <valid-atomic-wait>`
+:math:`\I64.\ATOMICWAIT~\memarg`                         :math:`\hex{FE}~\hex{02}`  :math:`[\I32~\I64~\I64] \to [\I32]`         :ref:`validation <valid-atomic-wait>`
 :math:`\I32.\ATOMICLOAD~\memarg`                         :math:`\hex{FE}~\hex{10}`  :math:`[\I32] \to [\I32]`                   :ref:`validation <valid-atomic-load>`          :ref:`execution <exec-atomic-load>`
 :math:`\I64.\ATOMICLOAD~\memarg`                         :math:`\hex{FE}~\hex{11}`  :math:`[\I32] \to [\I64]`                   :ref:`validation <valid-atomic-load>`          :ref:`execution <exec-atomic-load>`
 :math:`\I32.\ATOMICLOAD\K{8\_u}~\memarg`                 :math:`\hex{FE}~\hex{12}`  :math:`[\I32] \to [\I32]`                   :ref:`validation <valid-atomic-loadn>`         :ref:`execution <exec-atomic-loadn>`
