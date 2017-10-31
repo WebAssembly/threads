@@ -56,7 +56,6 @@ let encode m =
       if -64L <= i && i < 64L then u8 b
       else (u8 (b lor 0x80); vs64 (Int64.shift_right i 7))
 
-    let vu1 i = vu64 Int64.(logand (of_int i) 1L)
     let vu32 i = vu64 Int64.(logand (of_int32 i) 0xffffffffL)
     let vs7 i = vs64 (Int64.of_int i)
     let vs32 i = vs64 (Int64.of_int32 i)
@@ -69,7 +68,7 @@ let encode m =
           "cannot encode length with more than 32 bit";
       vu32 (Int32.of_int i)
 
-    let bool b = vu1 (if b then 1 else 0)
+    let bool2 b0 b1 = vs7 ((if b1 then 2 else 0) lor (if b0 then 1 else 0))
     let string bs = len (String.length bs); put_string s bs
     let name n = string (Utf8.encode n)
     let list f xs = List.iter f xs
@@ -109,14 +108,14 @@ let encode m =
     let func_type = function
       | FuncType (ins, out) -> vs7 (-0x20); vec value_type ins; vec value_type out
 
-    let limits vu {min; max} =
-      bool (max <> None); vu min; opt vu max
+    let limits vu f1 {min; max} =
+      bool2 (max <> None) f1; vu min; opt vu max
 
     let table_type = function
-      | TableType (lim, t) -> elem_type t; limits vu32 lim
+      | TableType (lim, t) -> elem_type t; limits vu32 false lim
 
     let memory_type = function
-      | MemoryType lim -> limits vu32 lim
+      | MemoryType (lim, shared) -> limits vu32 (shared = Shared) lim
 
     let mutability = function
       | Immutable -> u8 0

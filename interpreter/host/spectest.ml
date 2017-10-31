@@ -17,7 +17,9 @@ let global (GlobalType (t, _) as gt) =
   in Global.alloc gt v
 
 let table = Table.alloc (TableType ({min = 10l; max = Some 20l}, AnyFuncType))
-let memory = Memory.alloc (MemoryType {min = 1l; max = Some 2l})
+let memory = Memory.alloc (MemoryType ({min = 1l; max = Some 2l}, Unshared))
+let shared_memory =
+  Memory.alloc (MemoryType ({min = 1l; max = Some 2l}, Shared))
 let func f t = Func.alloc_host t (f t)
 
 let print_value v =
@@ -39,4 +41,5 @@ let lookup name t =
   | "global", _ -> ExternGlobal (global (GlobalType (I32Type, Immutable)))
   | "table", _ -> ExternTable table
   | "memory", _ -> ExternMemory memory
+  | "shared_memory", _ -> ExternMemory shared_memory
   | _ -> raise Not_found

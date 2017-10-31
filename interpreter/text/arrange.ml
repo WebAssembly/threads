@@ -321,9 +321,13 @@ let table off i tab =
     [atom elem_type t]
   )
 
+let memory_type = function
+  | MemoryType (lim, Unshared) -> atom (limits nat32) lim
+  | MemoryType (lim, Shared) -> Atom (limits nat32 lim ^ " shared")
+
 let memory off i mem =
-  let {mtype = MemoryType lim} = mem.it in
-  Node ("memory $" ^ nat (off + i) ^ " " ^ limits nat32 lim, [])
+  let {mtype} = mem.it in
+  Node ("memory $" ^ nat (off + i), [memory_type mtype])
 
 let segment head dat seg =
   let {index; offset; init} = seg.it in
