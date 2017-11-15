@@ -175,3 +175,58 @@ elem    ::= 0x01 e_o:expr e_a:expr y*:vec(funcindex) => {table 0, offset e_o, ap
 As with data segments, the `apply` initializer expression is evaluated during
 instantiation, and will be applied only if the expression evaluates to a
 non-zero value.
+
+## Solution 3: New instructions to initialize data and element segments
+
+Similar to solution 2, we repurpose the memory index as a flags field. Unlike
+solution 2, the flags field specifies whether this segment is _inactive_. An
+inactive segment will not be automatically copied into the memory or table on
+instantiation, and must instead be applied manually using two new instructions:
+`init_memory` and `init_table`.
+
+When the least-significant bit of the flags field is `1`, the segment is inactive. The rest of the bits of
+the flags field must be zero.
+
+The data section is encoded as follows:
+
+```
+datasec ::= seg*:section_11(vec(data))    => seg
+data    ::= 0x00 e:expr b*:vec(byte)      => {data 0, offset e, init b*, active true}
+data    ::= 0x01 e:expr b*:vec(byte)      => {data 0, offset e, init b*, active false}
+```
+
+The element section would be encoded similarly.
+
+### `init_memory` and `init_table`
+
+These instructions copy data from a given segment into the memory or table. The
+segment index is provided as an immediate value. Both instructions have no
+operands and return no results. If the segment index immediate is
+out-of-bounds, it is a validation error.
+
+When `init_memory` is executed, its behavior exactly matches the steps
+described in step 11 of
+[instantiation](https://webassembly.github.io/spec/exec/modules.html#instantiation).
+Similarly, `init_table` has behavior matching step 10.
+
+These instructions may only be used in the [start
+function](https://webassembly.github.io/spec/syntax/modules.html#start-function),
+and only when the start function is called automatically during instantiation.
+At any other times, the instructions will trap.
+
+Consider the example given in solution 2; there are two data sections, the
+first is always active and the second is conditionally active if global 0 has a
+non-zero value. This could be implemented as follows:
+
+```
+(import "a" "global" (global i32))  ;; global 0
+(memory 1)
+(data (i32.const 0) "hello")        ;; data segment 0
+(data (i32.const 16) "goodbye")     ;; data segment 1
+
+(func $start
+  (init_memory 0)      ;; copy data segment 0 into memory
+  (if (get_global 0)
+    (init_memory 1))    ;; copy data segment 1 into memory
+)
+```
