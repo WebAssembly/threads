@@ -150,10 +150,10 @@
 <td><span class="math">\(C \href{../valid/modules.html#valid-start}{\vdash} \href{../syntax/modules.html#syntax-start}{\mathit{start}} \mathrel{\mbox{ok}}\)</span></td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="../valid/modules.html#valid-export"><span class="std std-ref">Export</span></a></td>
-<td><span class="math">\(C \href{../valid/modules.html#valid-export}{\vdash} \href{../syntax/modules.html#syntax-export}{\mathit{export}} : \href{../syntax/values.html#syntax-name}{\mathit{name}}\)</span></td>
+<td><span class="math">\(C \href{../valid/modules.html#valid-export}{\vdash} \href{../syntax/modules.html#syntax-export}{\mathit{export}} : \href{../syntax/types.html#syntax-externtype}{\mathit{externtype}}\)</span></td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="../valid/modules.html#valid-exportdesc"><span class="std std-ref">Export description</span></a></td>
-<td><span class="math">\(C \href{../valid/modules.html#valid-exportdesc}{\vdash} \href{../syntax/modules.html#syntax-exportdesc}{\mathit{exportdesc}} \mathrel{\mbox{ok}}\)</span></td>
+<td><span class="math">\(C \href{../valid/modules.html#valid-exportdesc}{\vdash} \href{../syntax/modules.html#syntax-exportdesc}{\mathit{exportdesc}} : \href{../syntax/types.html#syntax-externtype}{\mathit{externtype}}\)</span></td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="../valid/modules.html#valid-import"><span class="std std-ref">Import</span></a></td>
 <td><span class="math">\(C \href{../valid/modules.html#valid-import}{\vdash} \href{../syntax/modules.html#syntax-import}{\mathit{import}} : \href{../syntax/types.html#syntax-externtype}{\mathit{externtype}}\)</span></td>
@@ -162,7 +162,7 @@
 <td><span class="math">\(C \href{../valid/modules.html#valid-importdesc}{\vdash} \href{../syntax/modules.html#syntax-importdesc}{\mathit{importdesc}} : \href{../syntax/types.html#syntax-externtype}{\mathit{externtype}}\)</span></td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="../valid/modules.html#valid-module"><span class="std std-ref">Module</span></a></td>
-<td><span class="math">\(\href{../valid/modules.html#valid-module}{\vdash} \href{../syntax/modules.html#syntax-module}{\mathit{module}} : \href{../syntax/types.html#syntax-externtype}{\mathit{externtype}}^\ast\)</span></td>
+<td><span class="math">\(\href{../valid/modules.html#valid-module}{\vdash} \href{../syntax/modules.html#syntax-module}{\mathit{module}} : \href{../syntax/types.html#syntax-externtype}{\mathit{externtype}}^\ast \href{../syntax/types.html#syntax-functype}{\rightarrow} \href{../syntax/types.html#syntax-externtype}{\mathit{externtype}}^\ast\)</span></td>
 </tr>
 </tbody>
 </table>
@@ -180,11 +180,17 @@
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><a class="reference internal" href="properties.html#valid-moduleinstr"><span class="std std-ref">Module instruction</span></a></td>
-<td><span class="math">\(S \href{../appendix/properties.html#valid-moduleinstr}{\vdash} \href{../exec/runtime.html#syntax-moduleinstr}{\mathit{moduleinstr}} \mathrel{\mbox{ok}}\)</span></td>
+<tr class="row-even"><td><a class="reference internal" href="properties.html#valid-val"><span class="std std-ref">Value</span></a></td>
+<td><span class="math">\(\href{../appendix/properties.html#valid-val}{\vdash} \href{../exec/runtime.html#syntax-val}{\mathit{val}} : \href{../syntax/types.html#syntax-valtype}{\mathit{valtype}}\)</span></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="properties.html#valid-result"><span class="std std-ref">Result</span></a></td>
+<td><span class="math">\(\href{../appendix/properties.html#valid-result}{\vdash} \href{../exec/runtime.html#syntax-result}{\mathit{result}} : \href{../syntax/types.html#syntax-resulttype}{\mathit{resulttype}}\)</span></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../exec/modules.html#valid-externval"><span class="std std-ref">External value</span></a></td>
+<td><span class="math">\(S \href{../exec/modules.html#valid-externval}{\vdash} \href{../exec/runtime.html#syntax-externval}{\mathit{externval}} : \href{../syntax/types.html#syntax-externtype}{\mathit{externtype}}\)</span></td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="properties.html#valid-funcinst"><span class="std std-ref">Function instance</span></a></td>
-<td><span class="math">\(S \href{../appendix/properties.html#valid-funcinst}{\vdash} \href{../exec/runtime.html#syntax-funcinst}{\mathit{funcinst}} : \href{../syntax/types.html#syntax-resulttype}{\mathit{resulttype}}\)</span></td>
+<td><span class="math">\(S \href{../appendix/properties.html#valid-funcinst}{\vdash} \href{../exec/runtime.html#syntax-funcinst}{\mathit{funcinst}} : \href{../syntax/types.html#syntax-functype}{\mathit{functype}}\)</span></td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="properties.html#valid-tableinst"><span class="std std-ref">Table instance</span></a></td>
 <td><span class="math">\(S \href{../appendix/properties.html#valid-tableinst}{\vdash} \href{../exec/runtime.html#syntax-tableinst}{\mathit{tableinst}} : \href{../syntax/types.html#syntax-tabletype}{\mathit{tabletype}}\)</span></td>
@@ -208,16 +214,10 @@
 <td><span class="math">\(\href{../appendix/properties.html#valid-config}{\vdash} \href{../exec/runtime.html#syntax-config}{\mathit{config}} \mathrel{\mbox{ok}}\)</span></td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="properties.html#valid-thread"><span class="std std-ref">Thread</span></a></td>
-<td><span class="math">\(S;\href{../syntax/types.html#syntax-resulttype}{\mathit{resulttype}}^? \href{../appendix/properties.html#valid-thread}{\vdash} \href{../exec/runtime.html#syntax-thread}{\mathit{thread}} : \href{../syntax/types.html#syntax-resulttype}{\mathit{resulttype}}^?\)</span></td>
+<td><span class="math">\(S;\href{../syntax/types.html#syntax-resulttype}{\mathit{resulttype}}^? \href{../appendix/properties.html#valid-thread}{\vdash} \href{../exec/runtime.html#syntax-thread}{\mathit{thread}} : \href{../syntax/types.html#syntax-resulttype}{\mathit{resulttype}}\)</span></td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="properties.html#valid-frame"><span class="std std-ref">Frame</span></a></td>
 <td><span class="math">\(S \href{../appendix/properties.html#valid-frame}{\vdash} \href{../exec/runtime.html#syntax-frame}{\mathit{frame}} : C\)</span></td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="properties.html#valid-val"><span class="std std-ref">Value</span></a></td>
-<td><span class="math">\(\href{../appendix/properties.html#valid-val}{\vdash} \href{../exec/runtime.html#syntax-val}{\mathit{val}} : \href{../syntax/types.html#syntax-valtype}{\mathit{valtype}}\)</span></td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="../exec/modules.html#valid-externval"><span class="std std-ref">External value</span></a></td>
-<td><span class="math">\(S \href{../exec/modules.html#valid-externval}{\vdash} \href{../exec/runtime.html#syntax-externval}{\mathit{externval}} : \href{../syntax/types.html#syntax-externtype}{\mathit{externtype}}\)</span></td>
 </tr>
 </tbody>
 </table>
@@ -315,9 +315,6 @@
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="../exec/instructions.html#exec-expr"><span class="std std-ref">Expression</span></a></td>
 <td><span class="math">\(S;F;\href{../syntax/instructions.html#syntax-expr}{\mathit{expr}} \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^\ast S';F';\href{../exec/runtime.html#syntax-val}{\mathit{val}}^\ast\)</span></td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="../exec/modules.html#exec-moduleinstr"><span class="std std-ref">Module instruction</span></a></td>
-<td><span class="math">\(S;\href{../exec/runtime.html#syntax-moduleinstr}{\mathit{moduleinstr}} \href{../exec/conventions.html#formal-notation}{\hookrightarrow} S';{\href{../exec/runtime.html#syntax-moduleinstr}{\mathit{moduleinstr}}'}^\ast\)</span></td>
 </tr>
 </tbody>
 </table>

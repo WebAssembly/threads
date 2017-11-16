@@ -99,7 +99,7 @@ This language is structured around the following concepts.</p>
 <dl class="docutils" id="value">
 <dt><strong>Values</strong></dt>
 <dd>WebAssembly provides only four basic <em>value types</em>.
-These are integers and <a class="reference external" href="http://ieeexplore.ieee.org/document/4610935/">IEEE 754 floating-point</a> numbers,
+These are integers and <a class="reference external" href="http://ieeexplore.ieee.org/document/4610935/">IEEE 754-2008</a> numbers,
 each in 32 and 64 bit width.
 32 bit integers also serve as Booleans and as memory addresses.
 The usual operations on these types are available,
@@ -123,7 +123,7 @@ Branches can only target such constructs.</dd>
 <dl class="docutils" id="trap">
 <dt><strong>Traps</strong></dt>
 <dd>Under some conditions, certain instructions may produce a <em>trap</em>,
-which immediately aborts excecution.
+which immediately aborts execution.
 Traps cannot be handled by WebAssembly code,
 but are reported to the outside environment,
 where they typically can be caught.</dd>

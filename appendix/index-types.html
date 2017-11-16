@@ -25,7 +25,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Index of Instructions" href="index-instructions.html" />
-    <link rel="prev" title="Validation Algorithm" href="algorithm.html" />
+    <link rel="prev" title="Soundness" href="properties.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -99,47 +99,47 @@
 <tbody valign="top">
 <tr class="row-even"><td><a class="reference internal" href="../syntax/modules.html#syntax-typeidx"><span class="std std-ref">Type index</span></a></td>
 <td><span class="math">\(x\)</span></td>
-<td>(positive number as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef698#1{{\mathtt{s}#1}}\mathdef698{\mathtt{32}}}\)</span> or <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef694#1{{\mathtt{u}#1}}\mathdef694{\mathtt{32}}}\)</span>)</td>
+<td>(positive number as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef761#1{{\mathtt{s}#1}}\mathdef761{\mathtt{32}}}\)</span> or <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef757#1{{\mathtt{u}#1}}\mathdef757{\mathtt{32}}}\)</span>)</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">Value type</span></a></td>
 <td><span class="math">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}\)</span></td>
-<td><span class="math">\(\def\mathdef725#1{\mathtt{0x#1}}\mathdef725{7F}\)</span> (-1 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef697#1{{\mathtt{s}#1}}\mathdef697{\mathtt{7}}}\)</span>)</td>
+<td><span class="math">\(\def\mathdef788#1{\mathtt{0x#1}}\mathdef788{7F}\)</span> (-1 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef760#1{{\mathtt{s}#1}}\mathdef760{\mathtt{7}}}\)</span>)</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">Value type</span></a></td>
 <td><span class="math">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}\)</span></td>
-<td><span class="math">\(\def\mathdef726#1{\mathtt{0x#1}}\mathdef726{7E}\)</span> (-2 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef697#1{{\mathtt{s}#1}}\mathdef697{\mathtt{7}}}\)</span>)</td>
+<td><span class="math">\(\def\mathdef789#1{\mathtt{0x#1}}\mathdef789{7E}\)</span> (-2 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef760#1{{\mathtt{s}#1}}\mathdef760{\mathtt{7}}}\)</span>)</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">Value type</span></a></td>
 <td><span class="math">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{f32}}\)</span></td>
-<td><span class="math">\(\def\mathdef727#1{\mathtt{0x#1}}\mathdef727{7D}\)</span> (-3 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef697#1{{\mathtt{s}#1}}\mathdef697{\mathtt{7}}}\)</span>)</td>
+<td><span class="math">\(\def\mathdef790#1{\mathtt{0x#1}}\mathdef790{7D}\)</span> (-3 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef760#1{{\mathtt{s}#1}}\mathdef760{\mathtt{7}}}\)</span>)</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">Value type</span></a></td>
 <td><span class="math">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{f64}}\)</span></td>
-<td><span class="math">\(\def\mathdef728#1{\mathtt{0x#1}}\mathdef728{7C}\)</span> (-4 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef697#1{{\mathtt{s}#1}}\mathdef697{\mathtt{7}}}\)</span>)</td>
+<td><span class="math">\(\def\mathdef791#1{\mathtt{0x#1}}\mathdef791{7C}\)</span> (-4 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef760#1{{\mathtt{s}#1}}\mathdef760{\mathtt{7}}}\)</span>)</td>
 </tr>
 <tr class="row-odd"><td>(reserved)</td>
 <td>&#160;</td>
-<td><span class="math">\(\def\mathdef729#1{\mathtt{0x#1}}\mathdef729{7C}\)</span> .. <span class="math">\(\def\mathdef730#1{\mathtt{0x#1}}\mathdef730{71}\)</span></td>
+<td><span class="math">\(\def\mathdef792#1{\mathtt{0x#1}}\mathdef792{7C}\)</span> .. <span class="math">\(\def\mathdef793#1{\mathtt{0x#1}}\mathdef793{71}\)</span></td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="../syntax/types.html#syntax-elemtype"><span class="std std-ref">Element type</span></a></td>
 <td><span class="math">\(\href{../syntax/types.html#syntax-elemtype}{\mathsf{anyfunc}}\)</span></td>
-<td><span class="math">\(\def\mathdef731#1{\mathtt{0x#1}}\mathdef731{70}\)</span> (-16 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef697#1{{\mathtt{s}#1}}\mathdef697{\mathtt{7}}}\)</span>)</td>
+<td><span class="math">\(\def\mathdef794#1{\mathtt{0x#1}}\mathdef794{70}\)</span> (-16 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef760#1{{\mathtt{s}#1}}\mathdef760{\mathtt{7}}}\)</span>)</td>
 </tr>
 <tr class="row-odd"><td>(reserved)</td>
 <td>&#160;</td>
-<td><span class="math">\(\def\mathdef732#1{\mathtt{0x#1}}\mathdef732{6F}\)</span> .. <span class="math">\(\def\mathdef733#1{\mathtt{0x#1}}\mathdef733{61}\)</span></td>
+<td><span class="math">\(\def\mathdef795#1{\mathtt{0x#1}}\mathdef795{6F}\)</span> .. <span class="math">\(\def\mathdef796#1{\mathtt{0x#1}}\mathdef796{61}\)</span></td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="../syntax/types.html#syntax-functype"><span class="std std-ref">Function type</span></a></td>
 <td><span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathit{valtype}}^\ast] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathit{valtype}}^\ast]\)</span></td>
-<td><span class="math">\(\def\mathdef734#1{\mathtt{0x#1}}\mathdef734{60}\)</span> (-32 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef697#1{{\mathtt{s}#1}}\mathdef697{\mathtt{7}}}\)</span>)</td>
+<td><span class="math">\(\def\mathdef797#1{\mathtt{0x#1}}\mathdef797{60}\)</span> (-32 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef760#1{{\mathtt{s}#1}}\mathdef760{\mathtt{7}}}\)</span>)</td>
 </tr>
 <tr class="row-odd"><td>(reserved)</td>
 <td>&#160;</td>
-<td><span class="math">\(\def\mathdef735#1{\mathtt{0x#1}}\mathdef735{5F}\)</span> .. <span class="math">\(\def\mathdef736#1{\mathtt{0x#1}}\mathdef736{41}\)</span></td>
+<td><span class="math">\(\def\mathdef798#1{\mathtt{0x#1}}\mathdef798{5F}\)</span> .. <span class="math">\(\def\mathdef799#1{\mathtt{0x#1}}\mathdef799{41}\)</span></td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="../syntax/types.html#syntax-resulttype"><span class="std std-ref">Result type</span></a></td>
 <td><span class="math">\(\epsilon\)</span></td>
-<td><span class="math">\(\def\mathdef737#1{\mathtt{0x#1}}\mathdef737{40}\)</span> (-64 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef697#1{{\mathtt{s}#1}}\mathdef697{\mathtt{7}}}\)</span>)</td>
+<td><span class="math">\(\def\mathdef800#1{\mathtt{0x#1}}\mathdef800{40}\)</span> (-64 as <span class="math">\(\href{../binary/values.html#binary-int}{\def\mathdef760#1{{\mathtt{s}#1}}\mathdef760{\mathtt{7}}}\)</span>)</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="../syntax/types.html#syntax-tabletype"><span class="std std-ref">Table type</span></a></td>
 <td><span class="math">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-elemtype}{\mathit{elemtype}}\)</span></td>

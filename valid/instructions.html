@@ -410,16 +410,48 @@ In contrast,</p>
 </div>
 <div class="section" id="atomic-memory-instructions">
 <span id="valid-instr-atomic-memory"></span><span id="index-5"></span><h2>Atomic Memory Instructions<a class="headerlink" href="#atomic-memory-instructions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="valid-atomic-load">
-<span id="id20"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-load" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="valid-atomic-wake">
+<span id="id20"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.wake}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-wake" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The memory <span class="math">\(C.\MEMS[0]\)</span> must be defined in the context.</li>
+<li>The memory <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</li>
+<li>The alignment <span class="math">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math">\(4\)</span>.</li>
+<li>Then the instruction is valid with type <span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}]\)</span>.</li>
+</ul>
+<div class="math">
+\[\frac{
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  \qquad
+  2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = 4
+}{
+  C \vdash \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.wake}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}]
+}\]</div>
+</div>
+<div class="section" id="valid-atomic-wait">
+<span id="id21"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.wait}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-wait" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>The memory <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</li>
+<li>The alignment <span class="math">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">width</span></a> of <span class="math">\(t\)</span> divided by <span class="math">\(8\)</span>.</li>
+<li>Then the instruction is valid with type <span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]\)</span>.</li>
+</ul>
+<div class="math">
+\[\frac{
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  \qquad
+  2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = |t|/8
+}{
+  C \vdash t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.wait}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]
+}\]</div>
+</div>
+<div class="section" id="valid-atomic-load">
+<span id="id22"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-load" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>The memory <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</li>
 <li>The alignment <span class="math">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">width</span></a> of <span class="math">\(t\)</span> divided by <span class="math">\(8\)</span>.</li>
 <li>Then the instruction is valid with type <span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</li>
 </ul>
 <div class="math">
 \[\frac{
-  C.\MEMS[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
   \qquad
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = |t|/8
 }{
@@ -427,15 +459,15 @@ In contrast,</p>
 }\]</div>
 </div>
 <div class="section" id="valid-atomic-loadn">
-<span id="id21"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}{N}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-loadn" title="Permalink to this headline">¶</a></h3>
+<span id="id23"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}{N}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-loadn" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The memory <span class="math">\(C.\MEMS[0]\)</span> must be defined in the context.</li>
+<li>The memory <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</li>
 <li>The alignment <span class="math">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math">\(N/8\)</span>.</li>
 <li>Then the instruction is valid with type <span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</li>
 </ul>
 <div class="math">
 \[\frac{
-  C.\MEMS[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
   \qquad
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = N/8
 }{
@@ -443,15 +475,15 @@ In contrast,</p>
 }\]</div>
 </div>
 <div class="section" id="valid-atomic-store">
-<span id="id22"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-store" title="Permalink to this headline">¶</a></h3>
+<span id="id24"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-store" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The memory <span class="math">\(C.\MEMS[0]\)</span> must be defined in the context.</li>
+<li>The memory <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</li>
 <li>The alignment <span class="math">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">width</span></a> of <span class="math">\(t\)</span> divided by <span class="math">\(8\)</span>.</li>
 <li>Then the instruction is valid with type <span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} []\)</span>.</li>
 </ul>
 <div class="math">
 \[\frac{
-  C.\MEMS[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
   \qquad
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = |t|/8
 }{
@@ -459,15 +491,15 @@ In contrast,</p>
 }\]</div>
 </div>
 <div class="section" id="valid-atomic-storen">
-<span id="id23"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-storen" title="Permalink to this headline">¶</a></h3>
+<span id="id25"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-storen" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The memory <span class="math">\(C.\MEMS[0]\)</span> must be defined in the context.</li>
+<li>The memory <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</li>
 <li>The alignment <span class="math">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math">\(N/8\)</span>.</li>
 <li>Then the instruction is valid with type <span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} []\)</span>.</li>
 </ul>
 <div class="math">
 \[\frac{
-  C.\MEMS[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
   \qquad
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = N/8
 }{
@@ -475,15 +507,15 @@ In contrast,</p>
 }\]</div>
 </div>
 <div class="section" id="valid-atomic-rmw">
-<span id="id24"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-rmw" title="Permalink to this headline">¶</a></h3>
+<span id="id26"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-rmw" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The memory <span class="math">\(C.\MEMS[0]\)</span> must be defined in the context.</li>
+<li>The memory <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</li>
 <li>The alignment <span class="math">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">width</span></a> of <span class="math">\(t\)</span> divided by <span class="math">\(8\)</span>.</li>
 <li>Then the instruction is valid with type <span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</li>
 </ul>
 <div class="math">
 \[\frac{
-  C.\MEMS[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
   \qquad
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = |t|/8
 }{
@@ -491,15 +523,15 @@ In contrast,</p>
 }\]</div>
 </div>
 <div class="section" id="valid-atomic-rmwn">
-<span id="id25"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{\_u.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-rmwn" title="Permalink to this headline">¶</a></h3>
+<span id="id27"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{\_u.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-rmwn" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The memory <span class="math">\(C.\MEMS[0]\)</span> must be defined in the context.</li>
+<li>The memory <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</li>
 <li>The alignment <span class="math">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math">\(N/8\)</span>.</li>
 <li>Then the instruction is valid with type <span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</li>
 </ul>
 <div class="math">
 \[\frac{
-  C.\MEMS[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
   \qquad
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = N/8
 }{
@@ -507,15 +539,15 @@ In contrast,</p>
 }\]</div>
 </div>
 <div class="section" id="valid-atomic-rmw-cmpxchg">
-<span id="id26"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-rmw-cmpxchg" title="Permalink to this headline">¶</a></h3>
+<span id="id28"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-rmw-cmpxchg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The memory <span class="math">\(C.\MEMS[0]\)</span> must be defined in the context.</li>
+<li>The memory <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</li>
 <li>The alignment <span class="math">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">width</span></a> of <span class="math">\(t\)</span> divided by <span class="math">\(8\)</span>.</li>
 <li>Then the instruction is valid with type <span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</li>
 </ul>
 <div class="math">
 \[\frac{
-  C.\MEMS[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
   \qquad
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = |t|/8
 }{
@@ -523,15 +555,15 @@ In contrast,</p>
 }\]</div>
 </div>
 <div class="section" id="valid-atomic-rmwn-cmpxchg">
-<span id="id27"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{\_u.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-rmwn-cmpxchg" title="Permalink to this headline">¶</a></h3>
+<span id="id29"></span><h3><span class="math">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{\_u.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#valid-atomic-rmwn-cmpxchg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The memory <span class="math">\(C.\MEMS[0]\)</span> must be defined in the context.</li>
+<li>The memory <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</li>
 <li>The alignment <span class="math">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math">\(N/8\)</span>.</li>
 <li>Then the instruction is valid with type <span class="math">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</li>
 </ul>
 <div class="math">
 \[\frac{
-  C.\MEMS[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
   \qquad
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = N/8
 }{
@@ -542,7 +574,7 @@ In contrast,</p>
 <div class="section" id="control-instructions">
 <span id="valid-instr-control"></span><span id="valid-label"></span><span id="index-6"></span><h2>Control Instructions<a class="headerlink" href="#control-instructions" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="valid-nop">
-<span id="id28"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{nop}}\)</span><a class="headerlink" href="#valid-nop" title="Permalink to this headline">¶</a></h3>
+<span id="id30"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{nop}}\)</span><a class="headerlink" href="#valid-nop" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The instruction is valid with type <span class="math">\([] \href{../syntax/types.html#syntax-functype}{\rightarrow} []\)</span>.</li>
 </ul>
@@ -553,7 +585,7 @@ In contrast,</p>
 }\]</div>
 </div>
 <div class="section" id="valid-unreachable">
-<span id="id29"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{unreachable}}\)</span><a class="headerlink" href="#valid-unreachable" title="Permalink to this headline">¶</a></h3>
+<span id="id31"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{unreachable}}\)</span><a class="headerlink" href="#valid-unreachable" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The instruction is valid with type <span class="math">\([t_1^\ast] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t_2^\ast]\)</span>, for any sequences of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value types</span></a> <span class="math">\(t_1^\ast\)</span> and <span class="math">\(t_2^\ast\)</span>.</li>
 </ul>
@@ -568,7 +600,7 @@ In contrast,</p>
 </div>
 </div>
 <div class="section" id="valid-block">
-<span id="id30"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{block}}~[t^?]~\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}}\)</span><a class="headerlink" href="#valid-block" title="Permalink to this headline">¶</a></h3>
+<span id="id32"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{block}}~[t^?]~\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}}\)</span><a class="headerlink" href="#valid-block" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Let <span class="math">\(C'\)</span> be the same <a class="reference internal" href="conventions.html#context"><span class="std std-ref">context</span></a> as <span class="math">\(C\)</span>, but with the <a class="reference internal" href="../syntax/types.html#syntax-resulttype"><span class="std std-ref">result type</span></a> <span class="math">\([t^?]\)</span> prepended to the <span class="math">\(\href{../valid/conventions.html#context}{\mathsf{labels}}\)</span> vector.</li>
 <li>Under context <span class="math">\(C'\)</span>,
@@ -588,7 +620,7 @@ This may be generalized in future versions of WebAssembly.</p>
 </div>
 </div>
 <div class="section" id="valid-loop">
-<span id="id31"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{loop}}~[t^?]~\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}}\)</span><a class="headerlink" href="#valid-loop" title="Permalink to this headline">¶</a></h3>
+<span id="id33"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{loop}}~[t^?]~\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}}\)</span><a class="headerlink" href="#valid-loop" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Let <span class="math">\(C'\)</span> be the same <a class="reference internal" href="conventions.html#context"><span class="std std-ref">context</span></a> as <span class="math">\(C\)</span>, but with the empty <a class="reference internal" href="../syntax/types.html#syntax-resulttype"><span class="std std-ref">result type</span></a> <span class="math">\([]\)</span> prepended to the <span class="math">\(\href{../valid/conventions.html#context}{\mathsf{labels}}\)</span> vector.</li>
 <li>Under context <span class="math">\(C'\)</span>,
@@ -608,7 +640,7 @@ This may be generalized in future versions of WebAssembly.</p>
 </div>
 </div>
 <div class="section" id="valid-if">
-<span id="id32"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{if}}~[t^?]~\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}_1^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{else}}~\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}_2^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}}\)</span><a class="headerlink" href="#valid-if" title="Permalink to this headline">¶</a></h3>
+<span id="id34"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{if}}~[t^?]~\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}_1^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{else}}~\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}_2^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}}\)</span><a class="headerlink" href="#valid-if" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Let <span class="math">\(C'\)</span> be the same <a class="reference internal" href="conventions.html#context"><span class="std std-ref">context</span></a> as <span class="math">\(C\)</span>, but with the empty <a class="reference internal" href="../syntax/types.html#syntax-resulttype"><span class="std std-ref">result type</span></a> <span class="math">\([t^?]\)</span> prepended to the <span class="math">\(\href{../valid/conventions.html#context}{\mathsf{labels}}\)</span> vector.</li>
 <li>Under context <span class="math">\(C'\)</span>,
@@ -632,7 +664,7 @@ This may be generalized in future versions of WebAssembly.</p>
 </div>
 </div>
 <div class="section" id="valid-br">
-<span id="id33"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{br}}~l\)</span><a class="headerlink" href="#valid-br" title="Permalink to this headline">¶</a></h3>
+<span id="id35"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{br}}~l\)</span><a class="headerlink" href="#valid-br" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The label <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{labels}}[l]\)</span> must be defined in the context.</li>
 <li>Let <span class="math">\([t^?]\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-resulttype"><span class="std std-ref">result type</span></a> <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{labels}}[l]\)</span>.</li>
@@ -650,7 +682,7 @@ This may be generalized in future versions of WebAssembly.</p>
 </div>
 </div>
 <div class="section" id="valid-br-if">
-<span id="id34"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{br\_if}}~l\)</span><a class="headerlink" href="#valid-br-if" title="Permalink to this headline">¶</a></h3>
+<span id="id36"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{br\_if}}~l\)</span><a class="headerlink" href="#valid-br-if" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The label <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{labels}}[l]\)</span> must be defined in the context.</li>
 <li>Let <span class="math">\([t^?]\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-resulttype"><span class="std std-ref">result type</span></a> <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{labels}}[l]\)</span>.</li>
@@ -664,7 +696,7 @@ This may be generalized in future versions of WebAssembly.</p>
 }\]</div>
 </div>
 <div class="section" id="valid-br-table">
-<span id="id35"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{br\_table}}~l^\ast~l_N\)</span><a class="headerlink" href="#valid-br-table" title="Permalink to this headline">¶</a></h3>
+<span id="id37"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{br\_table}}~l^\ast~l_N\)</span><a class="headerlink" href="#valid-br-table" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The label <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{labels}}[l]\)</span> must be defined in the context.</li>
 <li>Let <span class="math">\([t^?]\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-resulttype"><span class="std std-ref">result type</span></a> <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{labels}}[l_N]\)</span>.</li>
@@ -688,7 +720,7 @@ the label <span class="math">\(C.\href{../valid/conventions.html#context}{\maths
 </div>
 </div>
 <div class="section" id="valid-return">
-<span id="id36"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{return}}\)</span><a class="headerlink" href="#valid-return" title="Permalink to this headline">¶</a></h3>
+<span id="id38"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{return}}\)</span><a class="headerlink" href="#valid-return" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The return type <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{return}}\)</span> must not be empty in the context.</li>
 <li>Let <span class="math">\([t^?]\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-resulttype"><span class="std std-ref">result type</span></a> of <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{return}}\)</span>.</li>
@@ -709,7 +741,7 @@ which is the case for functions not returning anything.</p>
 </div>
 </div>
 <div class="section" id="valid-call">
-<span id="id37"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{call}}~x\)</span><a class="headerlink" href="#valid-call" title="Permalink to this headline">¶</a></h3>
+<span id="id39"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{call}}~x\)</span><a class="headerlink" href="#valid-call" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The function <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{funcs}}[x]\)</span> must be defined in the context.</li>
 <li>Then the instruction is valid with type <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{funcs}}[x]\)</span>.</li>
@@ -722,7 +754,7 @@ which is the case for functions not returning anything.</p>
 }\]</div>
 </div>
 <div class="section" id="valid-call-indirect">
-<span id="id38"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{call\_indirect}}~x\)</span><a class="headerlink" href="#valid-call-indirect" title="Permalink to this headline">¶</a></h3>
+<span id="id40"></span><h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{call\_indirect}}~x\)</span><a class="headerlink" href="#valid-call-indirect" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The table <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{tables}}[0]\)</span> must be defined in the context.</li>
 <li>Let <span class="math">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-elemtype}{\mathit{elemtype}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-tabletype"><span class="std std-ref">table type</span></a> <span class="math">\(C.\href{../valid/conventions.html#context}{\mathsf{tables}}[0]\)</span>.</li>
@@ -779,8 +811,8 @@ such that <span class="math">\(t_2^\ast = t_0^\ast~t^\ast\)</span>.</li>
 <div class="section" id="expressions">
 <span id="valid-expr"></span><span id="index-8"></span><h2>Expressions<a class="headerlink" href="#expressions" title="Permalink to this headline">¶</a></h2>
 <p>Expressions <span class="math">\(\href{../syntax/instructions.html#syntax-expr}{\mathit{expr}}\)</span> are classified by <a class="reference internal" href="../syntax/types.html#syntax-resulttype"><span class="std std-ref">result types</span></a> of the form <span class="math">\([t^?]\)</span>.</p>
-<div class="section" id="id39">
-<h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}}\)</span><a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id41">
+<h3><span class="math">\(\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}}\)</span><a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>The instruction sequence <span class="math">\(\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast\)</span> must be <a class="reference internal" href="#valid-instr-seq"><span class="std std-ref">valid</span></a> with type <span class="math">\([] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t^?]\)</span>,
 for some optional <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math">\(t^?\)</span>.</li>
