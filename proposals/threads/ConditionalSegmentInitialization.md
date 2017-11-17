@@ -184,35 +184,49 @@ inactive segment will not be automatically copied into the memory or table on
 instantiation, and must instead be applied manually using two new instructions:
 `init_memory` and `init_table`.
 
-When the least-significant bit of the flags field is `1`, the segment is inactive. The rest of the bits of
-the flags field must be zero.
+When the least-significant bit of the flags field is `1`, the segment is
+inactive. The rest of the bits of the flags field must be zero.
+
+An inactive segment has no initializer expression, since it will be specified
+as an operand to `init_memory` or `init_table`.
 
 The data section is encoded as follows:
 
 ```
-datasec ::= seg*:section_11(vec(data))    => seg
+datasec ::= seg*:section\_11(vec(data))   => seg
 data    ::= 0x00 e:expr b*:vec(byte)      => {data 0, offset e, init b*, active true}
-data    ::= 0x01 e:expr b*:vec(byte)      => {data 0, offset e, init b*, active false}
+data    ::= 0x01 b*:vec(byte)             => {data 0, offset empty, init b*, active false}
 ```
 
-The element section would be encoded similarly.
+The element section is encoded similarly.
 
-### `init_memory` and `init_table`
+### `init_memory` instruction
 
-These instructions copy data from a given segment into the memory or table. The
-segment index is provided as an immediate value. Both instructions have no
-operands and return no results. If the segment index immediate is
-out-of-bounds, it is a validation error.
+The `init_memory` instruction copies data from a given segment into a target
+memory. The source segment and target memory are given as immediates. The
+instruction also has three i32 operands: an offset into the source segment, an
+offset into the target memory, and a length to copy.
 
-When `init_memory` is executed, its behavior exactly matches the steps
-described in step 11 of
-[instantiation](https://webassembly.github.io/spec/exec/modules.html#instantiation).
-Similarly, `init_table` has behavior matching step 10.
+When `init_memory` is executed, its behavior matches the steps described in
+step 11 of
+[instantiation](https://webassembly.github.io/spec/exec/modules.html#instantiation),
+but it behaves as though the segment were specified with the source offset,
+target offset, and length as given by the `init_memory` operands.
 
-These instructions may only be used in the [start
-function](https://webassembly.github.io/spec/syntax/modules.html#start-function),
-and only when the start function is called automatically during instantiation.
-At any other times, the instructions will trap.
+A trap occurs if any of the accessed bytes lies outside the source data segment
+or the target memory.
+
+Note that it is allowed to use `init_memory` on the same data segment more than
+once, or with an active data segment.
+
+### `init_table` instruction
+
+The `init_table` instruction behaves similary to the `init_memory` instruction,
+with the difference that it operates on element segments and tables, instead of
+data segments and memories. The offset and length operands of `init_table` have
+element units instead of bytes as well.
+
+### Example
 
 Consider the example given in solution 2; there are two data sections, the
 first is always active and the second is conditionally active if global 0 has a
@@ -221,12 +235,15 @@ non-zero value. This could be implemented as follows:
 ```
 (import "a" "global" (global i32))  ;; global 0
 (memory 1)
-(data (i32.const 0) "hello")        ;; data segment 0
-(data (i32.const 16) "goodbye")     ;; data segment 1
+(data (i32.const 0) "hello")    ;; data segment 0, is active so always copied
+(data inactive "goodbye")       ;; data segment 1, is inactive
 
 (func $start
-  (init_memory 0)      ;; copy data segment 0 into memory
-  (if (get_global 0)
-    (init_memory 1))    ;; copy data segment 1 into memory
+  (if (get\_global 0)
+    ;; copy data segment 1 into memory
+    (init\_memory 1
+      (i32.const 0)     ;; source offset
+      (i32.const 16)    ;; target offset
+      (i32.const 7)))   ;; length
 )
 ```
