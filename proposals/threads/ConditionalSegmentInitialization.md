@@ -213,6 +213,11 @@ step 11 of
 but it behaves as though the segment were specified with the source offset,
 target offset, and length as given by the `init_memory` operands.
 
+`init_memory` may only be used during
+[instantiation](https://webassembly.github.io/spec/exec/modules.html#instantiation)
+when the start function is being invoked. At any other times, the instructions
+will trap.
+
 A trap occurs if any of the accessed bytes lies outside the source data segment
 or the target memory.
 
