@@ -50,12 +50,12 @@ mutex is unlocked. If its value is 1, the mutex is locked.
         (br_if $done)
 
         ;; Wait for the other agent to finish with mutex.
-        (i32.wait
+        (i32.atomic.wait
           (get_local $mutexAddr) ;; mutex address
           (i32.const 1)          ;; expected value (1 => locked)
           (i64.const -1))        ;; infinite timeout
 
-        ;; i32.wait returns:
+        ;; i32.atomic.wait returns:
         ;;   0 => "ok", woken by another agent.
         ;;   1 => "not-equal", loaded value != expected value
         ;;   2 => "timed-out", the timeout expired
@@ -81,7 +81,7 @@ mutex is unlocked. If its value is 1, the mutex is locked.
 
     ;; Wake one agent that is waiting on this lock.
     (drop
-      (wake
+      (atomic.wake
         (get_local $mutexAddr)   ;; mutex address
         (i64.const 1)))          ;; wake 1 waiter
   )
@@ -365,9 +365,9 @@ For the web embedding, the agent can also be suspended or woken via the
 not be suspended for other reasons, unless all agents in that cluster are
 also suspended.
 
-An agent suspended via `Atomics.wait` can be woken by the WebAssembly `wake`
-operator. Similarly, an agent suspended by `i32.wait` or `i64.wait` can be
-woken by [`Atomics.wake`][].
+An agent suspended via `Atomics.wait` can be woken by the WebAssembly
+`atomic.wake` operator. Similarly, an agent suspended by `i32.atomic.wait` or
+`i64.atomic.wait` can be woken by [`Atomics.wake`][].
 
 ### Wait
 
@@ -392,12 +392,13 @@ If the loaded value is not equal to the expected value, the operator returns 1
 is woken, the wait operator returns 0 ("ok"). If the timeout expires before
 another agent wakes this one, this operator returns 2 ("timed-out"). Note that
 when the agent is suspended, it will not be [spuriously woken](https://en.wikipedia.org/wiki/Spurious_wakeup).
-The agent is only woken by `wake` (or [`Atomics.wake`][] in the web embedding).
+The agent is only woken by `atomic.wake` (or [`Atomics.wake`][] in the web
+embedding).
 
-  * `i32.wait`: load i32 value, compare to expected (as `i32`), and wait for wake at same address
-  * `i64.wait`: load i64 value, compare to expected (as `i64`), and wait for wake at same address
+  * `i32.atomic.wait`: load i32 value, compare to expected (as `i32`), and wait for wake at same address
+  * `i64.atomic.wait`: load i64 value, compare to expected (as `i64`), and wait for wake at same address
   
-For the web embedding, `i32.wait` is equivalent in behavior to executing the following:
+For the web embedding, `i32.atomic.wait` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
@@ -408,7 +409,7 @@ For the web embedding, `i32.wait` is equivalent in behavior to executing the fol
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
    
-`i64.wait` has no equivalent in ECMAScript as it is currently specified, as there is
+`i64.atomic.wait` has no equivalent in ECMAScript as it is currently specified, as there is
 no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of a
 64-bit integer. That said, the behavior can be approximated as follows:
 
@@ -441,9 +442,9 @@ returns the number of waiters that were woken as an `i64`.
 | `wake count` == 0 | Wake no waiters |
 | `wake count` > 0 | Wake min(`wake count`, `num waiters`) waiters |
 
-  * `wake`: wake up `wake count` threads waiting on the given address via `i32.wait` or `i64.wait`
+  * `atomic.wake`: wake up `wake count` threads waiting on the given address via `i32.atomic.wait` or `i64.atomic.wait`
   
-For the web embedding, `wake` is equivalent in behavior to executing the following:
+For the web embedding, `atomic.wake` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
@@ -574,8 +575,8 @@ The [instruction syntax][] is modified as follows:
 atomicop ::= add | sub | and | or | xor | xchg | cmpxchg
 
 instr ::= ... |
-          inn.wait memarg |
-          wake memarg |
+          inn.atomic.wait memarg |
+          atomic.wake memarg |
 
           inn.extend8_s | inn.extend16_s | i64.extend32_s |
 
@@ -604,9 +605,9 @@ instr ::= ...
         | 0xC3                  =>  i64.extend16_s
         | 0xC4                  =>  i64.extend32_s
 
-        | 0xFE 0x00 m:memarg32  =>  wake m
-        | 0xFE 0x01 m:memarg32  =>  i32.wait m
-        | 0xFE 0x02 m:memarg64  =>  i64.wait m
+        | 0xFE 0x00 m:memarg32  =>  atomic.wake m
+        | 0xFE 0x01 m:memarg32  =>  i32.atomic.wait m
+        | 0xFE 0x02 m:memarg64  =>  i64.atomic.wait m
 
         | 0xFE 0x10 m:memarg32  =>  i32.atomic.load m
         | 0xFE 0x11 m:memarg64  =>  i64.atomic.load m
