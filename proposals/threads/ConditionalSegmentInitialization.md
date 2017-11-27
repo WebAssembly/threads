@@ -237,16 +237,16 @@ Consider the example given in solution 2; there are two data sections, the
 first is always active and the second is conditionally active if global 0 has a
 non-zero value. This could be implemented as follows:
 
-```
+```webassembly
 (import "a" "global" (global i32))  ;; global 0
 (memory 1)
 (data (i32.const 0) "hello")    ;; data segment 0, is active so always copied
 (data inactive "goodbye")       ;; data segment 1, is inactive
 
 (func $start
-  (if (get\_global 0)
+  (if (get_global 0)
     ;; copy data segment 1 into memory
-    (init\_memory 1
+    (init_memory 1
       (i32.const 0)     ;; source offset
       (i32.const 16)    ;; target offset
       (i32.const 7)))   ;; length
