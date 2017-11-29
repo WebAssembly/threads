@@ -89,9 +89,9 @@ as an operand to `init_memory` or `init_table`.
 The data section is encoded as follows:
 
 ```
-datasec ::= seg*:section\_11(vec(data))   => seg
-data    ::= 0x00 e:expr b*:vec(byte)      => {data 0, offset e, init b*, active true}
-data    ::= 0x01 b*:vec(byte)             => {data 0, offset empty, init b*, active false}
+datasec ::= seg*:section_11(vec(data))   => seg
+data    ::= 0x00 e:expr b*:vec(byte)     => {data 0, offset e, init b*, active true}
+data    ::= 0x01 b*:vec(byte)            => {data 0, offset empty, init b*, active false}
 ```
 
 The element section is encoded similarly.
