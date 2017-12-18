@@ -74,22 +74,29 @@ requires two modules where one should be enough.
 
 ## Proposal: New instructions to initialize data and element segments
 
-Similar to solution 2, we repurpose the memory index as a flags field. Unlike
-solution 2, the flags field specifies whether this segment is _inactive_. An
-inactive segment will not be automatically copied into the memory or table on
-instantiation, and must instead be applied manually using the following new
-instructions:
+The [binary format for the data section](https://webassembly.github.io/spec/binary/modules.html#data-section)
+currently has a collection of segments, each of which has a memory index, an
+initializer expression for its offset, and its raw data.
+
+Since WebAssembly currently does not allow for multiple memories, the memory
+index must be zero. We can repurpose this field as a flags field.
+
+When the least-significant bit of the flags field is `1`, this segment is
+_inactive_. An inactive segment will not be automatically copied into the
+memory or table on instantiation, and must instead be applied manually using
+the following new instructions:
 
 * `mem.init`: copy a region from a data segment
-* `mem.drop`: prevent further use of a data segment
 * `table.init`: copy an region from an element segment
-* `table.drop`: prevent further use of an element segment
-
-When the least-significant bit of the flags field is `1`, the segment is
-inactive. The rest of the bits of the flags field must be zero.
 
 An inactive segment has no initializer expression, since it will be specified
 as an operand to `mem.init` or `table.init`.
+
+Segments (either active or inactive) can also be discarded by using the
+following new instructions:
+
+* `mem.drop`: prevent further use of a data segment
+* `table.drop`: prevent further use of an element segment
 
 The data section is encoded as follows:
 
