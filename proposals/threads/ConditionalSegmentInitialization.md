@@ -92,11 +92,12 @@ the following new instructions:
 An inactive segment has no initializer expression, since it will be specified
 as an operand to `mem.init` or `table.init`.
 
-Segments (either active or inactive) can also be discarded by using the
-following new instructions:
+Inactive segments can also be discarded by using the following new instructions:
 
 * `mem.drop`: prevent further use of a data segment
 * `table.drop`: prevent further use of an element segment
+
+Attempting to drop an active segment is a validation error.
 
 The data section is encoded as follows:
 
