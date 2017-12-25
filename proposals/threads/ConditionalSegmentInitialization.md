@@ -82,17 +82,17 @@ Since WebAssembly currently does not allow for multiple memories, the memory
 index must be zero. We can repurpose this field as a flags field.
 
 When the least-significant bit of the flags field is `1`, this segment is
-_inactive_. An inactive segment will not be automatically copied into the
+_passive_. A passive segment will not be automatically copied into the
 memory or table on instantiation, and must instead be applied manually using
 the following new instructions:
 
 * `mem.init`: copy a region from a data segment
 * `table.init`: copy an region from an element segment
 
-An inactive segment has no initializer expression, since it will be specified
+An passive segment has no initializer expression, since it will be specified
 as an operand to `mem.init` or `table.init`.
 
-Inactive segments can also be discarded by using the following new instructions:
+Passive segments can also be discarded by using the following new instructions:
 
 * `mem.drop`: prevent further use of a data segment
 * `table.drop`: prevent further use of an element segment
@@ -111,7 +111,7 @@ The element section is encoded similarly.
 
 ### `mem.init` instruction
 
-The `mem.init` instruction copies data from a given segment into a target
+The `mem.init` instruction copies data from a given passive segment into a target
 memory. The source segment and target memory are given as immediates. The
 instruction also has three i32 operands: an offset into the source segment, an
 offset into the target memory, and a length to copy.
@@ -122,12 +122,13 @@ step 11 of
 but it behaves as though the segment were specified with the source offset,
 target offset, and length as given by the `mem.init` operands.
 
-A trap occurs if any of the accessed bytes lies outside the source data segment
-or the target memory. A trap also occurs if the segment is used after it has
-been dropped via `mem.drop`.
+A trap occurs if:
+* the segment is passive
+* the segment is used after it has been dropped via `mem.drop`
+* any of the accessed bytes lies outside the source data segment or the target memory
 
 Note that it is allowed to use `mem.init` on the same data segment more than
-once, or with an active data segment.
+once.
 
 ### `mem.drop` instruction
 
@@ -154,8 +155,8 @@ non-zero value. This could be implemented as follows:
 ```webassembly
 (import "a" "global" (global i32))  ;; global 0
 (memory 1)
-(data (i32.const 0) "hello")    ;; data segment 0, is active so always copied
-(data inactive "goodbye")       ;; data segment 1, is inactive
+(data (i32.const 0) "hello")   ;; data segment 0, is active so always copied
+(data passive "goodbye")       ;; data segment 1, is passive
 
 (func $start
   (if (get_global 0)
