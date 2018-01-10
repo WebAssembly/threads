@@ -74,17 +74,30 @@ requires two modules where one should be enough.
 
 ## Proposal: New instructions to initialize data and element segments
 
-Similar to solution 2, we repurpose the memory index as a flags field. Unlike
-solution 2, the flags field specifies whether this segment is _inactive_. An
-inactive segment will not be automatically copied into the memory or table on
-instantiation, and must instead be applied manually using two new instructions:
-`init_memory` and `init_table`.
+The [binary format for the data section](https://webassembly.github.io/spec/binary/modules.html#data-section)
+currently has a collection of segments, each of which has a memory index, an
+initializer expression for its offset, and its raw data.
 
-When the least-significant bit of the flags field is `1`, the segment is
-inactive. The rest of the bits of the flags field must be zero.
+Since WebAssembly currently does not allow for multiple memories, the memory
+index must be zero. We can repurpose this field as a flags field.
 
-An inactive segment has no initializer expression, since it will be specified
-as an operand to `init_memory` or `init_table`.
+When the least-significant bit of the flags field is `1`, this segment is
+_passive_. A passive segment will not be automatically copied into the
+memory or table on instantiation, and must instead be applied manually using
+the following new instructions:
+
+* `mem.init`: copy a region from a data segment
+* `table.init`: copy an region from an element segment
+
+An passive segment has no initializer expression, since it will be specified
+as an operand to `mem.init` or `table.init`.
+
+Passive segments can also be discarded by using the following new instructions:
+
+* `mem.drop`: prevent further use of a data segment
+* `table.drop`: prevent further use of an element segment
+
+Attempting to drop an active segment is a validation error.
 
 The data section is encoded as follows:
 
@@ -96,36 +109,42 @@ data    ::= 0x01 b*:vec(byte)            => {data 0, offset empty, init b*, acti
 
 The element section is encoded similarly.
 
-### `init_memory` instruction
+### `mem.init` instruction
 
-The `init_memory` instruction copies data from a given segment into a target
+The `mem.init` instruction copies data from a given passive segment into a target
 memory. The source segment and target memory are given as immediates. The
 instruction also has three i32 operands: an offset into the source segment, an
 offset into the target memory, and a length to copy.
 
-When `init_memory` is executed, its behavior matches the steps described in
+When `mem.init` is executed, its behavior matches the steps described in
 step 11 of
 [instantiation](https://webassembly.github.io/spec/exec/modules.html#instantiation),
 but it behaves as though the segment were specified with the source offset,
-target offset, and length as given by the `init_memory` operands.
+target offset, and length as given by the `mem.init` operands.
 
-`init_memory` may only be used during
-[instantiation](https://webassembly.github.io/spec/exec/modules.html#instantiation)
-when the start function is being invoked. At any other times, the instructions
-will trap.
+A trap occurs if:
+* the segment is passive
+* the segment is used after it has been dropped via `mem.drop`
+* any of the accessed bytes lies outside the source data segment or the target memory
 
-A trap occurs if any of the accessed bytes lies outside the source data segment
-or the target memory.
+Note that it is allowed to use `mem.init` on the same data segment more than
+once.
 
-Note that it is allowed to use `init_memory` on the same data segment more than
-once, or with an active data segment.
+### `mem.drop` instruction
 
-### `init_table` instruction
+The `mem.drop` instruction prevents further use of a given segment. After a
+data segment has been dropped, it is no longer valid to use it in a `mem.init`
+instruction. This instruction is intended to be used as an optimization hint to
+the WebAssembly implementation. After a memory segment is dropped its data can
+no longer be retrieved, so the memory used by this segment may be freed.
 
-The `init_table` instruction behaves similary to the `init_memory` instruction,
-with the difference that it operates on element segments and tables, instead of
-data segments and memories. The offset and length operands of `init_table` have
-element units instead of bytes as well.
+### `table.init` and `table.drop` instructions
+
+The `table.init` and `table.drop` instructions behave similary to the
+`mem.init` and `mem.drop` instructions, with the difference that they operate
+on element segments and tables, instead of data segments and memories. The
+offset and length operands of `table.init` have element units instead of bytes
+as well.
 
 ### Example
 
@@ -136,15 +155,20 @@ non-zero value. This could be implemented as follows:
 ```webassembly
 (import "a" "global" (global i32))  ;; global 0
 (memory 1)
-(data (i32.const 0) "hello")    ;; data segment 0, is active so always copied
-(data inactive "goodbye")       ;; data segment 1, is inactive
+(data (i32.const 0) "hello")   ;; data segment 0, is active so always copied
+(data passive "goodbye")       ;; data segment 1, is passive
 
 (func $start
   (if (get_global 0)
+
     ;; copy data segment 1 into memory
-    (init_memory 1
+    (mem.init 1
       (i32.const 0)     ;; source offset
       (i32.const 16)    ;; target offset
-      (i32.const 7)))   ;; length
+      (i32.const 7))    ;; length
+
+    ;; The memory used by this segment is no longer needed, so this segment can
+    ;; be dropped.
+    (mem.drop 1))
 )
 ```
