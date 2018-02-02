@@ -63,10 +63,7 @@ These operations closely match respective operations available in hardware.
      \K{f}\X{nn}\K{.}\fbinop \\&&|&
      \K{i}\X{nn}\K{.}\itestop \\&&|&
      \K{i}\X{nn}\K{.}\irelop ~|~
-     \K{f}\X{nn}\K{.}\frelop ~|~ \\&&|&
-     \K{i}\X{nn}\K{.}\EXTEND\K{8\_s} ~|~
-     \K{i}\X{nn}\K{.}\EXTEND\K{16\_s} ~|~
-     \K{i64.}\EXTEND\K{32\_s} ~|~ \\&&|&
+     \K{f}\X{nn}\K{.}\frelop \\&&|&
      \K{i32.}\WRAP\K{/i64} ~|~
      \K{i64.}\EXTEND\K{\_}\sx/\K{i32} ~|~
      \K{i}\X{nn}\K{.}\TRUNC\K{\_}\sx/\K{f}\X{mm} \\&&|&
@@ -154,10 +151,7 @@ Occasionally, it is convenient to group operators together according to the foll
 
 .. math::
    \begin{array}{llll}
-   \production{unary operator} & \unop &::=&
-     \iunop ~|~
-     \funop ~|~
-     \EXTEND{N}\K{\_s} \\
+   \production{unary operator} & \unop &::=& \iunop ~|~ \funop \\
    \production{binary operator} & \binop &::=& \ibinop ~|~ \fbinop \\
    \production{test operator} & \testop &::=& \itestop \\
    \production{relational operator} & \relop &::=& \irelop ~|~ \frelop \\

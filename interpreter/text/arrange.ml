@@ -101,9 +101,6 @@ struct
     | Clz -> "clz"
     | Ctz -> "ctz"
     | Popcnt -> "popcnt"
-    | Extend8S -> "extend8_s"
-    | Extend16S -> "extend16_s"
-    | Extend32S -> "extend32_s"
 
   let binop xx = function
     | Add -> "add"

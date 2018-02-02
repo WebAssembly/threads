@@ -611,19 +611,6 @@ The integer result of predicates -- i.e., :ref:`tests <syntax-testop>` and :ref:
    \end{array}
 
 
-.. _op-iextendn_s:
-
-:math:`\iextendns_N(i)`
-.......................
-
-* Return :math:`\extends_{M,N}(i)`.
-
-.. math::
-   \begin{array}{lll@{\qquad}l}
-   \iextendns_N(i) &=& \extends_{M,N}(i) \\
-   \end{array}
-
-
 .. _op-ixchg:
 
 :math:`\ixchg_N(i_1, i_2)`

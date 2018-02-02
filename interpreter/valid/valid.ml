@@ -137,11 +137,6 @@ let type_cvtop at = function
 
 (* Expressions *)
 
-let check_unop unop at =
-  match unop with
-  | Values.I32 I32Op.Extend32S -> error at "invalid unary operator"
-  | _ -> ()
-
 let check_memop (c : context) (memop : 'a memop) (sh: sharability option)
     get_sz at =
   let MemoryType (_, shared) = memory c (0l @@ at) in
@@ -283,7 +278,6 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     [t; t] --> [I32Type]
 
   | Unary unop ->
-    check_unop unop e.at;
     let t = type_unop unop in
     [t] --> [t]
 
