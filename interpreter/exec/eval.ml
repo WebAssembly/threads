@@ -228,7 +228,7 @@ let rec step (c : config) : config =
             | None -> Memory.load_value mem addr offset ty
             | Some sz -> Memory.load_packed sz Memory.ZX mem addr offset ty
           in v :: vs', []
-        with exn -> vs', [Trapped (memory_error e.at exn) @@ e.at])
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
 
       | AtomicStore {offset; ty; sz; _}, v :: I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
@@ -240,7 +240,7 @@ let rec step (c : config) : config =
           | Some sz -> Memory.store_packed sz mem addr offset v
           );
           vs', []
-        with exn -> vs', [Trapped (memory_error e.at exn) @@ e.at]);
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
 
       | AtomicRmw (rmwop, {offset; ty; sz; _}), v :: I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
@@ -257,7 +257,7 @@ let rec step (c : config) : config =
           | Some sz -> Memory.store_packed sz mem addr offset v2
           );
           v1 :: vs', []
-        with exn -> vs', [Trapped (memory_error e.at exn) @@ e.at])
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
 
       | AtomicRmwCmpXchg {offset; ty; sz; _}, vn :: ve :: I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
@@ -274,7 +274,7 @@ let rec step (c : config) : config =
                 | Some sz -> Memory.store_packed sz mem addr offset vn
           );
           v1 :: vs', []
-        with exn -> vs', [Trapped (memory_error e.at exn) @@ e.at]);
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
 
       | CurrentMemory, vs ->
         let mem = memory frame.inst (0l @@ e.at) in
