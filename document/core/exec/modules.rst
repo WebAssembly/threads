@@ -546,7 +546,7 @@ Instantiation
 
 Given a :ref:`store <syntax-store>` :math:`S`, a :ref:`module <syntax-module>` :math:`\module` is instantiated with a list of :ref:`external values <syntax-externval>` :math:`\externval^n` supplying the required imports as follows.
 
-Instantiation assumes that the module is :ref:`valid <valid>` and the provided imports :ref:`match <match-externtype>` the declared types,
+Instantiation checks that the module is :ref:`valid <valid>` and the provided imports :ref:`match <match-externtype>` the declared types,
 and may *fail* with an error otherwise.
 Instantiation can also result in a :ref:`trap <trap>` from executing the start function.
 It is up to the :ref:`embedder <embedder>` to define how such conditions are reported.
@@ -555,17 +555,17 @@ It is up to the :ref:`embedder <embedder>` to define how such conditions are rep
 
    a. Fail.
 
-2. Assert: :math:`\module` is :ref:`valid <valid-module>` with :ref:`external types <syntax-externtype>` :math:`\externtype^m` classifying its :ref:`imports <syntax-import>`.
+2. Assert: :math:`\module` is :ref:`valid <valid-module>` with :ref:`external types <syntax-externtype>` :math:`\externtype_{\F{im}}^m` classifying its :ref:`imports <syntax-import>`.
 
 3. If the number :math:`m` of :ref:`imports <syntax-import>` is not equal to the number :math:`n` of provided :ref:`external values <syntax-externval>`, then:
 
    a. Fail.
 
-4. For each :ref:`external value <syntax-externval>` :math:`\externval_i` in :math:`\externval^n` and :ref:`external type <syntax-externtype>` :math:`\externtype_i` in :math:`\externtype^n`, do:
+4. For each :ref:`external value <syntax-externval>` :math:`\externval_i` in :math:`\externval^n` and :ref:`external type <syntax-externtype>` :math:`\externtype'_i` in :math:`\externtype_{\F{im}}^n`, do:
 
-   a. Assert: :math:`\externval_i` is :ref:`valid <valid-externval>` with :ref:`external type <syntax-externtype>` :math:`\externtype'_i` in store :math:`S`.
+   a. Assert: :math:`\externval_i` is :ref:`valid <valid-externval>` with :ref:`external type <syntax-externtype>` :math:`\externtype_i` in store :math:`S`.
 
-   b. If :math:`\externtype'_i` does not :ref:`match <match-externtype>` :math:`\externtype_i`, then:
+   b. If :math:`\externtype_i` does not :ref:`match <match-externtype>` :math:`\externtype'_i`, then:
 
       i. Fail.
 
@@ -639,7 +639,7 @@ It is up to the :ref:`embedder <embedder>` to define how such conditions are rep
 
 13. Pop the frame from the stack.
 
-14. Let :math:`\moduleinst` be a new module instance :ref:`allocated <alloc-module>` from :math:`\module` in store :math:`S` with imports :math:`\externval^\ast` and glboal initializer values :math:`\val^\ast`.
+14. Let :math:`\moduleinst` be a new module instance :ref:`allocated <alloc-module>` from :math:`\module` in store :math:`S` with imports :math:`\externval^\ast` and global initializer values :math:`\val^\ast`.
 
 15. For each :ref:`element segment <syntax-elem>` :math:`\elem_i` in :math:`\module.\MELEM`, do:
 
@@ -676,21 +676,20 @@ It is up to the :ref:`embedder <embedder>` to define how such conditions are rep
      (\INVOKE~\funcaddr)^? \\
      \end{array} \\
    &(\iff
-     & \vdashmodule \module : \externtype^n \to {\externtype'}^\ast \\
-     &\wedge& (\vdashexternval \externval : \externtype')^n \\
-     &\wedge& (\vdashexterntypematch \externtype' \matches \externtype)^n \\[1ex]
+     & \vdashmodule \module : \externtype_{\F{im}}^n \to \externtype_{\F{ex}}^\ast \\
+     &\wedge& (S \vdashexternval \externval : \externtype)^n \\
+     &\wedge& (\vdashexterntypematch \externtype \matches \externtype_{\F{im}})^n \\[1ex]
      &\wedge& \module.\MGLOBALS = \global^k \\
      &\wedge& \module.\MELEM = \elem^\ast \\
      &\wedge& \module.\MDATA = \data^\ast \\
      &\wedge& \module.\MSTART = \start^? \\[1ex]
-     &\wedge& S', \moduleinst = \F{allocmodule}(S, \module, \externval^n, v^\ast) \\
+     &\wedge& S', \moduleinst = \allocmodule(S, \module, \externval^n, v^\ast) \\
      &\wedge& F = \{ \AMODULE~\moduleinst, \ALOCALS~\epsilon \} \\[1ex]
      &\wedge& (S'; F; \global.\GINIT \stepto^\ast S'; F; v)^\ast \\
      &\wedge& (S'; F; \elem.\EOFFSET \stepto^\ast S'; F; \I32.\CONST~\X{eo})^\ast \\
      &\wedge& (S'; F; \data.\DOFFSET \stepto^\ast S'; F; \I32.\CONST~\X{do})^\ast \\[1ex]
      &\wedge& (\X{eo} + |\elem.\EINIT| \leq |S'.\STABLES[\tableaddr].\TIELEM|)^\ast \\
      &\wedge& (\X{do} + |\data.\DINIT| \leq |S'.\SMEMS[\memaddr].\MIDATA|)^\ast
-     )
    \\[1ex]
      &\wedge& \globaladdr^\ast = \moduleinst.\MIGLOBALS[|\moduleinst.\MIGLOBALS|-k \slice k] \\
      &\wedge& (\tableaddr = \moduleinst.\MITABLES[\elem.\ETABLE])^\ast \\
@@ -769,7 +768,8 @@ The values :math:`\val_{\F{res}}^m` are returned as the results of the invocatio
 .. math::
    ~\\[-1ex]
    \begin{array}{@{}lcl}
-   \invoke(S, \funcaddr, \val^n) &=& S; \val^n~(\INVOKE~\funcaddr) \\
+   \invoke(S, \funcaddr, \val^n) &=& S; F; \val^n~(\INVOKE~\funcaddr) \\
      &(\iff & S.\SFUNCS[\funcaddr].\FITYPE = [t_1^n] \to [t_2^m] \\
      &\wedge& \val^n = (t_1.\CONST~c)^n) \\
+     &\wedge& F = \{ \AMODULE~\{\}, \ALOCALS~\epsilon \} \\
    \end{array}

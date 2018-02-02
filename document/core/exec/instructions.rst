@@ -20,8 +20,8 @@ The mapping of numeric instructions to their underlying operators is expressed b
 
 .. math::
    \begin{array}{lll@{\qquad}l}
-   \X{op}_{\K{i}N}(n) &=& \F{i}\X{op}_N(n) \\
-   \X{op}_{\K{f}N}(z) &=& \F{f}\X{op}_N(z) \\
+   \X{op}_{\K{i}N}(n_1,\dots,n_k) &=& \F{i}\X{op}_N(n_1,\dots,n_k) \\
+   \X{op}_{\K{f}N}(z_1,\dots,z_k) &=& \F{f}\X{op}_N(z_1,\dots,z_k) \\
    \end{array}
 
 And for :ref:`conversion operators <exec-cvtop>`:
@@ -400,7 +400,7 @@ Memory Instructions
 
 7. Pop the value :math:`\I32.\CONST~i` from the stack.
 
-8. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+8. Let :math:`\X{ea}` be the integer :math:`i + \memarg.\OFFSET`.
 
 9. If :math:`N` is not part of the instruction, then:
 
@@ -480,7 +480,7 @@ Memory Instructions
 
 9. Pop the value :math:`\I32.\CONST~i` from the stack.
 
-10. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+10. Let :math:`\X{ea}` be the integer :math:`i + \memarg.\OFFSET`.
 
 11. If :math:`N` is not part of the instruction, then:
 
@@ -600,6 +600,7 @@ Memory Instructions
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & F.\AMODULE.\MIMEMS[0] = a \\
+     \wedge & \X{sz} = |S.\SMEMS[a].\MIDATA|/64\,\F{Ki} \\
      \wedge & S' = S \with \SMEMS[a] = \growmem(S.\SMEMS[a], n)) \\
      \end{array}
    \\[1ex]
@@ -1343,29 +1344,27 @@ Exiting :math:`\instr^\ast` with label :math:`L`
 
 When the end of a block is reached without a jump or trap aborting it, then the following steps are performed.
 
-1. Let :math:`n` be the arity of :math:`L`.
+1. Let :math:`m` be the number of values on the top of the stack.
 
-2. Assert: due to :ref:`validation <valid-instr-seq>`, there are :math:`n` values on the top of the stack.
+2. Pop the values :math:`\val^m` from the stack.
 
-3. Pop the results :math:`\val^n` from the stack.
+3. Assert: due to :ref:`validation <valid-instr-seq>`, the label :math:`L` is now on the top of the stack.
 
-4. Assert: due to :ref:`validation <valid-instr-seq>`, the label :math:`L` is now on the top of the stack.
+4. Pop the label from the stack.
 
-5. Pop the label from the stack.
+5. Push :math:`\val^m` back to the stack.
 
-6. Push :math:`\val^n` back to the stack.
-
-7. Jump to the position after the |END| of the :ref:`structured control instruction <syntax-instr-control>` associated with the label :math:`L`.
+6. Jump to the position after the |END| of the :ref:`structured control instruction <syntax-instr-control>` associated with the label :math:`L`.
 
 .. math::
    ~\\[-1ex]
    \begin{array}{lcl@{\qquad}l}
-   \LABEL_n\{\instr^\ast\}~\val^n~\END &\stepto& \val^n
+   \LABEL_n\{\instr^\ast\}~\val^m~\END &\stepto& \val^m
    \end{array}
 
 .. note::
    This semantics also applies to the instruction sequence contained in a |LOOP| instruction.
-   Therefor, execution of a loop falls off the end, unless a backwards branch is performed explicitly.
+   Therefore, execution of a loop falls off the end, unless a backwards branch is performed explicitly.
 
 
 .. index:: ! call, function, function instance, label, frame
@@ -1389,21 +1388,23 @@ Invocation of :ref:`function address <syntax-funcaddr>` :math:`a`
 
 3. Let :math:`[t_1^n] \to [t_2^m]` be the :ref:`function type <syntax-functype>` :math:`f.\FITYPE`.
 
-4. Let :math:`t^\ast` be the list of :ref:`value types <syntax-valtype>` :math:`f.\FICODE.\FLOCALS`.
+4. Assert: due to :ref:`validation <valid-call>`, :math:`m \leq 1`.
 
-5. Let :math:`\instr^\ast~\END` be the :ref:`expression <syntax-expr>` :math:`f.\FICODE.\FBODY`.
+5. Let :math:`t^\ast` be the list of :ref:`value types <syntax-valtype>` :math:`f.\FICODE.\FLOCALS`.
 
-6. Assert: due to :ref:`validation <valid-call>`, :math:`n` values are on the top of the stack.
+6. Let :math:`\instr^\ast~\END` be the :ref:`expression <syntax-expr>` :math:`f.\FICODE.\FBODY`.
 
-7. Pop the values :math:`\val^n` from the stack.
+7. Assert: due to :ref:`validation <valid-call>`, :math:`n` values are on the top of the stack.
 
-8. Let :math:`\val_0^\ast` be the list of zero values of types :math:`t^\ast`.
+8. Pop the values :math:`\val^n` from the stack.
 
-9. Let :math:`F` be the :ref:`frame <syntax-frame>` :math:`\{ \AMODULE~f.\FIMODULE, \ALOCALS~\val^n~\val_0^\ast \}`.
+9. Let :math:`\val_0^\ast` be the list of zero values of types :math:`t^\ast`.
 
-10. Push the activation of :math:`F` with arity :math:`m` to the stack.
+10. Let :math:`F` be the :ref:`frame <syntax-frame>` :math:`\{ \AMODULE~f.\FIMODULE, \ALOCALS~\val^n~\val_0^\ast \}`.
 
-11. :ref:`Execute <exec-block>` the instruction :math:`\BLOCK~[t_2^m]~\instr^\ast~\END`.
+11. Push the activation of :math:`F` with arity :math:`m` to the stack.
+
+12. :ref:`Execute <exec-block>` the instruction :math:`\BLOCK~[t_2^m]~\instr^\ast~\END`.
 
 .. math::
    ~\\[-1ex]
@@ -1415,6 +1416,7 @@ Invocation of :ref:`function address <syntax-funcaddr>` :math:`a`
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & S.\SFUNCS[a] = f \\
      \wedge & f.\FITYPE = [t_1^n] \to [t_2^m] \\
+     \wedge & m \leq 1 \\
      \wedge & f.\FICODE = \{ \FTYPE~x, \FLOCALS~t^k, \FBODY~\instr^\ast~\END \} \\
      \wedge & F = \{ \AMODULE~f.\FIMODULE, ~\ALOCALS~\val^n~(t.\CONST~0)^k \})
      \end{array} \\

@@ -76,10 +76,10 @@ $(LIB).mlpack:	$(DIRS)
 		| sort | uniq \
 		>$@
 
-_build/$(LIB).cmo: $(LIB).mlpack
+_build/$(LIB).cmo: $(LIB).mlpack _tags
 		$(OCB) -quiet $(LIB).cmo
 
-_build/$(LIB).cmx: $(LIB).mlpack
+_build/$(LIB).cmx: $(LIB).mlpack _tags
 		$(OCB) -quiet $(LIB).cmx
 
 
@@ -136,9 +136,8 @@ $(ZIP):		$(WINMAKE)
 		git archive --format=zip --prefix=$(NAME)/ -o $@ HEAD
 
 clean:
-		rm -rf _build/jslib wasm.mlpack _tags
+		rm -rf _build/jslib $(LIB).mlpack _tags
 		$(OCB) -clean
-
 
 # Opam support
 
@@ -150,9 +149,9 @@ check:
 		ocamlfind query $(LIBS)
 
 install:	_build/$(LIB).cmx _build/$(LIB).cmo
-		ocamlfind install wasm meta/findlib/META _build/wasm.o \
+		ocamlfind install $(LIB) meta/findlib/META _build/$(LIB).o \
 		  $(wildcard _build/$(LIB).cm*) \
 		  $(wildcard $(DIRS:%=%/*.mli))
 
 uninstall:
-		ocamlfind remove wasm
+		ocamlfind remove $(LIB)

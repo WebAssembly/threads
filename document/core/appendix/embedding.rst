@@ -262,7 +262,7 @@ Functions
 .. index:: invocation, value, result
 .. _embed-invoke-func:
 
-:math:`\F{invoke\_func}(\store, \funcaddr, \val^\ast) : (\store, \val^\ast ~|~ \error`)`
+:math:`\F{invoke\_func}(\store, \funcaddr, \val^\ast) : (\store, \val^\ast ~|~ \error)`
 ........................................................................................
 
 1. Assert: :math:`\store.\SFUNCS[\funcaddr]` exists.
@@ -326,8 +326,8 @@ Tables
 
 .. _embed-read-table:
 
-:math:`\F{read\_table}(\store, \tableaddr, i) : \funcaddr ~|~ \error`
-.....................................................................
+:math:`\F{read\_table}(\store, \tableaddr, i) : \funcaddr^? ~|~ \error`
+.......................................................................
 
 1. Assert: :math:`\store.\STABLES[\tableaddr]` exists.
 
@@ -337,21 +337,19 @@ Tables
 
 4. If :math:`i` is larger than or equal to the length if :math:`\X{ti}.\TIELEM`, then return :math:`\ERROR`.
 
-5. If :math:`\X{ti}.\TIELEM[i]` contains a :ref:`function address <syntax-funcaddr>` :math:`\X{fa}`, then return :math:`\X{fa}`.
-
-6. Else :math:`\X{ti}.\TIELEM[i]` is empty, hence return :math:`\ERROR`.
+5. Else, return :math:`\X{ti}.\TIELEM[i]`.
 
 .. math::
    \begin{array}{lclll}
-   \F{read\_table}(S, a, i) &=& \X{fa} && (\iff S.\STABLES[a].\TIELEM[i] = \X{fa}) \\
+   \F{read\_table}(S, a, i) &=& \X{fa}^? && (\iff S.\STABLES[a].\TIELEM[i] = \X{fa}^?) \\
    \F{read\_table}(S, a, i) &=& \ERROR && (\otherwise) \\
    \end{array}
 
 
 .. _embed-write-table:
 
-:math:`\F{write\_table}(\store, \tableaddr, i, \funcaddr) : \store ~|~ \error`
-..............................................................................
+:math:`\F{write\_table}(\store, \tableaddr, i, \funcaddr^?) : \store ~|~ \error`
+................................................................................
 
 1. Assert: :math:`\store.\STABLES[\tableaddr]` exists.
 
@@ -361,15 +359,33 @@ Tables
 
 4. If :math:`i` is larger than or equal to the length if :math:`\X{ti}.\TIELEM`, then return :math:`\ERROR`.
 
-5. Replace :math:`\X{ti}.\TIELEM[i]` with the :ref:`function address <syntax-funcaddr>` :math:`\X{fa}`.
+5. Replace :math:`\X{ti}.\TIELEM[i]` with the optional :ref:`function address <syntax-funcaddr>` :math:`\X{fa}^?`.
 
 6. Return the updated store.
 
 .. math::
    \begin{array}{lclll}
-   \F{write\_table}(S, a, i, \X{fa}) &=& S' && (\iff S' = S \with \STABLES[a].\TIELEM[i] = \X{fa}) \\
-   \F{write\_table}(S, a, i, \X{fa}) &=& \ERROR && (\otherwise) \\
+   \F{write\_table}(S, a, i, \X{fa}^?) &=& S' && (\iff S' = S \with \STABLES[a].\TIELEM[i] = \X{fa}^?) \\
+   \F{write\_table}(S, a, i, \X{fa}^?) &=& \ERROR && (\otherwise) \\
    \end{array}
+
+
+.. _embed-size-table:
+
+:math:`\F{size\_table}(\store, \tableaddr) : \X{i32}`
+.....................................................
+
+1. Assert: :math:`\store.\STABLES[\tableaddr]` exists.
+
+2. Return the length of :math:`\store.\STABLES[\tableaddr].\TIELEM`.
+
+.. math::
+   ~ \\
+   \begin{array}{lclll}
+   \F{size\_table}(S, a) &=& n &&
+     (\iff |S.\STABLES[a].\TIELEM| = n) \\
+   \end{array}
+
 
 
 .. _embed-grow-table:
@@ -478,6 +494,24 @@ Memories
    \F{write\_mem}(S, a, i, b) &=& S' && (\iff S' = S \with \SMEMS[a].\MIDATA[i] = b) \\
    \F{write\_mem}(S, a, i, b) &=& \ERROR && (\otherwise) \\
    \end{array}
+
+
+.. _embed-size-mem:
+
+:math:`\F{size\_mem}(\store, \memaddr) : \X{i32}`
+.................................................
+
+1. Assert: :math:`\store.\SMEMS[\memaddr]` exists.
+
+2. Return the length of :math:`\store.\SMEMS[\memaddr].\MIDATA` divided by the :ref:`page size <page-size>`.
+
+.. math::
+   ~ \\
+   \begin{array}{lclll}
+   \F{size\_mem}(S, a) &=& n &&
+     (\iff |S.\SMEMS[a].\MIDATA| = n \cdot 64\,\F{Ki}) \\
+   \end{array}
+
 
 
 .. _embed-grow-mem:
