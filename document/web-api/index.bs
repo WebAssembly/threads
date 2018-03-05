@@ -20,8 +20,8 @@ Markup Shorthands: css no, markdown yes
     "status": "Current Editor's Draft"
   },
   "WEBASSEMBLY": {
-    "href": "https://webassembly.github.io/spec/",
-    "title": "WebAssembly Specification",
+    "href": "https://webassembly.github.io/spec/core/",
+    "title": "WebAssembly Core Specification",
     "publisher": "W3C WebAssembly Community Group",
     "status": "Draft"
   },
@@ -40,15 +40,21 @@ urlPrefix: https://tc39.github.io/ecma262/; spec: ECMA-262
         text: TypeError; url: sec-native-error-types-used-in-this-standard-typeerror
     type: interface
         text: ArrayBuffer; url: sec-arraybuffer-objects
-urlPrefix: https://webassembly.github.io/spec/; spec: WebAssembly; type: dfn
+    type: abstract-op
+        text: IsSharedArrayBuffer; url: sec-issharedarraybuffer
+    type: dfn
+        text: SharedArrayBuffer; url: sec-sharedarraybuffer-objects
+        text: agent cluster; url: sec-agent-clusters
+urlPrefix: https://webassembly.github.io/spec/core/; spec: WebAssembly; type: dfn
     text: function index; url: syntax/modules.html#syntax-funcidx
-urlPrefix: https://webassembly.github.io/spec/document/js-api/; spec: WASMJS
+urlPrefix: https://webassembly.github.io/spec/js-api/index.html; spec: WASMJS
     type: namespace
         text: WebAssembly; url: #namespacedef-webassembly
     type: interface
         text: CompileError; url: #compileerror
         text: Module; url: #module
         text: WebAssemblyInstantiatedSource; url: #dictdef-webassemblyinstantiatedsource
+        text: Memory; url: #memories
     type: dfn
         text: compile a WebAssembly module; url: #compile-a-webassembly-module
         text: instantiate a WebAssembly module; url: #instantiate-a-webassembly-module
@@ -56,6 +62,8 @@ urlPrefix: https://webassembly.github.io/spec/document/js-api/; spec: WASMJS
         text: asynchronously compile a webassembly module; url: #asynchronously-compile-a-webassembly-module
         text: instantiate a promise of a module; url: #instantiate-a-promise-of-a-module
         text: Exported Function; url: #exported-function
+        text: identified with; url: #identified-with
+        text: create a memory object; url: #create-a-memory-object
 url:https://html.spec.whatwg.org/#cors-same-origin;text:CORS-same-origin;type:dfn;spec:HTML
 url:https://fetch.spec.whatwg.org/#concept-body-consume-body;text:consume body;type:dfn;spec:FETCH
 </pre>
@@ -121,6 +129,29 @@ Note: This algorithm accepts a {{Response}} object, or a
          1. [=Reject=] |returnValue| with |reason|.
      1. Return |returnValue|.
 </div>
+
+<h2 id="serialization">Serialization</h2>
+
+On the Web, {{Memory}} has the <code>[<a extended-attribute>Serializable</a>]</code> extended attribute.
+
+The [=serialization steps=], given |value|, |serialized| and |forStorage|, are:
+
+    1.  If [$IsSharedArrayBuffer$](|value|.\[[BufferObject]]) is false, then
+        throw a "<a exception>DataCloneError</a>" {{DOMException}}.
+
+    1.  Set |serialized|.\[[MemoryBuffer]] to the [=sub-serialization=]
+        of |value|.\[[BufferObject]]. Rethrow any exceptions.
+
+    Note: Serializing and deserializing the [=SharedArrayBuffer=] will check that
+          |forStorage| is false and the tranfer occurs within an [=agent cluster=].
+
+The [=deserialization steps=], given |serialized| and |value|, are:
+
+    1.  Let |sab| be the [=sub-deserialization=] of |serialized|.\[[MemoryBuffer]].
+
+    1.  Let |memaddr| be the memory address [=identified with=] |sab|.\[[ArrayBufferData]].
+
+    1. [=Create a memory object=] from |memaddr| and return the result.
 
 <h2 id="conventions">Developer-Facing Display Conventions</h2>
 

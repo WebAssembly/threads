@@ -212,9 +212,7 @@ fetch('demo.wasm').then(response =>
 
 Note: WebAssembly semantics are defined in terms of an abstract [=store=], representing the state of the WebAssembly abstract machine. WebAssembly operations take a store and return an updated store.
 
-Each [=agent=] has an <dfn>associated store</dfn>. When a new agent is created, its associated store is set to the result of [=init_store=]().
-
-Note: In this specification, no WebAssembly-related objects, memory or addresses can be shared among agents in an [=agent cluster=]. In a future version of WebAssembly, this may change.
+Each [=agent cluster=] has an <dfn>associated store</dfn>. When a new agent cluster is created, its associated store is set to the result of [=init_store=](). The associated store of an [=agent=] is defined to be the associated store of the [=agent cluster=] that it belongs to.
 
 Elements of the WebAssembly store may be <dfn>identified with</dfn> JavaScript values. In particular, each WebAssembly [=memory instance=] with a corresponding {{Memory}} object is identified with a JavaScript [=Data Block=]; modifications to this Data Block are identified to updating the agent's store to a store which reflects those changes, and vice versa.
 
