@@ -343,8 +343,8 @@ change. It is a validation error to use these operators on non-shared linear
 memory. The operators have sequentially consistent ordering.
 
 Both wake and wait operators trap if the effective address of either operator
-is misaligned or out-of-bounds. The wait operators requires an alignment of
-their memory access size. The wait operator requires an alignment of 32 bits.
+is misaligned or out-of-bounds. The wait operators require an alignment of
+their memory access size. The wake operator requires an alignment of 32 bits.
 
 For the web embedding, the agent can also be suspended or woken via the
 [`Atomics.wait`][] and [`Atomics.wake`][] functions respectively. An agent will
