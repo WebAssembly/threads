@@ -173,8 +173,8 @@ Memory Instructions
 .. _text-loadn:
 .. _text-store:
 .. _text-storen:
-.. _text-current_memory:
-.. _text-grow_memory:
+.. _text-memory.size:
+.. _text-memory.grow:
 
 The offset and alignment immediates to memory instructions are optional.
 The offset defaults to :math:`\T{0}`, the alignment to the storage size of the respective memory access, which is its *natural alignment*.
@@ -214,8 +214,8 @@ Lexically, an |Toffset| or |Talign| phrase is considered a single :ref:`keyword 
      \text{i64.store8}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\STORE\K{8}~m \\ &&|&
      \text{i64.store16}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\STORE\K{16}~m \\ &&|&
      \text{i64.store32}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\STORE\K{32}~m \\ &&|&
-     \text{current\_memory} &\Rightarrow& \CURRENTMEMORY \\ &&|&
-     \text{grow\_memory} &\Rightarrow& \GROWMEMORY \\
+     \text{memory.size} &\Rightarrow& \MEMORYSIZE \\ &&|&
+     \text{memory.grow} &\Rightarrow& \MEMORYGROW \\
    \end{array}
 
 
@@ -582,6 +582,16 @@ Such a folded instruction can appear anywhere a regular instruction can.
    \end{array}
 
 .. note::
+   For example, the instruction sequence
+
+   .. math::
+      \mathtt{(get\_local~\$x)~(i32.const~2)~i32.add~(i32.const~3)~i32.mul}
+
+   can be folded into
+
+   .. math::
+      \mathtt{(i32.mul~(i32.add~(get\_local~\$x)~(i32.const~2))~(i32.const~3))}
+
    Folded instructions are solely syntactic sugar,
    no additional syntactic or type-based checking is implied.
 

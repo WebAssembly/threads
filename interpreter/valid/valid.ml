@@ -144,9 +144,9 @@ let check_memop (c : context) (memop : 'a memop) (sh: sharability option)
     match get_sz memop.sz with
     | None -> size memop.ty
     | Some sz ->
-      require (memop.ty = I64Type || sz <> Memory.Mem32) at
+      require (memop.ty = I64Type || sz <> Memory.Pack32) at
         "memory size too big";
-      Memory.mem_size sz
+      Memory.packed_size sz
   in
   require (1 lsl memop.align <= size) at
     "alignment must not be larger than natural";
@@ -184,6 +184,13 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
 
   | Nop ->
     [] --> []
+
+  | Drop ->
+    [peek 0 s] -~> []
+
+  | Select ->
+    let t = peek 1 s in
+    [t; t; Some I32Type] -~> [t]
 
   | Block (ts, es) ->
     check_arity (List.length ts) e.at;
@@ -224,12 +231,7 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     let FuncType (ins, out) = type_ c x in
     (ins @ [I32Type]) --> out
 
-  | Drop ->
-    [peek 0 s] -~> []
 
-  | Select ->
-    let t = peek 1 s in
-    [t; t; Some I32Type] -~> [t]
 
   | GetLocal x ->
     [] --> [local c x]
@@ -257,11 +259,11 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     check_memop c memop None (fun sz -> sz) e.at;
     [I32Type; memop.ty] --> []
 
-  | CurrentMemory ->
+  | MemorySize ->
     ignore (memory c (0l @@ e.at));
     [] --> [I32Type]
 
-  | GrowMemory ->
+  | MemoryGrow ->
     ignore (memory c (0l @@ e.at));
     [I32Type] --> [I32Type]
 
@@ -447,9 +449,6 @@ let check_import (im : import) (c : context) : context =
     {c with memories = mt :: c.memories}
   | GlobalImport gt ->
     check_global_type gt idesc.at;
-    let GlobalType (_, mut) = gt in
-    require (mut = Immutable) idesc.at
-      "mutable globals cannot be imported (yet)";
     {c with globals = gt :: c.globals}
 
 module NameSet = Set.Make(struct type t = Ast.name let compare = compare end)
@@ -460,10 +459,7 @@ let check_export (c : context) (set : NameSet.t) (ex : export) : NameSet.t =
   | FuncExport x -> ignore (func c x)
   | TableExport x -> ignore (table c x)
   | MemoryExport x -> ignore (memory c x)
-  | GlobalExport x ->
-    let GlobalType (_, mut) = global c x in
-    require (mut = Immutable) edesc.at
-      "mutable globals cannot be exported (yet)"
+  | GlobalExport x -> ignore (global c x)
   );
   require (not (NameSet.mem name set)) ex.at "duplicate export name";
   NameSet.add name set

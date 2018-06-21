@@ -355,10 +355,9 @@ These entries can occur on the stack in any order during the execution of a prog
 Stack entries are described by abstract syntax as follows.
 
 .. note::
-   It is possible to model the WebAssebmly semantics using separate stacks for operands, control constructs, and calls.
+   It is possible to model the WebAssembly semantics using separate stacks for operands, control constructs, and calls.
    However, because the stacks are interdependent, additional book keeping about associated stack heights would be required.
    For the purpose of this specification, an interleaved representation is simpler.
-
 
 Values
 ......
@@ -566,22 +565,14 @@ Finally, the following definition of *evaluation context* and associated structu
    \end{array}
 
 .. math::
-   \begin{array}{l}
-   \begin{array}{lcl@{\qquad}l}
-   S; F; E[\instr^\ast] &\stepto& S'; F'; E[{\instr'}^\ast]
-   \end{array}
-   \\ \qquad
-     (\iff S; F; \instr^\ast \stepto S'; F'; {\instr'}^\ast) \\
-   \begin{array}{lcl@{\qquad}l}
-   S; F; \FRAME_n\{F'\}~\instr^\ast~\END &\stepto& S'; F; \FRAME_n\{F''\}~\instr'^\ast~\END
-   \end{array}
-   \\ \qquad
-     (\iff S; F'; \instr^\ast \stepto S'; F''; {\instr'}^\ast) \\[1ex]
-   \begin{array}{lcl@{\qquad}l}
+   \begin{array}{rcl}
+   S; F; E[\instr^\ast] &\stepto& S'; F'; E[{\instr'}^\ast] \\
+     && (\iff S; F; \instr^\ast \stepto S'; F'; {\instr'}^\ast) \\
+   S; F; \FRAME_n\{F'\}~\instr^\ast~\END &\stepto& S'; F; \FRAME_n\{F''\}~\instr'^\ast~\END \\
+     && (\iff S; F'; \instr^\ast \stepto S'; F''; {\instr'}^\ast) \\[1ex]
    S; F; E[\TRAP] &\stepto& S; F; \TRAP
-     &(\iff E \neq [\_]) \\
-   S; F; \FRAME_n\{F'\}~\TRAP~\END &\stepto& S; F; \TRAP
-   \end{array} \\
+     \qquad (\iff E \neq [\_]) \\
+   S; F; \FRAME_n\{F'\}~\TRAP~\END &\stepto& S; F; \TRAP \\
    \end{array}
 
 Reduction terminates when a thread's instruction sequence has been reduced to a :ref:`result <syntax-result>`,

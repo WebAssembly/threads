@@ -14,7 +14,7 @@ and the provided output stack with result values of types :math:`t_2^\ast` that 
    consuming two |I32| values and producing one.
 
 Typing extends to :ref:`instruction sequences <valid-instr-seq>` :math:`\instr^\ast`.
-Such a sequence has a :ref:`function types <syntax-functype>` :math:`[t_1^\ast] \to [t_2^\ast]` if the accumulative effect of executing the instructions is consuming values of types :math:`t_1^\ast` off the operand stack and pushing new values of types :math:`t_2^\ast`.
+Such a sequence has a :ref:`function type <syntax-functype>` :math:`[t_1^\ast] \to [t_2^\ast]` if the accumulative effect of executing the instructions is consuming values of types :math:`t_1^\ast` off the operand stack and pushing new values of types :math:`t_2^\ast`.
 
 .. _polymorphism:
 
@@ -314,7 +314,7 @@ Memory Instructions
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
-* The alignment :math:`2^{\memarg.\ALIGN}` must not be larger than the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
+* The alignment :math:`2^{\memarg.\ALIGN}` must not be larger than the :ref:`bit width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
 * Then the instruction is valid with type :math:`[\I32] \to [t]`.
 
@@ -354,7 +354,7 @@ Memory Instructions
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
-* The alignment :math:`2^{\memarg.\ALIGN}` must not be larger than the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
+* The alignment :math:`2^{\memarg.\ALIGN}` must not be larger than the :ref:`bit width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
 * Then the instruction is valid with type :math:`[\I32~t] \to []`.
 
@@ -389,10 +389,10 @@ Memory Instructions
    }
 
 
-.. _valid-current_memory:
+.. _valid-memory.size:
 
-:math:`\CURRENTMEMORY`
-......................
+:math:`\MEMORYSIZE`
+...................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
@@ -402,13 +402,13 @@ Memory Instructions
    \frac{
      C.\CMEMS[0] = \memtype
    }{
-     C \vdashinstr \CURRENTMEMORY : [] \to [\I32]
+     C \vdashinstr \MEMORYSIZE : [] \to [\I32]
    }
 
 
-.. _valid-grow_memory:
+.. _valid-memory.grow:
 
-:math:`\GROWMEMORY`
+:math:`\MEMORYGROW`
 ...................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
@@ -419,7 +419,7 @@ Memory Instructions
    \frac{
      C.\CMEMS[0] = \memtype
    }{
-     C \vdashinstr \GROWMEMORY : [\I32] \to [\I32]
+     C \vdashinstr \MEMORYGROW : [\I32] \to [\I32]
    }
 
 
@@ -434,7 +434,7 @@ Atomic Memory Instructions
 .. _valid-atomic-wake:
 
 :math:`\ATOMICWAKE~\memarg`
-.....................
+...........................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
@@ -454,7 +454,7 @@ Atomic Memory Instructions
 .. _valid-atomic-wait:
 
 :math:`t\K{.}\ATOMICWAIT~\memarg`
-...........................
+.................................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
@@ -696,6 +696,8 @@ Control Instructions
    }
 
 .. note::
+   The :ref:`notation <notation-extend>` :math:`C,\CLABELS\,[t^?]` inserts the new label type at index :math:`0`, shifting all others.
+
    The fact that the nested instruction sequence :math:`\instr^\ast` must have type :math:`[] \to [t^?]` implies that it cannot access operands that have been pushed on the stack before the block was entered.
    This may be generalized in future versions of WebAssembly.
 
@@ -720,6 +722,8 @@ Control Instructions
    }
 
 .. note::
+   The :ref:`notation <notation-extend>` :math:`C,\CLABELS\,[t^?]` inserts the new label type at index :math:`0`, shifting all others.
+
    The fact that the nested instruction sequence :math:`\instr^\ast` must have type :math:`[] \to [t^?]` implies that it cannot access operands that have been pushed on the stack before the loop was entered.
    This may be generalized in future versions of WebAssembly.
 
@@ -749,6 +753,8 @@ Control Instructions
    }
 
 .. note::
+   The :ref:`notation <notation-extend>` :math:`C,\CLABELS\,[t^?]` inserts the new label type at index :math:`0`, shifting all others.
+
    The fact that the nested instruction sequence :math:`\instr^\ast` must have type :math:`[] \to [t^?]` implies that it cannot access operands that have been pushed on the stack before the conditional was entered.
    This may be generalized in future versions of WebAssembly.
 
@@ -772,6 +778,8 @@ Control Instructions
    }
 
 .. note::
+   The :ref:`label index <syntax-labelidx>` space in the :ref:`context <context>` :math:`C` contains the most recent label first, so that :math:`C.\CLABELS[l]` performs a relative lookup as expected.
+
    The |BR| instruction is :ref:`stack-polymorphic <polymorphism>`.
 
 
@@ -793,6 +801,9 @@ Control Instructions
      C \vdashinstr \BRIF~l : [t^?~\I32] \to [t^?]
    }
 
+.. note::
+   The :ref:`label index <syntax-labelidx>` space in the :ref:`context <context>` :math:`C` contains the most recent label first, so that :math:`C.\CLABELS[l]` performs a relative lookup as expected.
+
 
 .. _valid-br_table:
 
@@ -807,7 +818,7 @@ Control Instructions
   the label :math:`C.\CLABELS[l_i]` must be defined in the context.
 
 * For all :math:`l_i` in :math:`l^\ast`,
-  :math:`C.\CLABELS[l_i]` must be :math:`t^?`.
+  :math:`C.\CLABELS[l_i]` must be :math:`[t^?]`.
 
 * Then the instruction is valid with type :math:`[t_1^\ast~t^?~\I32] \to [t_2^\ast]`, for any sequences of :ref:`value types <syntax-valtype>` :math:`t_1^\ast` and :math:`t_2^\ast`.
 
@@ -821,6 +832,8 @@ Control Instructions
    }
 
 .. note::
+   The :ref:`label index <syntax-labelidx>` space in the :ref:`context <context>` :math:`C` contains the most recent label first, so that :math:`C.\CLABELS[l_i]` performs a relative lookup as expected.
+
    The |BRTABLE| instruction is :ref:`stack-polymorphic <polymorphism>`.
 
 
@@ -829,7 +842,7 @@ Control Instructions
 :math:`\RETURN`
 ...............
 
-* The return type :math:`C.\CRETURN` must not be empty in the context.
+* The return type :math:`C.\CRETURN` must not be absent in the context.
 
 * Let :math:`[t^?]` be the :ref:`result type <syntax-resulttype>` of :math:`C.\CRETURN`.
 
@@ -845,8 +858,8 @@ Control Instructions
 .. note::
    The |RETURN| instruction is :ref:`stack-polymorphic <polymorphism>`.
 
-   :math:`C.\CRETURN` is empty (:math:`\epsilon`) when validating an :ref:`expression <valid-expr>` that is not a function body.
-   This differs from it being set to the empty result type (:math:`[]`),
+   :math:`C.\CRETURN` is absent (set to :math:`\epsilon`) when validating an :ref:`expression <valid-expr>` that is not a function body.
+   This differs from it being set to the empty result type (:math:`[\epsilon]`),
    which is the case for functions not returning anything.
 
 
@@ -986,7 +999,7 @@ Constant Expressions
    \frac{
      (C \vdashinstrconst \instr \const)^\ast
    }{
-     C \vdashexprconst \instr~\END \const
+     C \vdashexprconst \instr^\ast~\END \const
    }
 
 .. math::
@@ -1002,4 +1015,7 @@ Constant Expressions
    }
 
 .. note::
+   Currently, constant expressions occurring as initializers of :ref:`globals <syntax-global>` are further constrained in that contained |GETGLOBAL| instructions are only allowed to refer to *imported* globals.
+   This is enforced in the :ref:`validation rule for modules <valid-module>` by constraining the context :math:`C` accordingly.
+
    The definition of constant expression may be extended in future versions of WebAssembly.

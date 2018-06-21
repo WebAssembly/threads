@@ -60,8 +60,8 @@ type rmwop = (I32Op.rmwop, I64Op.rmwop, F32Op.rmwop, F64Op.rmwop) Values.op
 
 type 'a memop =
   {ty : value_type; align : int; offset : Memory.offset; sz : 'a option}
-type loadop = (Memory.mem_size * Memory.extension) memop
-type storeop = Memory.mem_size memop
+type loadop = (Memory.pack_size * Memory.extension) memop
+type storeop = Memory.pack_size memop
 type atomicloadop = storeop (* Memory.extension isn't used. *)
 type atomicstoreop = storeop
 type atomicrmwop = rmwop * storeop
@@ -78,6 +78,8 @@ type instr = instr' Source.phrase
 and instr' =
   | Unreachable                       (* trap unconditionally *)
   | Nop                               (* do nothing *)
+  | Drop                              (* forget a value *)
+  | Select                            (* branchless conditional *)
   | Block of stack_type * instr list  (* execute in sequence *)
   | Loop of stack_type * instr list   (* loop header *)
   | If of stack_type * instr list * instr list  (* conditional *)
@@ -87,8 +89,6 @@ and instr' =
   | Return                            (* break from function body *)
   | Call of var                       (* call function *)
   | CallIndirect of var               (* call function through table *)
-  | Drop                              (* forget a value *)
-  | Select                            (* branchless conditional *)
   | GetLocal of var                   (* read local variable *)
   | SetLocal of var                   (* write local variable *)
   | TeeLocal of var                   (* write local variable and keep value *)
@@ -96,8 +96,8 @@ and instr' =
   | SetGlobal of var                  (* write global variable *)
   | Load of loadop                    (* read memory at address *)
   | Store of storeop                  (* write memory at address *)
-  | CurrentMemory                     (* size of linear memory *)
-  | GrowMemory                        (* grow linear memory *)
+  | MemorySize                        (* size of linear memory *)
+  | MemoryGrow                        (* grow linear memory *)
   | Const of literal                  (* constant *)
   | Test of testop                    (* numeric test *)
   | Compare of relop                  (* numeric comparison *)

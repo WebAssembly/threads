@@ -18,7 +18,7 @@ let pos s = !(s.pos)
 let eos s = (pos s = len s)
 
 let check n s = if pos s + n > len s then raise EOS
-let skip n s = check n s; s.pos := !(s.pos) + n
+let skip n s = if n < 0 then raise EOS else check n s; s.pos := !(s.pos) + n
 
 let read s = Char.code (s.bytes.[!(s.pos)])
 let peek s = if eos s then None else Some (read s)
@@ -41,7 +41,7 @@ let error s pos msg = raise (Code (region s pos pos, msg))
 let require b s pos msg = if not b then error s pos msg
 
 let guard f s =
-  try f s with EOS -> error s (len s) "unexpected end of binary or function"
+  try f s with EOS -> error s (len s) "unexpected end of section or function"
 
 let get = guard get
 let get_string n = guard (get_string n)
@@ -88,7 +88,7 @@ let rec vuN n s =
 let rec vsN n s =
   require (n > 0) s (pos s) "integer representation too long";
   let b = u8 s in
-  let mask = (-1 lsl n) land 0x7f in
+  let mask = (-1 lsl (n - 1)) land 0x7f in
   require (n >= 7 || b land mask = 0 || b land mask = mask) s (pos s - 1)
     "integer too large";
   let x = Int64.of_int (b land 0x7f) in
@@ -106,7 +106,7 @@ let f64 s = F64.of_bits (u64 s)
 let len32 s =
   let pos = pos s in
   let n = vu32 s in
-  if n <= Int32.of_int (len s) then Int32.to_int n else
+  if I32.le_u n (Int32.of_int (len s)) then Int32.to_int n else
     error s pos "length out of bounds"
 
 let bool2 s =
@@ -371,10 +371,10 @@ let rec instr s =
 
   | 0x3f ->
     expect 0x00 s "zero flag expected";
-    current_memory
+    memory_size
   | 0x40 ->
     expect 0x00 s "zero flag expected";
-    grow_memory
+    memory_grow
 
   | 0x41 -> i32_const (at vs32 s)
   | 0x42 -> i64_const (at vs64 s)
@@ -656,12 +656,17 @@ let start_section s =
 (* Code section *)
 
 let local s =
-  let n = len32 s in
+  let n = vu32 s in
   let t = value_type s in
-  Lib.List.make n t
+  n, t
 
 let code _ s =
-  let locals = List.flatten (vec local s) in
+  let pos = pos s in
+  let nts = vec local s in
+  let ns = List.map (fun (n, _) -> I64_convert.extend_u_i32 n) nts in
+  require (I64.lt_u (List.fold_left I64.add 0L ns) 0x1_0000_0000L)
+    s pos "too many locals";
+  let locals = List.flatten (List.map (Lib.Fun.uncurry Lib.List32.make) nts) in
   let body = instr_block s in
   end_ s;
   {locals; body; ftype = Source.((-1l) @@ Source.no_region)}
