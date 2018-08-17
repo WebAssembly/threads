@@ -515,21 +515,21 @@ accessor function performs the following steps:
 1. If `this` is not a `WebAssembly.Memory`, throw a [`TypeError`][] 
    exception.
 1. Otherwise:
-  1. If `m` is not shared, then return `M.[[BufferObject]]`.
-  1. Otherwise:
-    1. Let `newByteLength` be the byte length of `M.[[Memory]]`.
-    1. Let `oldByteLength` be
-       `M.[[BufferObject]].`[\[\[ArrayBufferByteLength\]\]][].
-    1. If `newByteLength` is equal to `oldByteLength`, then return
-       `M.[[BufferObject]]`.
-    1. Otherwise:
-      1. Let `buffer` be a new [`SharedArrayBuffer`][] whose
-         [\[\[ArrayBufferData\]\]][] aliases `M.[[Memory]]` and whose
-         [\[\[ArrayBufferByteLength\]\]][] is set to `newByteLength`.
-      1. Let `status` be [`SetIntegrityLevel`][](`buffer`, `"frozen"`).
-      1. If `status` is `false`, throw a [`TypeError`][] exception.
-      1. Set `M.[[BufferObject]]` to `buffer`.
-      1. Return `buffer`.
+   1. If `m` is not shared, then return `M.[[BufferObject]]`.
+   1. Otherwise:
+      1. Let `newByteLength` be the byte length of `M.[[Memory]]`.
+      1. Let `oldByteLength` be
+         `M.[[BufferObject]].`[\[\[ArrayBufferByteLength\]\]][].
+      1. If `newByteLength` is equal to `oldByteLength`, then return
+         `M.[[BufferObject]]`.
+      1. Otherwise:
+         1. Let `buffer` be a new [`SharedArrayBuffer`][] whose
+            [\[\[ArrayBufferData\]\]][] aliases `M.[[Memory]]` and whose
+            [\[\[ArrayBufferByteLength\]\]][] is set to `newByteLength`.
+         1. Let `status` be [`SetIntegrityLevel`][](`buffer`, `"frozen"`).
+         1. If `status` is `false`, throw a [`TypeError`][] exception.
+         1. Set `M.[[BufferObject]]` to `buffer`.
+         1. Return `buffer`.
       
 Note: Freezing the buffer prevents storing properties on the buffer object, 
 which will be lost when the cached buffer is invalidated. The buffer will
