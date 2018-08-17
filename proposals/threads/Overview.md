@@ -530,6 +530,11 @@ accessor function performs the following steps:
       1. If `status` is `false`, throw a [`TypeError`][] exception.
       1. Set `M.[[BufferObject]]` to `buffer`.
       1. Return `buffer`.
+      
+Note: Freezing the buffer prevents storing properties on the buffer object, 
+which will be lost when the cached buffer is invalidated. The buffer will
+be invalidated whenever its size changes, and this can happen at any time
+on another thread that has access to the shared buffer.
 
 ## [Spec Changes][spec]
 
