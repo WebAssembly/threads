@@ -83,7 +83,7 @@ mutex is unlocked. If its value is 1, the mutex is locked.
     (drop
       (atomic.wake
         (get_local $mutexAddr)   ;; mutex address
-        (i64.const 1)))          ;; wake 1 waiter
+        (i32.const 1)))          ;; wake 1 waiter
   )
 )
 ```
@@ -418,9 +418,9 @@ no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of 
 ### Wake
 
 The wake operator takes two operands: an address operand and a wake count as an
-`i64`. The operation will wake as many waiters as are waiting on the same
+`i32`. The operation will wake as many waiters as are waiting on the same
 effective address, up to the maximum as specified by `wake count`. The operator
-returns the number of waiters that were woken as an `i64`.
+returns the number of waiters that were woken as an `i32`.
 
 `wake count` value | Behavior |
 | ---- | ---- |
@@ -437,7 +437,8 @@ For the web embedding, `atomic.wake` is equivalent in behavior to executing the 
 1. Let `int32array` be [`Int32Array`][](`buffer`).
 1. Let `fcount` be `count` if `count` is >= 0, otherwise `∞`.
 1. Let `result` be [`Atomics.wake`][](`int32array`, `address`, `fcount`).
-1. Return `result` converted to an `i64`.
+1. Trap if `result` is >= 2**32.
+1. Return `result` converted to an `i32`.
 
 ## [JavaScript API][] changes
 
