@@ -85,6 +85,15 @@ This language is structured around the following concepts.
   that takes the form of *segments* copied to given offsets.
   They can also define a *start function* that is automatically executed.
 
+.. _thread:
+
+**Threads**
+  WebAssembly code can run in multiple concurrent *threads* of computation.
+  While threads are mostly isolated from one another,
+  it is possible to *share* linear memory between multiple threads.
+  Threads can hence communicate through memory
+  and synchronize through *atomic* memory instructions.
+
 .. _embedder:
 
 **Embedder**

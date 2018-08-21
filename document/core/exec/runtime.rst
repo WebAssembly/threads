@@ -59,6 +59,8 @@ It is either a sequence of :ref:`values <syntax-val>` or a :ref:`trap <syntax-tr
 Store
 ~~~~~
 
+TODO: since allocation order is non-deterministic in the presence of threads, we can no longer use ordered lists but need mappings from abstract addresses to instances.
+
 The *store* represents all global state that can be manipulated by WebAssembly programs.
 It consists of the runtime representation of all *instances* of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tableinst>`, :ref:`memories <syntax-meminst>`, and :ref:`globals <syntax-globalinst>` that have been :ref:`allocated <alloc>` during the life time of the abstract machine. [#gc]_
 
@@ -106,12 +108,13 @@ Addresses
 ~~~~~~~~~
 
 :ref:`Function instances <syntax-funcinst>`, :ref:`table instances <syntax-tableinst>`, :ref:`memory instances <syntax-meminst>`, and :ref:`global instances <syntax-globalinst>` in the :ref:`store <syntax-store>` are referenced with abstract *addresses*.
-These are simply indices into the respective store component.
+Each address uniquely determines a respective component in the store.
+Other than that the form that addresses take is unspecified and cannot be observed.
 
 .. math::
    \begin{array}{llll}
    \production{(address)} & \addr &::=&
-     0 ~|~ 1 ~|~ 2 ~|~ \dots \\
+     \dots \\
    \production{(function address)} & \funcaddr &::=&
      \addr \\
    \production{(table address)} & \tableaddr &::=&
@@ -132,9 +135,6 @@ even where this identity is not observable from within WebAssembly code itself
    which are *static*, module-local references to their original definitions.
    A *memory address* |memaddr| denotes the abstract address *of* a memory *instance* in the store,
    not an offset *inside* a memory instance.
-
-   There is no specific limit on the number of allocations of store objects,
-   hence logical addresses can be arbitrarily large natural numbers.
 
 
 .. index:: ! instance, function type, function instance, table instance, memory instance, global instance, export instance, table address, memory address, global address, index, name
@@ -189,6 +189,8 @@ The module instance is used to resolve references to other definitions during ex
    \production{(host function)} & \hostfunc &::=& \dots \\
    \end{array}
 
+TODO: need to represent host functions differently to encompass threading
+
 A *host function* is a function expressed outside WebAssembly but passed to a :ref:`module <syntax-module>` as an :ref:`import <syntax-import>`.
 The definition and behavior of host functions are outside the scope of this specification.
 For the purpose of this specification, it is assumed that when :ref:`invoked <exec-invoke-host>`,
@@ -208,6 +210,8 @@ but within certain :ref:`constraints <exec-invoke-host>` that ensure the integri
 
 Table Instances
 ~~~~~~~~~~~~~~~
+
+TODO: table access should uniformly happen through events now
 
 A *table instance* is the runtime representation of a :ref:`table <syntax-table>`.
 It holds a vector of *function elements* and an optional maximum size, if one was specified in the :ref:`table type <syntax-tabletype>` at the table's definition site.
@@ -239,20 +243,18 @@ Memory Instances
 ~~~~~~~~~~~~~~~~
 
 A *memory instance* is the runtime representation of a linear :ref:`memory <syntax-mem>`.
-It holds a vector of :ref:`bytes <syntax-byte>` and an optional maximum size, if one was specified at the definition site of the memory. It also contains a flag for whether the memory can be shared.
+A memory instance records an optional maximum size for a memory, if one was specified at the definition site of the memory, and a flag indicating whether the memory can be :ref:`shared <syntax-shared>` across threads.
 
 .. math::
    \begin{array}{llll}
    \production{(memory instance)} & \meminst &::=&
-     \{ \MIDATA~\vec(\byte), \MIMAX~\u32^?, \MISHARE~\share \} \\
+     \{ \MIMAX~\u32^?, \MISHARE~\share \} \\
    \end{array}
 
-The length of the vector always is a multiple of the WebAssembly *page size*, which is defined to be the constant :math:`65536` -- abbreviated :math:`64\,\F{Ki}`.
-Like in a :ref:`memory type <syntax-memtype>`, the maximum size in a memory instance is given in units of this page size.
+Like in a :ref:`memory type <syntax-memtype>`, the maximum size in a memory instance is given in units of the WebAssembly *page size*, which is defined to be the constant :math:`65536` -- abbreviated :math:`64\,\F{Ki}`.
 
-The bytes can be mutated through :ref:`memory instructions <syntax-instr-memory>`, the execution of a :ref:`data segment <syntax-data>`, or by external means provided by the :ref:`embedder <embedder>`.
-
-It is an invariant of the semantics that the length of the byte vector, divided by page size, never exceeds the maximum size, if present.
+WebAssembly :ref:`threads <thread>` expose a *weak memory model* in which reads, writes, and other accesses to a memory instance can be reordered in a non-deterministic fashion that mirrors the behavior of hardware.
+Instead of representing the contents of a memory directly in an instance -- e.g., as a specific vector of :ref:`bytes <syntax-byte>` -- the abstract machine hence separately records :ref:`traces <syntax-trace>` of corresponding memory :ref:`events <syntax-evt>` that describe the history of all accesses that have occured.
 
 
 .. index:: ! global instance, global, value, mutability, instruction, embedder
@@ -262,6 +264,8 @@ It is an invariant of the semantics that the length of the byte vector, divided 
 
 Global Instances
 ~~~~~~~~~~~~~~~~
+
+TODO: global access should uniformly happen through events now
 
 A *global instance* is the runtime representation of a :ref:`global <syntax-global>` variable.
 It holds an individual :ref:`value <syntax-val>` and a flag indicating whether it is mutable.
@@ -293,6 +297,28 @@ It defines the export's :ref:`name <syntax-name>` and the associated :ref:`exter
    \end{array}
 
 
+.. index:: ! external instance, function instance, table instance, memory instance, global instance, function, table, memory, global
+   pair: abstract syntax; external instance
+   pair: external; instance
+.. _syntax-externinst:
+
+External Instances
+~~~~~~~~~~~~~~~~~~
+
+An *external instance* is an instance that can be imported or exported,
+i.e., either a :ref:`function instance <syntax-funcinst>`, :ref:`table instance <syntax-tableinst>`, :ref:`memory instance <syntax-meminst>`, or :ref:`global instances <syntax-globalinst>`.
+
+.. math::
+   \begin{array}{llcl}
+   \production{(external instance)} & \externinst &::=&
+     \funcinst ~|~
+     \tableinst ~|~
+     \meminst ~|~
+     \globalinst \\
+   \end{array}
+
+
+
 .. index:: ! external value, function address, table address, memory address, global address, store, function, table, memory, global
    pair: abstract syntax; external value
    pair: external; value
@@ -301,8 +327,8 @@ It defines the export's :ref:`name <syntax-name>` and the associated :ref:`exter
 External Values
 ~~~~~~~~~~~~~~~
 
-An *external value* is the runtime representation of an entity that can be imported or exported.
-It is an :ref:`address <syntax-addr>` denoting either a :ref:`function instance <syntax-funcinst>`, :ref:`table instance <syntax-tableinst>`, :ref:`memory instance <syntax-meminst>`, or :ref:`global instances <syntax-globalinst>` in the shared :ref:`store <syntax-store>`.
+An *external value* is the address of an :ref:`external instance <syntax-externinst>`.
+Consequently, it is either a :ref:`function address <syntax-funcaddr>`, :ref:`table address <syntax-tableaddr>`, :ref:`memory address <syntax-memaddr>`, or :ref:`global address <syntax-globaladdr>`, denoting a respecive instance in the shared :ref:`store <syntax-store>`.
 
 .. math::
    \begin{array}{llcl}
@@ -328,6 +354,99 @@ It filters out entries of a specific kind in an order-preserving fashion:
 
 * :math:`\evglobals(\externval^\ast) = [\globaladdr ~|~ (\EVGLOBAL~\globaladdr) \in \externval^\ast]`
 
+
+
+.. index:: ! action, external instance, address, store, memory, table, value, byte
+.. _syntax-act:
+.. _syntax-ord:
+.. _syntax-loc:
+.. _syntax-storeval:
+
+Actions
+~~~~~~~
+
+The interaction of a WebAssembly computation with the :ref:`store <syntax-store>` is described through *actions*, such as reads and writes.
+The execution of every individual :ref:`instruction <syntax-instr>` can perform a set of such actions.
+
+.. math::
+   \begin{array}{llcl}
+   \production{(action)} & \act &::=&
+     \AFORK~\instr^\ast \\&&|&
+     \ANEW~\addr~\externinst \\&&|&
+     \AUSE~\addr~\externinst \\&&|&
+     \ARD_\ord~\addr~\loc~b^\ast \\&&|&
+     \AWR_\ord~\addr~\loc~b^\ast \\&&|&
+     \ARMW~\addr~\loc~b^\ast~b^ast \\&&|&
+     \AWAKE~\addr~\loc~\u32 \\&&|&
+     \hostact \\
+   \production{(ordering)} & \ord &::=&
+     \UNORD ~|~
+     \SEQCST \\
+   \production{(location)} & \loc &::=&
+     \u32 ~|~
+     \LSIZE ~|~
+     \LVAL \\
+   \production{(store value)} & \storeval &::=&
+     \val ~|~
+     b^\ast \\
+   \end{array}
+
+Performing as |AFORK| action creates a new :ref:`thread <thread>` of computation, as given by a sequence of :ref:`instructions <syntax-instr>`.
+
+The |ANEW| action creates a new :ref:`external instance <syntax-externinst>` at a fresh :ref:`address <syntax-addr>`.
+The corresponding |AUSE| action accesses a previously created external instance through its address.
+It records what instance has been found at that address.
+
+The access of *mutable* state is performed through the |ARD|, |AWR|, and |ARMW| actions.
+They each access an :ref:`external instance <syntax-externinst>`, denoted by their :ref:`address <syntax-addr>`, at a given *location*.
+Such a location may either be a natural number describing the offset into a :ref:`table <syntax-tableinst>` or :ref:`memory <syntax-meminst>` instance, or an abstract label denoting a special location, which is either |LSIZE| for the current size of a :ref:`table <syntax-tableinst>` or :ref:`memory <syntax-meminst>` instance, or |LVAL| for the current value of a :ref:`global instance <syntax-globalinst>`.
+In each case they record the *store value* that has been read or written, which is either a regular :ref:`value <syntax-val>` or a sequence of :ref:`bytes <syntax-byte>`, depending on the location accessed.
+An |ARMW| event, performing an atomic read-modify-write access, records both the store values read and written;
+it is an invariant of the semantics that both are either regular values of the same type or byte sequences of the same length.
+
+|ARD| and |AWR| events are further annotated by a memory *ordering*, which describes whether the access is *unordered*, as e.g. performed by a regular :ref:`load or store instruction <syntax-instr-memory>`, or *sequentially consistent*, as e.g. performed by :ref:`atomic memory instructions <syntax-instr-atomic-memory>`.
+A |ARMW| action always is sequentially consistent.
+
+.. note::
+   Future versions of WebAssembly may introduce additional orderings.
+
+A |AWAKE| action is performed by the |ATOMICWAKE| instruction.
+It records the :ref:`address <syntax-memaddr>` of the :ref:`memory instance <syntax-meminst>`, the location, and the number of suspended threads woken up.
+
+Finally, a *host action* is an action performed outside of WebAssembly code.
+Its form and meaning is outside the scope of this specification.
+
+.. note::
+   An :ref:`embedder <embedder>` may define a custom set of host actions and respective ordering constraints to model other forms of interactions that are not expressible withing WebAssembly, but whose ordering relative to WebAssembly events is relevant for the combined semantics.
+
+
+.. TODO, move elsewhere
+   Although not explicit in this representation of a memory instance,
+
+   It is an invariant of the semantics that the length of the byte vector, divided by page size, never exceeds the maximum size, if present.
+
+
+.. index:: ! event, action, instruction
+.. _syntax-evt:
+
+Events
+~~~~~~
+
+The (possibly empty) set of :ref:`actions <syntax-act>` performed by an individual :ref:`instruction <syntax-instr>` collectively forms an atomic *event*.
+
+Each event is also associated with an abstract *time* value that uniquely identifies the event.
+The shape of time values :math:`h` is not specified or observable.
+However, time values form a partially ordered set.
+Although the semantics choses time values non-deterministically,
+it includes conditions that enforce some ordering constraints on the chosen values, thereby imposing a partial ordering on events that guarantees well-defined causalities.
+
+.. math::
+   \begin{array}{llcl}
+   \production{(event)} & \evt &::=&
+     \{ \ETIME~h,~\EACTS~\act^\ast} \\
+   \production{(time)} & h &::=&
+     \dots \\
+   \end{array}
 
 
 .. index:: ! stack, ! frame, ! label, instruction, store, activation, function, call, local, module instance
@@ -523,29 +642,27 @@ This definition allows to index active labels surrounding a :ref:`branch <syntax
    The selected label is identified through the :ref:`label index <syntax-labelidx>` :math:`l`, which corresponds to the number of surrounding |LABEL| instructions that must be hopped over -- which is exactly the count encoded in the index of a block context.
 
 
-.. index:: ! configuration, ! thread, store, frame, instruction, module instruction
+.. index:: ! configuration, ! thread, ! trace, store, event, frame, instruction, module instruction
 .. _syntax-thread:
+.. _syntax-trace:
 .. _syntax-config:
 
 Configurations
 ..............
 
-A *configuration* consists of the current :ref:`store <syntax-store>` and an executing *thread*.
+A *configuration* consists of the current :ref:`store <syntax-store>`, a *trace* of the store :ref:`events <syntax-evt>` that have occurred so far, and a set of executing *threads*.
 
-A thread is a computation over :ref:`instructions <syntax-instr>`
-that operates relative to a current :ref:`frame <syntax-frame>` referring to the home :ref:`module instance <syntax-moduleinst>` that the computation runs in.
+A thread is a computation over a sequence of remaining :ref:`instructions <syntax-instr>`.
 
 .. math::
    \begin{array}{llcl}
    \production{(configuration)} & \config &::=&
-     \store; \thread \\
+     \store; \trace; \thread^\ast \\
+   \production{(trace)} & \trace &::=&
+     \evt^\ast \\
    \production{(thread)} & \thread &::=&
-     \frame; \instr^\ast \\
+     \instr^\ast \\
    \end{array}
-
-.. note::
-   The current version of WebAssembly is single-threaded,
-   but configurations with multiple threads may be supported in the future.
 
 
 .. index:: ! evaluation context, instruction, trap, label, frame, value
@@ -553,6 +670,8 @@ that operates relative to a current :ref:`frame <syntax-frame>` referring to the
 
 Evaluation Contexts
 ...................
+
+TODO: have to introduce two levels of reduction now, one on single threads and one reaction rule on configurations.
 
 Finally, the following definition of *evaluation context* and associated structural rules enable reduction inside instruction sequences and administrative forms as well as the propagation of traps:
 

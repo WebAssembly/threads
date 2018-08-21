@@ -105,12 +105,12 @@ Limits
 If no maximum is given, the respective storage can grow to any size.
 
 
-.. index:: ! memory type, limits, page size, memory, share
+.. index:: ! memory type, limits, page size, memory, shared
    pair: abstract syntax; memory type
    pair: memory; type
    pair: memory; limits
 .. _syntax-memtype:
-.. _syntax-share:
+.. _syntax-shared:
 
 Memory Types
 ~~~~~~~~~~~~
