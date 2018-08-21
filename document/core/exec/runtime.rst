@@ -374,10 +374,10 @@ The execution of every individual :ref:`instruction <syntax-instr>` can perform 
      \AFORK~\instr^\ast \\&&|&
      \ANEW~\addr~\externinst \\&&|&
      \AUSE~\addr~\externinst \\&&|&
-     \ARD_\ord~\addr~\loc~b^\ast \\&&|&
-     \AWR_\ord~\addr~\loc~b^\ast \\&&|&
-     \ARMW~\addr~\loc~b^\ast~b^ast \\&&|&
-     \AWAKE~\addr~\loc~\u32 \\&&|&
+     \ARD_\ord~\addr~\loc~\storeval \\&&|&
+     \AWR_\ord~\addr~\loc~\storeval \\&&|&
+     \ARMW~\addr~\loc~\storeval~\storeval \\&&|&
+     \AWAKE~\addr~\loc~\u32~\u32 \\&&|&
      \hostact \\
    \production{(ordering)} & \ord &::=&
      \UNORD ~|~
@@ -411,13 +411,13 @@ A |ARMW| action always is sequentially consistent.
    Future versions of WebAssembly may introduce additional orderings.
 
 A |AWAKE| action is performed by the |ATOMICWAKE| instruction.
-It records the :ref:`address <syntax-memaddr>` of the :ref:`memory instance <syntax-meminst>`, the location, and the number of suspended threads woken up.
+It records the :ref:`address <syntax-memaddr>` of the :ref:`memory instance <syntax-meminst>`, the location, the number of suspended threads woken up, as well as the maximum number of threads that was given as an operand to the instruction.
 
 Finally, a *host action* is an action performed outside of WebAssembly code.
 Its form and meaning is outside the scope of this specification.
 
 .. note::
-   An :ref:`embedder <embedder>` may define a custom set of host actions and respective ordering constraints to model other forms of interactions that are not expressible withing WebAssembly, but whose ordering relative to WebAssembly events is relevant for the combined semantics.
+   An :ref:`embedder <embedder>` may define a custom set of host actions and respective ordering constraints to model other forms of interactions that are not expressible within WebAssembly, but whose ordering relative to WebAssembly events is relevant for the combined semantics.
 
 
 .. TODO, move elsewhere
