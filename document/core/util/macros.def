@@ -831,6 +831,7 @@
 .. Instances, non-terminals
 
 .. |externval| mathdef:: \xref{exec/runtime}{syntax-externval}{\X{externval}}
+.. |externinst| mathdef:: \xref{exec/runtime}{syntax-externinst}{\X{externinst}}
 
 .. |moduleinst| mathdef:: \xref{exec/runtime}{syntax-moduleinst}{\X{moduleinst}}
 .. |funcinst| mathdef:: \xref{exec/runtime}{syntax-funcinst}{\X{funcinst}}
@@ -862,6 +863,37 @@
 .. Store, non-terminals
 
 .. |store| mathdef:: \xref{exec/runtime}{syntax-store}{\X{store}}
+.. |trace| mathdef:: \xref{exec/runtime}{syntax-trace}{\X{trace}}
+
+
+.. Events, terminals
+
+.. |ETIME| mathdef:: \xref{exec/runtime}{syntax-evt}{\K{time}}
+.. |EACTS| mathdef:: \xref{exec/runtime}{syntax-evt}{\K{acts}}
+
+.. |AFORK| mathdef:: \xref{exec/runtime}{syntax-act}{\K{fork}}
+.. |ANEW| mathdef:: \xref{exec/runtime}{syntax-act}{\K{new}}
+.. |AUSE| mathdef:: \xref{exec/runtime}{syntax-act}{\K{use}}
+.. |ARD| mathdef:: \xref{exec/runtime}{syntax-act}{\K{rd}}
+.. |AWR| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wr}}
+.. |ARMW| mathdef:: \xref{exec/runtime}{syntax-act}{\K{rmw}}
+.. |AWAKE| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wake}}
+
+.. |UNORD| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{UNORD}}
+.. |SEQCST| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{SEQCST}}
+
+.. |LSIZE| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{SIZE}}
+.. |LVAL| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{VAL}}
+
+
+.. Events, non-terminals
+
+.. |evt| mathdef:: \xref{exec/runtime}{syntax-evt}{\X{evt}}
+.. |act| mathdef:: \xref{exec/runtime}{syntax-act}{\X{act}}
+.. |hostact| mathdef:: \xref{exec/runtime}{syntax-act}{\X{hostact}}
+.. |ord| mathdef:: \xref{exec/runtime}{syntax-ord}{\X{ord}}
+.. |loc| mathdef:: \xref{exec/runtime}{syntax-loc}{\X{loc}}
+.. |storeval| mathdef:: \xref{exec/runtime}{syntax-storeval}{\X{storeval}}
 
 
 .. Stack, terminals
