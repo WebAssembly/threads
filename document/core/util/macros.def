@@ -372,6 +372,7 @@
 .. |DEMOTE| mathdef:: \xref{syntax/instructions}{syntax-instr-numeric}{\K{demote}}
 .. |REINTERPRET| mathdef:: \xref{syntax/instructions}{syntax-instr-numeric}{\K{reinterpret}}
 
+.. |ATOMIC| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic}}
 .. |ATOMICWAKE| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.wake}}
 .. |ATOMICWAIT| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.wait}}
 .. |ATOMICADD| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{add}}
@@ -868,6 +869,8 @@
 
 .. Events, terminals
 
+.. |AT| mathdef:: \xref{exec/runtime}{syntax-time}{\K{at}}
+
 .. |ETIME| mathdef:: \xref{exec/runtime}{syntax-evt}{\K{time}}
 .. |EACTS| mathdef:: \xref{exec/runtime}{syntax-evt}{\K{acts}}
 
@@ -879,15 +882,18 @@
 .. |ARMW| mathdef:: \xref{exec/runtime}{syntax-act}{\K{rmw}}
 .. |AWAKE| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wake}}
 
-.. |UNORD| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{UNORD}}
-.. |SEQCST| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{SEQCST}}
+.. |UNORD| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{unord}}
+.. |SEQCST| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{seqcst}}
 
-.. |LSIZE| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{SIZE}}
-.. |LVAL| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{VAL}}
+.. |LLEN| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{len}}
+.. |LDATA| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{data}}
+.. |LELEM| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{elem}}
+.. |LVAL| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{val}}
 
 
 .. Events, non-terminals
 
+.. |time| mathdef:: \xref{exec/runtime}{syntax-time}{\X{time}}
 .. |evt| mathdef:: \xref{exec/runtime}{syntax-evt}{\X{evt}}
 .. |act| mathdef:: \xref{exec/runtime}{syntax-act}{\X{act}}
 .. |hostact| mathdef:: \xref{exec/runtime}{syntax-act}{\X{hostact}}
@@ -917,6 +923,7 @@
 .. |INVOKE| mathdef:: \xref{exec/runtime}{syntax-invoke}{\K{invoke}}
 .. |INITELEM| mathdef:: \xref{exec/runtime}{syntax-init_elem}{\K{init\_elem}}
 .. |INITDATA| mathdef:: \xref{exec/runtime}{syntax-init_data}{\K{init\_data}}
+.. |SUSPEND| mathdef:: \xref{exec/runtime}{syntax-suspend}{\K{suspend}}
 
 
 .. Values & Results, non-terminals

@@ -59,7 +59,7 @@ It is either a sequence of :ref:`values <syntax-val>` or a :ref:`trap <syntax-tr
 Store
 ~~~~~
 
-TODO: since allocation order is non-deterministic in the presence of threads, we can no longer use ordered lists but need mappings from abstract addresses to instances.
+.. todo:: since allocation order is non-deterministic in the presence of threads, we can no longer use ordered lists but need mappings from abstract addresses to instances.
 
 The *store* represents all global state that can be manipulated by WebAssembly programs.
 It consists of the runtime representation of all *instances* of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tableinst>`, :ref:`memories <syntax-meminst>`, and :ref:`globals <syntax-globalinst>` that have been :ref:`allocated <alloc>` during the life time of the abstract machine. [#gc]_
@@ -189,7 +189,7 @@ The module instance is used to resolve references to other definitions during ex
    \production{(host function)} & \hostfunc &::=& \dots \\
    \end{array}
 
-TODO: need to represent host functions differently to encompass threading
+.. todo:: need to represent host functions differently to encompass threading
 
 A *host function* is a function expressed outside WebAssembly but passed to a :ref:`module <syntax-module>` as an :ref:`import <syntax-import>`.
 The definition and behavior of host functions are outside the scope of this specification.
@@ -211,7 +211,7 @@ but within certain :ref:`constraints <exec-invoke-host>` that ensure the integri
 Table Instances
 ~~~~~~~~~~~~~~~
 
-TODO: table access should uniformly happen through events now
+.. todo:: table access should uniformly happen through events now
 
 A *table instance* is the runtime representation of a :ref:`table <syntax-table>`.
 It holds a vector of *function elements* and an optional maximum size, if one was specified in the :ref:`table type <syntax-tabletype>` at the table's definition site.
@@ -265,7 +265,7 @@ Instead of representing the contents of a memory directly in an instance -- e.g.
 Global Instances
 ~~~~~~~~~~~~~~~~
 
-TODO: global access should uniformly happen through events now
+.. todo:: global access should uniformly happen through events now
 
 A *global instance* is the runtime representation of a :ref:`global <syntax-global>` variable.
 It holds an individual :ref:`value <syntax-val>` and a flag indicating whether it is mutable.
@@ -453,6 +453,7 @@ Conventions
 .. _syntax-invoke:
 .. _syntax-init_elem:
 .. _syntax-init_data:
+.. _syntax-suspend:
 .. _syntax-instr-admin:
 
 Administrative Instructions
@@ -471,6 +472,7 @@ In order to express the reduction of :ref:`traps <trap>`, :ref:`calls <syntax-ca
      \INVOKE~\funcaddr \\ &&|&
      \INITELEM~\tableaddr~\u32~\funcidx^\ast \\ &&|&
      \INITDATA~\memaddr~\u32~\byte^\ast \\ &&|&
+     \SUSPEND~\memaddr.\LDATA[\u32] \\ &&|&
      \LABEL_n\{\instr^\ast\}~\instr^\ast~\END \\ &&|&
      \FRAME_n\{\frame\}~\instr^\ast~\END \\
    \end{array}
@@ -485,6 +487,8 @@ The |INITELEM| and |INITDATA| instructions perform initialization of :ref:`eleme
 
 .. note::
    The reason for splitting instantiation into individual reduction steps is to provide a semantics that is compatible with future extensions like threads.
+
+.. todo:: describe |SUSPEND|
 
 The |LABEL| and |FRAME| instructions model :ref:`labels <syntax-label>` and :ref:`frames <syntax-frame>` :ref:`"on the stack" <exec-notation>`.
 Moreover, the administrative syntax maintains the nesting structure of the original :ref:`structured control instruction <syntax-instr-control>` or :ref:`function body <syntax-func>` and their :ref:`instruction sequences <syntax-instr-seq>` with an |END| marker.
@@ -549,9 +553,41 @@ This definition allows to index active labels surrounding a :ref:`branch <syntax
    The selected label is identified through the :ref:`label index <syntax-labelidx>` :math:`l`, which corresponds to the number of surrounding |LABEL| instructions that must be hopped over -- which is exactly the count encoded in the index of a block context.
 
 
-.. index:: ! configuration, ! thread, store, frame, instruction, module instruction
+.. index:: ! time stamp, ! happens-before, thread, event
+.. _syntax-time:
+
+Time Stamps
+~~~~~~~~~~~
+
+In order to track the relative ordering in the execution of :ref:`threads <syntax-thread>` and occurrence of :ref:`events <syntax-evt>`,
+the semantics uses a notion of *time stamps*.
+
+.. math::
+   \begin{array}{llll}
+   \production{(time stamp)} & \time &::=&
+     \dots \\
+   \end{array}
+
+The shape of time values is not specified or observable.
+However, time values form a partially ordered set:
+a time stamp :math:`\time_1` *happens before* :math:`\time_2`, written :math:`\time_1 \prec \time_2`, if it is known to have occurred earlier in time.
+
+.. note:
+
+   Although the semantics choses time values non-deterministically,
+   it includes conditions that enforce some ordering constraints on the chosen values, thereby imposing an ordering on execeution and events that guarantees well-defined causalities.
+
+   The ordering is partial because some events have an unspecified relative order -- in particular, when they occur in separate threads without intervening synchronisation.
+
+
+Convention
+..........
+
+* We use the notation :math:`(x~\AT~\time)` for pair of a semantic object :math:`x` and a time stamp :math:`\time`.
+
+
+.. index:: ! configuration, ! thread, store, time stamp, instruction
 .. _syntax-thread:
-.. _syntax-trace:
 .. _syntax-config:
 
 Configurations
@@ -559,14 +595,14 @@ Configurations
 
 A *configuration* consists of the current :ref:`store <syntax-store>` and a set of executing *threads*.
 
-A thread is a computation over a sequence of remaining :ref:`instructions <syntax-instr>`.
+A thread is a computation over a sequence of remaining :ref:`instructions <syntax-instr>`, annotated with the :ref:`time <syntax-time>` it was last active.
 
 .. math::
    \begin{array}{llcl}
    \production{(configuration)} & \config &::=&
      \store; \thread^\ast \\
    \production{(thread)} & \thread &::=&
-     \instr^\ast \\
+     \instr^\ast~\AT~\time \\
    \end{array}
 
 
@@ -586,19 +622,22 @@ The execution of every individual :ref:`instruction <syntax-instr>` can perform 
    \begin{array}{llcl}
    \production{(action)} & \act &::=&
      \AFORK~\instr^\ast \\&&|&
-     \ANEW~\addr~\externinst \\&&|&
-     \AUSE~\addr~\externinst \\&&|&
-     \ARD_\ord~\addr~\loc~\storeval \\&&|&
-     \AWR_\ord~\addr~\loc~\storeval \\&&|&
-     \ARMW~\addr~\loc~\storeval~\storeval \\&&|&
-     \AWAKE~\addr~\loc~\u32~\u32 \\&&|&
+     \ANEW~\loc~\externinst \\&&|&
+     \AUSE~\loc~\externinst \\&&|&
+     \ARD_\ord~\loc~\storeval \\&&|&
+     \AWR_\ord~\loc~\storeval \\&&|&
+     \ARMW~\loc~\storeval~\storeval \\&&|&
+     \AWAKE~\loc~\u32~\u32 \\&&|&
      \hostact \\
    \production{(ordering)} & \ord &::=&
      \UNORD ~|~
      \SEQCST \\
    \production{(location)} & \loc &::=&
-     \u32 ~|~
-     \LSIZE ~|~
+     \addr#\fld \\
+   \production{(field)} & \fld &::=&
+     \LLEN ~|~
+     \LDATA[\u32] ~|~
+     \LELEM[\u32] ~|~
      \LVAL \\
    \production{(store value)} & \storeval &::=&
      \val ~|~
@@ -612,9 +651,14 @@ The corresponding |AUSE| action accesses a previously created external instance 
 It records what instance has been found at that address.
 
 The access of *mutable* state is performed through the |ARD|, |AWR|, and |ARMW| actions.
-They each access an :ref:`external instance <syntax-externinst>`, denoted by their :ref:`address <syntax-addr>`, at a given *location*.
-Such a location may either be a natural number describing the offset into a :ref:`table <syntax-tableinst>` or :ref:`memory <syntax-meminst>` instance, or an abstract label denoting a special location, which is either |LSIZE| for the current size of a :ref:`table <syntax-tableinst>` or :ref:`memory <syntax-meminst>` instance, or |LVAL| for the current value of a :ref:`global instance <syntax-globalinst>`.
-In each case they record the *store value* that has been read or written, which is either a regular :ref:`value <syntax-val>` or a sequence of :ref:`bytes <syntax-byte>`, depending on the location accessed.
+They each access an :ref:`external instance <syntax-externinst>` at an abstract *location*.
+Such a location consists of an :ref:`address <syntax-addr>` of a :ref:`table <syntax-tableinst>`, :ref:`memory <syntax-meminst>`, or :ref:`global <syntax-globalinst>` instance and a symbolic *field* name in the respective object.
+For tables, this is either |LLEN| for the current size of the table or |LELEM| for the vector of elements.
+Similarly, for memories, it is either |LLEN| for the size or |LDATA| for the vector of bytes.
+For globals, the only field is |LVAL|, denoting the current value.
+In the case of |LELEM| or |LDATA|, the field name is further augmented by an numeric index into the vector of elements or bytes, respectively.
+
+In each case read and write actions record the *store value* that has been read or written, which is either a regular :ref:`value <syntax-val>` or a sequence of :ref:`bytes <syntax-byte>`, depending on the location accessed.
 An |ARMW| event, performing an atomic read-modify-write access, records both the store values read (first) and written (second);
 it is an invariant of the semantics that both are either regular values of the same type or byte sequences of the same length.
 
@@ -640,26 +684,24 @@ Its form and meaning is outside the scope of this specification.
    It is an invariant of the semantics that the length of the byte vector, divided by page size, never exceeds the maximum size, if present.
 
 
-.. index:: ! event, action, instruction
+Convention
+..........
+
+* The actions :math:`\ARD_\ord` and :math:`\AWR_\ord` are abbreviated to :math:just `\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
+
+
+.. index:: ! event, action, time stamp
 .. _syntax-evt:
 
 Events
 ~~~~~~
 
-The (possibly empty) set of :ref:`actions <syntax-act>` performed by an individual :ref:`instruction <syntax-instr>` collectively forms an atomic *event*.
-
-Each event is also associated with an abstract *time* value that uniquely identifies the event.
-The shape of time values :math:`h` is not specified or observable.
-However, time values form a partially ordered set.
-Although the semantics choses time values non-deterministically,
-it includes conditions that enforce some ordering constraints on the chosen values, thereby imposing a partial ordering on events that guarantees well-defined causalities.
+The (possibly empty) set of :ref:`actions <syntax-act>` performed by an individual :ref:`instruction <syntax-instr>` collectively forms an atomic *event*. Each event is also associated with a :ref:`time stamp <syntax-time>` that uniquely identifies the event.
 
 .. math::
    \begin{array}{llcl}
    \production{(event)} & \evt &::=&
-     \{ \ETIME~h,~\EACTS~\act^\ast} \\
-   \production{(time)} & h &::=&
-     \dots \\
+     \act^\ast~\AT~\time \\
    \end{array}
 
 
@@ -669,7 +711,7 @@ it includes conditions that enforce some ordering constraints on the chosen valu
 Evaluation Contexts
 ...................
 
-TODO: have to introduce two levels of reduction now, one on single threads and one reaction rule on configurations.
+.. todo:: have to introduce two levels of reduction now, one on single threads and one reaction rule on configurations.
 
 Finally, the following definition of *evaluation context* and associated structural rules enable reduction inside instruction sequences and administrative forms as well as the propagation of traps:
 
