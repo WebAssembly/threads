@@ -490,6 +490,8 @@ The |INITELEM| and |INITDATA| instructions perform initialization of :ref:`eleme
 
 .. todo:: describe |SUSPEND|
 
+.. todo:: add host instruction
+
 The |LABEL| and |FRAME| instructions model :ref:`labels <syntax-label>` and :ref:`frames <syntax-frame>` :ref:`"on the stack" <exec-notation>`.
 Moreover, the administrative syntax maintains the nesting structure of the original :ref:`structured control instruction <syntax-instr-control>` or :ref:`function body <syntax-func>` and their :ref:`instruction sequences <syntax-instr-seq>` with an |END| marker.
 That way, the end of the inner instruction sequence is known when part of an outer sequence.
@@ -689,6 +691,8 @@ Convention
 
 * The actions :math:`\ARD_\ord` and :math:`\AWR_\ord` are abbreviated to :math:just `\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
 
+.. todo:: define notational shorthands over actions
+
 
 .. index:: ! event, action, time stamp
 .. _syntax-evt:
@@ -704,6 +708,10 @@ The (possibly empty) set of :ref:`actions <syntax-act>` performed by an individu
      \act^\ast~\AT~\time \\
    \end{array}
 
+.. todo:: define notational shorthands over events
+
+.. todo:: define memory model and axiomatic constraints
+
 
 .. index:: ! evaluation context, instruction, trap, label, frame, value
 .. _syntax-ctxt-eval:
@@ -711,7 +719,7 @@ The (possibly empty) set of :ref:`actions <syntax-act>` performed by an individu
 Evaluation Contexts
 ...................
 
-.. todo:: have to introduce two levels of reduction now, one on single threads and one reaction rule on configurations.
+.. todo:: have to introduce two levels of reduction now, one on single threads and one reaction rule on configurations
 
 Finally, the following definition of *evaluation context* and associated structural rules enable reduction inside instruction sequences and administrative forms as well as the propagation of traps:
 

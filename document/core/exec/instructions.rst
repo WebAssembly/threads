@@ -1437,6 +1437,8 @@ When the end of a function is reached without a jump (i.e., |RETURN|) or trap ab
 Host Functions
 ..............
 
+.. todo:: this has to change completely
+
 Invoking a :ref:`host function <syntax-hostfunc>` has non-deterministic behavior.
 It may either terminate with a :ref:`trap <trap>` or return regularly.
 However, in the latter case, it must consume and produce the right number and types of WebAssembly :ref:`values <syntax-val>` on the stack,
@@ -1492,6 +1494,8 @@ All these notions are made precise in the :ref:`Appendix <soundness>`.
 
 Expressions
 ~~~~~~~~~~~
+
+.. todo:: update to not use state
 
 An :ref:`expression <syntax-expr>` is *evaluated* relative to a :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>` pointing to its containing :ref:`module instance <syntax-moduleinst>`.
 
