@@ -389,7 +389,7 @@ For the web embedding, `i32.atomic.wait` is equivalent in behavior to executing 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
 1. Let `int32array` be [`Int32Array`][](`buffer`).
-1. Let `result` be [`Atomics.wait`][](`int32array`, `address`, `expected`, `timeout` / 1000),
+1. Let `result` be [`Atomics.wait`][](`int32array`, `address`, `expected`, `timeout` / 1000000),
    where `address`, `expected`, and `timeout` are the operands to the `wait` operator
    as described above.
 1. Return an `i32` value as described in the above table:
@@ -404,7 +404,7 @@ no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of 
 1. Let `int64array` be `Int64Array`[](`buffer`), where `Int64Array` is a
    typed-array constructor that allows 64-bit integer views with an element size 
    of `8`.
-1. Let `result` be [`Atomics.wait`][](`int64array`, `address`, `expected`, `timeout` / 1000),
+1. Let `result` be [`Atomics.wait`][](`int64array`, `address`, `expected`, `timeout` / 1000000),
    where `address`, `expected`, and `timeout` are the operands to the `wait` operator
    as described above. The [`Atomics.wait`][] operation is modified:
    1. `ValidateSharedIntegerTypedArray` will fail if the typed-array type is not an
