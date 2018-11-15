@@ -381,9 +381,12 @@ when the agent is suspended, it will not be [spuriously woken](https://en.wikipe
 The agent is only woken by `atomic.wake` (or [`Atomics.wake`][] in the web
 embedding).
 
+When an agent is suspended, if the number of waiters (including this one) is
+equal to 2<sup>32</sup>, then trap.
+
   * `i32.atomic.wait`: load i32 value, compare to expected (as `i32`), and wait for wake at same address
   * `i64.atomic.wait`: load i64 value, compare to expected (as `i64`), and wait for wake at same address
-  
+
 For the web embedding, `i32.atomic.wait` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
@@ -394,7 +397,7 @@ For the web embedding, `i32.atomic.wait` is equivalent in behavior to executing 
    as described above.
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
-   
+
 `i64.atomic.wait` has no equivalent in ECMAScript as it is currently specified, as there is
 no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of a
 64-bit integer. That said, the behavior can be approximated as follows:
@@ -418,18 +421,12 @@ no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of 
 ### Wake
 
 The wake operator takes two operands: an address operand and a wake count as an
-`i32`. The operation will wake as many waiters as are waiting on the same
-effective address, up to the maximum as specified by `wake count`. The operator
-returns the number of waiters that were woken as an `i32`.
-
-`wake count` value | Behavior |
-| ---- | ---- |
-| `wake count` < 0 | Wake all waiters |
-| `wake count` == 0 | Wake no waiters |
-| `wake count` > 0 | Wake min(`wake count`, `num waiters`) waiters |
+unsigned `i32`. The operation will wake as many waiters as are waiting on the
+same effective address, up to the maximum as specified by `wake count`. The
+operator returns the number of waiters that were woken as an unsigned `i32`.
 
   * `atomic.wake`: wake up `wake count` threads waiting on the given address via `i32.atomic.wait` or `i64.atomic.wait`
-  
+
 For the web embedding, `atomic.wake` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
@@ -437,7 +434,6 @@ For the web embedding, `atomic.wake` is equivalent in behavior to executing the 
 1. Let `int32array` be [`Int32Array`][](`buffer`).
 1. Let `fcount` be `count` if `count` is >= 0, otherwise `∞`.
 1. Let `result` be [`Atomics.wake`][](`int32array`, `address`, `fcount`).
-1. Trap if `result` is >= 2**32.
 1. Return `result` converted to an `i32`.
 
 ## [JavaScript API][] changes
