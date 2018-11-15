@@ -9,7 +9,7 @@ deferred to the embedder.
 
 ## Example
 
-Here is an example of a naive mutex implemented in WebAssembly. It uses one 
+Here is an example of a naive mutex implemented in WebAssembly. It uses one
 i32 in linear memory to store the state of the lock. If its value is 0, the
 mutex is unlocked. If its value is 1, the mutex is locked.
 
@@ -79,11 +79,11 @@ mutex is unlocked. If its value is 1, the mutex is locked.
       (get_local $mutexAddr)     ;; mutex address
       (i32.const 0))             ;; 0 => unlocked
 
-    ;; Wake one agent that is waiting on this lock.
+    ;; Notify one agent that is waiting on this lock.
     (drop
-      (atomic.wake
+      (atomic.notify
         (get_local $mutexAddr)   ;; mutex address
-        (i32.const 1)))          ;; wake 1 waiter
+        (i32.const 1)))          ;; notify 1 waiter
   )
 )
 ```
@@ -97,20 +97,20 @@ let memory = new WebAssembly.Memory({initial: 1, maximum: 1, shared: true});
 let worker = new Worker('worker.js');
 const mutexAddr = 0;
 
-// Send the shared memory to the worker. 
+// Send the shared memory to the worker.
 worker.postMessage(memory);
 
 let imports = {env: {memory: memory}};
 let module = WebAssembly.instantiate(moduleBytes, imports).then(
     ({instance}) => {
-        // Blocking on the main thread is not allowed, so we can't 
+        // Blocking on the main thread is not allowed, so we can't
         // call lockMutex.
         if (instance.exports.tryLockMutex(mutexAddr)) {
             ...
             instance.exports.unlockMutex(mutexAddr);
         }
     });
-    
+
 
 /// worker.js ///
 let moduleBytes = ...;  // An ArrayBuffer containing the WebAssembly module above.
@@ -132,7 +132,7 @@ onmessage = function(e) {
 
 ## Agents and Agent Clusters
 
-An *agent* is the execution context for a WebAssembly module. For the web 
+An *agent* is the execution context for a WebAssembly module. For the web
 embedding, it is an [ECMAScript agent][]. It is further extended to include a
 [WebAssembly stack][] and [evaluation context][].
 
@@ -171,7 +171,7 @@ agent's cluster will have access to the additional linear memory.
 When a module has an imported linear memory, its data segments are copied into
 the linear memory when the module is instantiated.
 
-When linear memory is shared, it is possible for another module (or in the web 
+When linear memory is shared, it is possible for another module (or in the web
 embedding, for JavaScript code) to read from the linear memory as it is being
 initialized.
 
@@ -184,7 +184,7 @@ non-shared linear memory:
 * As non-atomics
 * An entire module's data section initialization then synchronizes with other
   operations (effectively, followed by a barrier)
-  
+
 The intention is to allow the implementor to "memcpy" the initializer data into
 place.
 
@@ -201,7 +201,7 @@ For example:
 (module $data_module
   (memory (export "memory") 1)
   (data (i32.const 0) "..."))
-  
+
 ;; Main module
 (module $main_module
   (import "env" "memory" (memory 1))
@@ -336,24 +336,24 @@ accesses on shared linear memory, misaligned accesses do not trap.
 It is a validation error if the alignment field of the memory access immediate
 has any other value than the natural alignment for that access size.
 
-## Wait and Wake operators
+## Wait and Notify operators
 
-The wake and wait operators are optimizations over busy-waiting for a value to
-change. It is a validation error to use these operators on non-shared linear
+The notify and wait operators are optimizations over busy-waiting for a value
+to change. It is a validation error to use these operators on non-shared linear
 memory. The operators have sequentially consistent ordering.
 
-Both wake and wait operators trap if the effective address of either operator
+Both notify and wait operators trap if the effective address of either operator
 is misaligned or out-of-bounds. The wait operators require an alignment of
-their memory access size. The wake operator requires an alignment of 32 bits.
+their memory access size. The notify operator requires an alignment of 32 bits.
 
 For the web embedding, the agent can also be suspended or woken via the
-[`Atomics.wait`][] and [`Atomics.wake`][] functions respectively. An agent will
-not be suspended for other reasons, unless all agents in that cluster are
+[`Atomics.wait`][] and [`Atomics.notify`][] functions respectively. An agent
+will not be suspended for other reasons, unless all agents in that cluster are
 also suspended.
 
 An agent suspended via `Atomics.wait` can be woken by the WebAssembly
-`atomic.wake` operator. Similarly, an agent suspended by `i32.atomic.wait` or
-`i64.atomic.wait` can be woken by [`Atomics.wake`][].
+`atomic.notify` operator. Similarly, an agent suspended by `i32.atomic.wait` or
+`i64.atomic.wait` can be woken by [`Atomics.notify`][].
 
 ### Wait
 
@@ -376,16 +376,16 @@ The wait operation begins by performing an atomic load from the given address.
 If the loaded value is not equal to the expected value, the operator returns 1
 ("not-equal"). If the values are equal, the agent is suspended. If the agent
 is woken, the wait operator returns 0 ("ok"). If the timeout expires before
-another agent wakes this one, this operator returns 2 ("timed-out"). Note that
+another agent notifies this one, this operator returns 2 ("timed-out"). Note that
 when the agent is suspended, it will not be [spuriously woken](https://en.wikipedia.org/wiki/Spurious_wakeup).
-The agent is only woken by `atomic.wake` (or [`Atomics.wake`][] in the web
+The agent is only woken by `atomic.notify` (or [`Atomics.notify`][] in the web
 embedding).
 
 When an agent is suspended, if the number of waiters (including this one) is
 equal to 2<sup>32</sup>, then trap.
 
-  * `i32.atomic.wait`: load i32 value, compare to expected (as `i32`), and wait for wake at same address
-  * `i64.atomic.wait`: load i64 value, compare to expected (as `i64`), and wait for wake at same address
+  * `i32.atomic.wait`: load i32 value, compare to expected (as `i32`), and wait for notify at same address
+  * `i64.atomic.wait`: load i64 value, compare to expected (as `i64`), and wait for notify at same address
 
 For the web embedding, `i32.atomic.wait` is equivalent in behavior to executing the following:
 
@@ -405,7 +405,7 @@ no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
 1. Let `int64array` be `Int64Array`[](`buffer`), where `Int64Array` is a
-   typed-array constructor that allows 64-bit integer views with an element size 
+   typed-array constructor that allows 64-bit integer views with an element size
    of `8`.
 1. Let `result` be [`Atomics.wait`][](`int64array`, `address`, `expected`, `timeout` / 1e6),
    where `address`, `expected`, and `timeout` are the operands to the `wait` operator
@@ -418,22 +418,22 @@ no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of 
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
 
-### Wake
+### Notify
 
-The wake operator takes two operands: an address operand and a wake count as an
-unsigned `i32`. The operation will wake as many waiters as are waiting on the
-same effective address, up to the maximum as specified by `wake count`. The
-operator returns the number of waiters that were woken as an unsigned `i32`.
+The notify operator takes two operands: an address operand and a count as an
+unsigned `i32`. The operation will notify as many waiters as are waiting on the
+same effective address, up to the maximum as specified by `count`. The operator
+returns the number of waiters that were woken as an unsigned `i32`.
 
-  * `atomic.wake`: wake up `wake count` threads waiting on the given address via `i32.atomic.wait` or `i64.atomic.wait`
+  * `atomic.notify`: notify `count` threads waiting on the given address via `i32.atomic.wait` or `i64.atomic.wait`
 
-For the web embedding, `atomic.wake` is equivalent in behavior to executing the following:
+For the web embedding, `atomic.notify` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
 1. Let `int32array` be [`Int32Array`][](`buffer`).
 1. Let `fcount` be `count` if `count` is >= 0, otherwise `∞`.
-1. Let `result` be [`Atomics.wake`][](`int32array`, `address`, `fcount`).
+1. Let `result` be [`Atomics.notify`][](`int32array`, `address`, `fcount`).
 1. Return `result` converted to an `i32`.
 
 ## [JavaScript API][] changes
@@ -509,7 +509,7 @@ Return `ret` as a Number value.
 This is an accessor property whose [[Set]] is Undefined and whose [[Get]]
 accessor function performs the following steps:
 
-1. If `this` is not a `WebAssembly.Memory`, throw a [`TypeError`][] 
+1. If `this` is not a `WebAssembly.Memory`, throw a [`TypeError`][]
    exception.
 1. Otherwise:
    1. If `m` is not shared, then return `M.[[BufferObject]]`.
@@ -527,8 +527,8 @@ accessor function performs the following steps:
          1. If `status` is `false`, throw a [`TypeError`][] exception.
          1. Set `M.[[BufferObject]]` to `buffer`.
          1. Return `buffer`.
-      
-Note: Freezing the buffer prevents storing properties on the buffer object, 
+
+Note: Freezing the buffer prevents storing properties on the buffer object,
 which will be lost when the cached buffer is invalidated. The buffer will
 be invalidated whenever its size changes, and this can happen at any time
 on another thread that has access to the shared buffer.
@@ -564,7 +564,7 @@ atomicop ::= add | sub | and | or | xor | xchg | cmpxchg
 
 instr ::= ... |
           inn.atomic.wait memarg |
-          atomic.wake memarg |
+          atomic.notify memarg |
 
           inn.atomic.load memarg | inn.atomic.store memarg |
           inn.atomic.load8_u memarg | inn.atomic.load16_u memarg | i64.atomic.load32_u memarg |
@@ -585,7 +585,7 @@ memarg32 ::= 0x02 o: offset     =>  {align 2, offset: o}
 memarg64 ::= 0x03 o: offset     =>  {align 3, offset: o}
 
 instr ::= ...
-        | 0xFE 0x00 m:memarg32  =>  atomic.wake m
+        | 0xFE 0x00 m:memarg32  =>  atomic.notify m
         | 0xFE 0x01 m:memarg32  =>  i32.atomic.wait m
         | 0xFE 0x02 m:memarg64  =>  i64.atomic.wait m
 
@@ -696,5 +696,5 @@ instr ::= ...
 [`IsSharedArrayBuffer`]: https://tc39.github.io/ecma262/#sec-issharedarraybuffer
 [`SetIntegrityLevel`]: https://tc39.github.io/ecma262/#sec-setintegritylevel
 [`Atomics.wait`]: https://tc39.github.io/ecma262/#sec-atomics.wait
-[`Atomics.wake`]: https://tc39.github.io/ecma262/#sec-atomics.wake
+[`Atomics.notify`]: https://tc39.github.io/ecma262/#sec-atomics.notify
 [`Int32Array`]: https://tc39.github.io/ecma262/#sec-typedarray-objects
