@@ -425,10 +425,6 @@ unsigned `i32`. The operation will wake as many waiters as are waiting on the
 same effective address, up to the maximum as specified by `wake count`. The
 operator returns the number of waiters that were woken as an `i32`.
 
-| `wake count` value | Behavior |
-| ---- | ---- |
-| | Wake min(`wake count`, `num waiters`) waiters |
-
   * `atomic.wake`: wake up `wake count` threads waiting on the given address via `i32.atomic.wait` or `i64.atomic.wait`
 
 For the web embedding, `atomic.wake` is equivalent in behavior to executing the following:
