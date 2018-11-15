@@ -423,7 +423,7 @@ no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of 
 The wake operator takes two operands: an address operand and a wake count as an
 unsigned `i32`. The operation will wake as many waiters as are waiting on the
 same effective address, up to the maximum as specified by `wake count`. The
-operator returns the number of waiters that were woken as an `i32`.
+operator returns the number of waiters that were woken as an unsigned `i32`.
 
   * `atomic.wake`: wake up `wake count` threads waiting on the given address via `i32.atomic.wait` or `i64.atomic.wait`
 
