@@ -154,7 +154,7 @@ Element segments :math:`\elem` are not classified by a type.
 
 * Let :math:`\limits~\elemtype` be the :ref:`table type <syntax-tabletype>` :math:`C.\CTABLES[x]`.
 
-* The :ref:`element type <syntax-elemtype>` :math:`\elemtype` must be |ANYFUNC|.
+* The :ref:`element type <syntax-elemtype>` :math:`\elemtype` must be |FUNCREF|.
 
 * The expression :math:`\expr` must be :ref:`valid <valid-expr>` with :ref:`result type <syntax-resulttype>` :math:`[\I32]`.
 
@@ -168,7 +168,7 @@ Element segments :math:`\elem` are not classified by a type.
 
 .. math::
    \frac{
-     C.\CTABLES[x] = \limits~\ANYFUNC
+     C.\CTABLES[x] = \limits~\FUNCREF
      \qquad
      C \vdashexpr \expr : [\I32]
      \qquad
@@ -330,9 +330,6 @@ Exports :math:`\export` and export descriptions :math:`\exportdesc` are classifi
      C \vdashexportdesc \EDGLOBAL~x : \ETGLOBAL~\globaltype
    }
 
-.. note::
-   In future versions of WebAssembly, the restriction to exporting only immutable globals may be removed.
-
 
 .. index:: import, name, function type, table type, memory type, global type
    pair: validation; import
@@ -421,9 +418,6 @@ Imports :math:`\import` and import descriptions :math:`\importdesc` are classifi
    }{
      C \vdashimportdesc \IDGLOBAL~\globaltype : \ETGLOBAL~\globaltype
    }
-
-.. note::
-   In future versions of WebAssembly, the restriction to importing only immutable globals may be removed.
 
 
 .. index:: module, type definition, function type, function, table, memory, global, element, data, start function, import, export, context

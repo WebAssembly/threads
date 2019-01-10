@@ -588,8 +588,8 @@ The execution of every individual :ref:`instruction <syntax-instr>` can perform 
      \AFORK~\instr^\ast \\&&|&
      \ANEW~\addr~\externinst \\&&|&
      \AUSE~\addr~\externinst \\&&|&
-     \ARD_\ord~\addr~\loc~\storeval \\&&|&
-     \AWR_\ord~\addr~\loc~\storeval \\&&|&
+     \ARD~\ord~\addr~\loc~\storeval \\&&|&
+     \AWR~\ord~\addr~\loc~\storeval \\&&|&
      \ARMW~\addr~\loc~\storeval~\storeval \\&&|&
      \AWAKE~\addr~\loc~\u32~\u32 \\&&|&
      \hostact \\
@@ -657,7 +657,7 @@ it includes conditions that enforce some ordering constraints on the chosen valu
 .. math::
    \begin{array}{llcl}
    \production{(event)} & \evt &::=&
-     \{ \ETIME~h,~\EACTS~\act^\ast} \\
+     \{ \ETIME~h,~\EACTS~\act^\ast \} \\
    \production{(time)} & h &::=&
      \dots \\
    \end{array}
