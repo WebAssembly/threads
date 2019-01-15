@@ -8,8 +8,9 @@ function assert_Memory(memory, expected) {
 
   // https://github.com/WebAssembly/spec/issues/840
   assert_equals(memory.buffer, memory.buffer, "buffer should be idempotent");
-  assert_equals(Object.getPrototypeOf(memory.buffer), ArrayBuffer.prototype,
-                "prototype of buffer");
+  const bufferType = expected.shared ? SharedArrayBuffer : ArrayBuffer;
+  assert_equals(Object.getPrototypeOf(memory.buffer), bufferType.prototype,
+                'prototype of buffer');
   assert_true(Object.isExtensible(memory.buffer), "buffer extensibility");
   assert_equals(memory.buffer.byteLength, 0x10000 * expected.size, "size of buffer");
   if (expected.size > 0) {
@@ -84,6 +85,10 @@ test(() => {
 }, "Initial value exceeds maximum");
 
 test(() => {
+  assert_throws(new TypeError(), () => new WebAssembly.Memory({ "initial": 10, "shared": true }));
+}, "Shared memory without maximum");
+
+test(() => {
   const proxy = new Proxy({}, {
     has(o, x) {
       assert_unreached(`Should not call [[HasProperty]] with ${x}`);
@@ -118,6 +123,16 @@ test(() => {
         },
       };
     },
+
+    get shared() {
+      order.push("shared");
+      return {
+        valueOf() {
+          order.push("shared valueOf");
+          return 1;
+        },
+      };
+    },
   });
 
   assert_array_equals(order, [
@@ -125,6 +140,8 @@ test(() => {
     "initial valueOf",
     "maximum",
     "maximum valueOf",
+    "shared",
+    "shared valueOf",
   ]);
 }, "Order of evaluation for descriptor");
 
@@ -145,3 +162,9 @@ test(() => {
   const memory = new WebAssembly.Memory(argument, {});
   assert_Memory(memory, { "size": 0 });
 }, "Stray argument");
+
+test(() => {
+  const argument = { "initial": 4, "maximum": 10, shared: true };
+  const memory = new WebAssembly.Memory(argument);
+  assert_Memory(memory, { "size": 4, "shared": true });
+}, "Shared memory");
