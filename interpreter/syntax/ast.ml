@@ -62,10 +62,14 @@ type 'a memop =
   {ty : value_type; align : int; offset : Memory.offset; sz : 'a option}
 type loadop = (Memory.pack_size * Memory.extension) memop
 type storeop = Memory.pack_size memop
-type atomicloadop = storeop (* Memory.extension isn't used. *)
-type atomicstoreop = storeop
-type atomicrmwop = rmwop * storeop
-type atomicrmwcmpxchgop = storeop
+
+type atomicmemop = storeop (* No atomic operations use Memory.extension *)
+type atomicwaitop = atomicmemop
+type atomicnotifyop = atomicmemop
+type atomicloadop = atomicmemop
+type atomicstoreop = atomicmemop
+type atomicrmwop = rmwop * atomicmemop
+type atomicrmwcmpxchgop = atomicmemop
 
 
 (* Expressions *)
@@ -104,6 +108,8 @@ and instr' =
   | Unary of unop                     (* unary numeric operator *)
   | Binary of binop                   (* binary numeric operator *)
   | Convert of cvtop                  (* conversion *)
+  | AtomicWait of atomicwaitop        (* atomically wait for notification at address *)
+  | AtomicNotify of atomicnotifyop    (* atomically notify all waiters at address *)
   | AtomicLoad of atomicloadop        (* atomically read memory at address *)
   | AtomicStore of atomicstoreop      (* atomically write memory at address *)
   | AtomicRmw of atomicrmwop          (* atomically read, modify, write memory at address *)

@@ -291,6 +291,14 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     let t1, t2 = type_cvtop e.at cvtop in
     [t1] --> [t2]
 
+  | AtomicNotify memop ->
+    check_memop c memop (Some Shared) (fun sz -> sz) e.at;
+    [I32Type; I32Type] --> [I32Type]
+
+  | AtomicWait memop ->
+    check_memop c memop (Some Shared) (fun sz -> sz) e.at;
+    [I32Type; memop.ty; I64Type] --> [I32Type]
+
   | AtomicLoad memop ->
     check_memop c memop (Some Shared) (fun sz -> sz) e.at;
     [I32Type] --> [memop.ty]

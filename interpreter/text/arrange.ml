@@ -205,10 +205,13 @@ let rmw = function
   | I32 I32Op.RmwXchg | I64 I64Op.RmwXchg -> "xchg"
   | _ -> assert false
 
-let memop name {ty; align; offset; _} =
-  value_type ty ^ "." ^ name ^
+let memarg {ty; align; offset; _} =
   (if offset = 0l then "" else " offset=" ^ nat32 offset) ^
   (if 1 lsl align = size ty then "" else " align=" ^ nat (1 lsl align))
+
+let memop name ma =
+  let {ty; _} = ma in
+  value_type ty ^ "." ^ name ^ memarg ma
 
 let loadop op =
   match op.sz with
@@ -219,6 +222,10 @@ let storeop op =
   match op.sz with
   | None -> memop "store" op
   | Some sz -> memop ("store" ^ pack_size sz) op
+
+let atomicwaitop op = memop "atomic.wait" op
+
+let atomicnotifyop op = "atomic.notify" ^ memarg op
 
 let atomicloadop op =
   match op.sz with
@@ -281,6 +288,8 @@ let rec instr e =
     | Unary op -> unop op, []
     | Binary op -> binop op, []
     | Convert op -> cvtop op, []
+    | AtomicWait op -> atomicwaitop op, []
+    | AtomicNotify op -> atomicnotifyop op, []
     | AtomicLoad op -> atomicloadop op, []
     | AtomicStore op -> atomicstoreop op, []
     | AtomicRmw (rmwop, op) -> atomicrmwop op rmwop, []

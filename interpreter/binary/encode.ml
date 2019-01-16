@@ -207,6 +207,18 @@ let encode m =
       | Store ({ty = I64Type; sz = Some Pack32; _} as mo) -> op 0x3e; memop mo
       | Store {ty = F32Type | F64Type; sz = Some _; _} -> assert false
 
+      | AtomicNotify ({ty = I32Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x00; memop mo
+      | AtomicNotify {ty = I32Type; sz = Some _; _} -> assert false
+      | AtomicNotify {ty = I64Type | F32Type | F64Type; _} -> assert false
+
+      | AtomicWait ({ty = I32Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x01; memop mo
+      | AtomicWait ({ty = I64Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x02; memop mo
+      | AtomicWait {ty = I32Type | I64Type; sz = Some _; _} -> assert false
+      | AtomicWait {ty = F32Type | F64Type; _} -> assert false
+
       | AtomicLoad ({ty = I32Type; sz = None; _} as mo) ->
         op 0xfe; op 0x10; memop mo
       | AtomicLoad ({ty = I64Type; sz = None; _} as mo) ->
