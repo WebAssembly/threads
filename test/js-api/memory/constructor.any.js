@@ -8,16 +8,18 @@ function assert_Memory(memory, expected) {
 
   // https://github.com/WebAssembly/spec/issues/840
   assert_equals(memory.buffer, memory.buffer, "buffer should be idempotent");
-  const bufferType = expected.shared ? SharedArrayBuffer : ArrayBuffer;
+  const isShared = !!expected.shared;
+  const bufferType = isShared ? SharedArrayBuffer : ArrayBuffer;
   assert_equals(Object.getPrototypeOf(memory.buffer), bufferType.prototype,
                 'prototype of buffer');
-  assert_true(Object.isExtensible(memory.buffer), "buffer extensibility");
   assert_equals(memory.buffer.byteLength, 0x10000 * expected.size, "size of buffer");
   if (expected.size > 0) {
     const array = new Uint8Array(memory.buffer);
     assert_equals(array[0], 0, "first element of buffer");
     assert_equals(array[array.byteLength - 1], 0, "last element of buffer");
   }
+  assert_equals(isShared, Object.isFrozen(memory.buffer), "buffer frozen");
+  assert_not_equals(isShared, Object.isExtensible(memory.buffer), "buffer extensibility");
 }
 
 test(() => {

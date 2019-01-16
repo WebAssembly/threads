@@ -22,10 +22,6 @@ function assert_ArrayBuffer(actual, expected, message) {
       assert_equals(array[array.byteLength - 1], 0, `${message}: last element`);
     }
   }
-
-  if (expected.shared) {
-    assert_true(Object.isFrozen(actual), "frozen");
-  }
 }
 
 test(() => {
@@ -195,7 +191,7 @@ test(() => {
   const oldMemory = memory.buffer;
   assert_ArrayBuffer(oldMemory, { "size": 1, "shared": true }, "Buffer before growing");
 
-  const result = memory.grow(1, {});
+  const result = memory.grow(1);
   assert_equals(result, 1);
 
   const newMemory = memory.buffer;
