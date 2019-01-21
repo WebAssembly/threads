@@ -9,7 +9,7 @@ function assert_Memory(memory, expected) {
   // https://github.com/WebAssembly/spec/issues/840
   assert_equals(memory.buffer, memory.buffer, "buffer should be idempotent");
   const isShared = !!expected.shared;
-  const bufferType = isShared ? SharedArrayBuffer : ArrayBuffer;
+  const bufferType = isShared ? self.SharedArrayBuffer : ArrayBuffer;
   assert_equals(Object.getPrototypeOf(memory.buffer), bufferType.prototype,
                 'prototype of buffer');
   assert_equals(memory.buffer.byteLength, 0x10000 * expected.size, "size of buffer");
@@ -19,7 +19,7 @@ function assert_Memory(memory, expected) {
     assert_equals(array[array.byteLength - 1], 0, "last element of buffer");
   }
   assert_equals(isShared, Object.isFrozen(memory.buffer), "buffer frozen");
-  assert_not_equals(isShared, Object.isExtensible(memory.buffer), "buffer extensibility");
+  assert_not_equals(Object.isExtensible(memory.buffer), isShared, "buffer extensibility");
 }
 
 test(() => {
@@ -131,7 +131,7 @@ test(() => {
       return {
         valueOf() {
           order.push("shared valueOf");
-          return 1;
+          return true;
         },
       };
     },

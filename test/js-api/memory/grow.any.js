@@ -2,7 +2,7 @@
 
 function assert_ArrayBuffer(actual, expected, message) {
   // https://github.com/WebAssembly/spec/issues/840
-  const bufferType = expected.shared ? SharedArrayBuffer : ArrayBuffer;
+  const bufferType = expected.shared ? self.SharedArrayBuffer : ArrayBuffer;
   assert_equals(Object.getPrototypeOf(actual), bufferType.prototype,
                 `${message}: prototype`);
   if (expected.detached) {
