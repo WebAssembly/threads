@@ -63,13 +63,7 @@ type 'a memop =
 type loadop = (Memory.pack_size * Memory.extension) memop
 type storeop = Memory.pack_size memop
 
-type atomicmemop = storeop (* No atomic operations use Memory.extension *)
-type atomicwaitop = atomicmemop
-type atomicnotifyop = atomicmemop
-type atomicloadop = atomicmemop
-type atomicstoreop = atomicmemop
-type atomicrmwop = rmwop * atomicmemop
-type atomicrmwcmpxchgop = atomicmemop
+type atomicop = storeop (* No atomic operations use Memory.extension *)
 
 
 (* Expressions *)
@@ -108,12 +102,12 @@ and instr' =
   | Unary of unop                     (* unary numeric operator *)
   | Binary of binop                   (* binary numeric operator *)
   | Convert of cvtop                  (* conversion *)
-  | AtomicWait of atomicwaitop        (* atomically wait for notification at address *)
-  | AtomicNotify of atomicnotifyop    (* atomically notify all waiters at address *)
-  | AtomicLoad of atomicloadop        (* atomically read memory at address *)
-  | AtomicStore of atomicstoreop      (* atomically write memory at address *)
-  | AtomicRmw of atomicrmwop          (* atomically read, modify, write memory at address *)
-  | AtomicRmwCmpXchg of atomicrmwcmpxchgop   (* atomically compare and exchange memory at address *)
+  | AtomicWait of atomicop            (* atomically wait for notification at address *)
+  | AtomicNotify of atomicop          (* atomically notify all waiters at address *)
+  | AtomicLoad of atomicop            (* atomically read memory at address *)
+  | AtomicStore of atomicop           (* atomically write memory at address *)
+  | AtomicRmw of rmwop * atomicop     (* atomically read, modify, write memory at address *)
+  | AtomicRmwCmpXchg of atomicop      (* atomically compare and exchange memory at address *)
 
 
 (* Globals & Functions *)
