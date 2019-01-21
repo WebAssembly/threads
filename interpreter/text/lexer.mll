@@ -251,6 +251,11 @@ rule token = parse
             (i64_store16 (opt a 1))
             (i64_store32 (opt a 2)) o)) }
 
+  | "atomic.notify"
+    { ATOMIC_NOTIFY (fun a o -> (atomic_notify (opt a 2)) o) }
+  | (ixx as t)".atomic.wait"
+    { ATOMIC_WAIT (fun a o ->
+        intop t (i32_atomic_wait (opt a 2)) (i64_atomic_wait (opt a 3)) o) }
   | (ixx as t)".atomic.load"
     { ATOMIC_LOAD (fun a o ->
         intop t (i32_atomic_load (opt a 2)) (i64_atomic_load (opt a 3)) o) }
