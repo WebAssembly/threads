@@ -440,7 +440,7 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The shareability :math:`\share` must be |MSHARED|.
+* The sharedness :math:`\share` must be |MSHARED|.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`4`.
 
@@ -464,7 +464,7 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The shareability :math:`\share` must be |MSHARED|.
+* The sharedness :math:`\share` must be |MSHARED|.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
@@ -488,7 +488,7 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The shareability :math:`\share` must be |MSHARED|.
+* The sharedness :math:`\share` must be |MSHARED|.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
@@ -513,7 +513,7 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The shareability :math:`\share` must be |MSHARED|.
+* The sharedness :math:`\share` must be |MSHARED|.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
@@ -538,7 +538,7 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The shareability :math:`\share` must be |MSHARED|.
+* The sharedness :math:`\share` must be |MSHARED|.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
@@ -563,7 +563,7 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The shareability :math:`\share` must be |MSHARED|.
+* The sharedness :math:`\share` must be |MSHARED|.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
@@ -588,7 +588,7 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The shareability :math:`\share` must be |MSHARED|.
+* The sharedness :math:`\share` must be |MSHARED|.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
@@ -612,7 +612,7 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The shareability :math:`\share` must be |MSHARED|.
+* The sharedness :math:`\share` must be |MSHARED|.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
@@ -636,7 +636,7 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The shareability :math:`\share` must be |MSHARED|.
+* The sharedness :math:`\share` must be |MSHARED|.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
@@ -660,7 +660,7 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The shareability :math:`\share` must be |MSHARED|.
+* The sharedness :math:`\share` must be |MSHARED|.
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
