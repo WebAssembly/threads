@@ -639,16 +639,15 @@ Immediately after a WebAssembly [=memory.grow=] instruction executes, perform th
     1. Let |memory| be the Memory instance.
     1. Let |memaddr| be |memory|.\[[Memory]].
     1. Let |block| be a [=Data Block=] which is [=identified with=] the underlying memory of |memaddr|.
-    1. If |block| is a [=Data Block=],
-        1. Return |memory|.\[[BufferObject]].
-    1. Otherwise,
-        1. Assert: |block| is a [=Shared Data Block=].
+    1. If |block| is a [=Shared Data Block=],
         1. Let |map| be the [=surrounding agent=]'s associated [=Memory object cache=].
         1. Assert: |map|[|memaddr|] [=map/exists=].
         1. Let |newMemory| be |map|[|memaddr|].
         1. Let |newBufferObject| be |newMemory|.\[[BufferObject]].
         1. Set |memory|.\[[BufferObject]] to |newBufferObject|.
         1. Return |newBufferObject|.
+    1. Otherwise,
+        1. Return |memory|.\[[BufferObject]].
 </div>
 
 <h3 id="tables">Tables</h3>
