@@ -29,6 +29,7 @@ and command' =
   | Register of Ast.name * var option
   | Action of action
   | Assertion of assertion
+  | Threads of assertion list
   | Meta of meta
 
 and meta = meta' Source.phrase

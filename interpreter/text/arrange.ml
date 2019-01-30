@@ -496,6 +496,7 @@ let command mode cmd =
     Node ("register " ^ name n ^ var_opt x_opt, [])
   | Action act -> action act
   | Assertion ass -> assertion mode ass
+  | Threads asss -> Node ("threads", List.map (assertion mode) asss)
   | Meta _ -> assert false
 
 let script mode scr = List.map (command mode) scr

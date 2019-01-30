@@ -425,6 +425,7 @@ rule token = parse
 
   | "script" { SCRIPT }
   | "register" { REGISTER }
+  | "threads" { THREADS }
   | "invoke" { INVOKE }
   | "get" { GET }
   | "assert_malformed" { ASSERT_MALFORMED }

@@ -312,6 +312,7 @@ cmd:
 module with given failure string
   <action>                                   ;; perform action and print results
   <assertion>                                ;; assert result of an action
+  ( threads <assertion>* )                   ;; run all assertions in parallel
   <meta>                                     ;; meta command
 
 module:

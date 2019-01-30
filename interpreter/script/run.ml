@@ -466,6 +466,9 @@ let rec run_command cmd =
       run_assertion ass
     end
 
+  (* TODO(binji) *)
+  | Threads asss -> assert false
+
   | Meta cmd ->
     run_meta cmd
 
