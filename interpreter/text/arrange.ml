@@ -467,6 +467,8 @@ let action act =
     Node ("invoke" ^ access x_opt name, List.map literal lits)
   | Get (x_opt, name) ->
     Node ("get" ^ access x_opt name, [])
+  | Join x ->
+    Node ("join " ^ x.it, [])
 
 let assertion mode ass =
   match ass.it with
@@ -496,7 +498,7 @@ let command mode cmd =
     Node ("register " ^ name n ^ var_opt x_opt, [])
   | Action act -> action act
   | Assertion ass -> assertion mode ass
-  | Threads asss -> Node ("threads", List.map (assertion mode) asss)
+  | Spawn (x_opt, act) -> Node ("spawn " ^ var_opt x_opt, [action act])
   | Meta _ -> assert false
 
 let script mode scr = List.map (command mode) scr

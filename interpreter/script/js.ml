@@ -354,6 +354,9 @@ let of_action mods act =
       Some (of_wrapper mods x_opt name (get gt), [t])
     | _ -> None
     )
+  (* TODO(binji): *)
+  | Join x ->
+    assert false
 
 let of_assertion' mods act name args wrapper_opt =
   let act_js, act_wrapper_opt = of_action mods act in
@@ -390,7 +393,7 @@ let of_assertion mods ass =
     of_assertion' mods act "assert_exhaustion" [] None
 
 (* TODO(binji): *)
-let of_threads mods asss = assert false
+let of_spawn mods x_opt act = assert false
 
 let of_command mods cmd =
   "\n// " ^ Filename.basename cmd.at.left.file ^
@@ -412,8 +415,8 @@ let of_command mods cmd =
     of_assertion' mods act "run" [] None ^ "\n"
   | Assertion ass ->
     of_assertion mods ass ^ "\n"
-  | Threads asss ->
-    of_threads mods asss ^ "\n"
+  | Spawn (x_opt, act) ->
+    of_spawn mods x_opt act ^ "\n"
   | Meta _ -> assert false
 
 let of_script scr =
