@@ -28,7 +28,7 @@ mutex is unlocked. If its value is 1, the mutex is locked.
     ;; - If it is 0 (unlocked), set it to 1 (locked).
     ;; - Return the originally loaded value.
     (i32.atomic.rmw.cmpxchg
-      (get_local $mutexAddr) ;; mutex address
+      (local.get $mutexAddr) ;; mutex address
       (i32.const 0)          ;; expected value (0 => unlocked)
       (i32.const 1))         ;; replacement value (1 => locked)
 
@@ -46,12 +46,12 @@ mutex is unlocked. If its value is 1, the mutex is locked.
       (loop $retry
         ;; Try to lock the mutex. $tryLockMutex returns 1 if the mutex
         ;; was locked, and 0 otherwise.
-        (call $tryLockMutex (get_local $mutexAddr))
+        (call $tryLockMutex (local.get $mutexAddr))
         (br_if $done)
 
         ;; Wait for the other agent to finish with mutex.
         (i32.atomic.wait
-          (get_local $mutexAddr) ;; mutex address
+          (local.get $mutexAddr) ;; mutex address
           (i32.const 1)          ;; expected value (1 => locked)
           (i64.const -1))        ;; infinite timeout
 
@@ -76,13 +76,13 @@ mutex is unlocked. If its value is 1, the mutex is locked.
     (param $mutexAddr i32)
     ;; Unlock the mutex.
     (i32.atomic.store
-      (get_local $mutexAddr)     ;; mutex address
+      (local.get $mutexAddr)     ;; mutex address
       (i32.const 0))             ;; 0 => unlocked
 
     ;; Notify one agent that is waiting on this lock.
     (drop
       (atomic.notify
-        (get_local $mutexAddr)   ;; mutex address
+        (local.get $mutexAddr)   ;; mutex address
         (i32.const 1)))          ;; notify 1 waiter
   )
 )
