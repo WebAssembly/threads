@@ -157,7 +157,7 @@ let inline_type_explicit (c : context) x ft at =
 %token FUNC START TYPE PARAM RESULT LOCAL GLOBAL
 %token TABLE ELEM MEMORY DATA OFFSET IMPORT EXPORT TABLE
 %token MODULE BIN QUOTE
-%token SCRIPT REGISTER SPAWN JOIN INVOKE GET
+%token SCRIPT REGISTER THREAD JOIN INVOKE GET
 %token ASSERT_MALFORMED ASSERT_INVALID ASSERT_SOFT_INVALID ASSERT_UNLINKABLE
 %token ASSERT_RETURN ASSERT_RETURN_CANONICAL_NAN ASSERT_RETURN_ARITHMETIC_NAN ASSERT_TRAP ASSERT_EXHAUSTION
 %token INPUT OUTPUT
@@ -833,7 +833,7 @@ cmd :
   | assertion { Assertion $1 @@ at () }
   | script_module { Module (fst $1, snd $1) @@ at () }
   | LPAR REGISTER name module_var_opt RPAR { Register ($3, $4) @@ at () }
-  | LPAR SPAWN thread_var_opt action RPAR { Spawn ($3, $4) @@ at () }
+  | LPAR THREAD thread_var_opt action RPAR { Thread ($3, $4) @@ at () }
   | meta { Meta $1 @@ at () }
 
 cmd_list :

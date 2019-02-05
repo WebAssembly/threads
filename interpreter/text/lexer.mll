@@ -425,7 +425,7 @@ rule token = parse
 
   | "script" { SCRIPT }
   | "register" { REGISTER }
-  | "spawn" { SPAWN }
+  | "thread" { THREAD }
   | "join" { JOIN }
   | "invoke" { INVOKE }
   | "get" { GET }

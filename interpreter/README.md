@@ -312,7 +312,7 @@ cmd:
 module with given failure string
   <action>                                   ;; perform action and print results
   <assertion>                                ;; assert result of an action
-  ( spawn <name>? <action> )                 ;; spawn a new thread and run an action
+  ( thread <name>? <action> )                ;; spawn a new thread and run an action
   <meta>                                     ;; meta command
 
 module:

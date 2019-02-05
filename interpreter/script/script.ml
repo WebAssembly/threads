@@ -30,7 +30,7 @@ and command' =
   | Register of Ast.name * var option
   | Action of action
   | Assertion of assertion
-  | Spawn of var option * action
+  | Thread of var option * action
   | Meta of meta
 
 and meta = meta' Source.phrase
