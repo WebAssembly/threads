@@ -393,7 +393,7 @@ let of_assertion mods ass =
     of_assertion' mods act "assert_exhaustion" [] None
 
 (* TODO(binji): *)
-let of_spawn mods x_opt act = assert false
+let of_thread mods x_opt act = assert false
 
 let of_command mods cmd =
   "\n// " ^ Filename.basename cmd.at.left.file ^
@@ -415,8 +415,8 @@ let of_command mods cmd =
     of_assertion' mods act "run" [] None ^ "\n"
   | Assertion ass ->
     of_assertion mods ass ^ "\n"
-  | Spawn (x_opt, act) ->
-    of_spawn mods x_opt act ^ "\n"
+  | Thread (x_opt, act) ->
+    of_thread mods x_opt act ^ "\n"
   | Meta _ -> assert false
 
 let of_script scr =

@@ -471,7 +471,7 @@ let rec run_command cmd =
     end
 
   (* TODO(binji) *)
-  | Spawn (x_opt, act) -> assert false
+  | Thread (x_opt, act) -> assert false
 
   | Meta cmd ->
     run_meta cmd
