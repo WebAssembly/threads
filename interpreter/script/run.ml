@@ -313,6 +313,10 @@ let run_action act =
     | None -> Assert.error act.at "undefined export"
     )
 
+  (* TODO(binji) *)
+  | Join x ->
+    assert false
+
 let assert_result at correct got print_expect expect =
   if not correct then begin
     print_string "Result: "; print_result got;
@@ -465,6 +469,9 @@ let rec run_command cmd =
     if not !Flags.dry then begin
       run_assertion ass
     end
+
+  (* TODO(binji) *)
+  | Spawn (x_opt, act) -> assert false
 
   | Meta cmd ->
     run_meta cmd

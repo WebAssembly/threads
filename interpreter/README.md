@@ -312,6 +312,7 @@ cmd:
 module with given failure string
   <action>                                   ;; perform action and print results
   <assertion>                                ;; assert result of an action
+  ( spawn <name>? <action> )                 ;; spawn a new thread and run an action
   <meta>                                     ;; meta command
 
 module:
@@ -322,6 +323,7 @@ module:
 action:
   ( invoke <name>? <string> <expr>* )        ;; invoke function export
   ( get <name>? <string> )                   ;; get global export
+  ( join <name> )                            ;; join named thread and return its value
 
 assertion:
   ( assert_return <action> <expr>* )         ;; assert action has expected results
