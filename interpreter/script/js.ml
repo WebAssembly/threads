@@ -28,10 +28,15 @@ let handler = {
     return (prop in target) ?  target[prop] : {};
   }
 };
+let instances = new Map();
 let registry = new Proxy({spectest}, handler);
 
-function register(name, instance) {
-  registry[name] = instance.exports;
+function getInstance(name) {
+  return instances.get(name);
+}
+
+function register(name, instanceName) {
+  registry[name] = getInstance(instanceName).exports;
 }
 
 function module(bytes, valid = true) {
@@ -52,21 +57,36 @@ function module(bytes, valid = true) {
   return new WebAssembly.Module(buffer);
 }
 
-function instance(bytes, imports = registry) {
+function anonInstance(bytes, imports = registry) {
   return new WebAssembly.Instance(module(bytes), imports);
 }
 
-function call(instance, name, args) {
+function instance(names, bytes, imports = registry) {
+  const instance = anonInstance(bytes, imports);
+  if (!(names instanceof Array)) {
+    names = [names];
+  }
+  for (let name of names) {
+    instances.set(name, instance);
+  }
+  return instance;
+}
+
+function call(instanceName, name, args) {
+  return callAnon(getInstance(instanceName), name, args);
+}
+
+function callAnon(instance, name, args) {
   return instance.exports[name](...args);
 }
 
-function get(instance, name) {
-  let v = instance.exports[name];
+function get(instanceName, name) {
+  let v = getInstance(instanceName).exports[name];
   return (v instanceof WebAssembly.Global) ? v.value : v;
 }
 
-function exports(name, instance) {
-  return {[name]: instance.exports};
+function exports(name) {
+  return {[name]: getInstance(name).exports};
 }
 
 function run(action) {
@@ -332,13 +352,13 @@ let rec of_definition def =
 let of_wrapper mods x_opt name wrap_action wrap_assertion at =
   let x = of_var_opt mods x_opt in
   let bs = wrap (Utf8.decode x) name wrap_action wrap_assertion at in
-  "call(instance(" ^ of_bytes bs ^ ", " ^
-    "exports(" ^ of_string x ^ ", " ^ x ^ ")), " ^ " \"run\", [])"
+  "callAnon(anonInstance(" ^ of_bytes bs ^ ", " ^
+    "exports(" ^ of_string x ^ ")), \"run\", [])"
 
 let of_action mods act =
   match act.it with
   | Invoke (x_opt, name, lits) ->
-    "call(" ^ of_var_opt mods x_opt ^ ", " ^ of_name name ^ ", " ^
+    "call(" ^ of_string (of_var_opt mods x_opt) ^ ", " ^ of_name name ^ ", " ^
       "[" ^ String.concat ", " (List.map of_literal lits) ^ "])",
     (match lookup mods x_opt name act.at with
     | ExternFuncType ft when not (is_js_func_type ft) ->
@@ -347,7 +367,7 @@ let of_action mods act =
     | _ -> None
     )
   | Get (x_opt, name) ->
-    "get(" ^ of_var_opt mods x_opt ^ ", " ^ of_name name ^ ")",
+    "get(" ^ of_string (of_var_opt mods x_opt) ^ ", " ^ of_name name ^ ")",
     (match lookup mods x_opt name act.at with
     | ExternGlobalType gt when not (is_js_global_type gt) ->
       let GlobalType (t, _) = gt in
@@ -406,11 +426,13 @@ let of_command mods cmd =
       | Encoded (_, bs) -> Decode.decode "binary" bs
       | Quoted (_, s) -> unquote (Parse.string_to_module s)
     in bind mods x_opt (unquote def);
-    "let " ^ current_var mods ^ " = instance(" ^ of_definition def ^ ");\n" ^
-    (if x_opt = None then "" else
-    "let " ^ of_var_opt mods x_opt ^ " = " ^ current_var mods ^ ";\n")
+    let current_name = of_string (current_var mods) in
+    let names =
+      if x_opt = None then current_name
+      else "[" ^ of_string (of_var_opt mods x_opt) ^ ", " ^ current_name ^ "]"
+    in "instance(" ^ names ^ ", " ^ of_definition def ^ ");\n"
   | Register (name, x_opt) ->
-    "register(" ^ of_name name ^ ", " ^ of_var_opt mods x_opt ^ ")\n"
+    "register(" ^ of_name name ^ ", " ^ of_string (of_var_opt mods x_opt) ^ ")\n"
   | Action act ->
     of_assertion' mods act "run" [] None ^ "\n"
   | Assertion ass ->
