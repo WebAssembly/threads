@@ -146,8 +146,17 @@ function assert_return_arithmetic_nan(action) {
     throw new Error("Wasm return value NaN expected, got " + actual);
   };
 }
-|}
 
+// Allow initThreads to be overridden by the surrounding harness.
+if (typeof this.initThreads !== "function") {
+  this.initThreads = async function(count) {
+    if (count !== 0) {
+      throw new Error("initThreads must be overridden for a non-zero thread count.");
+    }
+  }
+}
+
+|}
 
 (* Context *)
 
@@ -357,8 +366,7 @@ let of_action mods act =
     | _ -> None
     )
   (* TODO(binji): *)
-  | Join x ->
-    assert false
+  | Join x -> "null /* TODO */", None
 
 let of_assertion' mods act name args wrapper_opt =
   let act_js, act_wrapper_opt = of_action mods act in
@@ -395,7 +403,7 @@ let of_assertion mods ass =
     of_assertion' mods act "assert_exhaustion" [] None
 
 (* TODO(binji): *)
-let of_thread mods x_opt act = assert false
+let of_thread mods x_opt act = "/* TODO */"
 
 let of_command mods cmd =
   "\n// " ^ Filename.basename cmd.at.left.file ^
@@ -421,6 +429,15 @@ let of_command mods cmd =
     of_thread mods x_opt act ^ "\n"
   | Meta _ -> assert false
 
+let thread_count scr =
+  let is_thread = function
+    | Thread _ -> 1
+    | _ -> 0
+  in List.fold_left (fun sum cmd -> sum + is_thread cmd.it) 0 scr
+
 let of_script scr =
   (if !Flags.harness then harness else "") ^
-  String.concat "" (List.map (of_command (modules ())) scr)
+  "(async function runTests() {\n\n" ^
+  "await initThreads(" ^ string_of_int (thread_count scr) ^ ");\n" ^
+  String.concat "" (List.map (of_command (modules ())) scr) ^
+  "\n})();\n"

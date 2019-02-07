@@ -471,7 +471,11 @@ let rec run_command cmd =
     end
 
   (* TODO(binji) *)
-  | Thread (x_opt, act) -> assert false
+  | Thread (x_opt, act) ->
+    quote := cmd :: !quote;
+    if not !Flags.dry then begin
+      assert false
+    end
 
   | Meta cmd ->
     run_meta cmd
