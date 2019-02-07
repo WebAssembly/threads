@@ -722,6 +722,52 @@
   "type mismatch"
 )
 
+(assert_invalid
+  (module
+    (func $type-condition-empty
+      (if (then))
+    )
+  )
+  "type mismatch"
+)
+(assert_invalid
+  (module
+    (func $type-condition-empty-in-block
+      (i32.const 0)
+      (block (if (then)))
+    )
+  )
+  "type mismatch"
+)
+(assert_invalid
+  (module
+    (func $type-condition-empty-in-loop
+      (i32.const 0)
+      (loop (if (then)))
+    )
+  )
+  "type mismatch"
+)
+(assert_invalid
+  (module
+    (func $type-condition-empty-in-then
+      (i32.const 0) (i32.const 0)
+      (if (then (if (then))))
+    )
+  )
+  "type mismatch"
+)
+(assert_invalid
+  (module
+    (func $type-condition-empty-in-else
+      (i32.const 0) (i32.const 0)
+      (if (result i32) (then (i32.const 0)) (else (if (then)) (i32.const 0)))
+      (drop)
+    )
+  )
+  "type mismatch"
+)
+
 
 (assert_malformed
   (module quote "(func if end $l)")
