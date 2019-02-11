@@ -28,15 +28,10 @@ let handler = {
     return (prop in target) ?  target[prop] : {};
   }
 };
-let instances = new Map();
 let registry = new Proxy({spectest}, handler);
 
-function getInstance(name) {
-  return instances.get(name);
-}
-
-function register(name, instanceName) {
-  registry[name] = getInstance(instanceName).exports;
+function register(name, instance) {
+  registry[name] = instance.exports;
 }
 
 function module(bytes, valid = true) {
@@ -57,36 +52,26 @@ function module(bytes, valid = true) {
   return new WebAssembly.Module(buffer);
 }
 
-function anonInstance(bytes, imports = registry) {
-  return new WebAssembly.Instance(module(bytes), imports);
+function instance(bytes, imports = registry) {
+  let mod = module(bytes);
+  return {module: mod, instance: new WebAssembly.Instance(mod, imports)};
 }
 
-function instance(names, bytes, imports = registry) {
-  const instance = anonInstance(bytes, imports);
-  if (!(names instanceof Array)) {
-    names = [names];
-  }
-  for (let name of names) {
-    instances.set(name, instance);
-  }
-  return instance;
+function setInstance(names, instanceObj) {
+  instanceObj.names = names;
 }
 
-function call(instanceName, name, args) {
-  return callAnon(getInstance(instanceName), name, args);
+function call(instanceObj, name, args) {
+  return instanceObj.instance.exports[name](...args);
 }
 
-function callAnon(instance, name, args) {
-  return instance.exports[name](...args);
-}
-
-function get(instanceName, name) {
-  let v = getInstance(instanceName).exports[name];
+function get(instanceObj, name) {
+  let v = instanceObj.instance.exports[name];
   return (v instanceof WebAssembly.Global) ? v.value : v;
 }
 
-function exports(name) {
-  return {[name]: getInstance(name).exports};
+function exports(instanceObj) {
+  return {[name]: instanceObj.instance.exports};
 }
 
 function run(action) {
@@ -352,7 +337,7 @@ let rec of_definition def =
 let of_wrapper mods x_opt name wrap_action wrap_assertion at =
   let x = of_var_opt mods x_opt in
   let bs = wrap (Utf8.decode x) name wrap_action wrap_assertion at in
-  "callAnon(anonInstance(" ^ of_bytes bs ^ ", " ^
+  "call(instance(" ^ of_bytes bs ^ ", " ^
     "exports(" ^ of_string x ^ ")), \"run\", [])"
 
 let of_action mods act =
@@ -429,8 +414,8 @@ let of_command mods cmd =
     let current_name = of_string (current_var mods) in
     let names =
       if x_opt = None then current_name
-      else "[" ^ of_string (of_var_opt mods x_opt) ^ ", " ^ current_name ^ "]"
-    in "instance(" ^ names ^ ", " ^ of_definition def ^ ");\n"
+      else of_string (of_var_opt mods x_opt) ^ ", " ^ current_name
+    in "setInstance([" ^ names ^ "], instance(" ^ of_definition def ^ "));\n"
   | Register (name, x_opt) ->
     "register(" ^ of_name name ^ ", " ^ of_string (of_var_opt mods x_opt) ^ ")\n"
   | Action act ->
