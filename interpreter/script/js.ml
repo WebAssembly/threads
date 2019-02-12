@@ -30,8 +30,8 @@ let handler = {
 };
 let registry = new Proxy({spectest}, handler);
 
-function register(name, instance) {
-  registry[name] = instance.exports;
+function register(name, instanceObj) {
+  registry[name] = instanceObj.instance.exports;
 }
 
 function module(bytes, valid = true) {
@@ -53,20 +53,22 @@ function module(bytes, valid = true) {
 }
 
 function instance(bytes, imports = registry) {
-  return new WebAssembly.Instance(module(bytes), imports);
+  const mod = module(bytes);
+  const instance = new WebAssembly.Instance(mod, imports);
+  return {module: mod, instance};
 }
 
-function call(instance, name, args) {
-  return instance.exports[name](...args);
+function call(instanceObj, name, args) {
+  return instanceObj.instance.exports[name](...args);
 }
 
-function get(instance, name) {
-  let v = instance.exports[name];
+function get(instanceObj, name) {
+  let v = instanceObj.instance.exports[name];
   return (v instanceof WebAssembly.Global) ? v.value : v;
 }
 
-function exports(name, instance) {
-  return {[name]: instance.exports};
+function exports(name, instanceObj) {
+  return {[name]: instanceObj.instance.exports};
 }
 
 function run(action) {
