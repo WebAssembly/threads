@@ -147,15 +147,6 @@ function assert_return_arithmetic_nan(action) {
   };
 }
 
-// Allow initThreads to be overridden by the surrounding harness.
-if (typeof this.initThreads !== "function") {
-  this.initThreads = async function(count) {
-    if (count !== 0) {
-      throw new Error("initThreads must be overridden for a non-zero thread count.");
-    }
-  }
-}
-
 |}
 
 (* Context *)
@@ -429,15 +420,16 @@ let of_command mods cmd =
     of_thread mods x_opt act ^ "\n"
   | Meta _ -> assert false
 
-let thread_count scr =
+let of_script scr =
   let is_thread = function
     | Thread _ -> 1
     | _ -> 0
-  in List.fold_left (fun sum cmd -> sum + is_thread cmd.it) 0 scr
-
-let of_script scr =
-  (if !Flags.harness then harness else "") ^
-  "(async function runTests() {\n\n" ^
-  "await initThreads(" ^ string_of_int (thread_count scr) ^ ");\n" ^
-  String.concat "" (List.map (of_command (modules ())) scr) ^
-  "\n})();\n"
+  in
+  let thread_count = List.fold_left (fun s cmd -> s + is_thread cmd.it) 0 scr in
+  let contents = String.concat "" (List.map (of_command (modules ())) scr) in
+  let multi =
+    "(async function runTests() {\n\n" ^
+    "await initThreads(" ^ string_of_int thread_count ^ ");\n" ^
+    contents ^ "\n})();\n"
+  in (if !Flags.harness then harness else "") ^
+  (if thread_count = 0 then contents else multi)
