@@ -298,13 +298,13 @@ Instructions in this group are concerned with accessing :ref:`linear memory <syn
      \K{i}\X{nn}\K{.}\ATOMICSTORE\K{16}~\memarg ~|~
      \K{i64.}\ATOMICSTORE\K{32}~\memarg ~|~ \\&&&
      \K{i}\X{nn}\K{.}\ATOMICRMW\K{.}\atomicop~\memarg ~|~ \\&&&
-     \K{i}\X{nn}\K{.}\ATOMICRMW\K{8\_u.}\atomicop~\memarg ~|~ \\&&&
-     \K{i}\X{nn}\K{.}\ATOMICRMW\K{16\_u.}\atomicop~\memarg ~|~ \\&&&
-     \K{i64.}\ATOMICRMW\K{32\_u.}\atomicop~\memarg ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{8.}\atomicop\K{\_u}~\memarg ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{16.}\atomicop\K{\_u}~\memarg ~|~ \\&&&
+     \K{i64.}\ATOMICRMW\K{32.}\atomicop\K{\_u}~\memarg ~|~ \\&&&
      \K{i}\X{nn}\K{.}\ATOMICRMW\K{.}\ATOMICCMPXCHG~\memarg ~|~ \\&&&
-     \K{i}\X{nn}\K{.}\ATOMICRMW\K{8\_u.}\ATOMICCMPXCHG~\memarg ~|~ \\&&&
-     \K{i}\X{nn}\K{.}\ATOMICRMW\K{16\_u.}\ATOMICCMPXCHG~\memarg ~|~ \\&&&
-     \K{i64.}\ATOMICRMW\K{32\_u.}\ATOMICCMPXCHG~\memarg \\
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{8.}\ATOMICCMPXCHG\K{\_u}~\memarg ~|~ \\&&&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{16.}\ATOMICCMPXCHG\K{\_u}~\memarg ~|~ \\&&&
+     \K{i64.}\ATOMICRMW\K{32.}\ATOMICCMPXCHG\K{\_u}~\memarg \\
    \end{array}
 
 Memory is accessed atomically using the |ATOMICLOAD|, |ATOMICSTORE|, and

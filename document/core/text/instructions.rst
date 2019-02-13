@@ -275,11 +275,11 @@ The offset immediate to atomic memory instructions is optional, and defaults to
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \text{i32.atomic{.}rmw{.}add}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICADD~m \\ &&|&
      \text{i64.atomic{.}rmw{.}add}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICADD~m \\ &&|&
-     \text{i32.atomic{.}rmw8\_u{.}add}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICADD~m \\ &&|&
-     \text{i32.atomic{.}rmw16\_u{.}add}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICADD~m \\ &&|&
-     \text{i64.atomic{.}rmw8\_u{.}add}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICADD~m \\ &&|&
-     \text{i64.atomic{.}rmw16\_u{.}add}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICADD~m \\ &&|&
-     \text{i64.atomic{.}rmw32\_u{.}add}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICADD~m \\
+     \text{i32.atomic{.}rmw8{.}add\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICADD\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}add\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICADD\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}add\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICADD\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}add\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICADD\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}add\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICADD\K{\_u}~m \\
    \end{array}
 
 .. math::
@@ -287,11 +287,11 @@ The offset immediate to atomic memory instructions is optional, and defaults to
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \text{i32.atomic{.}rmw{.}sub}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICSUB~m \\ &&|&
      \text{i64.atomic{.}rmw{.}sub}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICSUB~m \\ &&|&
-     \text{i32.atomic{.}rmw8\_u{.}sub}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICSUB~m \\ &&|&
-     \text{i32.atomic{.}rmw16\_u{.}sub}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICSUB~m \\ &&|&
-     \text{i64.atomic{.}rmw8\_u{.}sub}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICSUB~m \\ &&|&
-     \text{i64.atomic{.}rmw16\_u{.}sub}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICSUB~m \\ &&|&
-     \text{i64.atomic{.}rmw32\_u{.}sub}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICSUB~m \\
+     \text{i32.atomic{.}rmw8{.}sub\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICSUB\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}sub\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICSUB\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}sub\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICSUB\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}sub\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICSUB\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}sub\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICSUB\K{\_u}~m \\
    \end{array}
 
 .. math::
@@ -299,11 +299,11 @@ The offset immediate to atomic memory instructions is optional, and defaults to
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \text{i32.atomic{.}rmw{.}and}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICAND~m \\ &&|&
      \text{i64.atomic{.}rmw{.}and}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICAND~m \\ &&|&
-     \text{i32.atomic{.}rmw8\_u{.}and}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICAND~m \\ &&|&
-     \text{i32.atomic{.}rmw16\_u{.}and}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICAND~m \\ &&|&
-     \text{i64.atomic{.}rmw8\_u{.}and}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICAND~m \\ &&|&
-     \text{i64.atomic{.}rmw16\_u{.}and}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICAND~m \\ &&|&
-     \text{i64.atomic{.}rmw32\_u{.}and}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICAND~m \\
+     \text{i32.atomic{.}rmw8{.}and\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICAND\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}and\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICAND\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}and\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICAND\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}and\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICAND\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}and\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICAND\K{\_u}~m \\
    \end{array}
 
 .. math::
@@ -311,11 +311,11 @@ The offset immediate to atomic memory instructions is optional, and defaults to
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \text{i32.atomic{.}rmw{.}or}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICOR~m \\ &&|&
      \text{i64.atomic{.}rmw{.}or}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICOR~m \\ &&|&
-     \text{i32.atomic{.}rmw8\_u{.}or}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICOR~m \\ &&|&
-     \text{i32.atomic{.}rmw16\_u{.}or}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICOR~m \\ &&|&
-     \text{i64.atomic{.}rmw8\_u{.}or}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICOR~m \\ &&|&
-     \text{i64.atomic{.}rmw16\_u{.}or}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICOR~m \\ &&|&
-     \text{i64.atomic{.}rmw32\_u{.}or}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICOR~m \\
+     \text{i32.atomic{.}rmw8{.}or\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICOR\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}or\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}or\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}or\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}or\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICOR\K{\_u}~m \\
    \end{array}
 
 .. math::
@@ -323,11 +323,11 @@ The offset immediate to atomic memory instructions is optional, and defaults to
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \text{i32.atomic{.}rmw{.}xor}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICXOR~m \\ &&|&
      \text{i64.atomic{.}rmw{.}xor}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICXOR~m \\ &&|&
-     \text{i32.atomic{.}rmw8\_u{.}xor}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICXOR~m \\ &&|&
-     \text{i32.atomic{.}rmw16\_u{.}xor}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICXOR~m \\ &&|&
-     \text{i64.atomic{.}rmw8\_u{.}xor}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICXOR~m \\ &&|&
-     \text{i64.atomic{.}rmw16\_u{.}xor}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICXOR~m \\ &&|&
-     \text{i64.atomic{.}rmw32\_u{.}xor}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICXOR~m \\
+     \text{i32.atomic{.}rmw8{.}xor\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICXOR\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}xor\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICXOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}xor\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICXOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}xor\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICXOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}xor\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICXOR\K{\_u}~m \\
    \end{array}
 
 .. math::
@@ -335,11 +335,11 @@ The offset immediate to atomic memory instructions is optional, and defaults to
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \text{i32.atomic{.}rmw{.}xchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICXCHG~m \\ &&|&
      \text{i64.atomic{.}rmw{.}xchg}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICXCHG~m \\ &&|&
-     \text{i32.atomic{.}rmw8\_u{.}xchg}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICXCHG~m \\ &&|&
-     \text{i32.atomic{.}rmw16\_u{.}xchg}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICXCHG~m \\ &&|&
-     \text{i64.atomic{.}rmw8\_u{.}xchg}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICXCHG~m \\ &&|&
-     \text{i64.atomic{.}rmw16\_u{.}xchg}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICXCHG~m \\ &&|&
-     \text{i64.atomic{.}rmw32\_u{.}xchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICXCHG~m \\
+     \text{i32.atomic{.}rmw8{.}xchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICXCHG\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}xchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}xchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}xchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}xchg\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICXCHG\K{\_u}~m \\
    \end{array}
 
 .. math::
@@ -347,11 +347,11 @@ The offset immediate to atomic memory instructions is optional, and defaults to
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \text{i32.atomic{.}rmw{.}cmpxchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICCMPXCHG~m \\ &&|&
      \text{i64.atomic{.}rmw{.}cmpxchg}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICCMPXCHG~m \\ &&|&
-     \text{i32.atomic{.}rmw8\_u{.}cmpxchg}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICCMPXCHG~m \\ &&|&
-     \text{i32.atomic{.}rmw16\_u{.}cmpxchg}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICCMPXCHG~m \\ &&|&
-     \text{i64.atomic{.}rmw8\_u{.}cmpxchg}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICCMPXCHG~m \\ &&|&
-     \text{i64.atomic{.}rmw16\_u{.}cmpxchg}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICCMPXCHG~m \\ &&|&
-     \text{i64.atomic{.}rmw32\_u{.}cmpxchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICCMPXCHG~m \\
+     \text{i32.atomic{.}rmw8{.}cmpxchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}cmpxchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}cmpxchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}cmpxchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}cmpxchg\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICCMPXCHG\K{\_u}~m \\
    \end{array}
 
 
