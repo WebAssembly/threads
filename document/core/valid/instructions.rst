@@ -605,7 +605,7 @@ Atomic Memory Instructions
 
 .. _valid-atomic-rmwn:
 
-:math:`t\K{.}\ATOMICRMW{N}\K{\_u.}\atomicop~\memarg`
+:math:`t\K{.}\ATOMICRMW{N}\K{.}\atomicop\K{\_u}~\memarg`
 ....................................................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
@@ -624,7 +624,7 @@ Atomic Memory Instructions
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
-     C \vdash t\K{.}\ATOMICRMW{N}\K{\_u.}\atomicop~\memarg : [\I32~t] \to [t]
+     C \vdash t\K{.}\ATOMICRMW{N}\K{.}\atomicop\K{\_u}~\memarg : [\I32~t] \to [t]
    }
 
 .. _valid-atomic-rmw-cmpxchg:
@@ -653,7 +653,7 @@ Atomic Memory Instructions
 
 .. _valid-atomic-rmwn-cmpxchg:
 
-:math:`t\K{.}\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg`
+:math:`t\K{.}\ATOMICRMW{N}\K{.}\ATOMICCMPXCHG\K{\_u}~\memarg`
 .........................................................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
@@ -672,7 +672,7 @@ Atomic Memory Instructions
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
-     C \vdash t\K{.}\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg : [\I32~t~t] \to [t]
+     C \vdash t\K{.}\ATOMICRMW{N}\K{.}\ATOMICCMPXCHG\K{\_u}~\memarg : [\I32~t~t] \to [t]
    }
 
 
