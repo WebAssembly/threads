@@ -290,7 +290,7 @@ rule token = parse
     { ATOMIC_RMW (fun a o ->
         intop t (i32_atomic_rmw (rmwop t r) (opt a 2))
                 (i64_atomic_rmw (rmwop t r) (opt a 3)) o) }
-  | (ixx as t)".atomic.rmw"(mem_size as sz)"_u."(rmw as r)
+  | (ixx as t)".atomic.rmw"(mem_size as sz)"."(rmw as r)"_u"
     { if t = "i32" && sz = "32" then error lexbuf "unknown operator";
       ATOMIC_RMW (fun a o ->
         intop t
@@ -306,7 +306,7 @@ rule token = parse
     { ATOMIC_RMW_CMPXCHG (fun a o ->
         intop t (i32_atomic_rmw_cmpxchg (opt a 2))
                 (i64_atomic_rmw_cmpxchg (opt a 3)) o) }
-  | (ixx as t)".atomic.rmw"(mem_size as sz)"_u.cmpxchg"
+  | (ixx as t)".atomic.rmw"(mem_size as sz)".cmpxchg_u"
     { if t = "i32" && sz = "32" then error lexbuf "unknown operator";
       ATOMIC_RMW_CMPXCHG (fun a o ->
         intop t
