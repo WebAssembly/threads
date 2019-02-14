@@ -276,6 +276,25 @@ let rec step (c : config) : config =
           v1 :: vs', []
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
 
+      | AtomicWait {offset; ty; sz; _}, I64 timeout :: ve :: I32 i :: vs' ->
+        let mem = memory frame.inst (0l @@ e.at) in
+        let addr = I64_convert.extend_i32_u i in
+        (try
+          assert (sz = None);
+          check_align addr ty sz e.at;
+          let v = Memory.load_value mem addr offset ty
+          in if v = ve then
+            assert false  (* Unimplemented *)
+          else
+            I32 1l :: vs', []  (* Not equal *)
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+
+      | AtomicNotify x, I32 count :: I32 i :: vs' ->
+          if count = 0l then
+            I32 0l :: vs', []  (* Trivial case waking 0 waiters *)
+          else
+            assert false  (* Unimplemented *)
+
       | MemorySize, vs ->
         let mem = memory frame.inst (0l @@ e.at) in
         I32 (Memory.size mem) :: vs, []
