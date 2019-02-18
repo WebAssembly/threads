@@ -266,47 +266,47 @@ operation.
 
 | Name | Read (as `read`) | Modify | Write | Return `read` |
 | ---- | ---- | ---- | ---- | ---- |
-| `i32.atomic.rmw8_u.add` | 1 byte | 8-bit sign-agnostic addition | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.add` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.add_u` | 1 byte | 8-bit sign-agnostic addition | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.add_u` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.add` | 4 bytes | 32-bit sign-agnostic addition | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.add` | 1 byte | 8-bit sign-agnostic addition | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.add` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.add` | 4 bytes | 32-bit sign-agnostic addition | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.add_u` | 1 byte | 8-bit sign-agnostic addition | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.add_u` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.add_u` | 4 bytes | 32-bit sign-agnostic addition | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.add` | 8 bytes | 64-bit sign-agnostic addition | 8 bytes | as i64 |
-| `i32.atomic.rmw8_u.sub` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.sub` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.sub_u` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.sub_u` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.sub` | 4 bytes | 32-bit sign-agnostic subtraction | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.sub` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.sub` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.sub` | 4 bytes | 32-bit sign-agnostic subtraction | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.sub_u` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.sub_u` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.sub_u` | 4 bytes | 32-bit sign-agnostic subtraction | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.sub` | 8 bytes | 64-bit sign-agnostic subtraction | 8 bytes | as i64 |
-| `i32.atomic.rmw8_u.and` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.and` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.and_u` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.and_u` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.and` | 4 bytes | 32-bit sign-agnostic bitwise and | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.and` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.and` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.and` | 4 bytes | 32-bit sign-agnostic bitwise and | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.and_u` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.and_u` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.and_u` | 4 bytes | 32-bit sign-agnostic bitwise and | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.and` | 8 bytes | 64-bit sign-agnostic bitwise and | 8 bytes | as i64 |
-| `i32.atomic.rmw8_u.or` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.or` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.or_u` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.or_u` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.or` | 4 bytes | 32-bit sign-agnostic bitwise inclusive or | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.or` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.or` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.or` | 4 bytes | 32-bit sign-agnostic bitwise inclusive or | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.or_u` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.or_u` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.or_u` | 4 bytes | 32-bit sign-agnostic bitwise inclusive or | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.or` | 8 bytes | 64-bit sign-agnostic bitwise inclusive or | 8 bytes | as i64 |
-| `i32.atomic.rmw8_u.xor` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.xor` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.xor_u` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.xor_u` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.xor` | 4 bytes | 32-bit sign-agnostic bitwise exclusive or | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.xor` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.xor` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.xor` | 4 bytes | 32-bit sign-agnostic bitwise exclusive or | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.xor_u` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.xor_u` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.xor_u` | 4 bytes | 32-bit sign-agnostic bitwise exclusive or | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.xor` | 8 bytes | 64-bit sign-agnostic bitwise exclusive or | 8 bytes | as i64 |
-| `i32.atomic.rmw8_u.xchg` | 1 byte | nop | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.xchg` | 2 bytes | nop | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.xchg_u` | 1 byte | nop | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.xchg_u` | 2 bytes | nop | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.xchg` | 4 bytes | nop | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.xchg` | 1 byte | nop | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.xchg` | 2 bytes | nop | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.xchg` | 4 bytes | nop | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.xchg_u` | 1 byte | nop | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.xchg_u` | 2 bytes | nop | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.xchg_u` | 4 bytes | nop | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.xchg` | 8 bytes | nop | 8 bytes | as i64 |
 
 
@@ -320,12 +320,12 @@ address. If the values are not equal, no value is stored. In either case, the
 
 | Name | Load (as `loaded`) | Compare `expected` with `loaded` | Conditionally Store `replacement` | Return `loaded` |
 | ---- | ---- | ---- | ---- | ---- |
-| `i32.atomic.rmw8_u.cmpxchg` | 1 byte | `expected` wrapped from i32 to i8, 8-bit compare equal | wrapped from i32 to i8, store 1 byte | zero-extended from i8 to i32 |
-| `i32.atomic.rmw16_u.cmpxchg` | 2 bytes | `expected` wrapped from i32 to i16, 16-bit compare equal | wrapped from i32 to i16, store 2 bytes | zero-extended from i8 to i32 |
+| `i32.atomic.rmw8.cmpxchg_u` | 1 byte | `expected` wrapped from i32 to i8, 8-bit compare equal | wrapped from i32 to i8, store 1 byte | zero-extended from i8 to i32 |
+| `i32.atomic.rmw16.cmpxchg_u` | 2 bytes | `expected` wrapped from i32 to i16, 16-bit compare equal | wrapped from i32 to i16, store 2 bytes | zero-extended from i8 to i32 |
 | `i32.atomic.rmw.cmpxchg` | 4 bytes | 32-bit compare equal | store 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.cmpxchg` | 1 byte | `expected` wrapped from i64 to i8, 8-bit compare equal | wrapped from i64 to i8, store 1 byte | zero-extended from i8 to i64 |
-| `i64.atomic.rmw16_u.cmpxchg` | 2 bytes | `expected` wrapped from i64 to i16, 16-bit compare equal | wrapped from i64 to i16, store 2 bytes | zero-extended from i16 to i64 |
-| `i64.atomic.rmw32_u.cmpxchg` | 4 bytes | `expected` wrapped from i64 to i32, 32-bit compare equal | wrapped from i64 to i32, store 4 bytes | zero-extended from i32 to i64 |
+| `i64.atomic.rmw8.cmpxchg_u` | 1 byte | `expected` wrapped from i64 to i8, 8-bit compare equal | wrapped from i64 to i8, store 1 byte | zero-extended from i8 to i64 |
+| `i64.atomic.rmw16.cmpxchg_u` | 2 bytes | `expected` wrapped from i64 to i16, 16-bit compare equal | wrapped from i64 to i16, store 2 bytes | zero-extended from i16 to i64 |
+| `i64.atomic.rmw32.cmpxchg_u` | 4 bytes | `expected` wrapped from i64 to i32, 32-bit compare equal | wrapped from i64 to i32, store 4 bytes | zero-extended from i32 to i64 |
 | `i64.atomic.rmw.cmpxchg` | 8 bytes | 64-bit compare equal | 8 bytes | as i64 |
 
 ### Alignment
@@ -571,9 +571,9 @@ instr ::= ... |
           inn.atomic.store8 memarg | inn.atomic.store16 memarg | i64.atomic.store32 memarg |
 
           inn.atomic.rmw.atomicop memarg |
-          inn.atomic.rmw8_u.atomicop memarg |
-          inn.atomic.rmw16_u.atomicop memarg |
-          i64.atomic.rmw32_u.atomicop memarg |
+          inn.atomic.rmw8.atomicop_u memarg |
+          inn.atomic.rmw16.atomicop_u memarg |
+          i64.atomic.rmw32.atomicop_u memarg |
 ```
 
 The [instruction binary format][] is modified as follows:
@@ -606,59 +606,59 @@ instr ::= ...
 
         | 0xFE 0x1E m:memarg32  =>  i32.atomic.rmw.add m
         | 0xFE 0x1F m:memarg64  =>  i64.atomic.rmw.add m
-        | 0xFE 0x20 m:memarg8   =>  i32.atomic.rmw8_u.add m
-        | 0xFE 0x21 m:memarg16  =>  i32.atomic.rmw16_u.add m
-        | 0xFE 0x22 m:memarg8   =>  i64.atomic.rmw8_u.add m
-        | 0xFE 0x23 m:memarg16  =>  i64.atomic.rmw16_u.add m
-        | 0xFE 0x24 m:memarg32  =>  i64.atomic.rmw32_u.add m
+        | 0xFE 0x20 m:memarg8   =>  i32.atomic.rmw8.add_u m
+        | 0xFE 0x21 m:memarg16  =>  i32.atomic.rmw16.add_u m
+        | 0xFE 0x22 m:memarg8   =>  i64.atomic.rmw8.add_u m
+        | 0xFE 0x23 m:memarg16  =>  i64.atomic.rmw16.add_u m
+        | 0xFE 0x24 m:memarg32  =>  i64.atomic.rmw32.add_u m
 
         | 0xFE 0x25 m:memarg32  =>  i32.atomic.rmw.sub m
         | 0xFE 0x26 m:memarg64  =>  i64.atomic.rmw.sub m
-        | 0xFE 0x27 m:memarg8   =>  i32.atomic.rmw8_u.sub m
-        | 0xFE 0x28 m:memarg16  =>  i32.atomic.rmw16_u.sub m
-        | 0xFE 0x29 m:memarg8   =>  i64.atomic.rmw8_u.sub m
-        | 0xFE 0x2A m:memarg16  =>  i64.atomic.rmw16_u.sub m
-        | 0xFE 0x2B m:memarg32  =>  i64.atomic.rmw32_u.sub m
+        | 0xFE 0x27 m:memarg8   =>  i32.atomic.rmw8.sub_u m
+        | 0xFE 0x28 m:memarg16  =>  i32.atomic.rmw16.sub_u m
+        | 0xFE 0x29 m:memarg8   =>  i64.atomic.rmw8.sub_u m
+        | 0xFE 0x2A m:memarg16  =>  i64.atomic.rmw16.sub_u m
+        | 0xFE 0x2B m:memarg32  =>  i64.atomic.rmw32.sub_u m
 
         | 0xFE 0x2C m:memarg32  =>  i32.atomic.rmw.and m
         | 0xFE 0x2D m:memarg64  =>  i64.atomic.rmw.and m
-        | 0xFE 0x2E m:memarg8   =>  i32.atomic.rmw8_u.and m
-        | 0xFE 0x2F m:memarg16  =>  i32.atomic.rmw16_u.and m
-        | 0xFE 0x30 m:memarg8   =>  i64.atomic.rmw8_u.and m
-        | 0xFE 0x31 m:memarg16  =>  i64.atomic.rmw16_u.and m
-        | 0xFE 0x32 m:memarg32  =>  i64.atomic.rmw32_u.and m
+        | 0xFE 0x2E m:memarg8   =>  i32.atomic.rmw8.and_u m
+        | 0xFE 0x2F m:memarg16  =>  i32.atomic.rmw16.and_u m
+        | 0xFE 0x30 m:memarg8   =>  i64.atomic.rmw8.and_u m
+        | 0xFE 0x31 m:memarg16  =>  i64.atomic.rmw16.and_u m
+        | 0xFE 0x32 m:memarg32  =>  i64.atomic.rmw32.and_u m
 
         | 0xFE 0x33 m:memarg32  =>  i32.atomic.rmw.or m
         | 0xFE 0x34 m:memarg64  =>  i64.atomic.rmw.or m
-        | 0xFE 0x35 m:memarg8   =>  i32.atomic.rmw8_u.or m
-        | 0xFE 0x36 m:memarg16  =>  i32.atomic.rmw16_u.or m
-        | 0xFE 0x37 m:memarg8   =>  i64.atomic.rmw8_u.or m
-        | 0xFE 0x38 m:memarg16  =>  i64.atomic.rmw16_u.or m
-        | 0xFE 0x39 m:memarg32  =>  i64.atomic.rmw32_u.or m
+        | 0xFE 0x35 m:memarg8   =>  i32.atomic.rmw8.or_u m
+        | 0xFE 0x36 m:memarg16  =>  i32.atomic.rmw16.or_u m
+        | 0xFE 0x37 m:memarg8   =>  i64.atomic.rmw8.or_u m
+        | 0xFE 0x38 m:memarg16  =>  i64.atomic.rmw16.or_u m
+        | 0xFE 0x39 m:memarg32  =>  i64.atomic.rmw32.or_u m
 
         | 0xFE 0x3A m:memarg32  =>  i32.atomic.rmw.xor m
         | 0xFE 0x3B m:memarg64  =>  i64.atomic.rmw.xor m
-        | 0xFE 0x3C m:memarg8   =>  i32.atomic.rmw8_u.xor m
-        | 0xFE 0x3D m:memarg16  =>  i32.atomic.rmw16_u.xor m
-        | 0xFE 0x3E m:memarg8   =>  i64.atomic.rmw8_u.xor m
-        | 0xFE 0x3F m:memarg16  =>  i64.atomic.rmw16_u.xor m
-        | 0xFE 0x40 m:memarg32  =>  i64.atomic.rmw32_u.xor m
+        | 0xFE 0x3C m:memarg8   =>  i32.atomic.rmw8.xor_u m
+        | 0xFE 0x3D m:memarg16  =>  i32.atomic.rmw16.xor_u m
+        | 0xFE 0x3E m:memarg8   =>  i64.atomic.rmw8.xor_u m
+        | 0xFE 0x3F m:memarg16  =>  i64.atomic.rmw16.xor_u m
+        | 0xFE 0x40 m:memarg32  =>  i64.atomic.rmw32.xor_u m
 
         | 0xFE 0x41 m:memarg32  =>  i32.atomic.rmw.xchg m
         | 0xFE 0x42 m:memarg64  =>  i64.atomic.rmw.xchg m
-        | 0xFE 0x43 m:memarg8   =>  i32.atomic.rmw8_u.xchg m
-        | 0xFE 0x44 m:memarg16  =>  i32.atomic.rmw16_u.xchg m
-        | 0xFE 0x45 m:memarg8   =>  i64.atomic.rmw8_u.xchg m
-        | 0xFE 0x46 m:memarg16  =>  i64.atomic.rmw16_u.xchg m
-        | 0xFE 0x47 m:memarg32  =>  i64.atomic.rmw32_u.xchg m
+        | 0xFE 0x43 m:memarg8   =>  i32.atomic.rmw8.xchg_u m
+        | 0xFE 0x44 m:memarg16  =>  i32.atomic.rmw16.xchg_u m
+        | 0xFE 0x45 m:memarg8   =>  i64.atomic.rmw8.xchg_u m
+        | 0xFE 0x46 m:memarg16  =>  i64.atomic.rmw16.xchg_u m
+        | 0xFE 0x47 m:memarg32  =>  i64.atomic.rmw32.xchg_u m
 
         | 0xFE 0x48 m:memarg32  =>  i32.atomic.rmw.cmpxchg m
         | 0xFE 0x49 m:memarg64  =>  i64.atomic.rmw.cmpxchg m
-        | 0xFE 0x4A m:memarg8   =>  i32.atomic.rmw8_u.cmpxchg m
-        | 0xFE 0x4B m:memarg16  =>  i32.atomic.rmw16_u.cmpxchg m
-        | 0xFE 0x4C m:memarg8   =>  i64.atomic.rmw8_u.cmpxchg m
-        | 0xFE 0x4D m:memarg16  =>  i64.atomic.rmw16_u.cmpxchg m
-        | 0xFE 0x4E m:memarg32  =>  i64.atomic.rmw32_u.cmpxchg m
+        | 0xFE 0x4A m:memarg8   =>  i32.atomic.rmw8.cmpxchg_u m
+        | 0xFE 0x4B m:memarg16  =>  i32.atomic.rmw16.cmpxchg_u m
+        | 0xFE 0x4C m:memarg8   =>  i64.atomic.rmw8.cmpxchg_u m
+        | 0xFE 0x4D m:memarg16  =>  i64.atomic.rmw16.cmpxchg_u m
+        | 0xFE 0x4E m:memarg32  =>  i64.atomic.rmw32.cmpxchg_u m
 ```
 
 [ECMAScript agent]: https://tc39.github.io/ecma262/#sec-agents
