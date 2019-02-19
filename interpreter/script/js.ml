@@ -146,8 +146,8 @@ function assert_return_arithmetic_nan(action) {
     throw new Error("Wasm return value NaN expected, got " + actual);
   };
 }
-
 |}
+
 
 (* Context *)
 
