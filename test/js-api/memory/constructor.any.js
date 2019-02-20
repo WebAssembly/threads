@@ -125,14 +125,44 @@ test(() => {
         },
       };
     },
+  });
+
+  assert_array_equals(order, [
+    "initial",
+    "initial valueOf",
+    "maximum",
+    "maximum valueOf",
+  ]);
+}, "Order of evaluation for descriptor");
+
+test(t => {
+  const order = [];
+
+  new WebAssembly.Memory({
+    get maximum() {
+      order.push("maximum");
+      return {
+        valueOf() {
+          order.push("maximum valueOf");
+          return 1;
+        },
+      };
+    },
+
+    get initial() {
+      order.push("initial");
+      return {
+        valueOf() {
+          order.push("initial valueOf");
+          return 1;
+        },
+      };
+    },
 
     get shared() {
       order.push("shared");
       return {
-        valueOf() {
-          order.push("shared valueOf");
-          return true;
-        },
+        valueOf: t.unreached_func("should not call shared valueOf"),
       };
     },
   });
@@ -143,9 +173,8 @@ test(() => {
     "maximum",
     "maximum valueOf",
     "shared",
-    "shared valueOf",
   ]);
-}, "Order of evaluation for descriptor");
+}, "Order of evaluation for descriptor (with shared)");
 
 test(() => {
   const argument = { "initial": 0 };
