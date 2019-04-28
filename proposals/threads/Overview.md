@@ -196,7 +196,7 @@ only initialized once is to place all data segments in a separate module that
 is only instantiated once, then share the linear memory with other modules.
 For example:
 
-```
+```wasm
 ;; Data module
 (module $data_module
   (memory (export "memory") 1)
