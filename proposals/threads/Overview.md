@@ -206,7 +206,8 @@ For example:
 (module $main_module
   (import "env" "memory" (memory 1))
   ...)
-
+```
+```js
 WebAssembly.instantiate(dataModuleBytes, {}).then(
     ({instance}) => {
         let imports = {env: {memory: instance.exports.memory}};
