@@ -922,7 +922,7 @@ See :ref:`above <exec-atomic-store>`.
 :math:`\ATOMICWAKE`
 ...................
 
-.. todo:: add text; operand order? is the trap case correct?
+.. todo:: add text; operand order? is the trap case correct (issue #105)?
 
 .. math::
    \begin{array}{l}
