@@ -199,7 +199,7 @@ Instruction                                              Binary Opcode          
 :math:`\I64.\REINTERPRET\K{/}\F64`                       :math:`\hex{BD}`           :math:`[\F64] \to [\I64]`                   :ref:`validation <valid-cvtop>`                :ref:`execution <exec-cvtop>`, :ref:`operator <op-reinterpret>`
 :math:`\F32.\REINTERPRET\K{/}\I32`                       :math:`\hex{BE}`           :math:`[\I32] \to [\F32]`                   :ref:`validation <valid-cvtop>`                :ref:`execution <exec-cvtop>`, :ref:`operator <op-reinterpret>`
 :math:`\F64.\REINTERPRET\K{/}\I64`                       :math:`\hex{BF}`           :math:`[\I64] \to [\F64]`                   :ref:`validation <valid-cvtop>`                :ref:`execution <exec-cvtop>`, :ref:`operator <op-reinterpret>`
-:math:`\ATOMICWAKE~\memarg`                              :math:`\hex{FE}~\hex{00}`  :math:`[\I32~\I64] \to [\I64]`              :ref:`validation <valid-atomic-wake>`
+:math:`\ATOMICNOTIFY~\memarg`                            :math:`\hex{FE}~\hex{00}`  :math:`[\I32~\I64] \to [\I64]`              :ref:`validation <valid-atomic-notify>`
 :math:`\I32.\ATOMICWAIT~\memarg`                         :math:`\hex{FE}~\hex{01}`  :math:`[\I32~\I32~\I64] \to [\I32]`         :ref:`validation <valid-atomic-wait>`
 :math:`\I64.\ATOMICWAIT~\memarg`                         :math:`\hex{FE}~\hex{02}`  :math:`[\I32~\I64~\I64] \to [\I32]`         :ref:`validation <valid-atomic-wait>`
 :math:`\I32.\ATOMICLOAD~\memarg`                         :math:`\hex{FE}~\hex{10}`  :math:`[\I32] \to [\I32]`                   :ref:`validation <valid-atomic-load>`          :ref:`execution <exec-atomic-load>`

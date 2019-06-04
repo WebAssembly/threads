@@ -287,7 +287,7 @@ Instructions in this group are concerned with accessing :ref:`linear memory <syn
      \ATOMICXCHG \\
    \production{instruction} & \instr &::=&
      \dots ~|~ \\&&&
-     \ATOMICWAKE~\memarg ~|~ \\&&&
+     \ATOMICNOTIFY~\memarg ~|~ \\&&&
      \K{i}\X{nn}\K{.}\ATOMICWAIT~\memarg ~|~ \\&&&
      \K{i}\X{nn}\K{.}\ATOMICLOAD~\memarg ~|~ \\&&&
      \K{i}\X{nn}\K{.}\ATOMICSTORE~\memarg ~|~ \\&&&
@@ -324,12 +324,12 @@ this action conditionally, if the read value is equal to a provided comparison
 argument. All other :ref:`atomicops <syntax-atomicop>` have behavior of the
 :ref:`ibinop <syntax-ibinop>` of the same name.
 
-The |ATOMICWAKE| and |ATOMICWAIT| instructions provide primitive
+The |ATOMICWAIT| and |ATOMICNOTIFY| instructions provide primitive
 synchronization between :ref:`threads <syntax-thread>`. The |ATOMICWAIT|
 instructions atomically load a value from the calculated effective address and
 compare it to an expected value. If they are equal, the thread is then
 suspended until a given timeout expires or another thread wakes it. The
-|ATOMICWAKE| instruction wakes threads that are waiting on a given address, up
+|ATOMICNOTIFY| instruction wakes threads that are waiting on a given address, up
 to a given maximum.
 
 

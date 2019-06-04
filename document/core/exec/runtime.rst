@@ -61,10 +61,10 @@ Store
 
 .. todo:: since allocation order is non-deterministic in the presence of threads, we can no longer use ordered lists but need mappings from abstract addresses to instances.
 
-The *store* represents all global state that can be manipulated by WebAssembly programs.
-It consists of the runtime representation of all *instances* of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tableinst>`, :ref:`memories <syntax-meminst>`, and :ref:`globals <syntax-globalinst>` that have been :ref:`allocated <alloc>` during the life time of the abstract machine. [#gc]_
+A *store* represents all state that can be manipulated by WebAssembly programs within a single :ref:`thread <syntax-thread>`.
+It consists of the runtime representation of all *instances* of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tableinst>`, :ref:`memories <syntax-meminst>`, and :ref:`globals <syntax-globalinst>` that have been :ref:`allocated <alloc>` during the life time of that thread. [#gc]_
 
-Syntactically, the store is defined as a :ref:`record <notation-record>` listing the existing instances of each category:
+Syntactically, a store is defined as a :ref:`record <notation-record>` listing the existing instances of each category:
 
 .. math::
    \begin{array}{llll}
@@ -77,6 +77,8 @@ Syntactically, the store is defined as a :ref:`record <notation-record>` listing
      \end{array}
    \end{array}
 
+It is an invariant of the semantics that for all memory instances :math:`\meminst` in a store, :math:`\meminst.\MISHARE = \UNSHARED`.
+
 .. [#gc]
    In practice, implementations may apply techniques like garbage collection to remove objects from the store that are no longer referenced.
    However, such techniques are not semantically observable,
@@ -87,6 +89,41 @@ Convention
 ..........
 
 * The meta variable :math:`S` ranges over stores where clear from context.
+
+
+.. index:: ! shared store, memory instance, module, allocation
+   pair: abstract syntax; shared store
+.. _syntax-sharedstore:
+.. _sharedstore:
+
+Shared Store
+~~~~~~~~~~~~
+
+.. todo:: since allocation order is non-deterministic in the presence of threads, we can no longer use ordered lists but need mappings from abstract addresses to instances.
+
+The *shared store* represents all global state that can be manipulated by WebAssembly programs and is potentially shared between multiple :ref:`threads <syntax-thread>`.
+It consists of the runtime representation of all *instances* of :ref:`shared <syntax-shared>` :ref:`memories <syntax-meminst>` that have been :ref:`allocated <alloc>` by any thread during the life time of the abstract machine.
+
+Syntactically, the shared store is defined as a :ref:`record <notation-record>` listing the existing instances of each sharable category:
+
+.. math::
+   \begin{array}{llll}
+   \production{(shared store)} & \sharedstore &::=& \{~
+     \begin{array}[t]{l@{~}ll}
+     \SSMEMS & \meminst^\ast, \\
+     \end{array}
+   \end{array}
+
+It is an invariant of the semantics that for all memory instances :math:`\meminst` in a shared store, :math:`\meminst.\MISHARE = \SHARED`.
+
+.. note::
+   In future versions of WebAssembly, other entities than just memories may be sharable.
+
+
+Convention
+..........
+
+* The meta variable :math:`\X{SS}` ranges over shared stores where clear from context.
 
 
 .. index:: ! address, store, function instance, table instance, memory instance, global instance, embedder
@@ -211,8 +248,6 @@ but within certain :ref:`constraints <exec-invoke-host>` that ensure the integri
 Table Instances
 ~~~~~~~~~~~~~~~
 
-.. todo:: table access should uniformly happen through events now
-
 A *table instance* is the runtime representation of a :ref:`table <syntax-table>`.
 It holds a vector of *function elements* and an optional maximum size, if one was specified in the :ref:`table type <syntax-tabletype>` at the table's definition site.
 
@@ -248,13 +283,16 @@ A memory instance records an optional maximum size for a memory, if one was spec
 .. math::
    \begin{array}{llll}
    \production{(memory instance)} & \meminst &::=&
-     \{ \MIMAX~\u32^?, \MISHARE~\share \} \\
+     \{ \MIMAX~\u32^?, \MISHARE~\UNSHARED, \MIDATA~\vec(\byte) \} \\ &&|&
+     \{ \MIMAX~\u32^?, \MISHARE~\SHARED \} \\
    \end{array}
 
 Like in a :ref:`memory type <syntax-memtype>`, the maximum size in a memory instance is given in units of the WebAssembly *page size*, which is defined to be the constant :math:`65536` -- abbreviated :math:`64\,\F{Ki}`.
 
-WebAssembly :ref:`threads <thread>` expose a *weak memory model* in which reads, writes, and other accesses to a memory instance can be reordered in a non-deterministic fashion that mirrors the behavior of hardware.
-Instead of representing the contents of a memory directly in an instance -- e.g., as a specific vector of :ref:`bytes <syntax-byte>` -- the abstract machine hence separately records :ref:`traces <syntax-trace>` of corresponding memory :ref:`events <syntax-evt>` that describe all accesses that occur.
+The instance of a non-shared memory holds a vector of :ref:`bytes representing its state.
+For :ref:`shared <syntax-shared>` memories, no state is recorded in the instance itself.
+WebAssembly :ref:`threads <thread>` expose a *weak memory model* in which reads, writes, and other accesses to a shared memory instance can be reordered in a non-deterministic fashion that mirrors the behavior of hardware.
+Instead of representing the contents of a memory directly in an the abstract machine hence separately records :ref:`traces <syntax-trace>` of corresponding memory :ref:`events <syntax-evt>` that describe all accesses that occur.
 
 
 .. index:: ! global instance, global, value, mutability, instruction, embedder
@@ -264,8 +302,6 @@ Instead of representing the contents of a memory directly in an instance -- e.g.
 
 Global Instances
 ~~~~~~~~~~~~~~~~
-
-.. todo:: global access should uniformly happen through events now
 
 A *global instance* is the runtime representation of a :ref:`global <syntax-global>` variable.
 It holds an individual :ref:`value <syntax-val>` and a flag indicating whether it is mutable.
@@ -472,7 +508,8 @@ In order to express the reduction of :ref:`traps <trap>`, :ref:`calls <syntax-ca
      \INVOKE~\funcaddr \\ &&|&
      \INITELEM~\tableaddr~\u32~\funcidx^\ast \\ &&|&
      \INITDATA~\memaddr~\u32~\byte^\ast \\ &&|&
-     \SUSPEND~\memaddr.\LDATA[\u32] \\ &&|&
+     \WAITX~\loc~n \\ &&|&
+     \NOTIFYX~\loc~n~m \\ &&|&
      \LABEL_n\{\instr^\ast\}~\instr^\ast~\END \\ &&|&
      \FRAME_n\{\frame\}~\instr^\ast~\END \\
    \end{array}
@@ -488,7 +525,7 @@ The |INITELEM| and |INITDATA| instructions perform initialization of :ref:`eleme
 .. note::
    The reason for splitting instantiation into individual reduction steps is to provide a semantics that is compatible with future extensions like threads.
 
-.. todo:: describe |SUSPEND|
+.. todo:: describe |WAITX| and |NOTIFYX|
 
 .. todo:: add host instruction
 
@@ -588,23 +625,23 @@ Convention
 * We use the notation :math:`(x~\AT~\time)` for pair of a semantic object :math:`x` and a time stamp :math:`\time`.
 
 
-.. index:: ! configuration, ! thread, store, time stamp, instruction
+.. index:: ! configuration, ! thread, store, shared store, time stamp, instruction
 .. _syntax-thread:
 .. _syntax-config:
 
 Configurations
 ~~~~~~~~~~~~~~
 
-A *configuration* consists of the current :ref:`store <syntax-store>` and a set of executing *threads*.
+A *configuration* consists of the current :ref:`shared store <syntax-sharedstore>` and a set of executing *threads*.
 
 A thread is a computation over a sequence of remaining :ref:`instructions <syntax-instr>`, annotated with the :ref:`time <syntax-time>` it was last active.
 
 .. math::
    \begin{array}{llcl}
    \production{(configuration)} & \config &::=&
-     \store; \thread^\ast \\
+     \sharedstore; \thread^\ast \\
    \production{(thread)} & \thread &::=&
-     \instr^\ast~\AT~\time \\
+     \store; \instr^\ast~\AT~\time \\
    \end{array}
 
 
@@ -612,53 +649,39 @@ A thread is a computation over a sequence of remaining :ref:`instructions <synta
 .. _syntax-act:
 .. _syntax-ord:
 .. _syntax-loc:
+.. _syntax-fld:
 .. _syntax-storeval:
 
 Actions
 ~~~~~~~
 
-The interaction of a WebAssembly computation with the :ref:`store <syntax-store>` is described through *actions*, such as reads and writes.
+The interaction of a WebAssembly computation with the :ref:`shared store <syntax-sharedstore>` is described through *actions*, such as reads and writes.
 The execution of every individual :ref:`instruction <syntax-instr>` can perform a set of such actions.
 
 .. math::
    \begin{array}{llcl}
    \production{(action)} & \act &::=&
-     \AFORK~\instr^\ast \\&&|&
-     \ANEW~\loc~\externinst \\&&|&
-     \AUSE~\loc~\externinst \\&&|&
-     \ARD_\ord~\loc~\storeval \\&&|&
-     \AWR_\ord~\loc~\storeval \\&&|&
+     \ARD_{\ord}~\loc~\storeval \\&&|&
+     \AWR_{\ord}~\loc~\storeval \\&&|&
      \ARMW~\loc~\storeval~\storeval \\&&|&
-     \AWAKE~\loc~\u32~\u32 \\&&|&
      \hostact \\
    \production{(ordering)} & \ord &::=&
      \UNORD ~|~
      \SEQCST \\
    \production{(location)} & \loc &::=&
-     \addr#\fld \\
+     \addr.\fld \\
    \production{(field)} & \fld &::=&
      \LLEN ~|~
-     \LDATA[\u32] ~|~
-     \LELEM[\u32] ~|~
-     \LVAL \\
+     \LDATA[\u32] \\
    \production{(store value)} & \storeval &::=&
      \val ~|~
      b^\ast \\
    \end{array}
 
-Performing a |AFORK| action creates a new :ref:`thread <thread>` of computation, given by a sequence of :ref:`instructions <syntax-instr>` to execute.
-
-The |ANEW| action creates a new :ref:`external instance <syntax-externinst>` at a fresh :ref:`address <syntax-addr>`.
-The corresponding |AUSE| action accesses a previously created external instance through its address.
-It records what instance has been found at that address.
-
-The access of *mutable* state is performed through the |ARD|, |AWR|, and |ARMW| actions.
+The access of *mutable* shared state is performed through the |ARD|, |AWR|, and |ARMW| actions.
 They each access an :ref:`external instance <syntax-externinst>` at an abstract *location*.
-Such a location consists of an :ref:`address <syntax-addr>` of a :ref:`table <syntax-tableinst>`, :ref:`memory <syntax-meminst>`, or :ref:`global <syntax-globalinst>` instance and a symbolic *field* name in the respective object.
-For tables, this is either |LLEN| for the current size of the table or |LELEM| for the vector of elements.
-Similarly, for memories, it is either |LLEN| for the size or |LDATA| for the vector of bytes.
-For globals, the only field is |LVAL|, denoting the current value.
-In the case of |LELEM| or |LDATA|, the field name is further augmented by an numeric index into the vector of elements or bytes, respectively.
+Such a location consists of an :ref:`address <syntax-addr>` of a :ref:`shared <syntax-shared>` :ref:`memory <syntax-meminst>` instance and a symbolic *field* name in the respective object.
+This is either |LLEN| for the size or |LDATA| for the vector of bytes.
 
 In each case read and write actions record the *store value* that has been read or written, which is either a regular :ref:`value <syntax-val>` or a sequence of :ref:`bytes <syntax-byte>`, depending on the location accessed.
 An |ARMW| event, performing an atomic read-modify-write access, records both the store values read (first) and written (second);
@@ -669,9 +692,6 @@ A |ARMW| action always is sequentially consistent.
 
 .. note::
    Future versions of WebAssembly may introduce additional orderings.
-
-A |AWAKE| action is performed by the |ATOMICWAKE| instruction.
-It records the :ref:`address <syntax-memaddr>` of the :ref:`memory instance <syntax-meminst>`, the location, the number of suspended threads woken up, as well as the maximum number of threads that was given as an operand to the instruction.
 
 Finally, a *host action* is an action performed outside of WebAssembly code.
 Its form and meaning is outside the scope of this specification.
@@ -689,7 +709,8 @@ Its form and meaning is outside the scope of this specification.
 Convention
 ..........
 
-* The actions :math:`\ARD_\ord` and :math:`\AWR_\ord` are abbreviated to :math:just `\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
+* The actions :math:`\ARD_{\ord}` and :math:`\AWR_{\ord}` are abbreviated to :math:just `\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
+
 
 .. todo:: define notational shorthands over actions
 

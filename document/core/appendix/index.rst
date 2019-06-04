@@ -16,8 +16,6 @@ Appendix
 
    .. toctree::
 
-      :maxdepth: 2
       index-types
       index-instructions
       index-rules
-

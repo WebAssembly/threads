@@ -436,33 +436,62 @@ Memory Instructions
    ~\\[-1ex]
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(t.\ATOMIC^?.\LOAD({N}\K{\_}\sx)^?~\memarg)
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_\ord~a.\LDATA[\X{ea}]~b^\ast)}&
-     F; (t.\CONST~\extend\F{\_}\sx_{N,|t|}(n))
+   S; F; (\I32.\CONST~i)~(t.\LOAD~\memarg) &\stepto& S; F; (t.\CONST~c)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & a = F.\AMODULE.\MIMEMS[0] \\
-     \wedge & \X{ea} = i + \memarg.\OFFSET \\
+     (\iff & \meminst.\MISHARE = \UNSHARED \\
+     \wedge & \X{ea} + |t|/8 \leq |\meminst.\MIDATA| \\
+     \wedge & \bytes_t(c) = \meminst.\MIDATA[\X{ea} \slice |t|/8])
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\LOAD{N}\K{\_}\sx~\memarg) &\stepto&
+     S; F; (t.\CONST~\extend\F{\_}\sx_{N,|t|}(n))
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \meminst.\MISHARE = \UNSHARED \\
+     \wedge & \X{ea} + N/8 \leq |\meminst.\MIDATA| \\
+     \wedge & \bytes_{\iN}(n) = \meminst.\MIDATA[\X{ea} \slice N/8])
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~k)~(t.\LOAD({N}\K{\_}\sx)^?~\memarg) &\stepto& S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     (\otherwise, \iff \meminst.\MISHARE = \UNSHARED) \\
+   %
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\ATOMIC^?.\LOAD({N}\K{\_}\sx)^?~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast)}&
+     S; F; (t.\CONST~\extend\F{\_}\sx_{N,|t|}(n))
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \meminst.\MISHARE = \SHARED \\
      \wedge & \X{ea} + N/8 \leq n \\
+     \wedge & (\ord = \UNORD \vee \X{ea} \mod N/8 = 0) \\
      \wedge & b^\ast = \bytes_{\iN}(n)) \\
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~k)~(t.\ATOMIC^?.\LOAD({N}\K{\_}\sx)^?~\memarg)
+   S; F; (\I32.\CONST~k)~(t.\ATOMIC^?.\LOAD({N}\K{\_}\sx)^?~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)}&
-     F; \TRAP
+     S; F; \TRAP
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & a = F.\AMODULE.\MIMEMS[0] \\
-     \wedge & \X{ea} = i + \memarg.\OFFSET \\
+     (\iff & \meminst.\MISHARE = \SHARED \\
      \wedge & (\X{ea} + N/8 > n \vee \ord = \SEQCST \wedge \X{ea} \mod N/8 \neq 0)) \\
      \end{array}
    \\[2ex]
    \begin{array}[t]{@{}r@{~}l@{}}
    (\where & \ord = \SEQCST \iff \ATOMIC ~\mbox{is present}, \otherwise \ord = \UNORD \\
-   \wedge & N = |t| \wedge \sx = \K{u} \iff ~\mbox{not present}) \\
+   \wedge & N = |t| \wedge \sx = \K{u} \iff ~\mbox{not present} \\
+   \wedge & a = F.\AMODULE.\MIMEMS[0] \\
+   \wedge & \meminst = S.\SMEMS[a] \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
    \end{array}
    \end{array}
 
@@ -521,34 +550,61 @@ Memory Instructions
    ~\\[-1ex]
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE{N}~\memarg)
-     &\stepto^{(\ARD~a.\LLEN~n)~(\AWR_\UNORD~a.\LDATA[\X{ea}]~b^\ast)}&
-     F; \epsilon
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE~\memarg) &\stepto& S'; F; \epsilon
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & a = F.\AMODULE.\MIMEMS[0] \\
-     \wedge & \X{ea} = i + \memarg.\OFFSET \\
+     (\iff & \meminst.\MISHARE = \UNSHARED \\
+     \wedge & \X{ea} + |t|/8 \leq |\meminst.\MIDATA| \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea} \slice |t|/8] = \bytes_t(c)
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE{N}~\memarg) &\stepto& S'; F; \epsilon
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \meminst.\MISHARE = \UNSHARED \\
+     \wedge & \X{ea} + N/8 \leq |\meminst.\MIDATA| \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea} \slice N/8] = \bytes_{\iN}(\wrap_{|t|,N}(c))
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\STORE{N}^?~\memarg) &\stepto& S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     (\otherwise) \\
+   %
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE{N}~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)~(\AWR_{\ord}~a.\LDATA[\X{ea}]~b^\ast)}&
+     S; F; \epsilon
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \meminst.\MISHARE = \SHARED \\
      \wedge & \X{ea} + N/8 \leq n \\
      \wedge & (\ord = \UNORD \vee \X{ea} \mod N/8 = 0) \\
      \wedge & b^\ast = \bytes_{\iN}(\wrap_{|t|,N}(c))
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE{N}^?~\memarg)
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE{N}^?~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)}&
-     F; \TRAP
+     S; F; \TRAP
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & a = F.\AMODULE.\MIMEMS[0] \\
-     \wedge & \X{ea} = i + \memarg.\OFFSET \\
+     (\iff & \meminst.\MISHARE = \SHARED \\
      \wedge & (\X{ea} + N/8 > n \vee \ord = \SEQCST \wedge \X{ea} \mod N/8 \neq 0)) \\
      \end{array}
    \\[2ex]
    \begin{array}[t]{@{}r@{~}l@{}}
    (\where & \ord = \SEQCST \iff \ATOMIC ~\mbox{is present}, \otherwise \ord = \UNORD \\
-   \wedge & N = |t| \wedge \sx = \K{u} \iff ~\mbox{not present}) \\
+   \wedge & N = |t| \wedge \sx = \K{u} \iff ~\mbox{not present} \\
+   \wedge & a = F.\AMODULE.\MIMEMS[0] \\
+   \wedge & \meminst = S.\SMEMS[a] \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
    \end{array}
    \end{array}
 
@@ -872,6 +928,7 @@ See :ref:`above <exec-atomic-store>`.
 :math:`t\K{.}\ATOMICWAIT`
 .........................
 
+.. todo:: update to new rules
 .. todo:: add text
 
 .. math::
@@ -879,7 +936,7 @@ See :ref:`above <exec-atomic-store>`.
    \begin{array}{lcl@{\qquad}l}
    F; (\I64.\CONST~k)~(t.\CONST~c)~(\I32.\CONST~i)~t.\ATOMICWAIT
      &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LDATA[i]~b^{|t|})}&
-     F; (\SUSPEND~a.\LDATA[i])
+     F; (\WAITX~a.\LDATA[i])
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -917,18 +974,19 @@ See :ref:`above <exec-atomic-store>`.
    \end{array}
 
 
-.. _exec-wake:
+.. _exec-notify:
 
-:math:`\ATOMICWAKE`
-...................
+:math:`\ATOMICNOTIFY`
+.....................
 
+.. todo:: update to new rules
 .. todo:: add text; operand order? is the trap case correct (issue #105)?
 
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\ATOMICWAKE
-     &\stepto^{(\ARD~a.\LLEN~n)~(\AWAKE~a.\LDATA[i]~j~k)}&
+   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\ATOMICNOTIFY
+     &\stepto^{(\ARD~a.\LLEN~n)~(\K{wake}~a.\LDATA[i]~j~k)}&
      F; (\I32.\CONST~j)
    \end{array}
    \\ \qquad
@@ -939,7 +997,7 @@ See :ref:`above <exec-atomic-store>`.
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\ATOMICWAKE
+   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\ATOMICNOTIFY
      &\stepto^{(\ARD~a.\LLEN~n)}&
      F; \TRAP
    \end{array}
@@ -1253,7 +1311,7 @@ Control Instructions
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
    F; (\I32.\CONST~i)~(\CALLINDIRECT~x)
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LELEM[i]~a')~(\AUSE~a'~f)}&
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LELEM[i]~a')}&
      F; (\INVOKE~a')
    \end{array}
    \\ \qquad
@@ -1265,7 +1323,7 @@ Control Instructions
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
    F; (\I32.\CONST~i)~(\CALLINDIRECT~x)
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LELEM[i]~a')~(\AUSE~a'~f)}&
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LELEM[i]~a')}&
      F; \TRAP
    \end{array}
    \\ \qquad
@@ -1388,7 +1446,7 @@ Invocation of :ref:`function address <syntax-funcaddr>` :math:`a`
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
    \val^n~(\INVOKE~a)
-     &\stepto^{(\AUSE~a~f)}&
+     &\stepto&
      \FRAME_m\{F\}~\BLOCK~[t_2^m]~\instr^\ast~\END~\END
    \end{array}
    \\ \qquad

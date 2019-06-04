@@ -431,10 +431,10 @@ Memory Instructions
 Atomic Memory Instructions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _valid-atomic-wake:
+.. _valid-atomic-notify:
 
-:math:`\ATOMICWAKE~\memarg`
-...........................
+:math:`\ATOMICNOTIFY~\memarg`
+.............................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
@@ -448,7 +448,7 @@ Atomic Memory Instructions
      \qquad
      2^{\memarg.\ALIGN} = 4
    }{
-     C \vdash \ATOMICWAKE~\memarg : [\I32~\I64] \to [\I64]
+     C \vdash \ATOMICNOTIFY~\memarg : [\I32~\I64] \to [\I64]
    }
 
 .. _valid-atomic-wait:

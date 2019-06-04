@@ -97,8 +97,8 @@ Memory Types
 .. math::
    \begin{array}{llclll@{\qquad\qquad}l}
    \production{memory type} & \Bmemtype &::=&
-     \X{lim},0{:}\Blimits &\Rightarrow& \X{lim}~\MUNSHARED \\ &&|&
-     \X{lim},1{:}\Blimits &\Rightarrow& \X{lim}~\MSHARED
+     \X{lim},0{:}\Blimits &\Rightarrow& \X{lim}~\UNSHARED \\ &&|&
+     \X{lim},1{:}\Blimits &\Rightarrow& \X{lim}~\SHARED
        \qquad (\iff lim.\LMAX \ne \epsilon) \\
    \end{array}
 
