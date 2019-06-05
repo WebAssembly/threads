@@ -184,8 +184,8 @@
 .. |ETMEM| mathdef:: \xref{syntax/types}{syntax-externtype}{\K{mem}}
 .. |ETGLOBAL| mathdef:: \xref{syntax/types}{syntax-externtype}{\K{global}}
 
-.. |MSHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{shared}}
-.. |MUNSHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{unshared}}
+.. |SHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{shared}}
+.. |UNSHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{unshared}}
 
 .. Types, non-terminals
 
@@ -372,8 +372,9 @@
 .. |DEMOTE| mathdef:: \xref{syntax/instructions}{syntax-instr-numeric}{\K{demote}}
 .. |REINTERPRET| mathdef:: \xref{syntax/instructions}{syntax-instr-numeric}{\K{reinterpret}}
 
-.. |ATOMICWAKE| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.wake}}
+.. |ATOMIC| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic}}
 .. |ATOMICWAIT| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.wait}}
+.. |ATOMICNOTIFY| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.notify}}
 .. |ATOMICADD| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{add}}
 .. |ATOMICSUB| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{sub}}
 .. |ATOMICAND| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{and}}
@@ -859,40 +860,48 @@
 .. |SMEMS| mathdef:: \xref{exec/runtime}{syntax-store}{\K{mems}}
 .. |SGLOBALS| mathdef:: \xref{exec/runtime}{syntax-store}{\K{globals}}
 
+.. |SSFUNCS| mathdef:: \xref{exec/runtime}{syntax-sharedstore}{\K{funcs}}
+.. |SSTABLES| mathdef:: \xref{exec/runtime}{syntax-sharedstore}{\K{tables}}
+.. |SSMEMS| mathdef:: \xref{exec/runtime}{syntax-sharedstore}{\K{mems}}
+.. |SSGLOBALS| mathdef:: \xref{exec/runtime}{syntax-sharedstore}{\K{globals}}
+
 
 .. Store, non-terminals
 
 .. |store| mathdef:: \xref{exec/runtime}{syntax-store}{\X{store}}
+.. |sharedstore| mathdef:: \xref{exec/runtime}{syntax-sharedstore}{\X{sharedstore}}
 .. |trace| mathdef:: \xref{exec/runtime}{syntax-trace}{\X{trace}}
 
 
 .. Events, terminals
 
+.. |AT| mathdef:: \xref{exec/runtime}{syntax-time}{\K{at}}
+
 .. |ETIME| mathdef:: \xref{exec/runtime}{syntax-evt}{\K{time}}
 .. |EACTS| mathdef:: \xref{exec/runtime}{syntax-evt}{\K{acts}}
 
-.. |AFORK| mathdef:: \xref{exec/runtime}{syntax-act}{\K{fork}}
-.. |ANEW| mathdef:: \xref{exec/runtime}{syntax-act}{\K{new}}
-.. |AUSE| mathdef:: \xref{exec/runtime}{syntax-act}{\K{use}}
 .. |ARD| mathdef:: \xref{exec/runtime}{syntax-act}{\K{rd}}
 .. |AWR| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wr}}
 .. |ARMW| mathdef:: \xref{exec/runtime}{syntax-act}{\K{rmw}}
-.. |AWAKE| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wake}}
 
-.. |UNORD| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{UNORD}}
-.. |SEQCST| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{SEQCST}}
+.. |UNORD| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{unord}}
+.. |SEQCST| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{seqcst}}
 
-.. |LSIZE| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{SIZE}}
-.. |LVAL| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{VAL}}
+.. |LLEN| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{len}}
+.. |LDATA| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{data}}
+.. |LELEM| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{elem}}
+.. |LVAL| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{val}}
 
 
 .. Events, non-terminals
 
+.. |time| mathdef:: \xref{exec/runtime}{syntax-time}{\X{time}}
 .. |evt| mathdef:: \xref{exec/runtime}{syntax-evt}{\X{evt}}
 .. |act| mathdef:: \xref{exec/runtime}{syntax-act}{\X{act}}
 .. |hostact| mathdef:: \xref{exec/runtime}{syntax-act}{\X{hostact}}
 .. |ord| mathdef:: \xref{exec/runtime}{syntax-ord}{\X{ord}}
 .. |loc| mathdef:: \xref{exec/runtime}{syntax-loc}{\X{loc}}
+.. |fld| mathdef:: \xref{exec/runtime}{syntax-fld}{\X{fld}}
 .. |storeval| mathdef:: \xref{exec/runtime}{syntax-storeval}{\X{storeval}}
 
 
@@ -917,6 +926,8 @@
 .. |INVOKE| mathdef:: \xref{exec/runtime}{syntax-invoke}{\K{invoke}}
 .. |INITELEM| mathdef:: \xref{exec/runtime}{syntax-init_elem}{\K{init\_elem}}
 .. |INITDATA| mathdef:: \xref{exec/runtime}{syntax-init_data}{\K{init\_data}}
+.. |WAITX| mathdef:: \xref{exec/runtime}{syntax-waitx}{\K{wait'}}
+.. |NOTIFYX| mathdef:: \xref{exec/runtime}{syntax-notifyx}{\K{notify'}}
 
 
 .. Values & Results, non-terminals
@@ -1052,6 +1063,7 @@
 .. |vdashmoduleinst| mathdef:: \xref{appendix/properties}{valid-moduleinst}{\vdash}
 
 .. |vdashstore| mathdef:: \xref{appendix/properties}{valid-store}{\vdash}
+.. |vdashsharedstore| mathdef:: \xref{appendix/properties}{valid-sharedstore}{\vdash}
 .. |vdashconfig| mathdef:: \xref{appendix/properties}{valid-config}{\vdash}
 .. |vdashthread| mathdef:: \xref{appendix/properties}{valid-thread}{\vdash}
 .. |vdashframe| mathdef:: \xref{appendix/properties}{valid-frame}{\vdash}
@@ -1061,6 +1073,7 @@
 .. |vdashmeminstextends| mathdef:: \xref{appendix/properties}{extend-meminst}{\vdash}
 .. |vdashglobalinstextends| mathdef:: \xref{appendix/properties}{extend-globalinst}{\vdash}
 .. |vdashstoreextends| mathdef:: \xref{appendix/properties}{extend-store}{\vdash}
+.. |vdashsharedstoreextends| mathdef:: \xref{appendix/properties}{extend-sharedstore}{\vdash}
 
 
 .. Custom Sections

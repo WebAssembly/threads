@@ -122,8 +122,8 @@ Memory Types
    \production{memory type} & \memtype &::=&
      \limits~\share \\
    \production{share} & \share &::=&
-     \MSHARED ~|~
-     \MUNSHARED \\
+     \SHARED ~|~
+     \UNSHARED \\
    \end{array}
 
 The limits constrain the minimum and optionally the maximum size of a memory.

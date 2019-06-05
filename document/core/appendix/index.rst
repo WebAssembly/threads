@@ -19,4 +19,3 @@ Appendix
       index-types
       index-instructions
       index-rules
-

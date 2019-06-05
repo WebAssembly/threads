@@ -3,6 +3,8 @@
 Index of Semantic Rules
 -----------------------
 
+.. todo:: add rules for shared store etc.
+
 
 .. index:: validation
 .. _index-valid:

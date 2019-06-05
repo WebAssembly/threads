@@ -382,9 +382,13 @@ Memory Instructions
 
 .. _exec-load:
 .. _exec-loadn:
+.. _exec-atomic-load:
+.. _exec-atomic-loadn:
 
-:math:`t\K{.}\LOAD~\memarg` and :math:`t\K{.}\LOAD{N}\K{\_}\sx~\memarg`
-.......................................................................
+:math:`t\K{.}\ATOMIC^?.\LOAD~\memarg` and :math:`t\K{.}\ATOMIC^?.\LOAD{N}\K{\_}\sx~\memarg`
+...........................................................................................
+
+.. todo:: update text to match formalism
 
 1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
 
@@ -432,9 +436,9 @@ Memory Instructions
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
-     \wedge & \bytes_t(c) = S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice |t|/8])
+     (\iff & \meminst = S.\SMEMS[a] \\
+     \wedge & \X{ea} + |t|/8 \leq |\meminst.\MIDATA| \\
+     \wedge & \bytes_t(c) = \meminst.\MIDATA[\X{ea} \slice |t|/8])
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -443,24 +447,60 @@ Memory Instructions
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
-     \wedge & \bytes_{\iN}(n) = S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice N/8])
+     (\iff & \meminst = S.\SMEMS[a] \\
+     \wedge & \X{ea} + N/8 \leq |\meminst.\MIDATA| \\
+     \wedge & \bytes_{\iN}(n) = \meminst.\MIDATA[\X{ea} \slice N/8])
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
    S; F; (\I32.\CONST~k)~(t.\LOAD({N}\K{\_}\sx)^?~\memarg) &\stepto& S; F; \TRAP
    \end{array}
    \\ \qquad
-     (\otherwise) \\
+     (\otherwise, \iff \meminst.\MISHARE = \UNSHARED)
+   \\[1ex]
+   %
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\ATOMIC^?.\LOAD({N}\K{\_}\sx)^?~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast)}&
+     S; F; (t.\CONST~\extend\F{\_}\sx_{N,|t|}(n))
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \S.\SMEMS[a] ~\mbox{undefined} \\
+     \wedge & \X{ea} + N/8 \leq n \\
+     \wedge & (\ord = \UNORD \vee \X{ea} \mod N/8 = 0) \\
+     \wedge & b^\ast = \bytes_{\iN}(n)) \\
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~k)~(t.\ATOMIC^?.\LOAD({N}\K{\_}\sx)^?~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)}&
+     S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \S.\SMEMS[a] ~\mbox{undefined} \\
+     \wedge & (\X{ea} + N/8 > n \vee \ord = \SEQCST \wedge \X{ea} \mod N/8 \neq 0)) \\
+     \end{array}
+   \\[2ex]
+   \begin{array}[t]{@{}r@{~}l@{}}
+   (\where & \ord = \SEQCST \iff \ATOMIC ~\mbox{is present}, \otherwise \ord = \UNORD \\
+   \wedge & N = |t| \wedge \sx = \K{u} \iff ~\mbox{not present} \\
+   \wedge & a = F.\AMODULE.\MIMEMS[0] \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
+   \end{array}
    \end{array}
 
 
 .. _exec-store:
 .. _exec-storen:
+.. _exec-atomic-store:
+.. _exec-atomic-storen:
 
-:math:`t\K{.}\STORE~\memarg` and :math:`t\K{.}\STORE{N}~\memarg`
-................................................................
+:math:`t\K{.}\ATOMIC^?.\STORE~\memarg` and :math:`t\K{.}\ATOMIC^?.\STORE{N}~\memarg`
+....................................................................................
+
+.. todo:: update text to match formalism
 
 1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
 
@@ -510,9 +550,9 @@ Memory Instructions
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
-     \wedge & S' = S \with \SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice |t|/8] = \bytes_t(c)
+     (\iff & \meminst = S.\SMEMS[a] \\
+     \wedge & \X{ea} + |t|/8 \leq |\meminst.\MIDATA| \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea} \slice |t|/8] = \bytes_t(c)
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -520,16 +560,48 @@ Memory Instructions
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
-     \wedge & S' = S \with \SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice N/8] = \bytes_{\iN}(\wrap_{|t|,N}(c))
+     (\iff & \meminst = S.\SMEMS[a] \\
+     \wedge & \X{ea} + N/8 \leq |\meminst.\MIDATA| \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea} \slice N/8] = \bytes_{\iN}(\wrap_{|t|,N}(c))
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
    S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\STORE{N}^?~\memarg) &\stepto& S; F; \TRAP
    \end{array}
    \\ \qquad
-     (\otherwise) \\
+     (\otherwise)
+   \\[1ex]
+   %
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE{N}~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)~(\AWR_{\ord}~a.\LDATA[\X{ea}]~b^\ast)}&
+     S; F; \epsilon
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
+     \wedge & \X{ea} + N/8 \leq n \\
+     \wedge & (\ord = \UNORD \vee \X{ea} \mod N/8 = 0) \\
+     \wedge & b^\ast = \bytes_{\iN}(\wrap_{|t|,N}(c))
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE{N}^?~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)}&
+     S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
+     \wedge & (\X{ea} + N/8 > n \vee \ord = \SEQCST \wedge \X{ea} \mod N/8 \neq 0)) \\
+     \end{array}
+   \\[2ex]
+   \begin{array}[t]{@{}r@{~}l@{}}
+   (\where & \ord = \SEQCST \iff \ATOMIC ~\mbox{is present}, \otherwise \ord = \UNORD \\
+   \wedge & N = |t| \wedge \sx = \K{u} \iff ~\mbox{not present} \\
+   \wedge & a = F.\AMODULE.\MIMEMS[0] \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
+   \end{array}
    \end{array}
 
 
@@ -537,6 +609,8 @@ Memory Instructions
 
 :math:`\MEMORYSIZE`
 ...................
+
+.. todo:: update text to match formalism
 
 1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
 
@@ -558,7 +632,24 @@ Memory Instructions
    S; F; \MEMORYSIZE &\stepto& S; F; (\I32.\CONST~\X{sz})
    \end{array}
    \\ \qquad
-     (\iff |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| = \X{sz}\cdot64\,\F{Ki}) \\
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \meminst = S.\SMEMS[a]
+     \wedge & |\meminst.\MIDATA| = \X{sz}\cdot64\,\F{Ki}) \\
+     \end{array}
+   \\[1ex]
+   %
+   \begin{array}{lcl@{\qquad}l}
+   S; F; \MEMORYSIZE &\stepto^{(\ARD~a.\LLEN~n)}& S; F; (\I32.\CONST~\X{sz})
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
+     \wedge & n = \X{sz} \cdot 64\,\F{Ki}) \\
+     \end{array}
+   \\[2ex]
+   \begin{array}[t]{@{}r@{~}l@{}}
+   (\where & a = F.\AMODULE.\MIMEMS[0]) \\
+   \end{array}
    \end{array}
 
 
@@ -566,6 +657,8 @@ Memory Instructions
 
 :math:`\MEMORYGROW`
 ...................
+
+.. todo:: update text to match formalism
 
 1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
 
@@ -599,13 +692,44 @@ Memory Instructions
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & F.\AMODULE.\MIMEMS[0] = a \\
-     \wedge & \X{sz} = |S.\SMEMS[a].\MIDATA|/64\,\F{Ki} \\
+     (\iff & \meminst = S.\SMEMS[a] \\
+     \wedge & \X{sz} = |\meminst.\MIDATA|/64\,\F{Ki} \\
      \wedge & S' = S \with \SMEMS[a] = \growmem(S.\SMEMS[a], n)) \\
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
    S; F; (\I32.\CONST~n)~\MEMORYGROW &\stepto& S; F; (\I32.\CONST~{-1})
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \meminst = S.\SMEMS[a]) \\
+     \end{array}
+   \\[1ex]
+   %
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~\MEMORYGROW
+     &\stepto^{(\ARMW~a.\LLEN~n~(n+k))~(\AWR~a.\LDATA[n]~(0)^k)}&
+     S; F; (\I32.\CONST~\X{sz})
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
+     \wedge & n = \X{sz} \cdot 64\,\F{Ki} \\
+     \wedge & k = i \cdot 64\,\F{Ki}) \\
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~n)~\MEMORYGROW
+     &\stepto^{(\ARD~a.\LLEN~n)}&
+     S; F; (\I32.\CONST~{-1})
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & S.\SMEMS[a] ~\mbox{undefined}) \\
+     \end{array}
+   \end{array}
+   \\[2ex]
+   \begin{array}[t]{@{}r@{~}l@{}}
+   (\where & a = F.\AMODULE.\MIMEMS[0]) \\
    \end{array}
    \end{array}
 
@@ -626,159 +750,17 @@ Memory Instructions
 Atomic Memory Instructions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _exec-atomic-load:
-.. _exec-atomic-loadn:
-
 :math:`t\K{.}\ATOMICLOAD~\memarg` and :math:`t\K{.}\ATOMICLOAD{N}\K{\_u}~\memarg`
 .................................................................................
 
-1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+See :ref:`above <exec-atomic-load>`.
 
-2. Assert: due to :ref:`validation <valid-atomic-loadn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
-
-3. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
-
-4. Assert: due to :ref:`validation <valid-atomic-loadn>`, :math:`S.\SMEMS[a]` exists.
-
-5. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
-
-6. Assert: due to :ref:`validation <valid-atomic-loadn>`, a value :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
-
-7. Pop the value :math:`\I32.\CONST~i` from the stack.
-
-8. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
-
-9. If :math:`N` is not part of the instruction, then:
-
-   a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
-
-10. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
-
-    a. Trap.
-
-11. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
-
-    a. Trap.
-
-12. Let :math:`b^\ast` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea}:N/8]`.
-
-13. Let :math:`c` be the constant for which :math:`\bytes_t(c) = b^\ast`.
-
-14. Push the value :math:`t.\CONST~c` to the stack.
-
-.. math::
-   \begin{array}{l}
-   \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\ATOMICLOAD~\memarg) &\stepto& S; F; (t.\CONST~c)
-   \end{array}
-   \\ \qquad
-     \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
-     \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & \bytes_t(c) = S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice |t|/8])
-     \end{array}
-   \\[1ex]
-   \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\ATOMICLOAD{N}\K{\_u}~\memarg) &\stepto& S; F; (t.\CONST~c))
-   \end{array}
-   \\ \qquad
-     \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
-     \wedge & \X{ea} \mod N/8 = 0 \\
-     \wedge & \bytes_{\iN}(c) = S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice N/8])
-     \end{array}
-   \\[1ex]
-   \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~k)~(t.\ATOMICLOAD({N}\K{\_u})^?~\memarg) &\stepto& S; F; \TRAP
-   \end{array}
-   \\ \qquad
-     (\otherwise) \\
-   \end{array}
-
-
-.. _exec-atomic-store:
-.. _exec-atomic-storen:
 
 :math:`t\K{.}\ATOMICSTORE~\memarg` and :math:`t\K{.}\ATOMICSTORE{N}~\memarg`
 ............................................................................
 
-1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+See :ref:`above <exec-atomic-store>`.
 
-2. Assert: due to :ref:`validation <valid-atomic-storen>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
-
-3. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
-
-4. Assert: due to :ref:`validation <valid-atomic-storen>`, :math:`S.\SMEMS[a]` exists.
-
-5. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
-
-6. Assert: due to :ref:`validation <valid-atomic-storen>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
-
-7. Pop the value :math:`t.\CONST~c` from the stack.
-
-8. Assert: due to :ref:`validation <valid-atomic-storen>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
-
-9. Pop the value :math:`\I32.\CONST~i` from the stack.
-
-10. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
-
-11. If :math:`N` is not part of the instruction, then:
-
-    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
-
-12. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
-
-    a. Trap.
-
-13. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
-
-    a. Trap.
-
-14. If :math:`N` is part of the instruction, then:
-
-    a. Let :math:`n` be the result of computing :math:`\wrap_{|t|,N}(c)`.
-
-    b. Let :math:`b^\ast` be the byte sequence :math:`\bytes_{\iN}(n)`.
-
-15. Else:
-
-    a. Let :math:`b^\ast` be the byte sequence :math:`\bytes_t(c)`.
-
-16. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast`.
-
-.. math::
-   ~\\[-1ex]
-   \begin{array}{l}
-   \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\ATOMICSTORE~\memarg) &\stepto& S'; F; \epsilon
-   \end{array}
-   \\ \qquad
-     \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
-     \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & S' = S \with \MIMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice |t|/8] = \bytes_t(c)
-     \end{array}
-   \\[1ex]
-   \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\ATOMICSTORE{N}~\memarg) &\stepto& S'; F; \epsilon
-   \end{array}
-   \\ \qquad
-     \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA| \\
-     \wedge & \X{ea} \mod N/8 = 0 \\
-     \wedge & S' = S \with \SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice N/8] = \bytes_{\iN}(\wrap_{|t|,N}(c))
-     \end{array}
-   \\[1ex]
-   \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMICSTORE{N}^?~\memarg) &\stepto& S; F; \TRAP
-   \end{array}
-   \\ \qquad
-     (\otherwise) \\
-   \end{array}
 
 
 .. _exec-atomic-rmw:
@@ -786,6 +768,8 @@ Atomic Memory Instructions
 
 :math:`t\K{.}\ATOMICRMW{.}\atomicop~\memarg` and :math:`t\K{.}\ATOMICRMW{N}\K{\_u.}\atomicop~\memarg`
 .....................................................................................................
+
+.. todo:: update text to match formalism
 
 1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
 
@@ -842,36 +826,35 @@ Atomic Memory Instructions
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\ATOMICRMW.\atomicop~\memarg) &\stepto& S'; F; (t.\CONST~c_1)
+   F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\ATOMICRMW({N}\K{\_u})^?.\atomicop~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARMW~a.\LDATA[\X{ea}]~b_1^\ast~b^\ast)}&
+     F; (t.\CONST~c_1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
-     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[a].\MIDATA| \\
-     \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
-     \wedge & m = \atomicop_t(c_1, c_2) \\
-     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:|t|/8] = \bytes_t(m)
-     \end{array} \\
-   \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\ATOMICRMW{N}\K{\_u}.\atomicop~\memarg) &\stepto& S'; F; (t.\CONST~c_1)
-   \end{array}
-   \\ \qquad
-     \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
-     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[a].\MIDATA| \\
+     (\iff & \X{ea} + N/8 \leq n \\
      \wedge & \X{ea} \mod N/8 = 0 \\
-     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
-     \wedge & m = \atomicop_t(c_1, c_2) \\
-     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:N/8] = \bytes_{\iN}(\wrap_{|t|,N}(m))
-     \end{array} \\
+     \wedge & b_1^\ast = \bytes_{\iN}(c_1) \\
+     \wedge & b^\ast = \bytes_{\iN}(\wrap_{|t|,N}(\atomicop_t(c_1, c_2)))) \\
+     \end{array}
+   \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMICRMW({N}\K{\_u})^?.\atomicop~\memarg) &\stepto& S; F; \TRAP
+   F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMICRMW({N}\K{\_u})^?.\atomicop~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)}&
+     F; \TRAP
    \end{array}
    \\ \qquad
-     (\mbox{otherwise}) \\
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
+     \end{array}
+   \\[2ex]
+   (\where N = |t| \iff ~\mbox{not present}) \\
+   \\[2ex]
+   \begin{array}[t]{@{}r@{~}l@{}}
+   (\where & N = |t| \iff ~\mbox{not present} \\
+   \wedge & a = F.\AMODULE.\MIMEMS[0] \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
+   \end{array}
    \end{array}
 
 
@@ -880,6 +863,8 @@ Atomic Memory Instructions
 
 :math:`t\K{.}\ATOMICRMW{.}\ATOMICCMPXCHG~\memarg` and :math:`t\K{.}\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg`
 ...............................................................................................................
+
+.. todo:: update text to match formalism
 
 1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
 
@@ -940,60 +925,121 @@ Atomic Memory Instructions
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW.\ATOMICCMPXCHG~\memarg) &\stepto& S'; F; (t.\CONST~c_1)
+   F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATOMICCMPXCHG~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARMW~a.\LDATA[\X{ea}]~b_1^\ast~b^\ast)}&
+     F; (t.\CONST~c_1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
-     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[a].\MIDATA| \\
+     (\iff & \X{ea} + |t|/8 \leq n \\
      \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
-     \wedge & c_1 = c_2 \\
-     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:|t|/8] = \bytes_t(c_3)
-     \end{array} \\
+     \wedge & b_1^\ast = \bytes_{\iN}(c_1) \\
+     \wedge & ((c_1 = c_2 \wedge c = c_1) \vee (c_1 \neq c_2 \wedge c = c_3)) \\ 
+     \wedge & b^\ast = \bytes_{\iN}(\wrap_{|t|,N}(c))) \\
+     \end{array}
+   \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW.\ATOMICCMPXCHG~\memarg) &\stepto& S; F; (t.\CONST~c_1)
+   F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMICRMW({N}\K{\_u})^?.\atomicop~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)}&
+     F; \TRAP
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
-     \wedge & \X{ea} + |t|/8 \leq |S.\SMEMS[a].\MIDATA| \\
+     (\iff & \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
+     \end{array}
+   \\[2ex]
+   \begin{array}[t]{@{}r@{~}l@{}}
+   (\where & N = |t| \iff ~\mbox{not present} \\
+   \wedge & a = F.\AMODULE.\MIMEMS[0] \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
+   \end{array}
+   \end{array}
+
+
+.. _exec-wait:
+
+:math:`t\K{.}\ATOMICWAIT`
+.........................
+
+.. todo:: update to new rules
+.. todo:: add text
+
+.. math::
+   \begin{array}{l}
+   \begin{array}{lcl@{\qquad}l}
+   F; (\I64.\CONST~k)~(t.\CONST~c)~(\I32.\CONST~i)~t.\ATOMICWAIT
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LDATA[i]~b^{|t|})}&
+     F; (\WAITX~a.\LDATA[i])
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \X{ea} + |t|/8 \leq n \\
      \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice |t|/8]) \\
-     \wedge & c_1 \ne c_2 \\
-     \end{array} \\
+     \wedge & b^{|t|} = \bytes_t(c) \\
+     \end{array}
+   \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg) &\stepto& S'; F; (t.\CONST~c_1)
+   F; (\I64.\CONST~k)~(t.\CONST~c)~(\I32.\CONST~i)~t.\ATOMICWAIT
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LDATA[i]~b^{|t|})}&
+     F; (\I32.\CONST~1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
-     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[a].\MIDATA| \\
-     \wedge & \X{ea} \mod N/8 = 0 \\
-     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
-     \wedge & c_1 = c_2 \\
-     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea}:N/8] = \bytes_{\iN}(\wrap_{|t|,N}(c_3))
-     \end{array} \\
+     (\iff & \X{ea} + |t|/8 \leq n \\
+     \wedge & \X{ea} \mod |t|/8 = 0 \\
+     \wedge & b^{|t|} \neq \bytes_t(c) \\
+     \end{array}
+   \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW{N}\K{\_u.}\ATOMICCMPXCHG~\memarg) &\stepto& S; F; (t.\CONST~c_1)
+   F; (\I64.\CONST~k)~(t.\CONST~c)~(\I32.\CONST~i)~t.\ATOMICWAIT
+     &\stepto^{(\ARD~a.\LLEN~n)}&
+     F; \TRAP
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\mbox{if} & \X{ea} = i + \memarg.\OFFSET \\
-     \wedge & F.\AMODULE.\MIMEMS[0] = a \\
-     \wedge & \X{ea} + N/8 \leq |S.\SMEMS[a].\MIDATA| \\
-     \wedge & \X{ea} \mod N/8 = 0 \\
-     \wedge & \bytes_t(c_1) = S.\SMEMS[a].\MIDATA[\X{ea} \slice N/8]) \\
-     \wedge & c_1 \ne c_2 \\
-     \end{array} \\
+     (\iff i + |t|/8 > n \vee i \mod |t|/8 \neq 0) \\
+     \end{array}
+   \\[2ex]
+   \begin{array}[t]{@{}r@{~}l@{}}
+   (\where & a = F.\AMODULE.\MIMEMS[0] \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
+   \end{array}
+   \end{array}
+
+
+.. _exec-notify:
+
+:math:`\ATOMICNOTIFY`
+.....................
+
+.. todo:: update to new rules
+.. todo:: add text; operand order? is the trap case correct (issue #105)?
+
+.. math::
+   \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATOMICCMPXCHG~\memarg) &\stepto& S; F; \TRAP
+   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\ATOMICNOTIFY
+     &\stepto^{(\ARD~a.\LLEN~n)~(\K{wake}~a.\LDATA[i]~j~k)}&
+     F; (\I32.\CONST~j)
    \end{array}
    \\ \qquad
-     (\mbox{otherwise}) \\
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff i \leq n \wedge j \leq k) \\
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\ATOMICNOTIFY
+     &\stepto^{(\ARD~a.\LLEN~n)}&
+     F; \TRAP
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff i > n) \\
+     \end{array}
+   \\[2ex]
+   \begin{array}[t]{@{}r@{~}l@{}}
+   (\where & \X{ea} = i + \memarg.\OFFSET) \\
+   \end{array}
    \end{array}
 
 
@@ -1410,7 +1456,8 @@ Invocation of :ref:`function address <syntax-funcaddr>` :math:`a`
    ~\\[-1ex]
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; \val^n~(\INVOKE~a) &\stepto& S; \FRAME_m\{F\}~\BLOCK~[t_2^m]~\instr^\ast~\END~\END
+   S; \val^n~(\INVOKE~a) &\stepto&
+     S; \FRAME_m\{F\}~\BLOCK~[t_2^m]~\instr^\ast~\END~\END
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -1458,6 +1505,8 @@ When the end of a function is reached without a jump (i.e., |RETURN|) or trap ab
 
 Host Functions
 ..............
+
+.. todo:: this has to change completely
 
 Invoking a :ref:`host function <syntax-hostfunc>` has non-deterministic behavior.
 It may either terminate with a :ref:`trap <trap>` or return regularly.
@@ -1514,6 +1563,8 @@ All these notions are made precise in the :ref:`Appendix <soundness>`.
 
 Expressions
 ~~~~~~~~~~~
+
+.. todo:: update to not use state
 
 An :ref:`expression <syntax-expr>` is *evaluated* relative to a :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>` pointing to its containing :ref:`module instance <syntax-moduleinst>`.
 

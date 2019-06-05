@@ -1,6 +1,8 @@
 .. index:: ! soundness, type system
 .. _soundness:
 
+.. todo:: update to work for new configurations
+
 Soundness
 ---------
 
