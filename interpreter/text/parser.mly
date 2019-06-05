@@ -145,18 +145,19 @@ let inline_type_explicit (c : context) x ft at =
 
 %}
 
-%token NAT INT FLOAT STRING VAR VALUE_TYPE ANYFUNC MUT SHARED LPAR RPAR
+%token NAT INT FLOAT STRING VAR VALUE_TYPE FUNCREF MUT SHARED LPAR RPAR
 %token NOP DROP BLOCK END IF THEN ELSE SELECT LOOP BR BR_IF BR_TABLE
 %token CALL CALL_INDIRECT RETURN
-%token GET_LOCAL SET_LOCAL TEE_LOCAL GET_GLOBAL SET_GLOBAL
+%token LOCAL_GET LOCAL_SET LOCAL_TEE GLOBAL_GET GLOBAL_SET
 %token LOAD STORE OFFSET_EQ_NAT ALIGN_EQ_NAT
+%token ATOMIC_WAIT ATOMIC_NOTIFY
 %token ATOMIC_LOAD ATOMIC_STORE ATOMIC_RMW ATOMIC_RMW_CMPXCHG
 %token CONST UNARY BINARY TEST COMPARE CONVERT
 %token UNREACHABLE MEMORY_SIZE MEMORY_GROW
 %token FUNC START TYPE PARAM RESULT LOCAL GLOBAL
 %token TABLE ELEM MEMORY DATA OFFSET IMPORT EXPORT TABLE
 %token MODULE BIN QUOTE
-%token SCRIPT REGISTER INVOKE GET
+%token SCRIPT REGISTER THREAD JOIN INVOKE GET
 %token ASSERT_MALFORMED ASSERT_INVALID ASSERT_SOFT_INVALID ASSERT_UNLINKABLE
 %token ASSERT_RETURN ASSERT_RETURN_CANONICAL_NAN ASSERT_RETURN_ARITHMETIC_NAN ASSERT_TRAP ASSERT_EXHAUSTION
 %token INPUT OUTPUT
@@ -176,6 +177,8 @@ let inline_type_explicit (c : context) x ft at =
 %token<Ast.instr'> CONVERT
 %token<int option -> Memory.offset -> Ast.instr'> LOAD
 %token<int option -> Memory.offset -> Ast.instr'> STORE
+%token<int option -> Memory.offset -> Ast.instr'> ATOMIC_WAIT
+%token<int option -> Memory.offset -> Ast.instr'> ATOMIC_NOTIFY
 %token<int option -> Memory.offset -> Ast.instr'> ATOMIC_LOAD
 %token<int option -> Memory.offset -> Ast.instr'> ATOMIC_STORE
 %token<int option -> Memory.offset -> Ast.instr'> ATOMIC_RMW
@@ -210,7 +213,7 @@ value_type_list :
   | VALUE_TYPE value_type_list { $1 :: $2 }
 
 elem_type :
-  | ANYFUNC { AnyFuncType }
+  | FUNCREF { FuncRefType }
 
 global_type :
   | VALUE_TYPE { GlobalType ($1, Immutable) }
@@ -316,11 +319,11 @@ plain_instr :
       br_table xs x }
   | RETURN { fun c -> return }
   | CALL var { fun c -> call ($2 c func) }
-  | GET_LOCAL var { fun c -> get_local ($2 c local) }
-  | SET_LOCAL var { fun c -> set_local ($2 c local) }
-  | TEE_LOCAL var { fun c -> tee_local ($2 c local) }
-  | GET_GLOBAL var { fun c -> get_global ($2 c global) }
-  | SET_GLOBAL var { fun c -> set_global ($2 c global) }
+  | LOCAL_GET var { fun c -> local_get ($2 c local) }
+  | LOCAL_SET var { fun c -> local_set ($2 c local) }
+  | LOCAL_TEE var { fun c -> local_tee ($2 c local) }
+  | GLOBAL_GET var { fun c -> global_get ($2 c global) }
+  | GLOBAL_SET var { fun c -> global_set ($2 c global) }
   | LOAD offset_opt align_opt { fun c -> $1 $3 $2 }
   | STORE offset_opt align_opt { fun c -> $1 $3 $2 }
   | MEMORY_SIZE { fun c -> memory_size }
@@ -331,6 +334,8 @@ plain_instr :
   | UNARY { fun c -> $1 }
   | BINARY { fun c -> $1 }
   | CONVERT { fun c -> $1 }
+  | ATOMIC_WAIT offset_opt align_opt { fun c -> $1 $3 $2 }
+  | ATOMIC_NOTIFY offset_opt align_opt { fun c -> $1 $3 $2 }
   | ATOMIC_LOAD offset_opt align_opt { fun c -> $1 $3 $2 }
   | ATOMIC_STORE offset_opt align_opt { fun c -> $1 $3 $2 }
   | ATOMIC_RMW offset_opt align_opt { fun c -> $1 $3 $2 }
@@ -776,8 +781,14 @@ inline_module :  /* Sugar */
 inline_module1 :  /* Sugar */
   | module_fields1 { Textual ($1 (empty_context ()) () @@ at ()) @@ at () }
 
-
 /* Scripts */
+
+thread_var_opt :
+  | /* empty */ { None }
+  | thread_var { Some $1 }
+
+thread_var :
+  | VAR { $1 @@ at () }
 
 script_var_opt :
   | /* empty */ { None }
@@ -795,6 +806,8 @@ action :
     { Invoke ($3, $4, $5) @@ at () }
   | LPAR GET module_var_opt name RPAR
     { Get ($3, $4) @@ at() }
+  | LPAR JOIN thread_var RPAR
+    { Join $3 @@ at () }
 
 assertion :
   | LPAR ASSERT_MALFORMED script_module STRING RPAR
@@ -811,11 +824,16 @@ assertion :
   | LPAR ASSERT_TRAP action STRING RPAR { AssertTrap ($3, $4) @@ at () }
   | LPAR ASSERT_EXHAUSTION action STRING RPAR { AssertExhaustion ($3, $4) @@ at () }
 
+assertion_list :
+  | /* empty */ { [] }
+  | assertion assertion_list { $1 :: $2 }
+
 cmd :
   | action { Action $1 @@ at () }
   | assertion { Assertion $1 @@ at () }
   | script_module { Module (fst $1, snd $1) @@ at () }
   | LPAR REGISTER name module_var_opt RPAR { Register ($3, $4) @@ at () }
+  | LPAR THREAD thread_var_opt action RPAR { Thread ($3, $4) @@ at () }
   | meta { Meta $1 @@ at () }
 
 cmd_list :

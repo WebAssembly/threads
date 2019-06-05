@@ -10,6 +10,7 @@ type action = action' Source.phrase
 and action' =
   | Invoke of var option * Ast.name * Ast.literal list
   | Get of var option * Ast.name
+  | Join of var
 
 type assertion = assertion' Source.phrase
 and assertion' =
@@ -29,6 +30,7 @@ and command' =
   | Register of Ast.name * var option
   | Action of action
   | Assertion of assertion
+  | Thread of var option * action
   | Meta of meta
 
 and meta = meta' Source.phrase

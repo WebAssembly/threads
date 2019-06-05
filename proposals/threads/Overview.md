@@ -9,7 +9,7 @@ deferred to the embedder.
 
 ## Example
 
-Here is an example of a naive mutex implemented in WebAssembly. It uses one 
+Here is an example of a naive mutex implemented in WebAssembly. It uses one
 i32 in linear memory to store the state of the lock. If its value is 0, the
 mutex is unlocked. If its value is 1, the mutex is locked.
 
@@ -28,7 +28,7 @@ mutex is unlocked. If its value is 1, the mutex is locked.
     ;; - If it is 0 (unlocked), set it to 1 (locked).
     ;; - Return the originally loaded value.
     (i32.atomic.rmw.cmpxchg
-      (get_local $mutexAddr) ;; mutex address
+      (local.get $mutexAddr) ;; mutex address
       (i32.const 0)          ;; expected value (0 => unlocked)
       (i32.const 1))         ;; replacement value (1 => locked)
 
@@ -46,12 +46,12 @@ mutex is unlocked. If its value is 1, the mutex is locked.
       (loop $retry
         ;; Try to lock the mutex. $tryLockMutex returns 1 if the mutex
         ;; was locked, and 0 otherwise.
-        (call $tryLockMutex (get_local $mutexAddr))
+        (call $tryLockMutex (local.get $mutexAddr))
         (br_if $done)
 
         ;; Wait for the other agent to finish with mutex.
         (i32.atomic.wait
-          (get_local $mutexAddr) ;; mutex address
+          (local.get $mutexAddr) ;; mutex address
           (i32.const 1)          ;; expected value (1 => locked)
           (i64.const -1))        ;; infinite timeout
 
@@ -76,14 +76,14 @@ mutex is unlocked. If its value is 1, the mutex is locked.
     (param $mutexAddr i32)
     ;; Unlock the mutex.
     (i32.atomic.store
-      (get_local $mutexAddr)     ;; mutex address
+      (local.get $mutexAddr)     ;; mutex address
       (i32.const 0))             ;; 0 => unlocked
 
-    ;; Wake one agent that is waiting on this lock.
+    ;; Notify one agent that is waiting on this lock.
     (drop
-      (atomic.wake
-        (get_local $mutexAddr)   ;; mutex address
-        (i32.const 1)))          ;; wake 1 waiter
+      (atomic.notify
+        (local.get $mutexAddr)   ;; mutex address
+        (i32.const 1)))          ;; notify 1 waiter
   )
 )
 ```
@@ -97,20 +97,20 @@ let memory = new WebAssembly.Memory({initial: 1, maximum: 1, shared: true});
 let worker = new Worker('worker.js');
 const mutexAddr = 0;
 
-// Send the shared memory to the worker. 
+// Send the shared memory to the worker.
 worker.postMessage(memory);
 
 let imports = {env: {memory: memory}};
 let module = WebAssembly.instantiate(moduleBytes, imports).then(
     ({instance}) => {
-        // Blocking on the main thread is not allowed, so we can't 
+        // Blocking on the main thread is not allowed, so we can't
         // call lockMutex.
         if (instance.exports.tryLockMutex(mutexAddr)) {
             ...
             instance.exports.unlockMutex(mutexAddr);
         }
     });
-    
+
 
 /// worker.js ///
 let moduleBytes = ...;  // An ArrayBuffer containing the WebAssembly module above.
@@ -132,7 +132,7 @@ onmessage = function(e) {
 
 ## Agents and Agent Clusters
 
-An *agent* is the execution context for a WebAssembly module. For the web 
+An *agent* is the execution context for a WebAssembly module. For the web
 embedding, it is an [ECMAScript agent][]. It is further extended to include a
 [WebAssembly stack][] and [evaluation context][].
 
@@ -171,7 +171,7 @@ agent's cluster will have access to the additional linear memory.
 When a module has an imported linear memory, its data segments are copied into
 the linear memory when the module is instantiated.
 
-When linear memory is shared, it is possible for another module (or in the web 
+When linear memory is shared, it is possible for another module (or in the web
 embedding, for JavaScript code) to read from the linear memory as it is being
 initialized.
 
@@ -184,7 +184,7 @@ non-shared linear memory:
 * As non-atomics
 * An entire module's data section initialization then synchronizes with other
   operations (effectively, followed by a barrier)
-  
+
 The intention is to allow the implementor to "memcpy" the initializer data into
 place.
 
@@ -196,17 +196,18 @@ only initialized once is to place all data segments in a separate module that
 is only instantiated once, then share the linear memory with other modules.
 For example:
 
-```
+```wasm
 ;; Data module
 (module $data_module
   (memory (export "memory") 1)
   (data (i32.const 0) "..."))
-  
+
 ;; Main module
 (module $main_module
   (import "env" "memory" (memory 1))
   ...)
-
+```
+```js
 WebAssembly.instantiate(dataModuleBytes, {}).then(
     ({instance}) => {
         let imports = {env: {memory: instance.exports.memory}};
@@ -266,47 +267,47 @@ operation.
 
 | Name | Read (as `read`) | Modify | Write | Return `read` |
 | ---- | ---- | ---- | ---- | ---- |
-| `i32.atomic.rmw8_u.add` | 1 byte | 8-bit sign-agnostic addition | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.add` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.add_u` | 1 byte | 8-bit sign-agnostic addition | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.add_u` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.add` | 4 bytes | 32-bit sign-agnostic addition | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.add` | 1 byte | 8-bit sign-agnostic addition | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.add` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.add` | 4 bytes | 32-bit sign-agnostic addition | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.add_u` | 1 byte | 8-bit sign-agnostic addition | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.add_u` | 2 bytes | 16-bit sign-agnostic addition | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.add_u` | 4 bytes | 32-bit sign-agnostic addition | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.add` | 8 bytes | 64-bit sign-agnostic addition | 8 bytes | as i64 |
-| `i32.atomic.rmw8_u.sub` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.sub` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.sub_u` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.sub_u` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.sub` | 4 bytes | 32-bit sign-agnostic subtraction | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.sub` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.sub` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.sub` | 4 bytes | 32-bit sign-agnostic subtraction | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.sub_u` | 1 byte | 8-bit sign-agnostic subtraction | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.sub_u` | 2 bytes | 16-bit sign-agnostic subtraction | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.sub_u` | 4 bytes | 32-bit sign-agnostic subtraction | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.sub` | 8 bytes | 64-bit sign-agnostic subtraction | 8 bytes | as i64 |
-| `i32.atomic.rmw8_u.and` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.and` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.and_u` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.and_u` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.and` | 4 bytes | 32-bit sign-agnostic bitwise and | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.and` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.and` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.and` | 4 bytes | 32-bit sign-agnostic bitwise and | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.and_u` | 1 byte | 8-bit sign-agnostic bitwise and | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.and_u` | 2 bytes | 16-bit sign-agnostic bitwise and | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.and_u` | 4 bytes | 32-bit sign-agnostic bitwise and | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.and` | 8 bytes | 64-bit sign-agnostic bitwise and | 8 bytes | as i64 |
-| `i32.atomic.rmw8_u.or` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.or` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.or_u` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.or_u` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.or` | 4 bytes | 32-bit sign-agnostic bitwise inclusive or | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.or` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.or` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.or` | 4 bytes | 32-bit sign-agnostic bitwise inclusive or | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.or_u` | 1 byte | 8-bit sign-agnostic bitwise inclusive or | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.or_u` | 2 bytes | 16-bit sign-agnostic bitwise inclusive or | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.or_u` | 4 bytes | 32-bit sign-agnostic bitwise inclusive or | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.or` | 8 bytes | 64-bit sign-agnostic bitwise inclusive or | 8 bytes | as i64 |
-| `i32.atomic.rmw8_u.xor` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.xor` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.xor_u` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.xor_u` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.xor` | 4 bytes | 32-bit sign-agnostic bitwise exclusive or | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.xor` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.xor` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.xor` | 4 bytes | 32-bit sign-agnostic bitwise exclusive or | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.xor_u` | 1 byte | 8-bit sign-agnostic bitwise exclusive or | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.xor_u` | 2 bytes | 16-bit sign-agnostic bitwise exclusive or | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.xor_u` | 4 bytes | 32-bit sign-agnostic bitwise exclusive or | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.xor` | 8 bytes | 64-bit sign-agnostic bitwise exclusive or | 8 bytes | as i64 |
-| `i32.atomic.rmw8_u.xchg` | 1 byte | nop | 1 byte | zero-extended i8 to i32 |
-| `i32.atomic.rmw16_u.xchg` | 2 bytes | nop | 2 bytes | zero-extended i16 to i32 |
+| `i32.atomic.rmw8.xchg_u` | 1 byte | nop | 1 byte | zero-extended i8 to i32 |
+| `i32.atomic.rmw16.xchg_u` | 2 bytes | nop | 2 bytes | zero-extended i16 to i32 |
 | `i32.atomic.rmw.xchg` | 4 bytes | nop | 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.xchg` | 1 byte | nop | 1 byte | zero-extended i8 to i64 |
-| `i64.atomic.rmw16_u.xchg` | 2 bytes | nop | 2 bytes | zero-extended i16 to i64 |
-| `i64.atomic.rmw32_u.xchg` | 4 bytes | nop | 4 bytes | zero-extended i32 to i64 |
+| `i64.atomic.rmw8.xchg_u` | 1 byte | nop | 1 byte | zero-extended i8 to i64 |
+| `i64.atomic.rmw16.xchg_u` | 2 bytes | nop | 2 bytes | zero-extended i16 to i64 |
+| `i64.atomic.rmw32.xchg_u` | 4 bytes | nop | 4 bytes | zero-extended i32 to i64 |
 | `i64.atomic.rmw.xchg` | 8 bytes | nop | 8 bytes | as i64 |
 
 
@@ -320,12 +321,12 @@ address. If the values are not equal, no value is stored. In either case, the
 
 | Name | Load (as `loaded`) | Compare `expected` with `loaded` | Conditionally Store `replacement` | Return `loaded` |
 | ---- | ---- | ---- | ---- | ---- |
-| `i32.atomic.rmw8_u.cmpxchg` | 1 byte | `expected` wrapped from i32 to i8, 8-bit compare equal | wrapped from i32 to i8, store 1 byte | zero-extended from i8 to i32 |
-| `i32.atomic.rmw16_u.cmpxchg` | 2 bytes | `expected` wrapped from i32 to i16, 16-bit compare equal | wrapped from i32 to i16, store 2 bytes | zero-extended from i8 to i32 |
+| `i32.atomic.rmw8.cmpxchg_u` | 1 byte | `expected` wrapped from i32 to i8, 8-bit compare equal | wrapped from i32 to i8, store 1 byte | zero-extended from i8 to i32 |
+| `i32.atomic.rmw16.cmpxchg_u` | 2 bytes | `expected` wrapped from i32 to i16, 16-bit compare equal | wrapped from i32 to i16, store 2 bytes | zero-extended from i8 to i32 |
 | `i32.atomic.rmw.cmpxchg` | 4 bytes | 32-bit compare equal | store 4 bytes | as i32 |
-| `i64.atomic.rmw8_u.cmpxchg` | 1 byte | `expected` wrapped from i64 to i8, 8-bit compare equal | wrapped from i64 to i8, store 1 byte | zero-extended from i8 to i64 |
-| `i64.atomic.rmw16_u.cmpxchg` | 2 bytes | `expected` wrapped from i64 to i16, 16-bit compare equal | wrapped from i64 to i16, store 2 bytes | zero-extended from i16 to i64 |
-| `i64.atomic.rmw32_u.cmpxchg` | 4 bytes | `expected` wrapped from i64 to i32, 32-bit compare equal | wrapped from i64 to i32, store 4 bytes | zero-extended from i32 to i64 |
+| `i64.atomic.rmw8.cmpxchg_u` | 1 byte | `expected` wrapped from i64 to i8, 8-bit compare equal | wrapped from i64 to i8, store 1 byte | zero-extended from i8 to i64 |
+| `i64.atomic.rmw16.cmpxchg_u` | 2 bytes | `expected` wrapped from i64 to i16, 16-bit compare equal | wrapped from i64 to i16, store 2 bytes | zero-extended from i16 to i64 |
+| `i64.atomic.rmw32.cmpxchg_u` | 4 bytes | `expected` wrapped from i64 to i32, 32-bit compare equal | wrapped from i64 to i32, store 4 bytes | zero-extended from i32 to i64 |
 | `i64.atomic.rmw.cmpxchg` | 8 bytes | 64-bit compare equal | 8 bytes | as i64 |
 
 ### Alignment
@@ -336,24 +337,24 @@ accesses on shared linear memory, misaligned accesses do not trap.
 It is a validation error if the alignment field of the memory access immediate
 has any other value than the natural alignment for that access size.
 
-## Wait and Wake operators
+## Wait and Notify operators
 
-The wake and wait operators are optimizations over busy-waiting for a value to
-change. It is a validation error to use these operators on non-shared linear
+The notify and wait operators are optimizations over busy-waiting for a value
+to change. It is a validation error to use these operators on non-shared linear
 memory. The operators have sequentially consistent ordering.
 
-Both wake and wait operators trap if the effective address of either operator
+Both notify and wait operators trap if the effective address of either operator
 is misaligned or out-of-bounds. The wait operators require an alignment of
-their memory access size. The wake operator requires an alignment of 32 bits.
+their memory access size. The notify operator requires an alignment of 32 bits.
 
 For the web embedding, the agent can also be suspended or woken via the
-[`Atomics.wait`][] and [`Atomics.wake`][] functions respectively. An agent will
-not be suspended for other reasons, unless all agents in that cluster are
+[`Atomics.wait`][] and [`Atomics.notify`][] functions respectively. An agent
+will not be suspended for other reasons, unless all agents in that cluster are
 also suspended.
 
 An agent suspended via `Atomics.wait` can be woken by the WebAssembly
-`atomic.wake` operator. Similarly, an agent suspended by `i32.atomic.wait` or
-`i64.atomic.wait` can be woken by [`Atomics.wake`][].
+`atomic.notify` operator. Similarly, an agent suspended by `i32.atomic.wait` or
+`i64.atomic.wait` can be woken by [`Atomics.notify`][].
 
 ### Wait
 
@@ -376,25 +377,28 @@ The wait operation begins by performing an atomic load from the given address.
 If the loaded value is not equal to the expected value, the operator returns 1
 ("not-equal"). If the values are equal, the agent is suspended. If the agent
 is woken, the wait operator returns 0 ("ok"). If the timeout expires before
-another agent wakes this one, this operator returns 2 ("timed-out"). Note that
+another agent notifies this one, this operator returns 2 ("timed-out"). Note that
 when the agent is suspended, it will not be [spuriously woken](https://en.wikipedia.org/wiki/Spurious_wakeup).
-The agent is only woken by `atomic.wake` (or [`Atomics.wake`][] in the web
+The agent is only woken by `atomic.notify` (or [`Atomics.notify`][] in the web
 embedding).
 
-  * `i32.atomic.wait`: load i32 value, compare to expected (as `i32`), and wait for wake at same address
-  * `i64.atomic.wait`: load i64 value, compare to expected (as `i64`), and wait for wake at same address
-  
+When an agent is suspended, if the number of waiters (including this one) is
+equal to 2<sup>32</sup>, then trap.
+
+  * `i32.atomic.wait`: load i32 value, compare to expected (as `i32`), and wait for notify at same address
+  * `i64.atomic.wait`: load i64 value, compare to expected (as `i64`), and wait for notify at same address
+
 For the web embedding, `i32.atomic.wait` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
 1. Let `int32array` be [`Int32Array`][](`buffer`).
-1. Let `result` be [`Atomics.wait`][](`int32array`, `address`, `expected`, `timeout`),
+1. Let `result` be [`Atomics.wait`][](`int32array`, `address`, `expected`, `timeout` / 1e6),
    where `address`, `expected`, and `timeout` are the operands to the `wait` operator
    as described above.
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
-   
+
 `i64.atomic.wait` has no equivalent in ECMAScript as it is currently specified, as there is
 no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of a
 64-bit integer. That said, the behavior can be approximated as follows:
@@ -402,9 +406,9 @@ no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
 1. Let `int64array` be `Int64Array`[](`buffer`), where `Int64Array` is a
-   typed-array constructor that allows 64-bit integer views with an element size 
+   typed-array constructor that allows 64-bit integer views with an element size
    of `8`.
-1. Let `result` be [`Atomics.wait`][](`int64array`, `address`, `expected`, `timeout`),
+1. Let `result` be [`Atomics.wait`][](`int64array`, `address`, `expected`, `timeout` / 1e6),
    where `address`, `expected`, and `timeout` are the operands to the `wait` operator
    as described above. The [`Atomics.wait`][] operation is modified:
    1. `ValidateSharedIntegerTypedArray` will fail if the typed-array type is not an
@@ -415,29 +419,22 @@ no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of 
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
 
-### Wake
+### Notify
 
-The wake operator takes two operands: an address operand and a wake count as an
-`i32`. The operation will wake as many waiters as are waiting on the same
-effective address, up to the maximum as specified by `wake count`. The operator
-returns the number of waiters that were woken as an `i32`.
+The notify operator takes two operands: an address operand and a count as an
+unsigned `i32`. The operation will notify as many waiters as are waiting on the
+same effective address, up to the maximum as specified by `count`. The operator
+returns the number of waiters that were woken as an unsigned `i32`.
 
-`wake count` value | Behavior |
-| ---- | ---- |
-| `wake count` < 0 | Wake all waiters |
-| `wake count` == 0 | Wake no waiters |
-| `wake count` > 0 | Wake min(`wake count`, `num waiters`) waiters |
+  * `atomic.notify`: notify `count` threads waiting on the given address via `i32.atomic.wait` or `i64.atomic.wait`
 
-  * `atomic.wake`: wake up `wake count` threads waiting on the given address via `i32.atomic.wait` or `i64.atomic.wait`
-  
-For the web embedding, `atomic.wake` is equivalent in behavior to executing the following:
+For the web embedding, `atomic.notify` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
 1. Let `int32array` be [`Int32Array`][](`buffer`).
 1. Let `fcount` be `count` if `count` is >= 0, otherwise `∞`.
-1. Let `result` be [`Atomics.wake`][](`int32array`, `address`, `fcount`).
-1. Trap if `result` is >= 2**32.
+1. Let `result` be [`Atomics.notify`][](`int32array`, `address`, `fcount`).
 1. Return `result` converted to an `i32`.
 
 ## [JavaScript API][] changes
@@ -513,7 +510,7 @@ Return `ret` as a Number value.
 This is an accessor property whose [[Set]] is Undefined and whose [[Get]]
 accessor function performs the following steps:
 
-1. If `this` is not a `WebAssembly.Memory`, throw a [`TypeError`][] 
+1. If `this` is not a `WebAssembly.Memory`, throw a [`TypeError`][]
    exception.
 1. Otherwise:
    1. If `m` is not shared, then return `M.[[BufferObject]]`.
@@ -531,8 +528,8 @@ accessor function performs the following steps:
          1. If `status` is `false`, throw a [`TypeError`][] exception.
          1. Set `M.[[BufferObject]]` to `buffer`.
          1. Return `buffer`.
-      
-Note: Freezing the buffer prevents storing properties on the buffer object, 
+
+Note: Freezing the buffer prevents storing properties on the buffer object,
 which will be lost when the cached buffer is invalidated. The buffer will
 be invalidated whenever its size changes, and this can happen at any time
 on another thread that has access to the shared buffer.
@@ -568,16 +565,16 @@ atomicop ::= add | sub | and | or | xor | xchg | cmpxchg
 
 instr ::= ... |
           inn.atomic.wait memarg |
-          atomic.wake memarg |
+          atomic.notify memarg |
 
           inn.atomic.load memarg | inn.atomic.store memarg |
           inn.atomic.load8_u memarg | inn.atomic.load16_u memarg | i64.atomic.load32_u memarg |
           inn.atomic.store8 memarg | inn.atomic.store16 memarg | i64.atomic.store32 memarg |
 
           inn.atomic.rmw.atomicop memarg |
-          inn.atomic.rmw8_u.atomicop memarg |
-          inn.atomic.rmw16_u.atomicop memarg |
-          i64.atomic.rmw32_u.atomicop memarg |
+          inn.atomic.rmw8.atomicop_u memarg |
+          inn.atomic.rmw16.atomicop_u memarg |
+          i64.atomic.rmw32.atomicop_u memarg |
 ```
 
 The [instruction binary format][] is modified as follows:
@@ -589,7 +586,7 @@ memarg32 ::= 0x02 o: offset     =>  {align 2, offset: o}
 memarg64 ::= 0x03 o: offset     =>  {align 3, offset: o}
 
 instr ::= ...
-        | 0xFE 0x00 m:memarg32  =>  atomic.wake m
+        | 0xFE 0x00 m:memarg32  =>  atomic.notify m
         | 0xFE 0x01 m:memarg32  =>  i32.atomic.wait m
         | 0xFE 0x02 m:memarg64  =>  i64.atomic.wait m
 
@@ -610,59 +607,59 @@ instr ::= ...
 
         | 0xFE 0x1E m:memarg32  =>  i32.atomic.rmw.add m
         | 0xFE 0x1F m:memarg64  =>  i64.atomic.rmw.add m
-        | 0xFE 0x20 m:memarg8   =>  i32.atomic.rmw8_u.add m
-        | 0xFE 0x21 m:memarg16  =>  i32.atomic.rmw16_u.add m
-        | 0xFE 0x22 m:memarg8   =>  i64.atomic.rmw8_u.add m
-        | 0xFE 0x23 m:memarg16  =>  i64.atomic.rmw16_u.add m
-        | 0xFE 0x24 m:memarg32  =>  i64.atomic.rmw32_u.add m
+        | 0xFE 0x20 m:memarg8   =>  i32.atomic.rmw8.add_u m
+        | 0xFE 0x21 m:memarg16  =>  i32.atomic.rmw16.add_u m
+        | 0xFE 0x22 m:memarg8   =>  i64.atomic.rmw8.add_u m
+        | 0xFE 0x23 m:memarg16  =>  i64.atomic.rmw16.add_u m
+        | 0xFE 0x24 m:memarg32  =>  i64.atomic.rmw32.add_u m
 
         | 0xFE 0x25 m:memarg32  =>  i32.atomic.rmw.sub m
         | 0xFE 0x26 m:memarg64  =>  i64.atomic.rmw.sub m
-        | 0xFE 0x27 m:memarg8   =>  i32.atomic.rmw8_u.sub m
-        | 0xFE 0x28 m:memarg16  =>  i32.atomic.rmw16_u.sub m
-        | 0xFE 0x29 m:memarg8   =>  i64.atomic.rmw8_u.sub m
-        | 0xFE 0x2A m:memarg16  =>  i64.atomic.rmw16_u.sub m
-        | 0xFE 0x2B m:memarg32  =>  i64.atomic.rmw32_u.sub m
+        | 0xFE 0x27 m:memarg8   =>  i32.atomic.rmw8.sub_u m
+        | 0xFE 0x28 m:memarg16  =>  i32.atomic.rmw16.sub_u m
+        | 0xFE 0x29 m:memarg8   =>  i64.atomic.rmw8.sub_u m
+        | 0xFE 0x2A m:memarg16  =>  i64.atomic.rmw16.sub_u m
+        | 0xFE 0x2B m:memarg32  =>  i64.atomic.rmw32.sub_u m
 
         | 0xFE 0x2C m:memarg32  =>  i32.atomic.rmw.and m
         | 0xFE 0x2D m:memarg64  =>  i64.atomic.rmw.and m
-        | 0xFE 0x2E m:memarg8   =>  i32.atomic.rmw8_u.and m
-        | 0xFE 0x2F m:memarg16  =>  i32.atomic.rmw16_u.and m
-        | 0xFE 0x30 m:memarg8   =>  i64.atomic.rmw8_u.and m
-        | 0xFE 0x31 m:memarg16  =>  i64.atomic.rmw16_u.and m
-        | 0xFE 0x32 m:memarg32  =>  i64.atomic.rmw32_u.and m
+        | 0xFE 0x2E m:memarg8   =>  i32.atomic.rmw8.and_u m
+        | 0xFE 0x2F m:memarg16  =>  i32.atomic.rmw16.and_u m
+        | 0xFE 0x30 m:memarg8   =>  i64.atomic.rmw8.and_u m
+        | 0xFE 0x31 m:memarg16  =>  i64.atomic.rmw16.and_u m
+        | 0xFE 0x32 m:memarg32  =>  i64.atomic.rmw32.and_u m
 
         | 0xFE 0x33 m:memarg32  =>  i32.atomic.rmw.or m
         | 0xFE 0x34 m:memarg64  =>  i64.atomic.rmw.or m
-        | 0xFE 0x35 m:memarg8   =>  i32.atomic.rmw8_u.or m
-        | 0xFE 0x36 m:memarg16  =>  i32.atomic.rmw16_u.or m
-        | 0xFE 0x37 m:memarg8   =>  i64.atomic.rmw8_u.or m
-        | 0xFE 0x38 m:memarg16  =>  i64.atomic.rmw16_u.or m
-        | 0xFE 0x39 m:memarg32  =>  i64.atomic.rmw32_u.or m
+        | 0xFE 0x35 m:memarg8   =>  i32.atomic.rmw8.or_u m
+        | 0xFE 0x36 m:memarg16  =>  i32.atomic.rmw16.or_u m
+        | 0xFE 0x37 m:memarg8   =>  i64.atomic.rmw8.or_u m
+        | 0xFE 0x38 m:memarg16  =>  i64.atomic.rmw16.or_u m
+        | 0xFE 0x39 m:memarg32  =>  i64.atomic.rmw32.or_u m
 
         | 0xFE 0x3A m:memarg32  =>  i32.atomic.rmw.xor m
         | 0xFE 0x3B m:memarg64  =>  i64.atomic.rmw.xor m
-        | 0xFE 0x3C m:memarg8   =>  i32.atomic.rmw8_u.xor m
-        | 0xFE 0x3D m:memarg16  =>  i32.atomic.rmw16_u.xor m
-        | 0xFE 0x3E m:memarg8   =>  i64.atomic.rmw8_u.xor m
-        | 0xFE 0x3F m:memarg16  =>  i64.atomic.rmw16_u.xor m
-        | 0xFE 0x40 m:memarg32  =>  i64.atomic.rmw32_u.xor m
+        | 0xFE 0x3C m:memarg8   =>  i32.atomic.rmw8.xor_u m
+        | 0xFE 0x3D m:memarg16  =>  i32.atomic.rmw16.xor_u m
+        | 0xFE 0x3E m:memarg8   =>  i64.atomic.rmw8.xor_u m
+        | 0xFE 0x3F m:memarg16  =>  i64.atomic.rmw16.xor_u m
+        | 0xFE 0x40 m:memarg32  =>  i64.atomic.rmw32.xor_u m
 
         | 0xFE 0x41 m:memarg32  =>  i32.atomic.rmw.xchg m
         | 0xFE 0x42 m:memarg64  =>  i64.atomic.rmw.xchg m
-        | 0xFE 0x43 m:memarg8   =>  i32.atomic.rmw8_u.xchg m
-        | 0xFE 0x44 m:memarg16  =>  i32.atomic.rmw16_u.xchg m
-        | 0xFE 0x45 m:memarg8   =>  i64.atomic.rmw8_u.xchg m
-        | 0xFE 0x46 m:memarg16  =>  i64.atomic.rmw16_u.xchg m
-        | 0xFE 0x47 m:memarg32  =>  i64.atomic.rmw32_u.xchg m
+        | 0xFE 0x43 m:memarg8   =>  i32.atomic.rmw8.xchg_u m
+        | 0xFE 0x44 m:memarg16  =>  i32.atomic.rmw16.xchg_u m
+        | 0xFE 0x45 m:memarg8   =>  i64.atomic.rmw8.xchg_u m
+        | 0xFE 0x46 m:memarg16  =>  i64.atomic.rmw16.xchg_u m
+        | 0xFE 0x47 m:memarg32  =>  i64.atomic.rmw32.xchg_u m
 
         | 0xFE 0x48 m:memarg32  =>  i32.atomic.rmw.cmpxchg m
         | 0xFE 0x49 m:memarg64  =>  i64.atomic.rmw.cmpxchg m
-        | 0xFE 0x4A m:memarg8   =>  i32.atomic.rmw8_u.cmpxchg m
-        | 0xFE 0x4B m:memarg16  =>  i32.atomic.rmw16_u.cmpxchg m
-        | 0xFE 0x4C m:memarg8   =>  i64.atomic.rmw8_u.cmpxchg m
-        | 0xFE 0x4D m:memarg16  =>  i64.atomic.rmw16_u.cmpxchg m
-        | 0xFE 0x4E m:memarg32  =>  i64.atomic.rmw32_u.cmpxchg m
+        | 0xFE 0x4A m:memarg8   =>  i32.atomic.rmw8.cmpxchg_u m
+        | 0xFE 0x4B m:memarg16  =>  i32.atomic.rmw16.cmpxchg_u m
+        | 0xFE 0x4C m:memarg8   =>  i64.atomic.rmw8.cmpxchg_u m
+        | 0xFE 0x4D m:memarg16  =>  i64.atomic.rmw16.cmpxchg_u m
+        | 0xFE 0x4E m:memarg32  =>  i64.atomic.rmw32.cmpxchg_u m
 ```
 
 [ECMAScript agent]: https://tc39.github.io/ecma262/#sec-agents
@@ -700,5 +697,5 @@ instr ::= ...
 [`IsSharedArrayBuffer`]: https://tc39.github.io/ecma262/#sec-issharedarraybuffer
 [`SetIntegrityLevel`]: https://tc39.github.io/ecma262/#sec-setintegritylevel
 [`Atomics.wait`]: https://tc39.github.io/ecma262/#sec-atomics.wait
-[`Atomics.wake`]: https://tc39.github.io/ecma262/#sec-atomics.wake
+[`Atomics.notify`]: https://tc39.github.io/ecma262/#sec-atomics.notify
 [`Int32Array`]: https://tc39.github.io/ecma262/#sec-typedarray-objects

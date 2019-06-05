@@ -222,7 +222,7 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
 
 * The :ref:`limits <syntax-limits>` :math:`\{\LMIN~n, \LMAX~m^?\}` must be :ref:`valid <valid-limits>`.
 
-* Then the table instance is valid with :ref:`table type <syntax-tabletype>` :math:`\{\LMIN~n, \LMAX~m^?\}~\ANYFUNC`.
+* Then the table instance is valid with :ref:`table type <syntax-tabletype>` :math:`\{\LMIN~n, \LMAX~m^?\}~\FUNCREF`.
 
 .. math::
    \frac{
@@ -230,7 +230,7 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
      \qquad
      \vdashlimits \{\LMIN~n, \LMAX~m^?\} \ok
    }{
-     S \vdashtableinst \{ \TIELEM~(\X{fa}^?)^n, \TIMAX~m^? \} : \{\LMIN~n, \LMAX~m^?\}~\ANYFUNC
+     S \vdashtableinst \{ \TIELEM~(\X{fa}^?)^n, \TIMAX~m^? \} : \{\LMIN~n, \LMAX~m^?\}~\FUNCREF
    }
 
 
@@ -492,7 +492,7 @@ To that end, all previous typing judgements :math:`C \vdash \X{prop}` are genera
 :math:`\INITELEM~\tableaddr~o~x^n`
 ..................................
 
-* The :ref:`external table value <syntax-externval>` :math:`\EVTABLE~\tableaddr` must be :ref:`valid <valid-externval-table>` with some :ref:`external table type <syntax-externtype>` :math:`\ETTABLE~\limits~\ANYFUNC`.
+* The :ref:`external table value <syntax-externval>` :math:`\EVTABLE~\tableaddr` must be :ref:`valid <valid-externval-table>` with some :ref:`external table type <syntax-externtype>` :math:`\ETTABLE~\limits~\FUNCREF`.
 
 * The index :math:`o + n` must be smaller than or equal to :math:`\limits.\LMIN`.
 
@@ -504,7 +504,7 @@ To that end, all previous typing judgements :math:`C \vdash \X{prop}` are genera
 
 .. math::
    \frac{
-     S \vdashexternval \EVTABLE~\tableaddr : \ETTABLE~\limits~\ANYFUNC
+     S \vdashexternval \EVTABLE~\tableaddr : \ETTABLE~\limits~\FUNCREF
      \qquad
      o + n \leq \limits.\LMIN
      \qquad

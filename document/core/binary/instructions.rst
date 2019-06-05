@@ -93,20 +93,20 @@ Variable Instructions
 
 :ref:`Variable instructions <syntax-instr-variable>` are represented by byte codes followed by the encoding of the respective :ref:`index <syntax-index>`.
 
-.. _binary-get_local:
-.. _binary-set_local:
-.. _binary-tee_local:
-.. _binary-get_global:
-.. _binary-set_global:
+.. _binary-local.get:
+.. _binary-local.set:
+.. _binary-local.tee:
+.. _binary-global.get:
+.. _binary-global.set:
 
 .. math::
    \begin{array}{llclll}
    \production{instruction} & \Binstr &::=& \dots \\ &&|&
-     \hex{20}~~x{:}\Blocalidx &\Rightarrow& \GETLOCAL~x \\ &&|&
-     \hex{21}~~x{:}\Blocalidx &\Rightarrow& \SETLOCAL~x \\ &&|&
-     \hex{22}~~x{:}\Blocalidx &\Rightarrow& \TEELOCAL~x \\ &&|&
-     \hex{23}~~x{:}\Bglobalidx &\Rightarrow& \GETGLOBAL~x \\ &&|&
-     \hex{24}~~x{:}\Bglobalidx &\Rightarrow& \SETGLOBAL~x \\
+     \hex{20}~~x{:}\Blocalidx &\Rightarrow& \LOCALGET~x \\ &&|&
+     \hex{21}~~x{:}\Blocalidx &\Rightarrow& \LOCALSET~x \\ &&|&
+     \hex{22}~~x{:}\Blocalidx &\Rightarrow& \LOCALTEE~x \\ &&|&
+     \hex{23}~~x{:}\Bglobalidx &\Rightarrow& \GLOBALGET~x \\ &&|&
+     \hex{24}~~x{:}\Bglobalidx &\Rightarrow& \GLOBALSET~x \\
    \end{array}
 
 
@@ -215,11 +215,11 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
    \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \hex{FE}~\hex{1E}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICADD~m \\ &&|&
      \hex{FE}~\hex{1F}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICADD~m \\ &&|&
-     \hex{FE}~\hex{20}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICADD~m \\ &&|&
-     \hex{FE}~\hex{21}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICADD~m \\ &&|&
-     \hex{FE}~\hex{22}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICADD~m \\ &&|&
-     \hex{FE}~\hex{23}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICADD~m \\ &&|&
-     \hex{FE}~\hex{24}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICADD~m \\
+     \hex{FE}~\hex{20}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICADD\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{21}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICADD\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{22}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICADD\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{23}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICADD\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{24}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICADD\K{\_u}~m \\
    \end{array}
 
 
@@ -228,11 +228,11 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
    \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \hex{FE}~\hex{25}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICSUB~m \\ &&|&
      \hex{FE}~\hex{26}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICSUB~m \\ &&|&
-     \hex{FE}~\hex{27}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICSUB~m \\ &&|&
-     \hex{FE}~\hex{28}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICSUB~m \\ &&|&
-     \hex{FE}~\hex{29}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICSUB~m \\ &&|&
-     \hex{FE}~\hex{2A}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICSUB~m \\ &&|&
-     \hex{FE}~\hex{2B}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICSUB~m \\
+     \hex{FE}~\hex{27}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICSUB\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{28}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICSUB\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{29}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICSUB\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{2A}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICSUB\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{2B}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICSUB\K{\_u}~m \\
    \end{array}
 
 
@@ -241,11 +241,11 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
    \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \hex{FE}~\hex{2C}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICAND~m \\ &&|&
      \hex{FE}~\hex{2D}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICAND~m \\ &&|&
-     \hex{FE}~\hex{2E}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICAND~m \\ &&|&
-     \hex{FE}~\hex{2F}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICAND~m \\ &&|&
-     \hex{FE}~\hex{30}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICAND~m \\ &&|&
-     \hex{FE}~\hex{31}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICAND~m \\ &&|&
-     \hex{FE}~\hex{32}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICAND~m \\
+     \hex{FE}~\hex{2E}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICAND\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{2F}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICAND\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{30}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICAND\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{31}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICAND\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{32}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICAND\K{\_u}~m \\
    \end{array}
 
 
@@ -254,11 +254,11 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
    \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \hex{FE}~\hex{33}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICOR~m \\ &&|&
      \hex{FE}~\hex{34}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICOR~m \\ &&|&
-     \hex{FE}~\hex{35}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICOR~m \\ &&|&
-     \hex{FE}~\hex{36}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICOR~m \\ &&|&
-     \hex{FE}~\hex{37}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICOR~m \\ &&|&
-     \hex{FE}~\hex{38}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICOR~m \\ &&|&
-     \hex{FE}~\hex{39}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICOR~m \\
+     \hex{FE}~\hex{35}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICOR\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{36}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICOR\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{37}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICOR\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{38}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICOR\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{39}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICOR\K{\_u}~m \\
    \end{array}
 
 
@@ -267,11 +267,11 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
    \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \hex{FE}~\hex{3A}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICXOR~m \\ &&|&
      \hex{FE}~\hex{3B}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICXOR~m \\ &&|&
-     \hex{FE}~\hex{3C}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICXOR~m \\ &&|&
-     \hex{FE}~\hex{3D}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICXOR~m \\ &&|&
-     \hex{FE}~\hex{3E}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICXOR~m \\ &&|&
-     \hex{FE}~\hex{3F}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICXOR~m \\ &&|&
-     \hex{FE}~\hex{40}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICXOR~m \\
+     \hex{FE}~\hex{3C}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICXOR\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{3D}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICXOR\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{3E}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICXOR\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{3F}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICXOR\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{40}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICXOR\K{\_u}~m \\
    \end{array}
 
 
@@ -280,11 +280,11 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
    \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \hex{FE}~\hex{41}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICXCHG~m \\ &&|&
      \hex{FE}~\hex{42}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICXCHG~m \\ &&|&
-     \hex{FE}~\hex{43}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICXCHG~m \\ &&|&
-     \hex{FE}~\hex{44}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICXCHG~m \\ &&|&
-     \hex{FE}~\hex{45}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICXCHG~m \\ &&|&
-     \hex{FE}~\hex{46}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICXCHG~m \\ &&|&
-     \hex{FE}~\hex{47}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICXCHG~m \\
+     \hex{FE}~\hex{43}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICXCHG\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{44}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICXCHG\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{45}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICXCHG\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{46}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICXCHG\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{47}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICXCHG\K{\_u}~m \\
    \end{array}
 
 
@@ -293,11 +293,11 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
    \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
      \hex{FE}~\hex{48}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW.\ATOMICCMPXCHG~m \\ &&|&
      \hex{FE}~\hex{49}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW.\ATOMICCMPXCHG~m \\ &&|&
-     \hex{FE}~\hex{4A}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8\_u}.\ATOMICCMPXCHG~m \\ &&|&
-     \hex{FE}~\hex{4B}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16\_u}.\ATOMICCMPXCHG~m \\ &&|&
-     \hex{FE}~\hex{4C}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8\_u}.\ATOMICCMPXCHG~m \\ &&|&
-     \hex{FE}~\hex{4D}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16\_u}.\ATOMICCMPXCHG~m \\ &&|&
-     \hex{FE}~\hex{4E}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32\_u}.\ATOMICCMPXCHG~m \\
+     \hex{FE}~\hex{4A}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{4B}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{4C}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{4D}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
+     \hex{FE}~\hex{4E}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICCMPXCHG\K{\_u}~m \\
    \end{array}
 
 
@@ -474,31 +474,31 @@ All other numeric instructions are plain opcodes without any immediates.
 .. math::
    \begin{array}{llclll}
    \phantom{\production{instruction}} & \phantom{\Binstr} &\phantom{::=}& \phantom{\dots} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
-     \hex{A7} &\Rightarrow& \I32.\WRAP\K{/}\I64 \\ &&|&
-     \hex{A8} &\Rightarrow& \I32.\TRUNC\K{\_s/}\F32 \\ &&|&
-     \hex{A9} &\Rightarrow& \I32.\TRUNC\K{\_u/}\F32 \\ &&|&
-     \hex{AA} &\Rightarrow& \I32.\TRUNC\K{\_s/}\F64 \\ &&|&
-     \hex{AB} &\Rightarrow& \I32.\TRUNC\K{\_u/}\F64 \\ &&|&
-     \hex{AC} &\Rightarrow& \I64.\EXTEND\K{\_s/}\I32 \\ &&|&
-     \hex{AD} &\Rightarrow& \I64.\EXTEND\K{\_u/}\I32 \\ &&|&
-     \hex{AE} &\Rightarrow& \I64.\TRUNC\K{\_s/}\F32 \\ &&|&
-     \hex{AF} &\Rightarrow& \I64.\TRUNC\K{\_u/}\F32 \\ &&|&
-     \hex{B0} &\Rightarrow& \I64.\TRUNC\K{\_s/}\F64 \\ &&|&
-     \hex{B1} &\Rightarrow& \I64.\TRUNC\K{\_u/}\F64 \\ &&|&
-     \hex{B2} &\Rightarrow& \F32.\CONVERT\K{\_s/}\I32 \\ &&|&
-     \hex{B3} &\Rightarrow& \F32.\CONVERT\K{\_u/}\I32 \\ &&|&
-     \hex{B4} &\Rightarrow& \F32.\CONVERT\K{\_s/}\I64 \\ &&|&
-     \hex{B5} &\Rightarrow& \F32.\CONVERT\K{\_u/}\I64 \\ &&|&
-     \hex{B6} &\Rightarrow& \F32.\DEMOTE\K{/}\F64 \\ &&|&
-     \hex{B7} &\Rightarrow& \F64.\CONVERT\K{\_s/}\I32 \\ &&|&
-     \hex{B8} &\Rightarrow& \F64.\CONVERT\K{\_u/}\I32 \\ &&|&
-     \hex{B9} &\Rightarrow& \F64.\CONVERT\K{\_s/}\I64 \\ &&|&
-     \hex{BA} &\Rightarrow& \F64.\CONVERT\K{\_u/}\I64 \\ &&|&
-     \hex{BB} &\Rightarrow& \F64.\PROMOTE\K{/}\F32 \\ &&|&
-     \hex{BC} &\Rightarrow& \I32.\REINTERPRET\K{/}\F32 \\ &&|&
-     \hex{BD} &\Rightarrow& \I64.\REINTERPRET\K{/}\F64 \\ &&|&
-     \hex{BE} &\Rightarrow& \F32.\REINTERPRET\K{/}\I32 \\ &&|&
-     \hex{BF} &\Rightarrow& \F64.\REINTERPRET\K{/}\I64 \\
+     \hex{A7} &\Rightarrow& \I32.\WRAP\K{\_}\I64 \\ &&|&
+     \hex{A8} &\Rightarrow& \I32.\TRUNC\K{\_}\F32\K{\_s} \\ &&|&
+     \hex{A9} &\Rightarrow& \I32.\TRUNC\K{\_}\F32\K{\_u} \\ &&|&
+     \hex{AA} &\Rightarrow& \I32.\TRUNC\K{\_}\F64\K{\_s} \\ &&|&
+     \hex{AB} &\Rightarrow& \I32.\TRUNC\K{\_}\F64\K{\_u} \\ &&|&
+     \hex{AC} &\Rightarrow& \I64.\EXTEND\K{\_}\I32\K{\_s} \\ &&|&
+     \hex{AD} &\Rightarrow& \I64.\EXTEND\K{\_}\I32\K{\_u} \\ &&|&
+     \hex{AE} &\Rightarrow& \I64.\TRUNC\K{\_}\F32\K{\_s} \\ &&|&
+     \hex{AF} &\Rightarrow& \I64.\TRUNC\K{\_}\F32\K{\_u} \\ &&|&
+     \hex{B0} &\Rightarrow& \I64.\TRUNC\K{\_}\F64\K{\_s} \\ &&|&
+     \hex{B1} &\Rightarrow& \I64.\TRUNC\K{\_}\F64\K{\_u} \\ &&|&
+     \hex{B2} &\Rightarrow& \F32.\CONVERT\K{\_}\I32\K{\_s} \\ &&|&
+     \hex{B3} &\Rightarrow& \F32.\CONVERT\K{\_}\I32\K{\_u} \\ &&|&
+     \hex{B4} &\Rightarrow& \F32.\CONVERT\K{\_}\I64\K{\_s} \\ &&|&
+     \hex{B5} &\Rightarrow& \F32.\CONVERT\K{\_}\I64\K{\_u} \\ &&|&
+     \hex{B6} &\Rightarrow& \F32.\DEMOTE\K{\_}\F64 \\ &&|&
+     \hex{B7} &\Rightarrow& \F64.\CONVERT\K{\_}\I32\K{\_s} \\ &&|&
+     \hex{B8} &\Rightarrow& \F64.\CONVERT\K{\_}\I32\K{\_u} \\ &&|&
+     \hex{B9} &\Rightarrow& \F64.\CONVERT\K{\_}\I64\K{\_s} \\ &&|&
+     \hex{BA} &\Rightarrow& \F64.\CONVERT\K{\_}\I64\K{\_u} \\ &&|&
+     \hex{BB} &\Rightarrow& \F64.\PROMOTE\K{\_}\F32 \\ &&|&
+     \hex{BC} &\Rightarrow& \I32.\REINTERPRET\K{\_}\F32 \\ &&|&
+     \hex{BD} &\Rightarrow& \I64.\REINTERPRET\K{\_}\F64 \\ &&|&
+     \hex{BE} &\Rightarrow& \F32.\REINTERPRET\K{\_}\I32 \\ &&|&
+     \hex{BF} &\Rightarrow& \F64.\REINTERPRET\K{\_}\I64 \\
    \end{array}
 
 

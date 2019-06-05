@@ -96,7 +96,7 @@ let encode m =
       | F64Type -> vs7 (-0x04)
 
     let elem_type = function
-      | AnyFuncType -> vs7 (-0x10)
+      | FuncRefType -> vs7 (-0x10)
 
     let stack_type = function
       | [] -> vs7 (-0x40)
@@ -160,11 +160,11 @@ let encode m =
       | Drop -> op 0x1a
       | Select -> op 0x1b
 
-      | GetLocal x -> op 0x20; var x
-      | SetLocal x -> op 0x21; var x
-      | TeeLocal x -> op 0x22; var x
-      | GetGlobal x -> op 0x23; var x
-      | SetGlobal x -> op 0x24; var x
+      | LocalGet x -> op 0x20; var x
+      | LocalSet x -> op 0x21; var x
+      | LocalTee x -> op 0x22; var x
+      | GlobalGet x -> op 0x23; var x
+      | GlobalSet x -> op 0x24; var x
 
       | Load ({ty = I32Type; sz = None; _} as mo) -> op 0x28; memop mo
       | Load ({ty = I64Type; sz = None; _} as mo) -> op 0x29; memop mo
@@ -206,6 +206,18 @@ let encode m =
       | Store ({ty = I64Type; sz = Some Pack16; _} as mo) -> op 0x3d; memop mo
       | Store ({ty = I64Type; sz = Some Pack32; _} as mo) -> op 0x3e; memop mo
       | Store {ty = F32Type | F64Type; sz = Some _; _} -> assert false
+
+      | AtomicNotify ({ty = I32Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x00; memop mo
+      | AtomicNotify {ty = I32Type; sz = Some _; _} -> assert false
+      | AtomicNotify {ty = I64Type | F32Type | F64Type; _} -> assert false
+
+      | AtomicWait ({ty = I32Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x01; memop mo
+      | AtomicWait ({ty = I64Type; sz = None; _} as mo) ->
+        op 0xfe; op 0x02; memop mo
+      | AtomicWait {ty = I32Type | I64Type; sz = Some _; _} -> assert false
+      | AtomicWait {ty = F32Type | F64Type; _} -> assert false
 
       | AtomicLoad ({ty = I32Type; sz = None; _} as mo) ->
         op 0xfe; op 0x10; memop mo

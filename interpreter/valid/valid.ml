@@ -233,20 +233,20 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
 
 
 
-  | GetLocal x ->
+  | LocalGet x ->
     [] --> [local c x]
 
-  | SetLocal x ->
+  | LocalSet x ->
     [local c x] --> []
 
-  | TeeLocal x ->
+  | LocalTee x ->
     [local c x] --> [local c x]
 
-  | GetGlobal x ->
+  | GlobalGet x ->
     let GlobalType (t, mut) = global c x in
     [] --> [t]
 
-  | SetGlobal x ->
+  | GlobalSet x ->
     let GlobalType (t, mut) = global c x in
     require (mut = Mutable) x.at "global is immutable";
     [t] --> []
@@ -291,6 +291,14 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     let t1, t2 = type_cvtop e.at cvtop in
     [t1] --> [t2]
 
+  | AtomicNotify memop ->
+    check_memop c memop (Some Shared) (fun sz -> sz) e.at;
+    [I32Type; I32Type] --> [I32Type]
+
+  | AtomicWait memop ->
+    check_memop c memop (Some Shared) (fun sz -> sz) e.at;
+    [I32Type; memop.ty; I64Type] --> [I32Type]
+
   | AtomicLoad memop ->
     check_memop c memop (Some Shared) (fun sz -> sz) e.at;
     [I32Type] --> [memop.ty]
@@ -328,10 +336,12 @@ and check_block (c : context) (es : instr list) (ts : stack_type) at =
 
 (* Types *)
 
-let check_limits {min; max} at =
+let check_limits {min; max} range at msg =
+  require (I64.le_u (Int64.of_int32 min) range) at msg;
   match max with
   | None -> ()
   | Some max ->
+    require (I64.le_u (Int64.of_int32 max) range) at msg;
     require (I32.le_u min max) at
       "size minimum must not be greater than maximum"
 
@@ -346,19 +356,14 @@ let check_func_type (ft : func_type) at =
 
 let check_table_type (tt : table_type) at =
   let TableType (lim, _) = tt in
-  check_limits lim at
-
-let check_memory_size (sz : I32.t) at =
-  require (I32.le_u sz 65536l) at
-    "memory size must be at most 65536 pages (4GiB)"
+  check_limits lim 0x1_0000_0000L at "table size must be at most 2^32"
 
 let check_memory_type (mt : memory_type) at =
   let MemoryType (lim, shared) = mt in
-  check_limits lim at;
-  check_memory_size lim.min at;
+  check_limits lim 0x1_0000L at
+    "memory size must be at most 65536 pages (4GiB)";
   require (shared = Unshared || lim.max <> None) at
-    "shared memory must have maximum";
-  Lib.Option.app (fun max -> check_memory_size max at) lim.max
+    "shared memory must have maximum"
 
 let check_global_type (gt : global_type) at =
   let GlobalType (t, mut) = gt in
@@ -392,7 +397,7 @@ let check_func (c : context) (f : func) =
 let is_const (c : context) (e : instr) =
   match e.it with
   | Const _ -> true
-  | GetGlobal x -> let GlobalType (_, mut) = global c x in mut = Immutable
+  | GlobalGet x -> let GlobalType (_, mut) = global c x in mut = Immutable
   | _ -> false
 
 let check_const (c : context) (const : const) (t : value_type) =

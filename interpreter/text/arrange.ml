@@ -120,14 +120,14 @@ struct
     | Rotr -> "rotr"
 
   let cvtop xx = function
-    | ExtendSI32 -> "extend_s/i32"
-    | ExtendUI32 -> "extend_u/i32"
-    | WrapI64 -> "wrap/i64"
-    | TruncSF32 -> "trunc_s/f32"
-    | TruncUF32 -> "trunc_u/f32"
-    | TruncSF64 -> "trunc_s/f64"
-    | TruncUF64 -> "trunc_u/f64"
-    | ReinterpretFloat -> "reinterpret/f" ^ xx
+    | ExtendSI32 -> "extend_i32_s"
+    | ExtendUI32 -> "extend_i32_u"
+    | WrapI64 -> "wrap_i64"
+    | TruncSF32 -> "trunc_f32_s"
+    | TruncUF32 -> "trunc_f32_u"
+    | TruncSF64 -> "trunc_f64_s"
+    | TruncUF64 -> "trunc_f64_u"
+    | ReinterpretFloat -> "reinterpret_f" ^ xx
 end
 
 module FloatOp =
@@ -163,13 +163,13 @@ struct
     | CopySign -> "copysign"
 
   let cvtop xx = function
-    | ConvertSI32 -> "convert_s/i32"
-    | ConvertUI32 -> "convert_u/i32"
-    | ConvertSI64 -> "convert_s/i64"
-    | ConvertUI64 -> "convert_u/i64"
-    | PromoteF32 -> "promote/f32"
-    | DemoteF64 -> "demote/f64"
-    | ReinterpretInt -> "reinterpret/i" ^ xx
+    | ConvertSI32 -> "convert_i32_s"
+    | ConvertUI32 -> "convert_i32_u"
+    | ConvertSI64 -> "convert_i64_s"
+    | ConvertUI64 -> "convert_i64_u"
+    | PromoteF32 -> "promote_f32"
+    | DemoteF64 -> "demote_f64"
+    | ReinterpretInt -> "reinterpret_i" ^ xx
 end
 
 let oper (intop, floatop) op =
@@ -205,10 +205,14 @@ let rmw = function
   | I32 I32Op.RmwXchg | I64 I64Op.RmwXchg -> "xchg"
   | _ -> assert false
 
-let memop name {ty; align; offset; _} =
-  value_type ty ^ "." ^ name ^
+let memop_without_type name {ty; align; offset; _} =
+  name ^
   (if offset = 0l then "" else " offset=" ^ nat32 offset) ^
   (if 1 lsl align = size ty then "" else " align=" ^ nat (1 lsl align))
+
+let memop name ma =
+  let {ty; _} = ma in
+  value_type ty ^ "." ^ memop_without_type name ma
 
 let loadop op =
   match op.sz with
@@ -219,6 +223,10 @@ let storeop op =
   match op.sz with
   | None -> memop "store" op
   | Some sz -> memop ("store" ^ pack_size sz) op
+
+let atomicwaitop op = memop "atomic.wait" op
+
+let atomicnotifyop op = memop_without_type "atomic.notify" op
 
 let atomicloadop op =
   match op.sz with
@@ -266,11 +274,11 @@ let rec instr e =
     | Return -> "return", []
     | Call x -> "call " ^ var x, []
     | CallIndirect x -> "call_indirect", [Node ("type " ^ var x, [])]
-    | GetLocal x -> "get_local " ^ var x, []
-    | SetLocal x -> "set_local " ^ var x, []
-    | TeeLocal x -> "tee_local " ^ var x, []
-    | GetGlobal x -> "get_global " ^ var x, []
-    | SetGlobal x -> "set_global " ^ var x, []
+    | LocalGet x -> "local.get " ^ var x, []
+    | LocalSet x -> "local.set " ^ var x, []
+    | LocalTee x -> "local.tee " ^ var x, []
+    | GlobalGet x -> "global.get " ^ var x, []
+    | GlobalSet x -> "global.set " ^ var x, []
     | Load op -> loadop op, []
     | Store op -> storeop op, []
     | MemorySize -> "memory.size", []
@@ -281,6 +289,8 @@ let rec instr e =
     | Unary op -> unop op, []
     | Binary op -> binop op, []
     | Convert op -> cvtop op, []
+    | AtomicWait op -> atomicwaitop op, []
+    | AtomicNotify op -> atomicnotifyop op, []
     | AtomicLoad op -> atomicloadop op, []
     | AtomicStore op -> atomicstoreop op, []
     | AtomicRmw (rmwop, op) -> atomicrmwop op rmwop, []
@@ -457,6 +467,8 @@ let action act =
     Node ("invoke" ^ access x_opt name, List.map literal lits)
   | Get (x_opt, name) ->
     Node ("get" ^ access x_opt name, [])
+  | Join x ->
+    Node ("join " ^ x.it, [])
 
 let assertion mode ass =
   match ass.it with
@@ -486,6 +498,7 @@ let command mode cmd =
     Node ("register " ^ name n ^ var_opt x_opt, [])
   | Action act -> action act
   | Assertion ass -> assertion mode ass
+  | Thread (x_opt, act) -> Node ("thread " ^ var_opt x_opt, [action act])
   | Meta _ -> assert false
 
 let script mode scr = List.map (command mode) scr

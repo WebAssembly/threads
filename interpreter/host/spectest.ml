@@ -16,7 +16,7 @@ let global (GlobalType (t, _) as gt) =
     | F64Type -> F64 (F64.of_float 666.6)
   in Global.alloc gt v
 
-let table = Table.alloc (TableType ({min = 10l; max = Some 20l}, AnyFuncType))
+let table = Table.alloc (TableType ({min = 10l; max = Some 20l}, FuncRefType))
 let memory = Memory.alloc (MemoryType ({min = 1l; max = Some 2l}, Unshared))
 let shared_memory =
   Memory.alloc (MemoryType ({min = 1l; max = Some 2l}, Shared))
