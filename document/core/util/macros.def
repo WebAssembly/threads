@@ -886,6 +886,7 @@
 
 .. |UNORD| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{unord}}
 .. |SEQCST| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{seqcst}}
+.. |INIT| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{init}}
 
 .. |LLEN| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{len}}
 .. |LDATA| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{data}}
@@ -1043,6 +1044,21 @@
 
 .. |vdashlimitsmatch| mathdef:: \xref{exec/modules}{match-limits}{\vdash}
 .. |vdashexterntypematch| mathdef:: \xref{exec/modules}{match-externtype}{\vdash}
+
+
+.. Relaxed Memory Model Judgements
+
+.. |valid| mathdef:: \mathrel{\mbox{valid}}
+.. |validwith| mathdef:: \mathrel{\mbox{valid-with}}
+.. |readseachfrom| mathdef:: \mathrel{\mbox{reads-each-from}}
+.. |readsfrom| mathdef:: \mathrel{\mbox{reads-from}}
+.. |notear| mathdef:: \mathrel{\mbox{no-tear}}
+.. |sclastvisible| mathdef:: \mathrel{\mbox{sc-last-visible}}
+.. |hbconsistent| mathdef:: \mathrel{\mbox{hb-consistent}}
+.. |valueconsistent| mathdef:: \mathrel{\mbox{value-consistent}}
+
+.. |hbprec| mathdef:: \mathrel{\prec_{\K{hb}}}
+.. |totprec| mathdef:: \mathrel{\prec_{\K{tot}}}
 
 
 .. Soundness
