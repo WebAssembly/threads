@@ -439,9 +439,9 @@ For the web embedding, `atomic.notify` is equivalent in behavior to executing th
 
 ## Fence operator
 
-The fence operator, `atomic.fence`, takes no operands, and returns nothing. It is intended to preserve the semantics of the [fence operators of higher-level languages](https://en.cppreference.com/w/cpp/atomic/atomic_thread_fence).
+The fence operator, `atomic.fence`, takes no operands, and returns nothing. It is intended to preserve the synchronization guarantees of the [fence operators of higher-level languages](https://en.cppreference.com/w/cpp/atomic/atomic_thread_fence).
 
-Unlike other atomic operators, `atomic.fence` does not target a particular linear memory, and it is therefore *not* a validation error for this operator to be used in a module that does not declare a shared memory.
+Unlike other atomic operators, `atomic.fence` does not target a particular linear memory. It may occur in modules which declare no memory, or a non-shared memory, without causing a validation error.
 
 ## [JavaScript API][] changes
 
