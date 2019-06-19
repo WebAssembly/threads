@@ -598,7 +598,7 @@ instr ::= ...
         | 0xFE 0x01 m:memarg32  =>  i32.atomic.wait m
         | 0xFE 0x02 m:memarg64  =>  i64.atomic.wait m
 
-        | 0xFE 0x0F 0x00        =>  atomic.fence
+        | 0xFE 0x03 0x00        =>  atomic.fence
 
         | 0xFE 0x10 m:memarg32  =>  i32.atomic.load m
         | 0xFE 0x11 m:memarg64  =>  i64.atomic.load m
