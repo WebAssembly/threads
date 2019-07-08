@@ -437,6 +437,12 @@ For the web embedding, `atomic.notify` is equivalent in behavior to executing th
 1. Let `result` be [`Atomics.notify`][](`int32array`, `address`, `fcount`).
 1. Return `result` converted to an `i32`.
 
+## Fence operator
+
+The fence operator, `atomic.fence`, takes no operands, and returns nothing. It is intended to preserve the synchronization guarantees of the [fence operators of higher-level languages](https://en.cppreference.com/w/cpp/atomic/atomic_thread_fence).
+
+Unlike other atomic operators, `atomic.fence` does not target a particular linear memory. It may occur in modules which declare no memory, or a non-shared memory, without causing a validation error.
+
 ## [JavaScript API][] changes
 
 ### `WebAssembly.Memory` Constructor
@@ -567,6 +573,8 @@ instr ::= ... |
           inn.atomic.wait memarg |
           atomic.notify memarg |
 
+          atomic.fence |
+
           inn.atomic.load memarg | inn.atomic.store memarg |
           inn.atomic.load8_u memarg | inn.atomic.load16_u memarg | i64.atomic.load32_u memarg |
           inn.atomic.store8 memarg | inn.atomic.store16 memarg | i64.atomic.store32 memarg |
@@ -589,6 +597,8 @@ instr ::= ...
         | 0xFE 0x00 m:memarg32  =>  atomic.notify m
         | 0xFE 0x01 m:memarg32  =>  i32.atomic.wait m
         | 0xFE 0x02 m:memarg64  =>  i64.atomic.wait m
+
+        | 0xFE 0x03 0x00        =>  atomic.fence
 
         | 0xFE 0x10 m:memarg32  =>  i32.atomic.load m
         | 0xFE 0x11 m:memarg64  =>  i64.atomic.load m
