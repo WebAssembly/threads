@@ -277,6 +277,7 @@ let rec step (c : config) : config =
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
 
       | AtomicWait {offset; ty; sz; _}, I64 timeout :: ve :: I32 i :: vs' ->
+        (* TODO: Trap if memory is not shared *)
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_i32_u i in
         (try

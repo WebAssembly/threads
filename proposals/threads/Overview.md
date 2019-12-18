@@ -228,9 +228,8 @@ This has been separated into
 ## Atomic Memory Accesses
 
 Atomic memory accesses are separated into three categories, load/store,
-read-modify-write, and compare-exchange. All atomic memory accesses require a
-shared linear memory. Attempting to use atomic access operators on non-shared
-linear memory is a validation error.
+read-modify-write, and compare-exchange. All atomic memory accesses can be
+performed on both shared and unshared linear memories.
 
 Currently all atomic memory access instructions are [sequentially consistent][].
 Instructions with other memory orderings may be provided in the future.
@@ -340,12 +339,12 @@ has any other value than the natural alignment for that access size.
 ## Wait and Notify operators
 
 The notify and wait operators are optimizations over busy-waiting for a value
-to change. It is a validation error to use these operators on non-shared linear
-memory. The operators have sequentially consistent ordering.
+to change. The operators have sequentially consistent ordering.
 
 Both notify and wait operators trap if the effective address of either operator
-is misaligned or out-of-bounds. The wait operators require an alignment of
-their memory access size. The notify operator requires an alignment of 32 bits.
+is misaligned or out-of-bounds. Wait operators additionally trap if used on an
+unshared linear memory. The wait operators require an alignment of their memory
+access size. The notify operator requires an alignment of 32 bits.
 
 For the web embedding, the agent can also be suspended or woken via the
 [`Atomics.wait`][] and [`Atomics.notify`][] functions respectively. An agent
@@ -373,14 +372,15 @@ and a relative timeout in nanoseconds as an `i64`. The return value is `0`,
 | `1` | "not-equal", the loaded value did not match the expected value |
 | `2` | "timed-out", not woken before timeout expired |
 
-The wait operation begins by performing an atomic load from the given address.
-If the loaded value is not equal to the expected value, the operator returns 1
-("not-equal"). If the values are equal, the agent is suspended. If the agent
-is woken, the wait operator returns 0 ("ok"). If the timeout expires before
-another agent notifies this one, this operator returns 2 ("timed-out"). Note that
-when the agent is suspended, it will not be [spuriously woken](https://en.wikipedia.org/wiki/Spurious_wakeup).
-The agent is only woken by `atomic.notify` (or [`Atomics.notify`][] in the web
-embedding).
+If the linear memory is unshared, the wait operation traps. Otherwise, the wait
+operation begins by performing an atomic load from the given address.  If the
+loaded value is not equal to the expected value, the operator returns 1
+("not-equal"). If the values are equal, the agent is suspended. If the agent is
+woken, the wait operator returns 0 ("ok"). If the timeout expires before another
+agent notifies this one, this operator returns 2 ("timed-out"). Note that when
+the agent is suspended, it will not be [spuriously
+woken](https://en.wikipedia.org/wiki/Spurious_wakeup).  The agent is only woken
+by `atomic.notify` (or [`Atomics.notify`][] in the web embedding).
 
 When an agent is suspended, if the number of waiters (including this one) is
 equal to 2<sup>32</sup>, then trap.
@@ -424,7 +424,9 @@ no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of 
 The notify operator takes two operands: an address operand and a count as an
 unsigned `i32`. The operation will notify as many waiters as are waiting on the
 same effective address, up to the maximum as specified by `count`. The operator
-returns the number of waiters that were woken as an unsigned `i32`.
+returns the number of waiters that were woken as an unsigned `i32`. Note that if
+the notify operator is used with an unshared linear memory, the number of
+waiters will always be zero.
 
   * `atomic.notify`: notify `count` threads waiting on the given address via `i32.atomic.wait` or `i64.atomic.wait`
 
@@ -441,7 +443,7 @@ For the web embedding, `atomic.notify` is equivalent in behavior to executing th
 
 The fence operator, `atomic.fence`, takes no operands, and returns nothing. It is intended to preserve the synchronization guarantees of the [fence operators of higher-level languages](https://en.cppreference.com/w/cpp/atomic/atomic_thread_fence).
 
-Unlike other atomic operators, `atomic.fence` does not target a particular linear memory. It may occur in modules which declare no memory, or a non-shared memory, without causing a validation error.
+Unlike other atomic operators, `atomic.fence` does not target a particular linear memory. It may occur in modules which declare no memory without causing a validation error.
 
 ## [JavaScript API][] changes
 
