@@ -156,7 +156,7 @@ let rec step (c : config) : config =
         vs', [Plain (Br (Lib.List32.nth xs i)) @@ e.at]
 
       | Return, vs ->
-        vs, [Returning vs @@ e.at]
+        [], [Returning vs @@ e.at]
 
       | Call x, vs ->
         vs, [Invoke (func frame.inst x) @@ e.at]
@@ -416,8 +416,8 @@ let rec eval (c : config) : value stack =
 let invoke (func : func_inst) (vs : value list) : value list =
   let at = match func with Func.AstFunc (_,_, f) -> f.at | _ -> no_region in
   let FuncType (ins, out) = Func.type_of func in
-  if List.length vs <> List.length ins then
-    Crash.error at "wrong number of arguments";
+  if List.map Values.type_of vs <> ins then
+    Crash.error at "wrong number or types of arguments";
   let c = config empty_module_inst (List.rev vs) [Invoke func @@ at] in
   try List.rev (eval c) with Stack_overflow ->
     Exhaustion.error at "call stack exhausted"

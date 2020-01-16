@@ -11,42 +11,42 @@ Instruction                                                  Binary Opcode      
 :math:`\NOP`                                                 :math:`\hex{01}`           :math:`[] \to []`                           :ref:`validation <valid-nop>`                  :ref:`execution <exec-nop>`
 :math:`\BLOCK~[t^?]`                                         :math:`\hex{02}`           :math:`[] \to [t^\ast]`                     :ref:`validation <valid-block>`                :ref:`execution <exec-block>`
 :math:`\LOOP~[t^?]`                                          :math:`\hex{03}`           :math:`[] \to [t^\ast]`                     :ref:`validation <valid-loop>`                 :ref:`execution <exec-loop>`
-:math:`\IF~[t^?]`                                            :math:`\hex{04}`           :math:`[] \to [t^\ast]`                     :ref:`validation <valid-if>`                   :ref:`execution <exec-if>`
-:math:`\ELSE`                                                :math:`\hex{05}`
-(reserved)                                                   :math:`\hex{06}`
-(reserved)                                                   :math:`\hex{07}`
-(reserved)                                                   :math:`\hex{08}`
-(reserved)                                                   :math:`\hex{09}`
-(reserved)                                                   :math:`\hex{0A}`
-:math:`\END`                                                 :math:`\hex{0B}`
+:math:`\IF~[t^?]`                                            :math:`\hex{04}`           :math:`[\I32] \to [t^\ast]`                 :ref:`validation <valid-if>`                   :ref:`execution <exec-if>`
+:math:`\ELSE`                                                :math:`\hex{05}`                                                         
+(reserved)                                                   :math:`\hex{06}`                                                           
+(reserved)                                                   :math:`\hex{07}`                                                           
+(reserved)                                                   :math:`\hex{08}`                                                           
+(reserved)                                                   :math:`\hex{09}`                                                           
+(reserved)                                                   :math:`\hex{0A}`                                                           
+:math:`\END`                                                 :math:`\hex{0B}`                                                           
 :math:`\BR~l`                                                :math:`\hex{0C}`           :math:`[t_1^\ast~t^?] \to [t_2^\ast]`       :ref:`validation <valid-br>`                   :ref:`execution <exec-br>`
 :math:`\BRIF~l`                                              :math:`\hex{0D}`           :math:`[t^?~\I32] \to [t^?]`                :ref:`validation <valid-br_if>`                :ref:`execution <exec-br_if>`
 :math:`\BRTABLE~l^\ast~l`                                    :math:`\hex{0E}`           :math:`[t_1^\ast~t^?~\I32] \to [t_2^\ast]`  :ref:`validation <valid-br_table>`             :ref:`execution <exec-br_table>`
 :math:`\RETURN`                                              :math:`\hex{0F}`           :math:`[t_1^\ast~t^?] \to [t_2^\ast]`       :ref:`validation <valid-return>`               :ref:`execution <exec-return>`
 :math:`\CALL~x`                                              :math:`\hex{10}`           :math:`[t_1^\ast] \to [t_2^\ast]`           :ref:`validation <valid-call>`                 :ref:`execution <exec-call>`
 :math:`\CALLINDIRECT~x`                                      :math:`\hex{11}`           :math:`[t_1^\ast~\I32] \to [t_2^\ast]`      :ref:`validation <valid-call_indirect>`        :ref:`execution <exec-call_indirect>`
-(reserved)                                                   :math:`\hex{12}`
-(reserved)                                                   :math:`\hex{13}`
-(reserved)                                                   :math:`\hex{14}`
-(reserved)                                                   :math:`\hex{15}`
-(reserved)                                                   :math:`\hex{16}`
-(reserved)                                                   :math:`\hex{17}`
-(reserved)                                                   :math:`\hex{18}`
-(reserved)                                                   :math:`\hex{19}`
+(reserved)                                                   :math:`\hex{12}`                                                           
+(reserved)                                                   :math:`\hex{13}`                                                           
+(reserved)                                                   :math:`\hex{14}`                                                           
+(reserved)                                                   :math:`\hex{15}`                                                           
+(reserved)                                                   :math:`\hex{16}`                                                           
+(reserved)                                                   :math:`\hex{17}`                                                           
+(reserved)                                                   :math:`\hex{18}`                                                           
+(reserved)                                                   :math:`\hex{19}`                                                           
 :math:`\DROP`                                                :math:`\hex{1A}`           :math:`[t] \to []`                          :ref:`validation <valid-drop>`                 :ref:`execution <exec-drop>`
 :math:`\SELECT`                                              :math:`\hex{1B}`           :math:`[t~t~\I32] \to [t]`                  :ref:`validation <valid-select>`               :ref:`execution <exec-select>`
-(reserved)                                                   :math:`\hex{1C}`
-(reserved)                                                   :math:`\hex{1D}`
-(reserved)                                                   :math:`\hex{1E}`
-(reserved)                                                   :math:`\hex{1F}`
+(reserved)                                                   :math:`\hex{1C}`                                                           
+(reserved)                                                   :math:`\hex{1D}`                                                           
+(reserved)                                                   :math:`\hex{1E}`                                                           
+(reserved)                                                   :math:`\hex{1F}`                                                           
 :math:`\LOCALGET~x`                                          :math:`\hex{20}`           :math:`[] \to [t]`                          :ref:`validation <valid-local.get>`            :ref:`execution <exec-local.get>`
 :math:`\LOCALSET~x`                                          :math:`\hex{21}`           :math:`[t] \to []`                          :ref:`validation <valid-local.set>`            :ref:`execution <exec-local.set>`
 :math:`\LOCALTEE~x`                                          :math:`\hex{22}`           :math:`[t] \to [t]`                         :ref:`validation <valid-local.tee>`            :ref:`execution <exec-local.tee>`
 :math:`\GLOBALGET~x`                                         :math:`\hex{23}`           :math:`[] \to [t]`                          :ref:`validation <valid-global.get>`           :ref:`execution <exec-global.get>`
 :math:`\GLOBALSET~x`                                         :math:`\hex{24}`           :math:`[t] \to []`                          :ref:`validation <valid-global.set>`           :ref:`execution <exec-global.set>`
-(reserved)                                                   :math:`\hex{25}`
-(reserved)                                                   :math:`\hex{26}`
-(reserved)                                                   :math:`\hex{27}`
+(reserved)                                                   :math:`\hex{25}`                                                           
+(reserved)                                                   :math:`\hex{26}`                                                           
+(reserved)                                                   :math:`\hex{27}`                                                           
 :math:`\I32.\LOAD~\memarg`                                   :math:`\hex{28}`           :math:`[\I32] \to [\I32]`                   :ref:`validation <valid-load>`                 :ref:`execution <exec-load>`
 :math:`\I64.\LOAD~\memarg`                                   :math:`\hex{29}`           :math:`[\I32] \to [\I64]`                   :ref:`validation <valid-load>`                 :ref:`execution <exec-load>`
 :math:`\F32.\LOAD~\memarg`                                   :math:`\hex{2A}`           :math:`[\I32] \to [\F32]`                   :ref:`validation <valid-load>`                 :ref:`execution <exec-load>`
