@@ -154,6 +154,7 @@ let string = '"' character* '"'
 let name = '$' (letter | digit | '_' | symbol)+
 let reserved = ([^'\"''('')'';'] # space)+  (* hack for table size *)
 
+let nn = ("32" | "64")
 let ixx = "i" ("32" | "64")
 let fxx = "f" ("32" | "64")
 let nxx = ixx | fxx
@@ -251,11 +252,13 @@ rule token = parse
             (i64_store16 (opt a 1))
             (i64_store32 (opt a 2)) o)) }
 
-  | "atomic.notify"
-    { ATOMIC_NOTIFY (fun a o -> (atomic_notify (opt a 2)) o) }
-  | (ixx as t)".atomic.wait"
-    { ATOMIC_WAIT (fun a o ->
-        intop t (i32_atomic_wait (opt a 2)) (i64_atomic_wait (opt a 3)) o) }
+  | "memory.atomic.notify"
+    { MEMORY_ATOMIC_NOTIFY (fun a o -> (memory_atomic_notify (opt a 2)) o) }
+  | "memory.atomic.wait"(nn as sz)
+    { MEMORY_ATOMIC_WAIT (fun a o ->
+        intop ("i" ^ sz)
+          (memory_atomic_wait32 (opt a 2))
+          (memory_atomic_wait64 (opt a 3)) o) }
   | (ixx as t)".atomic.load"
     { ATOMIC_LOAD (fun a o ->
         intop t (i32_atomic_load (opt a 2)) (i64_atomic_load (opt a 3)) o) }

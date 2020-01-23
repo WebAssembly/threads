@@ -200,8 +200,8 @@ Instruction                                                  Binary Opcode      
 :math:`\F32.\REINTERPRET\K{\_}\I32`                          :math:`\hex{BE}`           :math:`[\I32] \to [\F32]`                   :ref:`validation <valid-cvtop>`                :ref:`execution <exec-cvtop>`, :ref:`operator <op-reinterpret>`
 :math:`\F64.\REINTERPRET\K{\_}\I64`                          :math:`\hex{BF}`           :math:`[\I64] \to [\F64]`                   :ref:`validation <valid-cvtop>`                :ref:`execution <exec-cvtop>`, :ref:`operator <op-reinterpret>`
 :math:`\ATOMICNOTIFY~\memarg`                                :math:`\hex{FE}~\hex{00}`  :math:`[\I32~\I64] \to [\I64]`              :ref:`validation <valid-atomic-notify>`
-:math:`\I32.\ATOMICWAIT~\memarg`                             :math:`\hex{FE}~\hex{01}`  :math:`[\I32~\I32~\I64] \to [\I32]`         :ref:`validation <valid-atomic-wait>`
-:math:`\I64.\ATOMICWAIT~\memarg`                             :math:`\hex{FE}~\hex{02}`  :math:`[\I32~\I64~\I64] \to [\I32]`         :ref:`validation <valid-atomic-wait>`
+:math:`\MEMORYATOMICWAIT32~\memarg`                          :math:`\hex{FE}~\hex{01}`  :math:`[\I32~\I32~\I64] \to [\I32]`         :ref:`validation <valid-atomic-wait>`
+:math:`\MEMORYATOMICWAIT64~\memarg`                          :math:`\hex{FE}~\hex{02}`  :math:`[\I32~\I64~\I64] \to [\I32]`         :ref:`validation <valid-atomic-wait>`
 :math:`\I32.\ATOMICLOAD~\memarg`                             :math:`\hex{FE}~\hex{10}`  :math:`[\I32] \to [\I32]`                   :ref:`validation <valid-atomic-load>`          :ref:`execution <exec-atomic-load>`
 :math:`\I64.\ATOMICLOAD~\memarg`                             :math:`\hex{FE}~\hex{11}`  :math:`[\I32] \to [\I64]`                   :ref:`validation <valid-atomic-load>`          :ref:`execution <exec-atomic-load>`
 :math:`\I32.\ATOMICLOAD\K{8\_u}~\memarg`                     :math:`\hex{FE}~\hex{12}`  :math:`[\I32] \to [\I32]`                   :ref:`validation <valid-atomic-loadn>`         :ref:`execution <exec-atomic-loadn>`

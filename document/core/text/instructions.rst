@@ -241,9 +241,9 @@ The offset immediate to atomic memory instructions is optional, and defaults to
 .. math::
    \begin{array}{llclll}
    \production{instruction} & \Tplaininstr_I &::=& \dots \phantom{thisshouldbeenoughnowitissee} && \phantom{thisshouldbeenough} \\ &&|&
-     \text{atomic.notify}~~m{:}\Tmemarg_4 &\Rightarrow& \ATOMICNOTIFY~m \\ &&|&
-     \text{i32.atomic.wait}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICWAIT~m \\ &&|&
-     \text{i64.atomic.wait}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICWAIT~m \\
+     \text{memory.atomic.notify}~~m{:}\Tmemarg_4 &\Rightarrow& \MEMORYATOMICNOTIFY~m \\ &&|&
+     \text{memory.atomic.wait32}~~m{:}\Tmemarg_4 &\Rightarrow& \MEMORYATOMICWAIT{32}~m \\ &&|&
+     \text{memory.atomic.wait64}~~m{:}\Tmemarg_8 &\Rightarrow& \MEMORYATOMICWAIT{64}~m \\
    \end{array}
 
 .. math::

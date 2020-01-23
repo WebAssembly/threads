@@ -158,7 +158,7 @@ let inline_type_explicit (c : context) x ft at =
 %token CALL CALL_INDIRECT RETURN
 %token LOCAL_GET LOCAL_SET LOCAL_TEE GLOBAL_GET GLOBAL_SET
 %token LOAD STORE OFFSET_EQ_NAT ALIGN_EQ_NAT
-%token ATOMIC_WAIT ATOMIC_NOTIFY
+%token MEMORY_ATOMIC_WAIT MEMORY_ATOMIC_NOTIFY
 %token ATOMIC_LOAD ATOMIC_STORE ATOMIC_RMW ATOMIC_RMW_CMPXCHG
 %token CONST UNARY BINARY TEST COMPARE CONVERT
 %token UNREACHABLE MEMORY_SIZE MEMORY_GROW
@@ -186,8 +186,8 @@ let inline_type_explicit (c : context) x ft at =
 %token<Ast.instr'> CONVERT
 %token<int option -> Memory.offset -> Ast.instr'> LOAD
 %token<int option -> Memory.offset -> Ast.instr'> STORE
-%token<int option -> Memory.offset -> Ast.instr'> ATOMIC_WAIT
-%token<int option -> Memory.offset -> Ast.instr'> ATOMIC_NOTIFY
+%token<int option -> Memory.offset -> Ast.instr'> MEMORY_ATOMIC_WAIT
+%token<int option -> Memory.offset -> Ast.instr'> MEMORY_ATOMIC_NOTIFY
 %token<int option -> Memory.offset -> Ast.instr'> ATOMIC_LOAD
 %token<int option -> Memory.offset -> Ast.instr'> ATOMIC_STORE
 %token<int option -> Memory.offset -> Ast.instr'> ATOMIC_RMW
@@ -345,8 +345,8 @@ plain_instr :
   | UNARY { fun c -> $1 }
   | BINARY { fun c -> $1 }
   | CONVERT { fun c -> $1 }
-  | ATOMIC_WAIT offset_opt align_opt { fun c -> $1 $3 $2 }
-  | ATOMIC_NOTIFY offset_opt align_opt { fun c -> $1 $3 $2 }
+  | MEMORY_ATOMIC_WAIT offset_opt align_opt { fun c -> $1 $3 $2 }
+  | MEMORY_ATOMIC_NOTIFY offset_opt align_opt { fun c -> $1 $3 $2 }
   | ATOMIC_LOAD offset_opt align_opt { fun c -> $1 $3 $2 }
   | ATOMIC_STORE offset_opt align_opt { fun c -> $1 $3 $2 }
   | ATOMIC_RMW offset_opt align_opt { fun c -> $1 $3 $2 }

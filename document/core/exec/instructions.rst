@@ -966,8 +966,8 @@ See :ref:`above <exec-atomic-store>`.
 
 .. _exec-wait:
 
-:math:`t\K{.}\ATOMICWAIT`
-.........................
+:math:`\MEMORYATOMICWAIT{N}`
+............................
 
 .. todo:: update to new rules
 .. todo:: add text
@@ -975,37 +975,37 @@ See :ref:`above <exec-atomic-store>`.
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   F; (\I64.\CONST~k)~(t.\CONST~c)~(\I32.\CONST~i)~t.\ATOMICWAIT
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LDATA[i]~b^{|t|})}&
+   F; (\I64.\CONST~k)~(\K{i}{N}.\CONST~c)~(\I32.\CONST~i)~\MEMORYATOMICWAIT{N}
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LDATA[i]~b^{N})}&
      F; (\WAITX~a.\LDATA[i])
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} + |t|/8 \leq n \\
-     \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & b^{|t|} = \bytes_t(c) \\
+     (\iff & \X{ea} + N/8 \leq n \\
+     \wedge & \X{ea} \mod N/8 = 0 \\
+     \wedge & b^{N} = \bytes_t(c) \\
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I64.\CONST~k)~(t.\CONST~c)~(\I32.\CONST~i)~t.\ATOMICWAIT
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LDATA[i]~b^{|t|})}&
+   F; (\I64.\CONST~k)~(\K{i}{N}.\CONST~c)~(\I32.\CONST~i)~\MEMORYATOMICWAIT{N}
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LDATA[i]~b^{N})}&
      F; (\I32.\CONST~1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} + |t|/8 \leq n \\
-     \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & b^{|t|} \neq \bytes_t(c) \\
+     (\iff & \X{ea} + N/8 \leq n \\
+     \wedge & \X{ea} \mod N/8 = 0 \\
+     \wedge & b^{N} \neq \bytes_t(c) \\
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I64.\CONST~k)~(t.\CONST~c)~(\I32.\CONST~i)~t.\ATOMICWAIT
+   F; (\I64.\CONST~k)~(\K{i}{N}.\CONST~c)~(\I32.\CONST~i)~\MEMORYATOMICWAIT{N}
      &\stepto^{(\ARD~a.\LLEN~n)}&
      F; \TRAP
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff i + |t|/8 > n \vee i \mod |t|/8 \neq 0) \\
+     (\iff i + N/8 > n \vee i \mod N/8 \neq 0) \\
      \end{array}
    \\[2ex]
    \begin{array}[t]{@{}r@{~}l@{}}
@@ -1017,8 +1017,8 @@ See :ref:`above <exec-atomic-store>`.
 
 .. _exec-notify:
 
-:math:`\ATOMICNOTIFY`
-.....................
+:math:`\MEMORYATOMICNOTIFY`
+...........................
 
 .. todo:: update to new rules
 .. todo:: add text; operand order? is the trap case correct (issue #105)?

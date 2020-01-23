@@ -276,8 +276,7 @@ let rec step (c : config) : config =
           v1 :: vs', []
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
 
-      | AtomicWait {offset; ty; sz; _}, I64 timeout :: ve :: I32 i :: vs' ->
-        (* TODO: Trap if memory is not shared *)
+      | MemoryAtomicWait {offset; ty; sz; _}, I64 timeout :: ve :: I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_i32_u i in
         (try
@@ -290,7 +289,7 @@ let rec step (c : config) : config =
             I32 1l :: vs', []  (* Not equal *)
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
 
-      | AtomicNotify x, I32 count :: I32 i :: vs' ->
+      | MemoryAtomicNotify x, I32 count :: I32 i :: vs' ->
           if count = 0l then
             I32 0l :: vs', []  (* Trivial case waking 0 waiters *)
           else

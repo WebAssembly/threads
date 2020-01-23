@@ -50,12 +50,12 @@ mutex is unlocked. If its value is 1, the mutex is locked.
         (br_if $done)
 
         ;; Wait for the other agent to finish with mutex.
-        (i32.atomic.wait
+        (memory.atomic.wait32
           (local.get $mutexAddr) ;; mutex address
           (i32.const 1)          ;; expected value (1 => locked)
           (i64.const -1))        ;; infinite timeout
 
-        ;; i32.atomic.wait returns:
+        ;; memory.atomic.wait32 returns:
         ;;   0 => "ok", woken by another agent.
         ;;   1 => "not-equal", loaded value != expected value
         ;;   2 => "timed-out", the timeout expired
@@ -81,7 +81,7 @@ mutex is unlocked. If its value is 1, the mutex is locked.
 
     ;; Notify one agent that is waiting on this lock.
     (drop
-      (atomic.notify
+      (memory.atomic.notify
         (local.get $mutexAddr)   ;; mutex address
         (i32.const 1)))          ;; notify 1 waiter
   )
@@ -352,8 +352,9 @@ will not be suspended for other reasons, unless all agents in that cluster are
 also suspended.
 
 An agent suspended via `Atomics.wait` can be woken by the WebAssembly
-`atomic.notify` operator. Similarly, an agent suspended by `i32.atomic.wait` or
-`i64.atomic.wait` can be woken by [`Atomics.notify`][].
+`memory.atomic.notify` operator. Similarly, an agent suspended by
+`memory.atomic.wait32` or `memory.atomic.wait64` can be woken by
+[`Atomics.notify`][].
 
 ### Wait
 
@@ -380,15 +381,15 @@ woken, the wait operator returns 0 ("ok"). If the timeout expires before another
 agent notifies this one, this operator returns 2 ("timed-out"). Note that when
 the agent is suspended, it will not be [spuriously
 woken](https://en.wikipedia.org/wiki/Spurious_wakeup).  The agent is only woken
-by `atomic.notify` (or [`Atomics.notify`][] in the web embedding).
+by `memory.atomic.notify` (or [`Atomics.notify`][] in the web embedding).
 
 When an agent is suspended, if the number of waiters (including this one) is
 equal to 2<sup>32</sup>, then trap.
 
-  * `i32.atomic.wait`: load i32 value, compare to expected (as `i32`), and wait for notify at same address
-  * `i64.atomic.wait`: load i64 value, compare to expected (as `i64`), and wait for notify at same address
+  * `memory.atomic.wait32`: load i32 value, compare to expected (as `i32`), and wait for notify at same address
+  * `memory.atomic.wait64`: load i64 value, compare to expected (as `i64`), and wait for notify at same address
 
-For the web embedding, `i32.atomic.wait` is equivalent in behavior to executing the following:
+For the web embedding, `memory.atomic.wait32` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
@@ -399,7 +400,7 @@ For the web embedding, `i32.atomic.wait` is equivalent in behavior to executing 
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
 
-`i64.atomic.wait` has no equivalent in ECMAScript as it is currently specified, as there is
+`memory.atomic.wait64` has no equivalent in ECMAScript as it is currently specified, as there is
 no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of a
 64-bit integer. That said, the behavior can be approximated as follows:
 
@@ -428,9 +429,9 @@ returns the number of waiters that were woken as an unsigned `i32`. Note that if
 the notify operator is used with an unshared linear memory, the number of
 waiters will always be zero.
 
-  * `atomic.notify`: notify `count` threads waiting on the given address via `i32.atomic.wait` or `i64.atomic.wait`
+  * `memory.atomic.notify`: notify `count` threads waiting on the given address via `memory.atomic.wait32` or `memory.atomic.wait64`
 
-For the web embedding, `atomic.notify` is equivalent in behavior to executing the following:
+For the web embedding, `memory.atomic.notify` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
@@ -572,8 +573,8 @@ The [instruction syntax][] is modified as follows:
 atomicop ::= add | sub | and | or | xor | xchg | cmpxchg
 
 instr ::= ... |
-          inn.atomic.wait memarg |
-          atomic.notify memarg |
+          memory.atomic.wait{nn} memarg |
+          memory.atomic.notify memarg |
 
           atomic.fence |
 
@@ -596,9 +597,9 @@ memarg32 ::= 0x02 o: offset     =>  {align 2, offset: o}
 memarg64 ::= 0x03 o: offset     =>  {align 3, offset: o}
 
 instr ::= ...
-        | 0xFE 0x00 m:memarg32  =>  atomic.notify m
-        | 0xFE 0x01 m:memarg32  =>  i32.atomic.wait m
-        | 0xFE 0x02 m:memarg64  =>  i64.atomic.wait m
+        | 0xFE 0x00 m:memarg32  =>  memory.atomic.notify m
+        | 0xFE 0x01 m:memarg32  =>  memory.atomic.wait32 m
+        | 0xFE 0x02 m:memarg64  =>  memory.atomic.wait64 m
 
         | 0xFE 0x03 0x00        =>  atomic.fence
 

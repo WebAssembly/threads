@@ -184,9 +184,9 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
 .. math::
    \begin{array}{llclll}
    \production{instruction} & \Binstr &::=& \dots && \phantom{thisshouldbeenough} \\ &&|&
-     \hex{FE}~\hex{00}~~m{:}\Bmemarg &\Rightarrow& \ATOMICNOTIFY~m \\ &&|&
-     \hex{FE}~\hex{01}~~m{:}\Bmemarg &\Rightarrow& \I32.\ATOMICWAIT~m \\ &&|&
-     \hex{FE}~\hex{02}~~m{:}\Bmemarg &\Rightarrow& \I64.\ATOMICWAIT~m \\
+     \hex{FE}~\hex{00}~~m{:}\Bmemarg &\Rightarrow& \MEMORYATOMICNOTIFY~m \\ &&|&
+     \hex{FE}~\hex{01}~~m{:}\Bmemarg &\Rightarrow& \MEMORYATOMICWAIT\K{32}~m \\ &&|&
+     \hex{FE}~\hex{02}~~m{:}\Bmemarg &\Rightarrow& \MEMORYATOMICWAIT\K{64}~m \\
    \end{array}
 
 
