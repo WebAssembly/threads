@@ -446,7 +446,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = 4
    }{
@@ -468,7 +468,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -490,7 +490,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -513,7 +513,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
@@ -536,7 +536,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -559,7 +559,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
@@ -582,7 +582,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -604,7 +604,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
@@ -626,7 +626,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -648,7 +648,7 @@ Atomic Memory Instructions
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
