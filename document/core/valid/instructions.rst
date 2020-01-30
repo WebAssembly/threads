@@ -440,15 +440,13 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The sharedness :math:`\share` must be |MSHARED|.
-
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`4`.
 
 * Then the instruction is valid with type :math:`[\I32~\I64] \to [\I64]`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = 4
    }{
@@ -464,15 +462,13 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The sharedness :math:`\share` must be |MSHARED|.
-
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
 * Then the instruction is valid with type :math:`[\I32~t~\I64] \to [\I32]`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -488,15 +484,13 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The sharedness :math:`\share` must be |MSHARED|.
-
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
 * Then the instruction is valid with type :math:`[\I32] \to [t]`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -513,15 +507,13 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The sharedness :math:`\share` must be |MSHARED|.
-
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
 * Then the instruction is valid with type :math:`[\I32] \to [t]`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
@@ -538,15 +530,13 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The sharedness :math:`\share` must be |MSHARED|.
-
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
 * Then the instruction is valid with type :math:`[\I32~t] \to []`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -563,15 +553,13 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The sharedness :math:`\share` must be |MSHARED|.
-
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
 * Then the instruction is valid with type :math:`[\I32~t] \to []`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
@@ -588,15 +576,13 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The sharedness :math:`\share` must be |MSHARED|.
-
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
 * Then the instruction is valid with type :math:`[\I32~t] \to [t]`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -612,15 +598,13 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The sharedness :math:`\share` must be |MSHARED|.
-
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
 * Then the instruction is valid with type :math:`[\I32~t] \to [t]`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{
@@ -636,15 +620,13 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The sharedness :math:`\share` must be |MSHARED|.
-
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
 
 * Then the instruction is valid with type :math:`[\I32~t~t] \to [t]`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = |t|/8
    }{
@@ -660,15 +642,13 @@ Atomic Memory Instructions
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The sharedness :math:`\share` must be |MSHARED|.
-
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
 
 * Then the instruction is valid with type :math:`[\I32~t~t] \to [t]`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \limits~\MSHARED
+     C.\CMEMS[0] = \memtype
      \qquad
      2^{\memarg.\ALIGN} = N/8
    }{

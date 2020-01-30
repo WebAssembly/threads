@@ -137,6 +137,7 @@ let type_cvtop at = function
 
 (* Expressions *)
 
+(* TODO: Remove sharability requirements *)
 let check_memop (c : context) (memop : 'a memop) (sh: sharability option)
     get_sz at =
   let MemoryType (_, shared) = memory c (0l @@ at) in
