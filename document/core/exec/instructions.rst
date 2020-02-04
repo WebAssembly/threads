@@ -975,7 +975,7 @@ See :ref:`above <exec-atomic-store>`.
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   F; (\I64.\CONST~k)~(\K{i}{N}.\CONST~c)~(\I32.\CONST~i)~\MEMORYATOMICWAIT{N}
+   F; (\I64.\CONST~k)~(\iN.\CONST~c)~(\I32.\CONST~i)~\MEMORYATOMICWAIT{N}
      &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LDATA[i]~b^{N})}&
      F; (\WAITX~a.\LDATA[i])
    \end{array}
@@ -987,7 +987,7 @@ See :ref:`above <exec-atomic-store>`.
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I64.\CONST~k)~(\K{i}{N}.\CONST~c)~(\I32.\CONST~i)~\MEMORYATOMICWAIT{N}
+   F; (\I64.\CONST~k)~(\iN.\CONST~c)~(\I32.\CONST~i)~\MEMORYATOMICWAIT{N}
      &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LDATA[i]~b^{N})}&
      F; (\I32.\CONST~1)
    \end{array}
@@ -999,7 +999,7 @@ See :ref:`above <exec-atomic-store>`.
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I64.\CONST~k)~(\K{i}{N}.\CONST~c)~(\I32.\CONST~i)~\MEMORYATOMICWAIT{N}
+   F; (\I64.\CONST~k)~(\iN.\CONST~c)~(\I32.\CONST~i)~\MEMORYATOMICWAIT{N}
      &\stepto^{(\ARD~a.\LLEN~n)}&
      F; \TRAP
    \end{array}

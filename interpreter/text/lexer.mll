@@ -154,12 +154,12 @@ let string = '"' character* '"'
 let name = '$' (letter | digit | '_' | symbol)+
 let reserved = ([^'\"''('')'';'] # space)+  (* hack for table size *)
 
-let nn = ("32" | "64")
-let ixx = "i" ("32" | "64")
-let fxx = "f" ("32" | "64")
+let xx = "32" | "64"
+let ixx = "i" xx
+let fxx = "f" xx
 let nxx = ixx | fxx
 let mixx = "i" ("8" | "16" | "32" | "64")
-let mfxx = "f" ("32" | "64")
+let mfxx = "f" xx
 let sign = "s" | "u"
 let mem_size = "8" | "16" | "32"
 let rmw = "add" | "sub" | "and" | "or" | "xor" | "xchg"
@@ -254,7 +254,7 @@ rule token = parse
 
   | "memory.atomic.notify"
     { MEMORY_ATOMIC_NOTIFY (fun a o -> (memory_atomic_notify (opt a 2)) o) }
-  | "memory.atomic.wait"(nn as sz)
+  | "memory.atomic.wait"(xx as sz)
     { MEMORY_ATOMIC_WAIT (fun a o ->
         intop ("i" ^ sz)
           (memory_atomic_wait32 (opt a 2))
