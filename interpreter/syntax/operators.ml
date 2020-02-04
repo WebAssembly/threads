@@ -71,13 +71,13 @@ let i64_store16 align offset =
 let i64_store32 align offset =
   Store {ty = I64Type; align; offset; sz = Some Pack32}
 
-let atomic_notify align offset =
-  AtomicNotify {ty = I32Type; align; offset; sz = None}
+let memory_atomic_notify align offset =
+  MemoryAtomicNotify {ty = I32Type; align; offset; sz = None}
 
-let i32_atomic_wait align offset =
-  AtomicWait {ty = I32Type; align; offset; sz = None}
-let i64_atomic_wait align offset =
-  AtomicWait {ty = I64Type; align; offset; sz = None}
+let memory_atomic_wait32 align offset =
+  MemoryAtomicWait {ty = I32Type; align; offset; sz = None}
+let memory_atomic_wait64 align offset =
+  MemoryAtomicWait {ty = I64Type; align; offset; sz = None}
 
 let i32_atomic_load align offset =
   AtomicLoad {ty = I32Type; align; offset; sz = None}

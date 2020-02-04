@@ -196,6 +196,11 @@ let extension = function
   | Memory.SX -> "_s"
   | Memory.ZX -> "_u"
 
+let wait_size = function
+  | I32Type -> "32"
+  | I64Type -> "64"
+  | _ -> assert false
+
 let rmw = function
   | I32 I32Op.RmwAdd | I64 I64Op.RmwAdd -> "add"
   | I32 I32Op.RmwSub | I64 I64Op.RmwSub -> "sub"
@@ -225,14 +230,16 @@ let storeop op =
   | None -> memop "store" op (size op.ty)
   | Some sz -> memop ("store" ^ pack_size sz) op (Memory.packed_size sz)
 
-let atomicwaitop op =
+let memoryatomicwaitop op =
   match op.sz with
-  | None -> memop "atomic.wait" op (size op.ty)
+  | None ->
+    memop_without_type ("memory.atomic.wait" ^ (wait_size op.ty)) op
+      (size op.ty)
   | Some sz -> assert false
 
-let atomicnotifyop op =
+let memoryatomicnotifyop op =
   match op.sz with
-  | None -> memop_without_type "atomic.notify" op (size op.ty)
+  | None -> memop_without_type "memory.atomic.notify" op (size op.ty)
   | Some sz -> assert false
 
 let atomicloadop op =
@@ -302,8 +309,8 @@ let rec instr e =
     | Unary op -> unop op, []
     | Binary op -> binop op, []
     | Convert op -> cvtop op, []
-    | AtomicWait op -> atomicwaitop op, []
-    | AtomicNotify op -> atomicnotifyop op, []
+    | MemoryAtomicWait op -> memoryatomicwaitop op, []
+    | MemoryAtomicNotify op -> memoryatomicnotifyop op, []
     | AtomicLoad op -> atomicloadop op, []
     | AtomicStore op -> atomicstoreop op, []
     | AtomicRmw (rmwop, op) -> atomicrmwop op rmwop, []

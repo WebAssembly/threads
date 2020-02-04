@@ -209,9 +209,9 @@ let memop s =
 let atomic_instr s =
   let pos = pos s in
   match op s with
-  | 0x00 -> let a, o = memop s in atomic_notify a o
-  | 0x01 -> let a, o = memop s in i32_atomic_wait a o
-  | 0x02 -> let a, o = memop s in i64_atomic_wait a o
+  | 0x00 -> let a, o = memop s in memory_atomic_notify a o
+  | 0x01 -> let a, o = memop s in memory_atomic_wait32 a o
+  | 0x02 -> let a, o = memop s in memory_atomic_wait64 a o
 
   | 0x10 -> let a, o = memop s in i32_atomic_load a o
   | 0x11 -> let a, o = memop s in i64_atomic_load a o

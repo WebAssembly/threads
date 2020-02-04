@@ -433,8 +433,8 @@ Atomic Memory Instructions
 
 .. _valid-atomic-notify:
 
-:math:`\ATOMICNOTIFY~\memarg`
-.............................
+:math:`\MEMORYATOMICNOTIFY~\memarg`
+...................................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
@@ -450,29 +450,29 @@ Atomic Memory Instructions
      \qquad
      2^{\memarg.\ALIGN} = 4
    }{
-     C \vdash \ATOMICNOTIFY~\memarg : [\I32~\I64] \to [\I64]
+     C \vdash \MEMORYATOMICNOTIFY~\memarg : [\I32~\I64] \to [\I64]
    }
 
 .. _valid-atomic-wait:
 
-:math:`t\K{.}\ATOMICWAIT~\memarg`
-.................................
+:math:`\MEMORYATOMICWAIT{N}~\memarg`
+....................................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
 * Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
 
-* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N` divided by :math:`8`.
 
-* Then the instruction is valid with type :math:`[\I32~t~\I64] \to [\I32]`.
+* Then the instruction is valid with type :math:`[\I32~\K{i}{N}~\I64] \to [\I32]`.
 
 .. math::
    \frac{
      C.\CMEMS[0] = \memtype
      \qquad
-     2^{\memarg.\ALIGN} = |t|/8
+     2^{\memarg.\ALIGN} = N/8
    }{
-     C \vdash t\K{.}\ATOMICWAIT~\memarg : [\I32~t~\I64] \to [\I32]
+     C \vdash \MEMORYATOMICWAIT{N}~\memarg : [\I32~\K{i}{N}~\I64] \to [\I32]
    }
 
 .. _valid-atomic-load:
