@@ -592,7 +592,7 @@ Atomic Memory Instructions
 .. _valid-atomic-rmwn:
 
 :math:`t\K{.}\ATOMICRMW{N}\K{.}\atomicop\K{\_u}~\memarg`
-....................................................
+........................................................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
 
@@ -636,7 +636,7 @@ Atomic Memory Instructions
 .. _valid-atomic-rmwn-cmpxchg:
 
 :math:`t\K{.}\ATOMICRMW{N}\K{.}\ATOMICCMPXCHG\K{\_u}~\memarg`
-.........................................................
+.............................................................
 
 * The memory :math:`C.\CMEMS[0]` must be defined in the context.
 

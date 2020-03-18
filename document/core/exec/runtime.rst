@@ -292,7 +292,9 @@ Like in a :ref:`memory type <syntax-memtype>`, the maximum size in a memory inst
 The instance of a non-shared memory holds a vector of :ref:`bytes representing its state.
 For :ref:`shared <syntax-shared>` memories, no state is recorded in the instance itself.
 WebAssembly :ref:`threads <thread>` expose a *weak memory model* in which reads, writes, and other accesses to a shared memory instance can be reordered in a non-deterministic fashion that mirrors the behavior of hardware.
-Instead of representing the contents of a memory directly in an the abstract machine hence separately records :ref:`traces <syntax-trace>` of corresponding memory :ref:`events <syntax-evt>` that describe all accesses that occur.
+Instead of representing the contents of a memory directly in an the abstract machine hence separately records traces of corresponding memory :ref:`events <syntax-evt>` that describe all accesses that occur.
+
+.. todo:: link "traces" to syntax-trace, when that is defined.
 
 
 .. index:: ! global instance, global, value, mutability, instruction, embedder
