@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/WebAssembly/spec.svg?branch=master)](https://travis-ci.org/WebAssembly/spec)
+[![Build Status](https://travis-ci.org/WebAssembly/threads.svg?branch=master)](https://travis-ci.org/WebAssembly/threads)
 
 # Threads Proposal for WebAssembly
 
