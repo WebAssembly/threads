@@ -641,7 +641,7 @@ Memory Instructions
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \meminst = S.\SMEMS[a]
+     (\iff & \meminst = S.\SMEMS[a] \\
      \wedge & |\meminst.\MIDATA| = \X{sz}\cdot64\,\F{Ki}) \\
      \end{array}
    \\[1ex]
@@ -1026,7 +1026,7 @@ See :ref:`above <exec-atomic-store>`.
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\ATOMICNOTIFY
+   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY
      &\stepto^{(\ARD~a.\LLEN~n)~(\K{wake}~a.\LDATA[i]~j~k)}&
      F; (\I32.\CONST~j)
    \end{array}
@@ -1036,7 +1036,7 @@ See :ref:`above <exec-atomic-store>`.
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\ATOMICNOTIFY
+   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY
      &\stepto^{(\ARD~a.\LLEN~n)}&
      F; \TRAP
    \end{array}
