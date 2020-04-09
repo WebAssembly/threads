@@ -507,7 +507,7 @@ Otherwise:
 
 Let `d` be [`ToNonWrappingUint32`][](`delta`).
 
-Let `ret` be the current size of memory in pages (before resizing). 
+Let `ret` be the current size of memory in pages (before resizing).
 
 Perform [`Memory.grow`][] with delta `d`. On failure, a [`RangeError`][] is
 thrown.
