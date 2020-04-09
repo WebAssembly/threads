@@ -507,12 +507,16 @@ Otherwise:
 
 Let `d` be [`ToNonWrappingUint32`][](`delta`).
 
-Let `ret` be the current size of memory in pages (before resizing).
+Let `ret` be the current size of memory in pages (before resizing). 
 
 Perform [`Memory.grow`][] with delta `d`. On failure, a [`RangeError`][] is
 thrown.
 
 Return `ret` as a Number value.
+
+Note: When [`IsSharedArrayBuffer`][](`M.[[BufferObject]]`) is true, the value `ret`
+should be the result of an atomic read-modify-write of the new size to the
+internal [\[\[ArrayBufferByteLength\]\]][] slot. 
 
 ### `WebAssembly.Memory.prototype.buffer`
 
