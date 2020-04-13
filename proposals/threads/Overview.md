@@ -514,6 +514,13 @@ thrown.
 
 Return `ret` as a Number value.
 
+Note: When [`IsSharedArrayBuffer`][](`M.[[BufferObject]]`) is true, the return
+value should be the result of an atomic read-modify-write of the new size
+to the internal [\[\[ArrayBufferByteLength\]\]][] slot. The `ret` value will be
+the value in pages read from the internal [\[\[ArrayBufferByteLength\]\]][] slot 
+before the modification to the resized size, which will be the current size of
+the memory.
+
 ### `WebAssembly.Memory.prototype.buffer`
 
 This is an accessor property whose [[Set]] is Undefined and whose [[Get]]
