@@ -703,9 +703,9 @@ instr ::= ...
 [`HasProperty`]: https://tc39.github.io/ecma262/#sec-hasproperty
 [`ToBoolean`]: https://tc39.github.io/ecma262/#sec-toboolean
 [`Get`]: https://tc39.github.io/ecma262/#sec-get-o-p
-[`Memory.create`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.ml#L47
-[`Memory.memory`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.mli#L1
-[`Memory.grow`]: https://github.com/WebAssembly/spec/blob/master/interpreter/spec/memory.ml#L60
+[`Memory.create`]: https://github.com/WebAssembly/spec/blob/master/interpreter/runtime/memory.ml#L26
+[`Memory.memory`]: https://github.com/WebAssembly/spec/blob/master/interpreter/runtime/memory.ml#L10
+[`Memory.grow`]: https://github.com/WebAssembly/spec/blob/master/interpreter/runtime/memory.ml#L48
 [`ArrayBuffer`]: https://tc39.github.io/ecma262/#sec-arraybuffer-objects
 [`SharedArrayBuffer`]: https://tc39.github.io/ecma262/#sec-sharedarraybuffer-objects
 [`detach`]: http://tc39.github.io/ecma262/#sec-detacharraybuffer
