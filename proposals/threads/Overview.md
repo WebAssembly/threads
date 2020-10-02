@@ -7,6 +7,10 @@ This proposal adds a new shared linear memory type and some new operations for
 atomic memory access. The responsibility of creating and joining threads is
 deferred to the embedder.
 
+> **WARNING:** The explainer hasn’t been updated to reflect the most recent 
+syntax changes. For the up-to-date syntax, please consult the
+[proposal spec](https://webassembly.github.io/threads).
+
 ## Example
 
 Here is an example of a naive mutex implemented in WebAssembly. It uses one
