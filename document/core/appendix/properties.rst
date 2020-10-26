@@ -745,6 +745,15 @@ In other words, every thread in a valid configuration either runs forever, traps
 Consequently, given a :ref:`valid store <valid-store>`, no computation defined by :ref:`instantiation <exec-instantiation>` or :ref:`invocation <exec-invocation>` of a valid module can "crash" or otherwise (mis)behave in ways not covered by the :ref:`execution <exec>` semantics given in this specification.
 
 
+.. index:: relaxed memory, ! sequential consistency
+
+Sequential Consistency of Data-Race-Free Programs
+-------------------------------------------------
+
+.. todo:: explain, state, cite [#cite-oopsla2019]_
+
+
+
 .. [#cite-pldi2017]
    The formalization and theorems are derived from the following article:
    Andreas Haas, Andreas Rossberg, Derek Schuff, Ben Titzer, Dan Gohman, Luke Wagner, Alon Zakai, JF Bastien, Michael Holman. |PLDI2017|_. Proceedings of the 38th ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI 2017). ACM 2017.
@@ -752,3 +761,7 @@ Consequently, given a :ref:`valid store <valid-store>`, no computation defined b
 .. [#cite-cpp2018]
    A machine-verified version of the formalization and soundness proof is described in the following article:
    Conrad Watt. |CPP2018|_. Proceedings of the 7th ACM SIGPLAN Conference on Certified Programs and Proofs (CPP 2018). ACM 2018.
+
+.. [#cite-oopsla2019]
+   The formalization of the relaxed memory model is derived from the following article:
+   Conrad Watt, Andreas Rossberg, Jean Pichon-Pharabod. |OOPSLA2019|_. Proceedings of the ACM on Programming Languages (OOPSLA 2019). ACM 2019.

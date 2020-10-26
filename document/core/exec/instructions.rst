@@ -750,7 +750,7 @@ Memory Instructions
    In practice, the choice depends on the :ref:`resources <impl-exec>` available to the :ref:`embedder <embedder>`.
 
 
-.. index:: atomic memory instruction
+.. index:: atomic memory instruction, memory, frame, module
    pair: execution; instruction
    single: abstract syntax; instruction
 .. _exec-instr-atomic-memory:

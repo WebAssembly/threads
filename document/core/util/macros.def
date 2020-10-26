@@ -47,6 +47,9 @@
 .. |CPP2018| replace:: Mechanising and Verifying the WebAssembly Specification
 .. _CPP2018: https://dl.acm.org/citation.cfm?id=3167082
 
+.. |OOPSLA2019| replace:: Weakening WebAssembly
+.. _OOPSLA2019: https://dl.acm.org/citation.cfm?id=3360559
+
 .. |TAPL| replace:: Types and Programming Languages
 .. _TAPL: https://www.cis.upenn.edu/~bcpierce/tapl/
 
@@ -809,9 +812,9 @@
 .. |TIELEM| mathdef:: \xref{exec/runtime}{syntax-tableinst}{\K{elem}}
 .. |TIMAX| mathdef:: \xref{exec/runtime}{syntax-tableinst}{\K{max}}
 
+.. |MITYPE| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{type}}
 .. |MIDATA| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{data}}
-.. |MIMAX| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{max}}
-.. |MISHARE| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{share}}
+.. |MITIME| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{time}}
 
 .. |GIVALUE| mathdef:: \xref{exec/runtime}{syntax-globalinst}{\K{value}}
 .. |GIMUT| mathdef:: \xref{exec/runtime}{syntax-globalinst}{\K{mut}}
@@ -879,6 +882,8 @@
 .. Events, terminals
 
 .. |AT| mathdef:: \xref{exec/runtime}{syntax-time}{\K{at}}
+.. |ATTIME| mathdef:: \xref{exec/runtime}{syntax-time}{\K{time}}
+.. |ATVAL| mathdef:: \xref{exec/runtime}{syntax-time}{\K{val}}
 
 .. |ETIME| mathdef:: \xref{exec/runtime}{syntax-evt}{\K{time}}
 .. |EACTS| mathdef:: \xref{exec/runtime}{syntax-evt}{\K{acts}}
@@ -949,6 +954,7 @@
 
 .. |config| mathdef:: \xref{exec/runtime}{syntax-config}{\X{config}}
 .. |thread| mathdef:: \xref{exec/runtime}{syntax-thread}{\X{thread}}
+.. |lconfig| mathdef:: \xref{exec/runtime}{syntax-config}{\X{lconfig}}
 
 
 .. Numerics, operators
@@ -1060,8 +1066,8 @@
 .. |hbconsistent| mathdef:: \mathrel{\mbox{hb-consistent}}
 .. |valueconsistent| mathdef:: \mathrel{\mbox{value-consistent}}
 
-.. |hbprec| mathdef:: \mathrel{\prec_{\K{hb}}}
-.. |totprec| mathdef:: \mathrel{\prec_{\K{tot}}}
+.. |prechb| mathdef:: \mathrel{\prec_{\K{hb}}}
+.. |prectot| mathdef:: \mathrel{\prec_{\K{tot}}}
 
 
 .. Soundness

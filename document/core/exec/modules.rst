@@ -562,6 +562,8 @@ Moreover, if the dots :math:`\dots` are a sequence :math:`A^n` (as for globals),
 Instantiation
 ~~~~~~~~~~~~~
 
+.. todo:: turn this into an administrative instruction handled by global reduction
+
 Given a :ref:`store <syntax-store>` :math:`S`, a :ref:`module <syntax-module>` :math:`\module` is instantiated with a list of :ref:`external values <syntax-externval>` :math:`\externval^n` supplying the required imports as follows.
 
 Instantiation checks that the module is :ref:`valid <valid>` and the provided imports :ref:`match <match-externtype>` the declared types,
