@@ -319,7 +319,8 @@ Memory Instances
 
 A *memory instance* is the runtime representation of a linear :ref:`memory <syntax-mem>`.
 It records its original :ref:`memory type <syntax-memtype>`
-and takes one of two different forms depending on whether that type is :ref:`shared <syntax-shared>` or not.
+and takes one of two different shapes depending on whether that type is :ref:`shared <syntax-shared>` or not.
+It is an invariant of the semantics that the shape always matches the type.
 
 .. math::
    \begin{array}{llll}
@@ -751,7 +752,7 @@ that define how a single step of execution modifies these configurations, respec
 Global Reduction
 ................
 
-*Global reduction* is concerned with synchronization between multiple :ref:`threads <syntax-thread>`.
+*Global reduction* is concerned with allocation in the global store and synchronization between multiple :ref:`threads <syntax-thread>`.
 It emits a (possibly empty) set of events that are produced by the corresponding step of computation.
 
 Formally, glboal reduction is a relation
