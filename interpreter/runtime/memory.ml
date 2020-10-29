@@ -7,9 +7,6 @@ type size = int32  (* number of pages *)
 type address = int64
 type offset = int32
 
-type pack_size = Pack8 | Pack16 | Pack32
-type extension = SX | ZX
-
 type memory' = (int, int8_unsigned_elt, c_layout) Array1.t
 type memory =
   {mutable content : memory'; max : size option; shared: sharability}
@@ -23,20 +20,12 @@ exception OutOfMemory
 
 let page_size = 0x10000L (* 64 KiB *)
 
-let packed_size = function
-  | Pack8 -> 1
-  | Pack16 -> 2
-  | Pack32 -> 4
-
-let packed_size_opt t sz =
-  match sz with
-  | None -> Types.size t
-  | Some s -> packed_size s
-
 let is_aligned a t sz =
-  let align = packed_size_opt t sz in
-  let mask = align - 1 in
-  Int64.(logand a (of_int mask)) = 0L
+  let align =
+    match sz with
+    | None -> Types.size t
+    | Some s -> Types.packed_size s
+  in Int64.(logand a (of_int (align - 1))) = 0L
 
 let within_limits n = function
   | None -> true
