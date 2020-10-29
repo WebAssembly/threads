@@ -329,13 +329,13 @@ It is an invariant of the semantics that the shape always matches the type.
      \{ \MITYPE~\memtype \} \\
    \end{array}
 
-The instance of a memory with :ref:`unshared <syntax-unshared>` :ref:`type <syntax-memtype>` holds a vector of :ref:`bytes` directly representing its state.
+The instance of a memory with :ref:`unshared <syntax-unshared>` :ref:`type <syntax-memtype>` holds a vector of :ref:`bytes <syntax-byte>` directly representing its state.
 The length of the vector always is a multiple of the WebAssembly *page size*, which is defined to be the constant :math:`65536` -- abbreviated :math:`64\,\F{Ki}`.
 The bytes can be mutated through :ref:`memory instructions <syntax-instr-memory>`, the execution of an active :ref:`data segment <syntax-data>`, or by external means provided by the :ref:`embedder <embedder>`.
 It is an invariant of the semantics that the length of the byte vector, divided by page size, never exceeds the maximum size of :math:`\memtype`, if present.
 
 For memories of :ref:`shared <syntax-shared>` :ref:`type <syntax-memtype>`, no state is recorded in the instance itself.
-Instead of representing the contents of a memory directly the abstract machine hence separately records :ref:`traces <syntax-trace>` of corresponding memory :ref:`events <syntax-evt>` that describe all accesses that occur.
+Instead of representing the contents of a memory directly the abstract machine hence separately records :ref:`traces <relaxed-trace>` of corresponding memory :ref:`events <syntax-evt>` that describe all accesses that occur.
 
 
 .. index:: ! global instance, global, value, mutability, instruction, embedder
@@ -771,9 +771,9 @@ The following structural rule for global reduction delegates to local reduction 
 
 .. math::
    \begin{array}{@{}c@{}}
-   \XX{SS}; P_1^\ast~(S; \instr^\ast \AT h)~P_2^\ast
+   \X{SS}; P_1^\ast~(S; \instr^\ast \AT h)~P_2^\ast
      \qquad \stepto^{\act^\ast \AT h'} \qquad
-     \XX{SS}; P_1^\ast~(S'; {\instr'}^\ast \AT h')~P_2^\ast \\
+     \X{SS}; P_1^\ast~(S'; {\instr'}^\ast \AT h')~P_2^\ast \\
      \qquad (
        \begin{array}[t]{@{}r@{~}l@{}}
        \iff & S; F_\epsilon; \instr^\ast \stepto^{\act^\ast} S'; F'; {\instr'}^\ast) \\

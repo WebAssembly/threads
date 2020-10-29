@@ -10,7 +10,7 @@ Relaxed Memory Model
 .. todo:: link this section with operational semantics
 
 
-.. _relaxed-traces:
+.. _relaxed-trace:
 
 Traces
 ~~~~~~

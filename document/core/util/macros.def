@@ -821,7 +821,6 @@
 
 .. |MITYPE| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{type}}
 .. |MIDATA| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{data}}
-.. |MITIME| mathdef:: \xref{exec/runtime}{syntax-meminst}{\K{time}}
 
 .. |GIVALUE| mathdef:: \xref{exec/runtime}{syntax-globalinst}{\K{value}}
 .. |GIMUT| mathdef:: \xref{exec/runtime}{syntax-globalinst}{\K{mut}}
@@ -847,6 +846,7 @@
 .. |externval| mathdef:: \xref{exec/runtime}{syntax-externval}{\X{externval}}
 .. |externinst| mathdef:: \xref{exec/runtime}{syntax-externinst}{\X{externinst}}
 
+.. |inst| mathdef:: \xref{exec/runtime}{syntax-store}{\X{inst}}
 .. |moduleinst| mathdef:: \xref{exec/runtime}{syntax-moduleinst}{\X{moduleinst}}
 .. |funcinst| mathdef:: \xref{exec/runtime}{syntax-funcinst}{\X{funcinst}}
 .. |tableinst| mathdef:: \xref{exec/runtime}{syntax-tableinst}{\X{tableinst}}

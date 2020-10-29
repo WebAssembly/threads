@@ -464,7 +464,7 @@ Memory Instructions
    S; F; (\I32.\CONST~k)~(t.\LOAD({N}\K{\_}\sx)^?~\memarg) &\stepto& S; F; \TRAP
    \end{array}
    \\ \qquad
-     (\otherwise, \iff \meminst.\MISHARE = \UNSHARED)
+     (\otherwise, \iff \meminst.\MITYPE = \limits~\UNSHARED)
    \\[1ex]
    %
    \begin{array}{lcl@{\qquad}l}
