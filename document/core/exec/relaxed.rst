@@ -18,12 +18,10 @@ Traces
 .. todo:: define, explain
 
 
-.. _relaxed-valid:
+.. _relaxed-consistent:
 
-Validity
-~~~~~~~~
-
-.. todo:: rename to avoid confusion with validation
+Consistency
+~~~~~~~~~~~
 
 .. todo:: define auxiliary functions (either here or in Runtime Structure)
 
@@ -31,9 +29,9 @@ Validity
 
 .. math::
    \frac{
-     \forall r, \, \vdash_r \X{tr} \validwith
+     \forall r, \, \vdash_r \X{tr} \consistentwith
    }{
-     \vdash \X{tr} \valid
+     \vdash \X{tr} \consistent
    }
 
 .. math::
@@ -47,7 +45,7 @@ Validity
          \F{overlap}_r(\evt_I, \evt) \Rightarrow \evt_I \prechb \evt
      \end{array}
    }{
-     \vdash_r \X{tr} \validwith
+     \vdash_r \X{tr} \consistentwith
    }
 
 .. math::

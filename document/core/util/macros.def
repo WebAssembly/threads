@@ -1074,8 +1074,10 @@
 
 .. Relaxed Memory Model Judgements
 
-.. |valid| mathdef:: \mathrel{\mbox{valid}}
-.. |validwith| mathdef:: \mathrel{\mbox{valid-with}}
+.. todo:: include xrefs
+
+.. |consistent| mathdef:: \mathrel{\mbox{consistent}}
+.. |consistentwith| mathdef:: \mathrel{\mbox{consistent-with}}
 .. |readseachfrom| mathdef:: \mathrel{\mbox{reads-each-from}}
 .. |readsfrom| mathdef:: \mathrel{\mbox{reads-from}}
 .. |notear| mathdef:: \mathrel{\mbox{no-tear}}
