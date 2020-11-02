@@ -51,81 +51,6 @@ It is either a sequence of :ref:`values <syntax-val>` or a :ref:`trap <syntax-tr
    In the current version of WebAssembly, a result can consist of at most one value.
 
 
-.. index:: ! store, function instance, table instance, memory instance, global instance, module, allocation
-   pair: abstract syntax; store
-.. _syntax-store:
-.. _store:
-
-Store
-~~~~~
-
-.. todo:: since allocation order is non-deterministic in the presence of threads, we can no longer use ordered lists but need mappings from abstract addresses to instances.
-
-A *store* represents all state that can be manipulated by WebAssembly programs within a single :ref:`thread <syntax-thread>`.
-It consists of the runtime representation of all *instances* of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tableinst>`, :ref:`memories <syntax-meminst>`, and :ref:`globals <syntax-globalinst>` that have been :ref:`allocated <alloc>` during the life time of that thread. [#gc]_
-
-Syntactically, a store is defined as a :ref:`record <notation-record>` listing the existing instances of each category:
-
-.. math::
-   \begin{array}{llll}
-   \production{(store)} & \store &::=& \{~
-     \begin{array}[t]{l@{~}ll}
-     \SFUNCS & \funcinst^\ast, \\
-     \STABLES & \tableinst^\ast, \\
-     \SMEMS & \meminst^\ast, \\
-     \SGLOBALS & \globalinst^\ast ~\} \\
-     \end{array}
-   \end{array}
-
-It is an invariant of the semantics that for all memory instances :math:`\meminst` in a store, :math:`\meminst.\MISHARE = \UNSHARED`.
-
-.. [#gc]
-   In practice, implementations may apply techniques like garbage collection to remove objects from the store that are no longer referenced.
-   However, such techniques are not semantically observable,
-   and hence outside the scope of this specification.
-
-
-Convention
-..........
-
-* The meta variable :math:`S` ranges over stores where clear from context.
-
-
-.. index:: ! shared store, memory instance, module, allocation
-   pair: abstract syntax; shared store
-.. _syntax-sharedstore:
-.. _sharedstore:
-
-Shared Store
-~~~~~~~~~~~~
-
-.. todo:: since allocation order is non-deterministic in the presence of threads, we can no longer use ordered lists but need mappings from abstract addresses to instances.
-
-The *shared store* represents all global state that can be manipulated by WebAssembly programs and is potentially shared between multiple :ref:`threads <syntax-thread>`.
-It consists of the runtime representation of all *instances* of :ref:`shared <syntax-shared>` :ref:`memories <syntax-meminst>` that have been :ref:`allocated <alloc>` by any thread during the life time of the abstract machine.
-
-Syntactically, the shared store is defined as a :ref:`record <notation-record>` listing the existing instances of each sharable category:
-
-.. math::
-   \begin{array}{llll}
-   \production{(shared store)} & \sharedstore &::=& \{~
-     \begin{array}[t]{l@{~}ll}
-     \SSMEMS & \meminst^\ast, \\
-     \end{array}
-   \end{array}
-
-It is an invariant of the semantics that for all memory instances :math:`\meminst` in a shared store, :math:`\meminst.\MISHARE = \SHARED`.
-
-.. note::
-   In future versions of WebAssembly, other entities than just memories may be sharable.
-
-
-Convention
-..........
-
-* The meta variable :math:`\X{SS}` ranges over shared stores where clear from context.
-
-
 .. index:: ! address, store, function instance, table instance, memory instance, global instance, embedder
    pair: abstract syntax; function address
    pair: abstract syntax; table address
@@ -172,6 +97,121 @@ even where this identity is not observable from within WebAssembly code itself
    which are *static*, module-local references to their original definitions.
    A *memory address* |memaddr| denotes the abstract address *of* a memory *instance* in the store,
    not an offset *inside* a memory instance.
+
+
+
+.. index:: ! time stamp, ! happens-before, thread, event
+.. _syntax-time:
+.. _relaxed-prechb:
+
+Time Stamps
+~~~~~~~~~~~
+
+In order to track the relative ordering in the execution of multiple :ref:`threads <syntax-thread>` and the occurrence of :ref:`events <syntax-evt>`,
+the semantics uses a notion of abstract *time stamps*.
+
+.. math::
+   \begin{array}{llll}
+   \production{(time stamp)} & \time &::=&
+     \dots \\
+   \end{array}
+
+Each time stamp denotes a discrete point in time, and is drawn from an infinite set.
+The shape of time stamps is not specified or observable.
+However, time stamps form a partially ordered set:
+a time stamp :math:`\time_1` *happens before* :math:`\time_2`, written :math:`\time_1 \prechb \time_2`, if it is known to have occurred earlier in time.
+
+.. note:
+
+   Although the semantics choses time stamps non-deterministically,
+   it includes conditions that enforce some ordering constraints on the chosen values, thereby imposing an ordering on execeution and events that guarantees well-defined causalities.
+
+   The ordering is partial because some events have an unspecified relative order -- in particular, when they occur in separate threads without intervening synchronisation.
+
+.. _relaxed-prectot:
+.. todo:: define prectot here as well?
+
+
+.. _notation-attime:
+
+Conventions
+...........
+
+* The meta variable :math:`h` ranges over time stamps where clear from context.
+
+* The notation :math:`(X~\AT~\time)` is a shorthand for the :ref:`record <notation-record>` :math:`\{\ATVAL~X, \ATTIME~\time\}` that annotates a semantic object :math:`X` with a time stamp :math:`\time`.
+
+
+.. index:: ! store, address, function instance, table instance, memory instance, global instance, module, allocation
+   pair: abstract syntax; store
+.. _store:
+
+Store
+~~~~~
+
+A *store* represents state that can be manipulated by WebAssembly programs.
+The overall state of the WebAssembly abstract machine can consist of multiple disjoint stores,
+separated into per-:ref:`thread <syntax-thread>` *local stores* and a single *shared store*. [#cite-oopsla2019]_
+
+.. _syntax-store:
+
+Local Store
+...........
+
+A *local store* represents all state that can be manipulated by programs within a single :ref:`thread <syntax-thread>`.
+It consists of the runtime representation of all *instances* of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tableinst>`, :ref:`memories <syntax-meminst>`, and :ref:`globals <syntax-globalinst>` that have been :ref:`allocated <alloc>` during the life time of that thread. [#gc]_
+
+Syntactically, a local store is defined as a :ref:`map <notation-map>` from known :ref:`addresses <syntax-addr>` to the allocated instances of each category:
+
+.. math::
+   \begin{array}{llll}
+   \production{(store)} & \store &::=&
+     (\addr \mapsto \inst)^\ast \\
+   \production{(instance)} & \inst &::=&
+     \funcinst ~|~
+     \tableinst ~|~
+     \meminst ~|~
+     \globalinst \\
+   \end{array}
+
+It is an invariant of the semantics that none of the memory instances :math:`\meminst` in a store is :math:`shared <syntax-shared>`.
+
+.. [#gc]
+   In practice, implementations may apply techniques like garbage collection to remove objects from the store that are no longer referenced.
+   However, such techniques are not semantically observable,
+   and hence outside the scope of this specification.
+
+
+.. index:: ! shared store, memory instance, module, allocation
+   pair: abstract syntax; shared store
+.. _syntax-sharedstore:
+.. _sharedstore:
+
+Shared Store
+............
+
+The *shared store* represents all global state that can be shared between multiple :ref:`threads <syntax-thread>`.
+It consists of the runtime representation of all *instances* of :ref:`shared <syntax-shared>` :ref:`memories <syntax-meminst>` that have been :ref:`allocated <alloc>` by any thread during the life time of the abstract machine.
+
+Syntactically, the shared store is defined as a :ref:`map <notation-map>` from known :ref:`addresses <syntax-addr>` to instances :ref:`annotated <notation-attime>` with the :ref:`time <syntax-time>` of their creation.
+
+.. math::
+   \begin{array}{llll}
+   \production{(shared store)} & \sharedstore &::=&
+     (\memaddr \mapsto \meminst \AT \time)^\ast, \\
+   \end{array}
+
+It is an invariant of the semantics that all memory instances :math:`\meminst` in a shared store are :math:`shared <syntax-shared>`.
+
+.. note::
+   In future versions of WebAssembly, other entities than just memories may be sharable and contained in a shared store.
+
+Conventions
+...........
+
+* The meta variable :math:`S` ranges over local stores where clear from context.
+
+* The meta variable :math:`\X{SS}` ranges over shared stores where clear from context.
 
 
 .. index:: ! instance, function type, function instance, table instance, memory instance, global instance, export instance, table address, memory address, global address, index, name
@@ -277,24 +317,27 @@ It is an invariant of the semantics that the length of the element vector never 
 Memory Instances
 ~~~~~~~~~~~~~~~~
 
+.. todo:: We used to update the memory type when a memory is grown. This does not work for shared memories. In fact, the "current" type of a shared memory is nondeterministic. We need to model that during instantiation somehow.
+
 A *memory instance* is the runtime representation of a linear :ref:`memory <syntax-mem>`.
-A memory instance records an optional maximum size for a memory, if one was specified at the definition site of the memory, and a flag indicating whether the memory can be :ref:`shared <syntax-shared>` across threads.
+It records its original :ref:`memory type <syntax-memtype>`
+and takes one of two different shapes depending on whether that type is :ref:`shared <syntax-shared>` or not.
+It is an invariant of the semantics that the shape always matches the type.
 
 .. math::
    \begin{array}{llll}
    \production{(memory instance)} & \meminst &::=&
-     \{ \MIMAX~\u32^?, \MISHARE~\UNSHARED, \MIDATA~\vec(\byte) \} \\ &&|&
-     \{ \MIMAX~\u32^?, \MISHARE~\SHARED \} \\
+     \{ \MITYPE~\memtype, \MIDATA~\vec(\byte) \} \\ &&|&
+     \{ \MITYPE~\memtype \} \\
    \end{array}
 
-Like in a :ref:`memory type <syntax-memtype>`, the maximum size in a memory instance is given in units of the WebAssembly *page size*, which is defined to be the constant :math:`65536` -- abbreviated :math:`64\,\F{Ki}`.
+The instance of a memory with :ref:`unshared <syntax-unshared>` :ref:`type <syntax-memtype>` holds a vector of :ref:`bytes <syntax-byte>` directly representing its state.
+The length of the vector always is a multiple of the WebAssembly *page size*, which is defined to be the constant :math:`65536` -- abbreviated :math:`64\,\F{Ki}`.
+The bytes can be mutated through :ref:`memory instructions <syntax-instr-memory>`, the execution of an active :ref:`data segment <syntax-data>`, or by external means provided by the :ref:`embedder <embedder>`.
+It is an invariant of the semantics that the length of the byte vector, divided by page size, never exceeds the maximum size of :math:`\memtype`, if present.
 
-The instance of a non-shared memory holds a vector of :ref:`bytes representing its state.
-For :ref:`shared <syntax-shared>` memories, no state is recorded in the instance itself.
-WebAssembly :ref:`threads <thread>` expose a *weak memory model* in which reads, writes, and other accesses to a shared memory instance can be reordered in a non-deterministic fashion that mirrors the behavior of hardware.
-Instead of representing the contents of a memory directly in an the abstract machine hence separately records traces of corresponding memory :ref:`events <syntax-evt>` that describe all accesses that occur.
-
-.. todo:: link "traces" to syntax-trace, when that is defined.
+For memories of :ref:`shared <syntax-shared>` :ref:`type <syntax-memtype>`, no state is recorded in the instance itself.
+Instead of representing the contents of a memory directly the abstract machine hence separately records :ref:`traces <relaxed-trace>` of corresponding memory :ref:`events <syntax-evt>` that describe all accesses that occur.
 
 
 .. index:: ! global instance, global, value, mutability, instruction, embedder
@@ -515,10 +558,10 @@ In order to express the reduction of :ref:`traps <trap>`, :ref:`calls <syntax-ca
      \INVOKE~\funcaddr \\ &&|&
      \INITELEM~\tableaddr~\u32~\funcidx^\ast \\ &&|&
      \INITDATA~\memaddr~\u32~\byte^\ast \\ &&|&
-     \WAITX~\loc~n \\ &&|&
-     \NOTIFYX~\loc~n~m \\ &&|&
      \LABEL_n\{\instr^\ast\}~\instr^\ast~\END \\ &&|&
-     \FRAME_n\{\frame\}~\instr^\ast~\END \\
+     \FRAME_n\{\frame\}~\instr^\ast~\END \\ &&|&
+     \WAITX~\loc~n \\ &&|&
+     \NOTIFYX~\loc~n~m \\
    \end{array}
 
 The |TRAP| instruction represents the occurrence of a trap.
@@ -532,13 +575,15 @@ The |INITELEM| and |INITDATA| instructions perform initialization of :ref:`eleme
 .. note::
    The reason for splitting instantiation into individual reduction steps is to provide a semantics that is compatible with future extensions like threads.
 
-.. todo:: describe |WAITX| and |NOTIFYX|
-
-.. todo:: add host instruction
-
 The |LABEL| and |FRAME| instructions model :ref:`labels <syntax-label>` and :ref:`frames <syntax-frame>` :ref:`"on the stack" <exec-notation>`.
 Moreover, the administrative syntax maintains the nesting structure of the original :ref:`structured control instruction <syntax-instr-control>` or :ref:`function body <syntax-func>` and their :ref:`instruction sequences <syntax-instr-seq>` with an |END| marker.
 That way, the end of the inner instruction sequence is known when part of an outer sequence.
+
+.. todo:: describe |WAITX| and |NOTIFYX|
+
+.. todo:: add allocation instructions
+
+.. todo:: add host instruction
 
 .. note::
    For example, the :ref:`reduction rule <exec-block>` for |BLOCK| is:
@@ -599,74 +644,26 @@ This definition allows to index active labels surrounding a :ref:`branch <syntax
    The selected label is identified through the :ref:`label index <syntax-labelidx>` :math:`l`, which corresponds to the number of surrounding |LABEL| instructions that must be hopped over -- which is exactly the count encoded in the index of a block context.
 
 
-.. index:: ! time stamp, ! happens-before, thread, event
-.. _syntax-time:
-
-Time Stamps
-~~~~~~~~~~~
-
-In order to track the relative ordering in the execution of :ref:`threads <syntax-thread>` and occurrence of :ref:`events <syntax-evt>`,
-the semantics uses a notion of *time stamps*.
-
-.. math::
-   \begin{array}{llll}
-   \production{(time stamp)} & \time &::=&
-     \dots \\
-   \end{array}
-
-The shape of time values is not specified or observable.
-However, time values form a partially ordered set:
-a time stamp :math:`\time_1` *happens before* :math:`\time_2`, written :math:`\time_1 \prec \time_2`, if it is known to have occurred earlier in time.
-
-.. note:
-
-   Although the semantics choses time values non-deterministically,
-   it includes conditions that enforce some ordering constraints on the chosen values, thereby imposing an ordering on execeution and events that guarantees well-defined causalities.
-
-   The ordering is partial because some events have an unspecified relative order -- in particular, when they occur in separate threads without intervening synchronisation.
-
-
-Convention
-..........
-
-* We use the notation :math:`(x~\AT~\time)` for pair of a semantic object :math:`x` and a time stamp :math:`\time`.
-
-
-.. index:: ! configuration, ! thread, store, shared store, time stamp, instruction
-.. _syntax-thread:
-.. _syntax-config:
-
-Configurations
-~~~~~~~~~~~~~~
-
-A *configuration* consists of the current :ref:`shared store <syntax-sharedstore>` and a set of executing *threads*.
-
-A thread is a computation over a sequence of remaining :ref:`instructions <syntax-instr>`, annotated with the :ref:`time <syntax-time>` it was last active.
-
-.. math::
-   \begin{array}{llcl}
-   \production{(configuration)} & \config &::=&
-     \sharedstore; \thread^\ast \\
-   \production{(thread)} & \thread &::=&
-     \store; \instr^\ast~\AT~\time \\
-   \end{array}
-
-
-.. index:: ! action, external instance, address, store, memory, table, value, byte
+.. index:: ! event, ! action, time stamp, external instance, address, store, memory, table, value, byte
+.. _syntax-evt:
 .. _syntax-act:
 .. _syntax-ord:
 .. _syntax-loc:
 .. _syntax-fld:
 .. _syntax-storeval:
 
-Actions
-~~~~~~~
+Events
+~~~~~~
 
-The interaction of a WebAssembly computation with the :ref:`shared store <syntax-sharedstore>` is described through *actions*, such as reads and writes.
-The execution of every individual :ref:`instruction <syntax-instr>` can perform a set of such actions.
+The interaction of a computation with the :ref:`shared store <syntax-sharedstore>` is described through *events*.
+An event is a (possibly empty) set of *actions*, such as reads and writes,
+that are atomically performed by the execution of an individual :ref:`instruction <syntax-instr>`.
+Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely identifies it.
 
 .. math::
    \begin{array}{llcl}
+   \production{(event)} & \evt &::=&
+     \act^\ast~\AT~\time \\
    \production{(action)} & \act &::=&
      \ARD_{\ord}~\loc~\storeval \\&&|&
      \AWR_{\ord}~\loc~\storeval \\&&|&
@@ -690,7 +687,7 @@ They each access an :ref:`external instance <syntax-externinst>` at an abstract 
 Such a location consists of an :ref:`address <syntax-addr>` of a :ref:`shared <syntax-shared>` :ref:`memory <syntax-meminst>` instance and a symbolic *field* name in the respective object.
 This is either |LLEN| for the size or |LDATA| for the vector of bytes.
 
-In each case read and write actions record the *store value* that has been read or written, which is either a regular :ref:`value <syntax-val>` or a sequence of :ref:`bytes <syntax-byte>`, depending on the location accessed.
+In each case, read and write actions record the *store value* that has been read or written, which is either a regular :ref:`value <syntax-val>` or a sequence of :ref:`bytes <syntax-byte>`, depending on the location accessed.
 An |ARMW| event, performing an atomic read-modify-write access, records both the store values read (first) and written (second);
 it is an invariant of the semantics that both are either regular values of the same type or byte sequences of the same length.
 
@@ -707,38 +704,115 @@ Its form and meaning is outside the scope of this specification.
    An :ref:`embedder <embedder>` may define a custom set of host actions and respective ordering constraints to model other forms of interactions that are not expressible within WebAssembly, but whose ordering relative to WebAssembly events is relevant for the combined semantics.
 
 
-.. TODO, move elsewhere
-   Although not explicit in this representation of a memory instance,
-
-   It is an invariant of the semantics that the length of the byte vector, divided by page size, never exceeds the maximum size, if present.
-
-
 Convention
 ..........
 
 * The actions :math:`\ARD_{\ord}` and :math:`\AWR_{\ord}` are abbreviated to :math:just `\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
 
+.. todo:: define notational shorthands over actions and events (or better put that in relaxed.rst?)
 
-.. todo:: define notational shorthands over actions
 
+.. index:: ! configuration, ! thread, store, shared store, time stamp, instruction, function, frame, ! termination
+.. _syntax-thread:
+.. _syntax-config:
 
-.. index:: ! event, action, time stamp
-.. _syntax-evt:
+Configurations
+~~~~~~~~~~~~~~
 
-Events
-~~~~~~
+A *global configuration* describes the overall state of the abstract machine.
+It consists of the current :ref:`shared store <syntax-sharedstore>` and a set of executing *threads*.
 
-The (possibly empty) set of :ref:`actions <syntax-act>` performed by an individual :ref:`instruction <syntax-instr>` collectively forms an atomic *event*. Each event is also associated with a :ref:`time stamp <syntax-time>` that uniquely identifies the event.
+A thread consists of a local :ref:`store <syntax-store>` and a computation over a sequence of remaining :ref:`instructions <syntax-instr>`, :ref:`annotated <notation-attime>` with the :ref:`time <syntax-time>` it was last active.
+
+A *local configuration* describes the state of an active function.
+It consists of the local :ref:`store <syntax-store>` of the respective thread, the :ref:`frame <syntax-frame>` of the function, and the sequence of remaining :ref:`instructions <syntax-instr>` in that function.
 
 .. math::
    \begin{array}{llcl}
-   \production{(event)} & \evt &::=&
-     \act^\ast~\AT~\time \\
+   \production{(global configuration)} & \config &::=&
+     \sharedstore; \thread^\ast \\
+   \production{(thread)} & \thread &::=&
+     \store; \instr^\ast~\AT~\time \\
+   \production{(local configuration)} & \lconfig &::=&
+     \store; \frame; \instr^\ast \\
    \end{array}
 
-.. todo:: define notational shorthands over events
+A thread has *terminated* when its instruction sequence has been reduced to a :ref:`result <syntax-result>`,
+that is, either a sequence of :ref:`values <syntax-val>` or to a |TRAP|.
 
-.. todo:: define memory model and axiomatic constraints
+
+Convention
+..........
+
+* The meta variable :math:`P` ranges over threads where clear from context.
+
+
+.. index:: ! reduction, configuration, ! termination
+
+Reduction
+~~~~~~~~~
+
+Formally, WebAssembly computation is defined by two *small-step reduction* relations on global and local :ref:`configurations <syntax-config>`
+that define how a single step of execution modifies these configurations, respectively.
+
+
+Global Reduction
+................
+
+*Global reduction* is concerned with allocation in the global store and synchronization between multiple :ref:`threads <syntax-thread>`.
+It emits a (possibly empty) set of events that are produced by the corresponding step of computation.
+
+Formally, glboal reduction is a relation
+
+.. math::
+   \config \stepto^{\evt^\ast} \config
+
+defined by inductive rewrite rules on global configurations.
+
+The following structural rule for global reduction delegates to local reduction for single thread execution:
+
+.. math::
+   \begin{array}{@{}c@{}}
+   \X{SS}; P_1^\ast~(S; \instr^\ast \AT h)~P_2^\ast
+     \qquad \stepto^{\act^\ast \AT h'} \qquad
+     \X{SS}; P_1^\ast~(S'; {\instr'}^\ast \AT h')~P_2^\ast \\
+     \qquad (
+       \begin{array}[t]{@{}r@{~}l@{}}
+       \iff & S; F_\epsilon; \instr^\ast \stepto^{\act^\ast} S'; F'; {\instr'}^\ast) \\
+       \wedge & h \prechb h' \\
+       \wedge & (S(\addr(\act)).\ATTIME \prechb h')^\ast \\
+       \wedge & F_\epsilon = \{\AMODULE~\{\}\}) \\
+       \end{array}
+   \end{array}
+
+.. note::
+   The :ref:`time stamp <syntax-time>` :math:`h'` indicates the point in time at which the computation step takes place,
+   marking both the emitted atomic event and the updated time of the thread.
+   This time stamp is chosen non-deterministically in the rule.
+   However, the second side condition ensures that the time :math:`h` of the last activity of the thread *happened before* :math:`h'`, thereby imposing *program order* for any events originating from the same thread.
+   Similarly, the third side condition ensures that the allocation of any object accessed *happened before* :math:`h'`, ensuring causality and preventing use before definition.
+
+   The empty :ref:`frame <syntax-frame>` :math:`F_\epsilon` is a dummy for initiating the reduction globally.
+   It is an invariant of the semantics that it will never be accessed,
+   because no local definitions are defined outside a function.
+
+
+Local Reduction
+...............
+
+*Local reduction* defines the execution of individual :ref:`instructions <syntax-instr>`.
+Each execution step can perform a (possibly empty) set of :ref:`actions <syntax-act>`.
+
+Formally, this is described by a labelled relation
+
+.. math::
+   \lconfig \stepto^{\act^\ast} \lconfig
+
+To avoid unnecessary clutter, the following conventions are employed in the notation for local reduction rules:
+
+* The configuration's store :math:`S` is omitted from rules that do not touch it.
+
+* The configuration's frame :math:`F` is omitted from rules that do not touch it.
 
 
 .. index:: ! evaluation context, instruction, trap, label, frame, value
@@ -747,9 +821,7 @@ The (possibly empty) set of :ref:`actions <syntax-act>` performed by an individu
 Evaluation Contexts
 ...................
 
-.. todo:: have to introduce two levels of reduction now, one on single threads and one reaction rule on configurations
-
-Finally, the following definition of *evaluation context* and associated structural rules enable reduction inside instruction sequences and administrative forms as well as the propagation of traps:
+The following definition of *evaluation context* and associated structural rules enable reduction inside instruction sequences and administrative forms as well as the propagation of traps:
 
 .. math::
    \begin{array}{llll}
@@ -770,9 +842,6 @@ Finally, the following definition of *evaluation context* and associated structu
    S; F; \FRAME_n\{F'\}~\TRAP~\END &\stepto& S; F; \TRAP \\
    \end{array}
 
-Reduction terminates when a thread's instruction sequence has been reduced to a :ref:`result <syntax-result>`,
-that is, either a sequence of :ref:`values <syntax-val>` or to a |TRAP|.
-
 .. note::
    The restriction on evaluation contexts rules out contexts like :math:`[\_]` and :math:`\epsilon~[\_]~\epsilon` for which :math:`E[\TRAP] = \TRAP`.
 
@@ -787,3 +856,16 @@ that is, either a sequence of :ref:`values <syntax-val>` or to a |TRAP|.
       E = (\F64.\CONST~x_1)~[\_]~(\F64.\CONST~x_3)~\F64.\ADD~\F64.\MUL
 
    Moreover, this is the *only* possible choice of evaluation context where the contents of the hole matches the left-hand side of a reduction rule.
+
+
+.. index:: ! host reduction, host
+
+Host Reduction
+..............
+
+.. todo:: define
+
+
+.. [#cite-oopsla2019]
+   The semantics of shared stores is derived from the following article:
+   Conrad Watt, Andreas Rossberg, Jean Pichon-Pharabod. |OOPSLA2019|_. Proceedings of the ACM on Programming Languages (OOPSLA 2019). ACM 2019.

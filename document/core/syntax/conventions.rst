@@ -47,6 +47,7 @@ The following conventions are adopted in defining grammar rules for abstract syn
 .. _notation-index:
 .. _notation-slice:
 .. _notation-replace:
+.. _notation-map:
 .. _notation-record:
 .. _notation-project:
 .. _notation-concat:
@@ -82,7 +83,19 @@ Moreover, the following conventions are employed:
   (similarly for :math:`x^\ast`, :math:`x^+`, :math:`x^?`).
   This implicitly expresses a form of mapping syntactic constructions over a sequence.
 
-Productions of the following form are interpreted as *records* that map a fixed set of fields :math:`\K{field}_i` to "values" :math:`A_i`, respectively:
+Sequences of the following form are interpreted as *maps* from a set of distinct "keys" :math:`A_i` to "values" :math:`B_i`, respectively:
+
+.. math::
+   \X{m} ~::=~ (A \mapsto B)^\ast
+
+The following notation is adopted for manipulating such maps:
+
+* :math:`m(A)` denotes :math:`B` if the mapping :math:`A \mapsto B` is contained in :math:`m`.
+
+* :math:`m \with (A) = B` denotes the same map as :math:`m`,
+  except that the mapping for :math:`A` is replaced with :math:`B`.
+
+Productions of the following form are interpreted as *records* that map a fixed set of distinct fields :math:`\K{field}_i` to "values" :math:`A_i`, respectively:
 
 .. math::
    \X{r} ~::=~ \{ \K{field}_1~A_1, \K{field}_2~A_2, \dots \}

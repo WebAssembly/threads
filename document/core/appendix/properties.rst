@@ -237,18 +237,41 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
 .. index:: memory type, memory instance, limits, byte
 .. _valid-meminst:
 
-:ref:`Memory Instances <syntax-meminst>` :math:`\{ \MIDATA~b^n, \MIMAX~m^? \}`
-..............................................................................
+:ref:`Memory Instances <syntax-meminst>` :math:`\{ \MITYPE~\limits~s, \MIDATA~b^\ast \}`
+........................................................................................
 
-* The :ref:`limits <syntax-limits>` :math:`\{\LMIN~n, \LMAX~m^?\}` must be :ref:`valid <valid-limits>` within range :math:`2^{16}`.
+* The :ref:`memory type <syntax-memtype>` :math:`\{\LMIN~n, \LMAX~m^?\}~s` must be :ref:`valid <valid-memtype>`.
 
-* Then the memory instance is valid with :ref:`memory type <syntax-memtype>` :math:`\{\LMIN~n, \LMAX~m^?\}`.
+* The :ref:`sharing mode <syntax-share>` :math:`s` must be :math:`\UNSHARED`.
+
+* The length of :math:`b^\ast` must equal :math:`\limits.\LMIN` multiplied by the :ref:`page size <page-size>` :math:`64\,\F{Ki}`.
+
+* Then the memory instance is valid with :ref:`memory type <syntax-memtype>` :math:`\limits~\UNSHARED`.
 
 .. math::
    \frac{
-     \vdashlimits \{\LMIN~n, \LMAX~m^?\} : 2^{16}
+     \vdashmemtype \limits~\UNSHARED \ok
+     \qquad
+     n = \limits.\LMIN \cdot 64\,\F{Ki}
    }{
-     S \vdashmeminst \{ \MIDATA~b^n, \MIMAX~m^? \} : \{\LMIN~n, \LMAX~m^?\}
+     S \vdashmeminst \{ \MITYPE~\limits~\UNSHARED, \MIDATA~b^n \} : \limits~\UNSHARED
+   }
+
+
+:ref:`Memory Instances <syntax-meminst>` :math:`\{ \MITYPE~\limits~s \}`
+........................................................................
+
+* The :ref:`memory type <syntax-memtype>` :math:`\{\LMIN~n, \LMAX~m^?\}~s` must be :ref:`valid <valid-memtype>`.
+
+* The :ref:`sharing mode <syntax-share>` :math:`s` must be :math:`\SHARED`.
+
+* Then the memory instance is valid with :ref:`memory type <syntax-memtype>` :math:`\limits~\SHARED`.
+
+.. math::
+   \frac{
+     \vdashmemtype \limits~\SHARED \ok
+   }{
+     S \vdashmeminst \{ \MITYPE~\limits~\SHARED \} : \limits~\SHARED
    }
 
 
@@ -672,21 +695,32 @@ a store state :math:`S'` extends state :math:`S`, written :math:`S \extendsto S'
    }
 
 
-.. index:: memory instance
+.. index:: memory instance, memory type
 .. _extend-meminst:
 
-:ref:`Memory Instance <syntax-meminst>` :math:`\meminst`
-........................................................
+:ref:`Unshared Memory Instance <syntax-meminst>` :math:`\{\MITYPE~\X{mt}, \MIDATA~b^n\}`
+........................................................................................
 
-* The length of :math:`\meminst.\MIDATA` must not shrink.
+* The :ref:`memory type <syntax-memtype>` :math:`\X{mt}` must remain unchanged.
 
-* The value of :math:`\meminst.\MIMAX` must remain unchanged.
+* The length :math:`n` of the data must not shrink.
 
 .. math::
    \frac{
      n_1 \leq n_2
    }{
-     \vdashmeminstextends \{\MIDATA~b_1^{n_1}, \MIMAX~m\} \extendsto \{\MIDATA~b_2^{n_2}, \MIMAX~m\}
+     \vdashmeminstextends \{\MITYPE~\X{mt}, \MIDATA~b_1^{n_1}\} \extendsto \{\MITYPE~\X{mt}, \MIDATA~b_2^{n_2}\}
+   }
+
+:ref:`Shared Memory Instance <syntax-meminst>` :math:`\{\MITYPE~\X{mt}\}`
+.........................................................................
+
+* The :ref:`memory type <syntax-memtype>` :math:`\X{mt}` must remain unchanged.
+
+.. math::
+   \frac{
+   }{
+     \vdashmeminstextends \{\MITYPE~\X{mt}\} \extendsto \{\MITYPE~\X{mt}\}
    }
 
 
@@ -745,6 +779,15 @@ In other words, every thread in a valid configuration either runs forever, traps
 Consequently, given a :ref:`valid store <valid-store>`, no computation defined by :ref:`instantiation <exec-instantiation>` or :ref:`invocation <exec-invocation>` of a valid module can "crash" or otherwise (mis)behave in ways not covered by the :ref:`execution <exec>` semantics given in this specification.
 
 
+.. index:: relaxed memory, ! sequential consistency
+
+Sequential Consistency of Data-Race-Free Programs
+-------------------------------------------------
+
+.. todo:: explain, state, cite [#cite-oopsla2019]_
+
+
+
 .. [#cite-pldi2017]
    The formalization and theorems are derived from the following article:
    Andreas Haas, Andreas Rossberg, Derek Schuff, Ben Titzer, Dan Gohman, Luke Wagner, Alon Zakai, JF Bastien, Michael Holman. |PLDI2017|_. Proceedings of the 38th ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI 2017). ACM 2017.
@@ -752,3 +795,7 @@ Consequently, given a :ref:`valid store <valid-store>`, no computation defined b
 .. [#cite-cpp2018]
    A machine-verified version of the formalization and soundness proof is described in the following article:
    Conrad Watt. |CPP2018|_. Proceedings of the 7th ACM SIGPLAN Conference on Certified Programs and Proofs (CPP 2018). ACM 2018.
+
+.. [#cite-oopsla2019]
+   The formalization of the relaxed memory model is derived from the following article:
+   Conrad Watt, Andreas Rossberg, Jean Pichon-Pharabod. |OOPSLA2019|_. Proceedings of the ACM on Programming Languages (OOPSLA 2019). ACM 2019.

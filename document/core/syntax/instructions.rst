@@ -312,28 +312,24 @@ Instructions in this group are concerned with accessing :ref:`linear memory <syn
    \end{array}
 
 Memory is accessed atomically using the |ATOMICLOAD|, |ATOMICSTORE|, and
-|ATOMICRMW| instructions. All instructions take a *memory immediate*
-|memarg|, just like their non-atomic equivalents. Unlike non-atomic memory
-access instructions, only integer :ref:`value types <syntax-valtype>` can be
-used. Also unlike non-atomic memory access instructions, there are no
-sign extension modes; atomic memory accesses are always zero-extending.
+|ATOMICRMW| instructions.
+All instructions take a *memory immediate* |memarg|, just like their non-atomic equivalents.
+Unlike non-atomic memory access instructions, only integer :ref:`value types <syntax-valtype>` can be used.
+Also unlike non-atomic memory access instructions, there are no sign extension modes; atomic memory accesses are always zero-extending.
 
-The |ATOMICRMW| instructions are `read-modify-write <https://en.wikipedia.org/wiki/Read-modify-write>`_
-instructions. They each have an :ref:`atomicop <syntax-atomicop>`, which
-specifies how memory will be modified. Each instruction returns the value read
-from memory before modification. The |ATOMICXCHG| :ref:`atomicop <syntax-atomicop>`
-doesn't use the read value, but instead stores its argument unmodified. The
-|ATOMICCMPXCHG| :ref:`atomicop <syntax-atomicop>` is similar, but only performs
-this action conditionally, if the read value is equal to a provided comparison
-argument. All other :ref:`atomicops <syntax-atomicop>` have behavior of the
-:ref:`ibinop <syntax-ibinop>` of the same name.
+The |ATOMICRMW| instructions are `read-modify-write <https://en.wikipedia.org/wiki/Read-modify-write>`_ instructions.
+They each have an :ref:`atomicop <syntax-atomicop>`, which specifies how memory will be modified.
+Each instruction returns the value read from memory before modification.
+The |ATOMICXCHG| :ref:`atomicop <syntax-atomicop>` doesn't use the read value, but instead stores its argument unmodified.
+The |ATOMICCMPXCHG| :ref:`atomicop <syntax-atomicop>` is similar, but only performs this action conditionally,
+if the read value is equal to a provided comparison argument.
+All other :ref:`atomicops <syntax-atomicop>` have behavior of the :ref:`ibinop <syntax-ibinop>` of the same name.
 
 The |MEMORYATOMICWAIT| and |MEMORYATOMICNOTIFY| instructions provide primitive
-synchronization between :ref:`threads <syntax-thread>`. The |MEMORYATOMICWAIT|
-instructions atomically load a value from the calculated effective address and
-compare it to an expected value. If they are equal, the thread is then
-suspended until a given timeout expires or another thread wakes it. The
-|MEMORYATOMICNOTIFY| instruction wakes threads that are waiting on a given
+synchronization between :ref:`threads <syntax-thread>`.
+The |MEMORYATOMICWAIT| instructions atomically load a value from the calculated effective address and compare it to an expected value.
+If they are equal, the thread is then suspended until a given timeout expires or another thread wakes it.
+The |MEMORYATOMICNOTIFY| instruction wakes threads that are waiting on a given
 address, up to a given maximum.
 
 

@@ -464,7 +464,7 @@ Memory Instructions
    S; F; (\I32.\CONST~k)~(t.\LOAD({N}\K{\_}\sx)^?~\memarg) &\stepto& S; F; \TRAP
    \end{array}
    \\ \qquad
-     (\otherwise, \iff \meminst.\MISHARE = \UNSHARED)
+     (\otherwise, \iff \meminst.\MITYPE = \limits~\UNSHARED)
    \\[1ex]
    %
    \begin{array}{lcl@{\qquad}l}
@@ -474,7 +474,7 @@ Memory Instructions
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \S.\SMEMS[a] ~\mbox{undefined} \\
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
      \wedge & \X{ea} + N/8 \leq n \\
      \wedge & (\ord = \UNORD \vee \X{ea} \mod N/8 = 0) \\
      \wedge & b^\ast = \bytes_{\iN}(n)) \\
@@ -487,7 +487,7 @@ Memory Instructions
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \S.\SMEMS[a] ~\mbox{undefined} \\
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
      \wedge & (\X{ea} + N/8 > n \vee \ord = \SEQCST \wedge \X{ea} \mod N/8 \neq 0)) \\
      \end{array}
    \\[2ex]
@@ -752,7 +752,7 @@ Memory Instructions
    In practice, the choice depends on the :ref:`resources <impl-exec>` available to the :ref:`embedder <embedder>`.
 
 
-.. index:: atomic memory instruction
+.. index:: atomic memory instruction, memory, frame, module
    pair: execution; instruction
    single: abstract syntax; instruction
 .. _exec-instr-atomic-memory:

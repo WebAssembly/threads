@@ -181,6 +181,8 @@ Each variant of :ref:`memory instruction <syntax-instr-memory>` is encoded with 
 Atomic Memory Instructions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. todo:: use LEB for secondary opcodes
+
 Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is encoded with a different byte code. Loads, stores and RMW instructions are followed by the encoding of their |memarg| immediate.
 
 .. _binary-atomic-wait:

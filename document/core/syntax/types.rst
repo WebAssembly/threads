@@ -102,7 +102,9 @@ If no maximum is given, the respective storage can grow to any size.
    pair: memory; type
    pair: memory; limits
 .. _syntax-memtype:
+.. _syntax-share:
 .. _syntax-shared:
+.. _syntax-unshared:
 
 Memory Types
 ~~~~~~~~~~~~

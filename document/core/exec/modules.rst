@@ -59,15 +59,17 @@ The following auxiliary typing rules specify this typing relation relative to a 
 :math:`\EVMEM~a`
 ................
 
-* The store entry :math:`S.\SMEMS[a]` must be a :ref:`memory instance <syntax-meminst>` :math:`\{\MIDATA~b^{n\cdot64\,\F{Ki}}, \MIMAX~m^?, \MISHARE~s\}`, for some :math:`n`.
+.. todo:: refactor semantics to handle shared instances
 
-* Then :math:`\EVMEM~a` is valid with :ref:`external type <syntax-externtype>` :math:`\ETMEM~(\{\LMIN~n, \LMAX~m^?\}~s)`.
+* The store entry :math:`S.\SMEMS[a]` must be a :ref:`memory instance <syntax-meminst>` :math:`\{\MITYPE~\{\LMIN~n, \LMAX~m^?\}~s, \MIDATA~b^{k\cdot64\,\F{Ki}}\}`.
+
+* Then :math:`\EVMEM~a` is valid with :ref:`external type <syntax-externtype>` :math:`\ETMEM~\{\LMIN~k, \LMAX~m^?\}~s`.
 
 .. math::
    \frac{
-     S.\SMEMS[a] = \{ \MIDATA~b^{n\cdot64\,\F{Ki}}, \MIMAX~m^?, \MISHARE~s\}
+     S.\SMEMS[a] = \{ \MITYPE~\{\LMIN~n, \LMAX~m^?\}~s, \MIDATA~b^{k\cdot64\,\F{Ki}} \}
    }{
-     S \vdashexternval \EVMEM~a : \ETMEM~\{\LMIN~n, \LMAX~m^?\}~s
+     S \vdashexternval \EVMEM~a : \ETMEM~\{\LMIN~k, \LMAX~m^?\}~s
    }
 
 
@@ -325,7 +327,7 @@ New instances of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tablei
 
 3. Let :math:`a` be the first free :ref:`memory address <syntax-memaddr>` in :math:`S`.
 
-4. Let :math:`\meminst` be the :ref:`memory instance <syntax-meminst>` :math:`\{ \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}}, \MIMAX~m^?, \MISHARE~s\}` that contains :math:`n` pages of zeroed :ref:`bytes <syntax-byte>`.
+4. Let :math:`\meminst` be the :ref:`memory instance <syntax-meminst>` :math:`\{ \MITYPE~\memtype, \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}} \}` that contains :math:`n` pages of zeroed :ref:`bytes <syntax-byte>`.
 
 5. Append :math:`\meminst` to the |SMEMS| of :math:`S`.
 
@@ -337,7 +339,7 @@ New instances of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tablei
    \mbox{where:} \hfill \\
    \memtype &=& \{\LMIN~n, \LMAX~m^?\}~s \\
    \memaddr &=& |S.\SMEMS| \\
-   \meminst &=& \{ \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}}, \MIMAX~m^?, \MISHARE~s\} \\
+   \meminst &=& \{ \MITYPE~\memtype, \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}} \} \\
    S' &=& S \compose \{\SMEMS~\meminst\} \\
    \end{array}
 
@@ -413,9 +415,11 @@ Growing :ref:`memories <syntax-meminst>`
 
 4. If :math:`\X{len}` is larger than :math:`2^{16}`, then fail.
 
-5. If :math:`\meminst.\MIMAX` is not empty and its value is smaller than :math:`\X{len}`, then fail.
+5. Let :math:`\limits~s` be the structure of the :ref:`memory type <syntax-memtype>` :math:`\meminst.\MITYPE`.
 
-6. Append :math:`n` times :math:`64\,\F{Ki}` :ref:`bytes <syntax-byte>` with value :math:`\hex{00}` to :math:`\meminst.\MIDATA`.
+6. If :math:`\limits.\LMAX` is not empty and its value is smaller than :math:`\X{len}`, then fail.
+
+7. Append :math:`n` times :math:`64\,\F{Ki}` :ref:`bytes <syntax-byte>` with value :math:`\hex{00}` to :math:`\meminst.\MIDATA`.
 
 .. math::
    \begin{array}{rllll}
@@ -424,7 +428,8 @@ Growing :ref:`memories <syntax-meminst>`
        \begin{array}[t]{@{}r@{~}l@{}}
        \iff & \X{len} = n + |\meminst.\MIDATA| / 64\,\F{Ki} \\
        \wedge & \X{len} \leq 2^{16} \\
-       \wedge & (\meminst.\MIMAX = \epsilon \vee \X{len} \leq \meminst.\MIMAX)) \\
+       \wedge & \meminst.\MITYPE = \limits~s \\
+       \wedge & (\limits.\LMAX = \epsilon \vee \X{len} \leq \limits.\LMAX)) \\
        \end{array} \\
    \end{array}
 
@@ -561,6 +566,8 @@ Moreover, if the dots :math:`\dots` are a sequence :math:`A^n` (as for globals),
 
 Instantiation
 ~~~~~~~~~~~~~
+
+.. todo:: turn this into an administrative instruction handled by global reduction
 
 Given a :ref:`store <syntax-store>` :math:`S`, a :ref:`module <syntax-module>` :math:`\module` is instantiated with a list of :ref:`external values <syntax-externval>` :math:`\externval^n` supplying the required imports as follows.
 
