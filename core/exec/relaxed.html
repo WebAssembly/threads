@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Relaxed Memory Model &#8212; WebAssembly 1.1</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"MAXBUFFER": 30720}})</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Binary Format" href="../binary/index.html" />
+    <link rel="prev" title="Modules" href="modules.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/webassembly.png" alt="Logo"/>
+            </a></p><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../syntax/index.html">Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../valid/index.html">Validation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Execution</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="conventions.html">Conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="runtime.html">Runtime Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numerics.html">Numerics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="instructions.html">Instructions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html">Modules</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Relaxed Memory Model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../binary/index.html">Binary Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../text/index.html">Text Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index.html">Appendix</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index-types.html">Index of Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index-instructions.html">Index of Instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/index-rules.html">Index of Semantic Rules</a></li>
+</ul>
+
+
+<hr />
+<ul>
+    
+    <li class="toctree-l1"><a href="../genindex.html">Index</a></li>
+    
+    <li class="toctree-l1"><a href="../_download/WebAssembly.pdf">Download as PDF</a></li>
+    
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>add index entries</p>
+</div>
+<div class="section" id="relaxed-memory-model">
+<span id="relaxed"></span><span id="index-0"></span><h1>Relaxed Memory Model<a class="headerlink" href="#relaxed-memory-model" title="Permalink to this headline">¶</a></h1>
+<div class="admonition-todo admonition" id="id3">
+<p class="admonition-title">Todo</p>
+<p>intro, cite <a class="footnote-reference brackets" href="#cite-oopsla2019" id="id2">1</a></p>
+</div>
+<div class="admonition-todo admonition" id="id4">
+<p class="admonition-title">Todo</p>
+<p>link this section with operational semantics</p>
+</div>
+<div class="section" id="traces">
+<span id="relaxed-trace"></span><h2>Traces<a class="headerlink" href="#traces" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-todo admonition" id="id5">
+<p class="admonition-title">Todo</p>
+<p>define, explain</p>
+</div>
+</div>
+<div class="section" id="consistency">
+<span id="relaxed-consistent"></span><h2>Consistency<a class="headerlink" href="#consistency" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-todo admonition" id="id6">
+<p class="admonition-title">Todo</p>
+<p>define auxiliary functions (either here or in Runtime Structure)</p>
+</div>
+<div class="admonition-todo admonition" id="id7">
+<p class="admonition-title">Todo</p>
+<p>add prose intuition</p>
+</div>
+<div class="math notranslate nohighlight">
+\[\frac{
+  \forall r, \, \vdash_r \mathit{tr} \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{consistent-with}}}
+}{
+  \vdash \mathit{tr} \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{consistent}}}
+}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{
+  \begin{array}[b]{&#64;{}l&#64;{}}
+    \forall \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \in \mathrm{reading}_r(\mathit{tr}), \exists \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W^\ast,
+      \mathit{tr} \vdash_r \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{reads-each-from}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W^\ast \\
+    \forall \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_I, \href{../exec/runtime.html#syntax-evt}{\mathit{evt}} \in \mathit{tr}, \,
+      \mathrm{ord}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_I) = \href{../exec/runtime.html#syntax-ord}{\mathsf{init}} \wedge
+      \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_I \neq \href{../exec/runtime.html#syntax-evt}{\mathit{evt}} \wedge
+      \mathrm{overlap}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_I, \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}) \Rightarrow \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_I \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}
+  \end{array}
+}{
+  \vdash_r \mathit{tr} \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{consistent-with}}}
+}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{
+  \begin{array}[b]{&#64;{}c&#64;{}}
+    \left|\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W^\ast\right| = |\mathrm{read}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R)| \\
+    \forall i &lt; |\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W^\ast|,
+      \mathit{tr} \vdash_r^i \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{reads-from}}} \left(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W^\ast[i]\right)
+    \\
+    \vdash_r \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{no-tear}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W^\ast
+  \end{array}
+}{
+  \mathit{tr} \vdash_r \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{reads-each-from}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W^\ast
+}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{
+  \begin{array}[b]{&#64;{}l&#64;{}}
+    \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \neq \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W \\
+    \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W \in \mathrm{writing}_r(\mathit{tr})
+  \end{array}
+  \qquad
+  \begin{array}[b]{&#64;{}r&#64;{}}
+    \mathit{tr} \vdash_r^{i,k} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{value-consistent}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W \\
+    \mathit{tr} \vdash_r^k \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{hb-consistent}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W
+  \end{array}
+  \qquad
+  \mathit{tr} \vdash_r \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{sc-last-visible}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}^\ast_W
+}{
+  \mathit{tr} \vdash_r^i \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{reads-from}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W
+}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{
+   \begin{array}[b]{&#64;{}r&#64;{~}c&#64;{~}l&#64;{}}
+     \mathrm{read}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R)[i] &amp;=&amp; \mathrm{write}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W)[j] \\
+     k = \mathrm{offset}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R) + i &amp;=&amp; \mathrm{offset}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W) + j
+   \end{array}
+}{
+   \mathit{tr} \vdash_r^{i,k} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{value-consistent}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W
+}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{
+  \begin{array}[b]{&#64;{}c}
+    \neg (\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W) \\
+    \mathrm{sync}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W, \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R) \Rightarrow \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R
+  \end{array}
+ \qquad
+ \begin{array}[b]{&#64;{}l&#64;{}}
+   \forall \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}'_W \in \mathrm{writing}_r(\mathit{tr}),\\
+   \quad \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}'_W \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \Rightarrow k \notin \mathrm{range}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}'_W)
+ \end{array}
+}{
+ \mathit{tr} \vdash_r^k \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{hb-consistent}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W
+}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{
+  \begin{array}[b]{&#64;{}l&#64;{\qquad}l&#64;{}}
+    \forall \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}'_W \in \mathrm{writing}_r(\mathit{tr}), \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \Rightarrow \\
+    \quad \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W \href{../exec/relaxed.html#relaxed-prectot}{\mathrel{\prec_{\mathsf{tot}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}'_W \href{../exec/relaxed.html#relaxed-prectot}{\mathrel{\prec_{\mathsf{tot}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \wedge \mathrm{sync}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W, \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R) \Rightarrow \neg \mathrm{sync}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}'_W, \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R) \\
+    \quad \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}'_W \href{../exec/relaxed.html#relaxed-prectot}{\mathrel{\prec_{\mathsf{tot}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R  \Rightarrow \neg\mathrm{sync}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}'_W, \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R) \\
+    \quad \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W \href{../exec/relaxed.html#relaxed-prectot}{\mathrel{\prec_{\mathsf{tot}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}'_W \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \Rightarrow \neg\mathrm{sync}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W, \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}'_W)
+  \end{array}
+}{
+  \mathit{tr} \vdash_r \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{sc-last-visible}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W
+}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\frac{
+  \mathrm{tearfree}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R) \Rightarrow |\{\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W \in \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W^\ast ~|~ \mathrm{same}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R, \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W) \wedge \mathrm{tearfree}_r(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W)\}| \leq 1
+}{
+  \vdash_r \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_R \href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{no-tear}}} \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_W^\ast
+}\]</div>
+<dl class="footnote brackets">
+<dt class="label" id="cite-oopsla2019"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dd><p>The semantics of the relaxed memory model is derived from the following article:
+Conrad Watt, Andreas Rossberg, Jean Pichon-Pharabod. <a class="reference external" href="https://dl.acm.org/citation.cfm?id=3360559">Weakening WebAssembly</a>. Proceedings of the ACM on Programming Languages (OOPSLA 2019). ACM 2019.</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2017, WebAssembly Community Group.
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
