@@ -102,6 +102,7 @@ even where this identity is not observable from within WebAssembly code itself
 
 .. index:: ! time stamp, ! happens-before, thread, event
 .. _syntax-time:
+.. _relaxed-prechb:
 
 Time Stamps
 ~~~~~~~~~~~
@@ -127,6 +128,7 @@ a time stamp :math:`\time_1` *happens before* :math:`\time_2`, written :math:`\t
 
    The ordering is partial because some events have an unspecified relative order -- in particular, when they occur in separate threads without intervening synchronisation.
 
+.. _relaxed-prectot:
 .. todo:: define prectot here as well?
 
 

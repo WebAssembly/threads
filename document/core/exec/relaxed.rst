@@ -8,7 +8,6 @@ Relaxed Memory Model
 
 .. todo:: intro, cite [#cite-oopsla2019]_
 .. todo:: link this section with operational semantics
-.. todo:: include xrefs to defs in macros.def
 
 
 .. _relaxed-trace:
