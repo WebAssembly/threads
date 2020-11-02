@@ -257,8 +257,8 @@ The offset immediate to atomic memory instructions is optional, and defaults to
    \begin{array}{llclll}
    \production{instruction} & \Tplaininstr_I &::=& \dots \phantom{thisshouldbeenoughnowitissee} && \phantom{thisshouldbeenough} \\ &&|&
      \text{memory.atomic.notify}~~m{:}\Tmemarg_4 &\Rightarrow& \MEMORYATOMICNOTIFY~m \\ &&|&
-     \text{memory.atomic.wait32}~~m{:}\Tmemarg_4 &\Rightarrow& \MEMORYATOMICWAIT{32}~m \\ &&|&
-     \text{memory.atomic.wait64}~~m{:}\Tmemarg_8 &\Rightarrow& \MEMORYATOMICWAIT{64}~m \\
+     \text{memory.atomic.wait32}~~m{:}\Tmemarg_4 &\Rightarrow& \MEMORYATOMICWAIT\K{32}~m \\ &&|&
+     \text{memory.atomic.wait64}~~m{:}\Tmemarg_8 &\Rightarrow& \MEMORYATOMICWAIT\K{64}~m \\
    \end{array}
 
 .. math::
