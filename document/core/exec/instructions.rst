@@ -474,7 +474,7 @@ Memory Instructions
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \S.\SMEMS[a] ~\mbox{undefined} \\
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
      \wedge & \X{ea} + N/8 \leq n \\
      \wedge & (\ord = \UNORD \vee \X{ea} \mod N/8 = 0) \\
      \wedge & b^\ast = \bytes_{\iN}(n)) \\
@@ -487,7 +487,7 @@ Memory Instructions
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \S.\SMEMS[a] ~\mbox{undefined} \\
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
      \wedge & (\X{ea} + N/8 > n \vee \ord = \SEQCST \wedge \X{ea} \mod N/8 \neq 0)) \\
      \end{array}
    \\[2ex]
