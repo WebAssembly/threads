@@ -888,7 +888,7 @@
 
 .. Events, terminals
 
-.. |AT| mathdef:: \xref{exec/runtime}{syntax-time}{\K{at}}
+.. |AT| mathdef:: \xref{exec/runtime}{syntax-time}{\mathbin{\K{at}}}
 .. |ATTIME| mathdef:: \xref{exec/runtime}{syntax-time}{\K{time}}
 .. |ATVAL| mathdef:: \xref{exec/runtime}{syntax-time}{\K{val}}
 
