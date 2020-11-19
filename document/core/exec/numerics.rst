@@ -1427,6 +1427,18 @@ Conversions
    \end{array}
 
 
+.. _op-extendt:
+
+:math:`\extendtsx_{t,t'}(c)`
+............................
+
+* Assert: Either :math:`t = t'`, or :math:`t` is an an integer type and :math:`\sx` is present.
+
+* If :math:`t = t'`, return :math:`c`.
+
+* Else, return :math:`\extendsx_{|t|,|t'|}(c)`.
+
+
 .. _op-wrap:
 
 :math:`\wrap_{M,N}(i)`
@@ -1438,6 +1450,18 @@ Conversions
    \begin{array}{lll@{\qquad}l}
    \wrap_{M,N}(i) &=& i \mod 2^N \\
    \end{array}
+
+
+.. _op-wrapt:
+
+:math:`\wrapt_{t,t'}(c)`
+........................
+
+* Assert: Either :math:`t = t'`, or :math:`t` is an an integer type.
+
+* If :math:`t = t'`, return :math:`c`.
+
+* Else, return :math:`\wrap_{|t|,|t'|}(c)`.
 
 
 .. _op-trunc_u:

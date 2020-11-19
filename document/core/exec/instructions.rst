@@ -381,7 +381,7 @@ Memory Instructions
 ~~~~~~~~~~~~~~~~~~~
 
 .. note::
-   The alignment :math:`\memarg.\ALIGN` in load and store instructions does not affect the semantics of accesses to :ref:`unshared <syntax-unshared>` :ref:`memories <syntax-memory>`.
+   The alignment :math:`\memarg.\ALIGN` in load and store instructions does not affect the semantics of accesses to :ref:`unshared <syntax-unshared>` :ref:`memories <syntax-mem>`.
    It is an indication that the offset :math:`\X{ea}` at which the memory is accessed is intended to satisfy the property :math:`\X{ea} \mod 2^{\memarg.\ALIGN} = 0`.
    A WebAssembly implementation can use this hint to optimize for the intended use.
    Unaligned access violating that property is still allowed and must succeed regardless of the annotation.
@@ -434,9 +434,9 @@ Memory Instructions
 
 11. If :math:`N` and :math:`\sx` are part of the instruction, then:
 
-    a. Let :math:`n` be the integer for which :math:`\bytes_{\iN}(n) = b^\ast`.
+    a. Let :math:`c_{\X{st}}` be the integer for which :math:`\bytes_{\iN}(n) = b^\ast`.
 
-    b. Let :math:`c` be the result of computing :math:`\extend\F{\_}\sx_{N,|t|}(n)`.
+    b. Let :math:`c` be the result of computing :math:`\extendsx_{N,|t|}(c_{\X{st}})`.
 
 12. Else:
 
@@ -448,24 +448,15 @@ Memory Instructions
    ~\\[-1ex]
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\LOAD~\memarg) &\stepto& S; F; (t.\CONST~c)
-   \end{array}
-   \\ \qquad
-     \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \meminst = S.\SMEMS[a] \\
-     \wedge & \X{ea} + |t|/8 \leq |\meminst.\MIDATA| \\
-     \wedge & \bytes_t(c) = \meminst.\MIDATA[\X{ea} \slice |t|/8])
-     \end{array}
-   \\[1ex]
-   \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\LOAD{N}\K{\_}\sx~\memarg) &\stepto&
-     S; F; (t.\CONST~\extend\F{\_}\sx_{N,|t|}(n))
+   S; F; (\I32.\CONST~i)~(t.\LOAD({N}\K{\_}\sx)^?~\memarg) &\stepto&
+     S; F; (t.\CONST~c)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & \meminst = S.\SMEMS[a] \\
      \wedge & \X{ea} + N/8 \leq |\meminst.\MIDATA| \\
-     \wedge & \bytes_{\iN}(n) = \meminst.\MIDATA[\X{ea} \slice N/8])
+     \wedge & (\ord = \UNORD \vee \X{ea} \mod N/8 = 0) \\
+     \wedge & c = \extendtsx_{\X{st},t}(\bytes^{-1}_{\X{st}}(\meminst.\MIDATA[\X{ea} \slice N/8]))) \\
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -477,16 +468,16 @@ Memory Instructions
    %
    ~\\
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\LOAD({N}\K{\_}\sx)^?~\memarg)
+   S; F; (\I32.\CONST~i)~(t.\LOAD({N}\K{\_}\sx)?~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast)}&
-     S; F; (t.\CONST~\extend\F{\_}\sx_{N,|t|}(n))
+     S; F; (t.\CONST~c)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
      \wedge & \X{ea} + N/8 \leq n \\
      \wedge & (\ord = \UNORD \vee \X{ea} \mod N/8 = 0) \\
-     \wedge & b^\ast = \bytes_{\iN}(n)) \\
+     \wedge & c = \extendtsx_{\X{st},t}(\bytes^{-1}_{\X{st}}(b^\ast))) \\
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -504,7 +495,8 @@ Memory Instructions
    ~\\
    \begin{array}[t]{@{}r@{~}l@{}}
    (\where & \ord = \UNORD \\
-   \wedge & N = |t| \wedge \sx = \K{u} \iff~\mbox{not present} \\
+   \wedge & N = |t| \iff N~\mbox{not present} \\
+   \wedge & \X{st} = t \iff N~\mbox{not present}, ~\iN \otherwise \\
    \wedge & a = F.\AMODULE.\MIMEMS[0] \\
    \wedge & \X{ea} = i + \memarg.\OFFSET) \\
    \end{array}
@@ -537,9 +529,9 @@ Memory Instructions
 
 8. Else:
 
-   a. Let :math:`n` be the result of computing :math:`\wrap_{|t|,N}(c)`.
+   a. Let :math:`c_{\X{st}}` be the result of computing :math:`\wrap_{|t|,N}(c)`.
 
-   b. Let :math:`b^\ast` be the byte sequence :math:`\bytes_{\iN}(n)`.
+   b. Let :math:`b^\ast` be the byte sequence :math:`\bytes_{\iN}(c_{\X{st}})`.
 
 9. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
 
@@ -573,23 +565,14 @@ Memory Instructions
    ~\\[-1ex]
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE~\memarg) &\stepto& S'; F; \epsilon
-   \end{array}
-   \\ \qquad
-     \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \meminst = S.\SMEMS[a] \\
-     \wedge & \X{ea} + |t|/8 \leq |\meminst.\MIDATA| \\
-     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea} \slice |t|/8] = \bytes_t(c)
-     \end{array}
-   \\[1ex]
-   \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE{N}~\memarg) &\stepto& S'; F; \epsilon
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE{N}^?~\memarg) &\stepto& S'; F; \epsilon
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & \meminst = S.\SMEMS[a] \\
      \wedge & \X{ea} + N/8 \leq |\meminst.\MIDATA| \\
-     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea} \slice N/8] = \bytes_{\iN}(\wrap_{|t|,N}(c))
+     \wedge & (\ord = \UNORD \vee \X{ea} \mod N/8 = 0) \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea} \slice N/8] = \bytes_{\X{st}}(\wrapt_{t,\X{st}}(c))
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -597,10 +580,11 @@ Memory Instructions
    \end{array}
    \\ \qquad
      (\otherwise)
-   \\[1ex]
+   \\
    %
+   ~\\
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE{N}~\memarg)
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE{N}^?~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)~(\AWR_{\ord}~a.\LDATA[\X{ea}]~b^\ast)}&
      S; F; \epsilon
    \end{array}
@@ -609,11 +593,9 @@ Memory Instructions
      (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
      \wedge & \X{ea} + N/8 \leq n \\
      \wedge & (\ord = \UNORD \vee \X{ea} \mod N/8 = 0) \\
-     \wedge & b^\ast = \bytes_{\iN}(\wrap_{|t|,N}(c))
+     \wedge & b^\ast = \bytes_{\X{st}}(\wrapt_{t,\X{st}}(c))
      \end{array}
-   \\
-   %
-   ~\\
+   \\[1ex]
    \begin{array}{lcl@{\qquad}l}
    S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\STORE{N}^?~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)}&
@@ -629,7 +611,8 @@ Memory Instructions
    ~\\
    \begin{array}[t]{@{}r@{~}l@{}}
    (\where & \ord = \UNORD \\
-   \wedge & N = |t| \iff ~\mbox{not present} \\
+   \wedge & N = |t| \iff N~\mbox{not present} \\
+   \wedge & \X{st} = t \iff N~\mbox{not present}, ~\X{st} = \iN \otherwise \\
    \wedge & a = F.\AMODULE.\MIMEMS[0] \\
    \wedge & \X{ea} = i + \memarg.\OFFSET) \\
    \end{array}
@@ -803,7 +786,7 @@ Memory Instructions
 
 
 
-.. index:: atomic memory instruction, memory, frame, module
+.. index:: atomic memory instruction, memory, frame, module, atomic operator
    pair: execution; instruction
    single: abstract syntax; instruction
 .. _exec-instr-atomic-memory:
@@ -811,226 +794,319 @@ Memory Instructions
 Atomic Memory Instructions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _exec-atomic-load:
-.. _exec-atomic-loadn:
+.. _exec-atomic.load:
+.. _exec-atomic.loadn:
 
 :math:`t\K{.}\ATOMICLOAD({N}\K{\_u})^?~\memarg`
 ...............................................
 
-The rules are identical to :ref:`non-atomic loads <exec-atomic-load>`, except that :math:`\ord = \SEQCST`.
+The rules are identical to :ref:`non-atomic loads <exec-load>`, except that :math:`\ord = \SEQCST`.
 
 
-.. _exec-atomic-store:
-.. _exec-atomic-storen:
+.. _exec-atomic.store:
+.. _exec-atomic.storen:
 
 :math:`t\K{.}\ATOMICSTORE{N}^?~\memarg`
 .......................................
 
-The rules are identical to :ref:`non-atomic stores <exec-atomic-store>`, except that :math:`\ord = \SEQCST`.
+The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :math:`\ord = \SEQCST`.
 
 
-.. _exec-atomic-rmw:
-.. _exec-atomic-rmwn:
+.. _exec-atomic.rmw:
+.. _exec-atomic.rmwn:
 
-:math:`t\K{.}\ATOMICRMW({N}\K{\_u})^?\K{.}\atomicop~\memarg`
-............................................................
+:math:`t\K{.}\ATOMICRMW({N}\K{\_u})^?\K{.}\atop~\memarg`
+........................................................
 
-.. todo:: update text to match formalism
+1. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
 
-1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+2. Pop the value :math:`t.\CONST~c_2` from the stack.
 
-2. Assert: due to :ref:`validation <valid-atomic-rmwn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+3. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
 
-3. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+4. Pop the value :math:`\I32.\CONST~i` from the stack.
 
-4. Assert: due to :ref:`validation <valid-atomic-rmwn>`, :math:`S.\SMEMS[a]` exists.
+5. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
 
-5. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
+6. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
 
-6. Assert: due to :ref:`validation <valid-atomic-rmwn>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
+   a. Trap.
 
-7. Pop the value :math:`t.\CONST~c_2` from the stack.
+7. If :math:`N` is not part of the instruction, then:
 
-8. Assert: due to :ref:`validation <valid-atomic-rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+   a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
 
-9. Pop the value :math:`\I32.\CONST~i` from the stack.
+8. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
 
-10. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+9. Assert: due to :ref:`validation <valid-atomic.rmwn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
 
-11. If :math:`N` is not part of the instruction, then:
+10. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
 
-    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
+11. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
 
-12. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
+    a. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
 
-    a. Trap.
+    b. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
 
-13. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
+       a. Trap.
 
-    a. Trap.
+    c. Let :math:`b^\ast_{\F{r}}` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
 
-14. Let :math:`b^\ast_r` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
+12. Else:
 
-15. Let :math:`c_1` be the integer for which :math:`bytes_{\iN}(m) = b^\ast_r`.
+    a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
-16. Let :math:`m` be the result of computing :math:`\atomicop_t(c_1, c_2)`.
+    b. If :math:`n` is smaller than :math:`\X{ea} + N/8`, or :math:`\X{ea}` is not divisible by :math:`N/8`, then:
+
+       i. Trap.
+
+    c. Perform the atomic :ref:`action <syntax-act>` :math:`(\ARMW_{\ord}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{r}}^\ast)` to read the bytes :math:`b_{\F{r}}^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a` and replace them with bytes :math:`b_{\F{w}}^\ast` (which are defined below).
+
+13. If :math:`N` and :math:`\sx` are part of the instruction, then:
+
+    a. Let :math:`c_{\F{r}}` be the integer for which :math:`\bytes_{\iN}(n) = b_{\F{r}}^\ast`.
+
+    b. Let :math:`c_1` be the result of computing :math:`\extendsx_{N,|t|}(c_{\F{r}})`.
+
+14. Else:
+
+    a. Let :math:`c_1` be the constant for which :math:`\bytes_t(c_1) = b_{\F{r}}^\ast`.
+
+15. Let :math:`c` be the result of computing :math:`\atop_t(c_1, c_2)`.
+
+16. If :math:`N` is part of the instruction, then:
+
+    a. Let :math:`c_{\F{w}}` be the result of computing :math:`\wrap_{|t|,N}(c)`.
+
+    b. Let :math:`b^\ast_{\F{w}}` be the byte sequence :math:`\bytes_{\iN}(c_{\F{w}})`.
+
+17. Else:
+
+    b. Let :math:`b^\ast_{\F{w}}` be the byte sequence :math:`\bytes_t(c_{\F{w}})`.
+
+18. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
+
+    a. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast_{\F{w}}`.
+
+19. Push the value :math:`t.\CONST~c` to the stack.
+
+.. math::
+   \begin{array}{l}
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\ATOMICRMW({N}\K{\_u})^?.\atop~\memarg)
+     &\stepto&
+     S'; F; (t.\CONST~c_1)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \meminst = S.\SMEMS[a] \\
+     \wedge & \X{ea} + N/8 \leq n \\
+     \wedge & \X{ea} \mod N/8 = 0 \\
+     \wedge & c_1 = \extendtu_{\X{st},t}(\bytes^{-1}_{\X{st}}(\meminst.\MIDATA[\X{ea} \slice N/8])) \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea} \slice N/8] = \bytes_{\X{st}}(\wrapt_{t,\X{st}}(\atop_t(c_1, c_2)))) \\
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMICRMW({N}\K{\_u})^?.\atop~\memarg)
+     &\stepto&
+     S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \meminst = S.\SMEMS[a] \\
+     \wedge & \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
+     \end{array}
+   \\
+   %
+   ~\\
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\ATOMICRMW({N}\K{\_u})^?.\atop~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARMW~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{w}}^\ast)}&
+     S; F; (t.\CONST~c_1)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
+     \wedge & \X{ea} + N/8 \leq n \\
+     \wedge & \X{ea} \mod N/8 = 0 \\
+     \wedge & c_1 = \extendtu_{\X{st},t}(\bytes^{-1}_{\X{st}}(b_{\F{r}}^\ast)) \\
+     \wedge & b_{\F{r}}^\ast = \bytes_{\X{st}}(\wrapt_{t,\X{st}}(\atop_t(c_1, c_2)))) \\
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMICRMW({N}\K{\_u})^?.\atop~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)}&
+     S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
+     \wedge & \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
+     \end{array}
+   \\
+   %
+   ~\\
+   \begin{array}[t]{@{}r@{~}l@{}}
+   (\where & N = |t| \iff N~\mbox{not present} \\
+   \wedge & \X{st} = t \iff N~\mbox{not present}, ~\X{st} = \iN \otherwise \\
+   \wedge & a = F.\AMODULE.\MIMEMS[0] \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
+   \end{array}
+   \end{array}
+
+
+.. _exec-atomic.rmw.cmpxchg:
+.. _exec-atomic.rmwn.cmpxchg:
+
+:math:`t\K{.}\ATOMICRMW({N}\K{\_u})^?\K{.}\ATCMPXCHG~\memarg`
+.............................................................
+
+1. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
+
+2. Pop the value :math:`t.\CONST~c_2` from the stack.
+
+3. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+
+4. Pop the value :math:`\I32.\CONST~i` from the stack.
+
+5. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+
+6. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
+
+   a. Trap.
+
+7. If :math:`N` is not part of the instruction, then:
+
+   a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
+
+8. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+9. Assert: due to :ref:`validation <valid-atomic.rmwn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+10. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+11. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
+
+    a. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
+
+    b. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
+
+       a. Trap.
+
+    c. Let :math:`b^\ast_{\F{r}}` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
+
+12. Else:
+
+    a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+
+    b. If :math:`n` is smaller than :math:`\X{ea} + N/8`, or :math:`\X{ea}` is not divisible by :math:`N/8`, then:
+
+       i. Trap.
+
+    c. Perform the atomic :ref:`action <syntax-act>` :math:`(\ARMW_{\ord}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{r}}^\ast)` to read the bytes :math:`b_{\F{r}}^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a` and replace them with bytes :math:`b_{\F{w}}^\ast` (which are defined below).
+
+13. If :math:`N` and :math:`\sx` are part of the instruction, then:
+
+    a. Let :math:`c_{\F{r}}` be the integer for which :math:`\bytes_{\iN}(n) = b_{\F{r}}^\ast`.
+
+    b. Let :math:`c_1` be the result of computing :math:`\extendsx_{N,|t|}(c_{\F{r}})`.
+
+14. Else:
+
+    a. Let :math:`c_1` be the constant for which :math:`\bytes_t(c_1) = b_{\F{r}}^\ast`.
+
+15. If :math:`c_1` equals :math:`c_2`, then:
+
+    a. Let :math:`c` be :math:`c_2`.
+
+16. Else:
+
+    a. Let :math:`c` be :math:`c_3`.
 
 17. If :math:`N` is part of the instruction, then:
 
-    a. Let :math:`n` be the result of computing :math:`\wrap_{|t|,N}(m)`.
+    a. Let :math:`c_{\F{w}}` be the result of computing :math:`\wrap_{|t|,N}(c)`.
 
-    b. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_{\iN}(n)`.
+    b. Let :math:`b^\ast_{\F{w}}` be the byte sequence :math:`\bytes_{\iN}(c_{\F{w}})`.
 
 18. Else:
 
-    a. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_t(m)`.
+    b. Let :math:`b^\ast_{\F{w}}` be the byte sequence :math:`\bytes_t(c_{\F{w}})`.
 
-19. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast_w`.
+19. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
 
-20. Push the value :math:`t.\CONST~c_1` to the stack.
+    a. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast_{\F{w}}`.
 
-.. todo:: add semantics for non-shared memories
+20. Push the value :math:`t.\CONST~c` to the stack.
 
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\ATOMICRMW({N}\K{\_u})^?.\atomicop~\memarg)
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARMW~a.\LDATA[\X{ea}]~b_1^\ast~b^\ast)}&
-     F; (t.\CONST~c_1)
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATCMPXCHG~\memarg)
+     &\stepto&
+     S'; F; (t.\CONST~c)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} + N/8 \leq n \\
+     (\iff & \meminst = S.\SMEMS[a] \\
+     \wedge & \X{ea} + N/8 \leq n \\
      \wedge & \X{ea} \mod N/8 = 0 \\
-     \wedge & b_1^\ast = \bytes_{\iN}(c_1) \\
-     \wedge & b^\ast = \bytes_{\iN}(\wrap_{|t|,N}(\atomicop_t(c_1, c_2)))) \\
+     \wedge & c_1 = \extendtu_{\X{st},t}(\bytes^{-1}_{\X{st}}(\meminst.\MIDATA[\X{ea} \slice N/8])) \\
+     \wedge & ((c_1 = c_2 \wedge c = c_1) \vee (c_1 \neq c_2 \wedge c = c_3)) \\
+     \wedge & S' = S \with \SMEMS[a].\MIDATA[\X{ea} \slice N/8] = \bytes_{\X{st}}(\wrapt_{t,\X{st}}(c))) \\
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMICRMW({N}\K{\_u})^?.\atomicop~\memarg)
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATCMPXCHG~\memarg)
+     &\stepto&
+     S; F; \TRAP
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \meminst = S.\SMEMS[a] \\
+     \wedge & \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
+     \end{array}
+   \\
+   %
+   ~\\
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATCMPXCHG~\memarg)
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARMW~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{w}}^\ast)}&
+     F; (t.\CONST~c)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
+     \wedge & \X{ea} + N/8 \leq n \\
+     \wedge & \X{ea} \mod N/8 = 0 \\
+     \wedge & c_1 = \extendtu_{\X{st},t}(\bytes^{-1}_{\X{st}}(b_{\F{r}}^\ast)) \\
+     \wedge & ((c_1 = c_2 \wedge c = c_1) \vee (c_1 \neq c_2 \wedge c = c_3)) \\
+     \wedge & b_{\F{w}}^\ast = \bytes_{\X{st}}(\wrapt_{t,\X{st}}(c))) \\
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATCMPXCHG~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)}&
      F; \TRAP
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
+     (\iff & S.\SMEMS[a] ~\mbox{undefined} \\
+     \wedge & \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
      \end{array}
    \\
    %
    ~\\
-   (\where N = |t| \iff ~\mbox{not present}) \\
-   \\[2ex]
    \begin{array}[t]{@{}r@{~}l@{}}
-   (\where & N = |t| \iff ~\mbox{not present} \\
+   (\where & N = |t| \iff N~\mbox{not present} \\
+   \wedge & \X{st} = t \iff N~\mbox{not present}, ~\X{st} = \iN \otherwise \\
    \wedge & a = F.\AMODULE.\MIMEMS[0] \\
    \wedge & \X{ea} = i + \memarg.\OFFSET) \\
    \end{array}
    \end{array}
 
 
-.. _exec-atomic-rmw-cmpxchg:
-.. _exec-atomic-rmwn-cmpxchg:
-
-:math:`t\K{.}\ATOMICRMW({N}\K{\_u})^?\K{.}\ATOMICCMPXCHG~\memarg`
-.................................................................
-
-.. todo:: update text to match formalism
-
-1. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
-
-2. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
-
-3. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
-
-4. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, :math:`S.\SMEMS[a]` exists.
-
-5. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
-
-6. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
-
-7. Pop the value :math:`t.\CONST~c_3` from the stack.
-
-8. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
-
-9. Pop the value :math:`t.\CONST~c_2` from the stack.
-
-10. Assert: due to :ref:`validation <valid-atomic-rmwn-cmpxchg>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
-
-11. Pop the value :math:`\I32.\CONST~i` from the stack.
-
-12. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
-
-13. If :math:`N` is not part of the instruction, then:
-
-    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
-
-14. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
-
-    a. Trap.
-
-15. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
-
-    a. Trap.
-
-16. Let :math:`b^\ast_r` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
-
-17. Let :math:`c_1` be the integer for which :math:`bytes_{\iN}(m) = b^\ast_r`.
-
-18. If :math:`N` is part of the instruction, then:
-
-    a. Let :math:`n` be the result of computing :math:`\wrap_{|t|,N}(c_3)`.
-
-    b. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_{\iN}(n)`.
-
-19. Else:
-
-    a. Let :math:`b^\ast_w` be the byte sequence :math:`\bytes_t(c_3)`.
-
-20. If :math:`c_1 = c_2`, then:
-
-    a. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast_w`.
-
-21. Push the value :math:`t.\CONST~c_1` to the stack.
-
-.. todo:: add semantics for non-shared memories
-
-.. math::
-   \begin{array}{l}
-   \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATOMICCMPXCHG~\memarg)
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARMW~a.\LDATA[\X{ea}]~b_1^\ast~b^\ast)}&
-     F; (t.\CONST~c_1)
-   \end{array}
-   \\ \qquad
-     \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} + |t|/8 \leq n \\
-     \wedge & \X{ea} \mod |t|/8 = 0 \\
-     \wedge & b_1^\ast = \bytes_{\iN}(c_1) \\
-     \wedge & ((c_1 = c_2 \wedge c = c_1) \vee (c_1 \neq c_2 \wedge c = c_3)) \\ 
-     \wedge & b^\ast = \bytes_{\iN}(\wrap_{|t|,N}(c))) \\
-     \end{array}
-   \\[1ex]
-   \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMICRMW({N}\K{\_u})^?.\atomicop~\memarg)
-     &\stepto^{(\ARD~a.\LLEN~n)}&
-     F; \TRAP
-   \end{array}
-   \\ \qquad
-     \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
-     \end{array}
-   \\
-   %
-   ~\\
-   \begin{array}[t]{@{}r@{~}l@{}}
-   (\where & N = |t| \iff ~\mbox{not present} \\
-   \wedge & a = F.\AMODULE.\MIMEMS[0] \\
-   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
-   \end{array}
-   \end{array}
-
-
-.. _exec-wait:
+.. _exec-memory.atomic.wait:
 
 :math:`\MEMORYATOMICWAIT{N}`
 ............................
@@ -1085,7 +1161,7 @@ The rules are identical to :ref:`non-atomic stores <exec-atomic-store>`, except 
    \end{array}
 
 
-.. _exec-notify:
+.. _exec-memory.atomic.notify:
 
 :math:`\MEMORYATOMICNOTIFY`
 ...........................
