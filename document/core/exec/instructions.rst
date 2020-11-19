@@ -376,7 +376,6 @@ Variable Instructions
    single: abstract syntax; instruction
 .. _exec-memarg:
 .. _exec-instr-memory:
-.. _exec-instr-atomic-memory:
 
 Memory Instructions
 ~~~~~~~~~~~~~~~~~~~
@@ -391,47 +390,39 @@ Memory Instructions
 
 .. _exec-load:
 .. _exec-loadn:
-.. _exec-atomic-load:
-.. _exec-atomic-loadn:
 
-:math:`t\K{.}\ATOMIC^?.\LOAD{N}(\K{\_}\sx)^?~\memarg`
-.....................................................
+:math:`t\K{.}\LOAD{N}(\K{\_}\sx)^?~\memarg`
+...........................................
 
-1. Assert: due to :ref:`validation <valid-loadn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+1. Let :math:`\ord` be :math:`\UNORD`.
 
-2. Pop the value :math:`\I32.\CONST~i` from the stack.
+2. Assert: due to :ref:`validation <valid-loadn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
 
-3. Let :math:`\X{ea}` be the integer :math:`i + \memarg.\OFFSET`.
+3. Pop the value :math:`\I32.\CONST~i` from the stack.
 
-4. If :math:`N` is not part of the instruction, then:
+4. Let :math:`\X{ea}` be the integer :math:`i + \memarg.\OFFSET`.
+
+5. If :math:`N` is not part of the instruction, then:
 
    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
 
-5. If :math:`\ATOMIC` is not part of the instruction, then:
+6. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
 
-   a. Let :math:`\ord` be :math:`\UNORD`.
+7. Assert: due to :ref:`validation <valid-loadn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
 
-6. Else:
+8. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
 
-   a. Let :math:`\ord` be :math:`\SEQCST`.
+9. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
 
-7. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+   a. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
 
-8. Assert: due to :ref:`validation <valid-loadn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+   b. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
 
-9. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+      i. Trap.
 
-10. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
+   c. Let :math:`b^\ast` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
 
-    a. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
-
-    b. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
-
-       i. Trap.
-
-    c. Let :math:`b^\ast` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
-
-11. Else:
+10. Else:
 
     a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
@@ -441,23 +432,23 @@ Memory Instructions
 
     c. Perform the :ref:`action <syntax-act>` :math:`(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast)` to read the bytes :math:`b^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
-12. If :math:`N` and :math:`\sx` are part of the instruction, then:
+11. If :math:`N` and :math:`\sx` are part of the instruction, then:
 
     a. Let :math:`n` be the integer for which :math:`\bytes_{\iN}(n) = b^\ast`.
 
     b. Let :math:`c` be the result of computing :math:`\extend\F{\_}\sx_{N,|t|}(n)`.
 
-13. Else:
+12. Else:
 
     a. Let :math:`c` be the constant for which :math:`\bytes_t(c) = b^\ast`.
 
-14. Push the value :math:`t.\CONST~c` to the stack.
+13. Push the value :math:`t.\CONST~c` to the stack.
 
 .. math::
    ~\\[-1ex]
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\ATOMIC^?.\LOAD~\memarg) &\stepto& S; F; (t.\CONST~c)
+   S; F; (\I32.\CONST~i)~(t.\LOAD~\memarg) &\stepto& S; F; (t.\CONST~c)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -467,7 +458,7 @@ Memory Instructions
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\ATOMIC^?.\LOAD{N}\K{\_}\sx~\memarg) &\stepto&
+   S; F; (\I32.\CONST~i)~(t.\LOAD{N}\K{\_}\sx~\memarg) &\stepto&
      S; F; (t.\CONST~\extend\F{\_}\sx_{N,|t|}(n))
    \end{array}
    \\ \qquad
@@ -478,7 +469,7 @@ Memory Instructions
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~k)~(t.\ATOMIC^?.\LOAD({N}\K{\_}\sx)^?~\memarg) &\stepto& S; F; \TRAP
+   S; F; (\I32.\CONST~k)~(t.\LOAD({N}\K{\_}\sx)^?~\memarg) &\stepto& S; F; \TRAP
    \end{array}
    \\ \qquad
      (\otherwise, \iff S.\SMEMS[a] ~\mbox{defined})
@@ -486,7 +477,7 @@ Memory Instructions
    %
    ~\\
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\ATOMIC^?.\LOAD({N}\K{\_}\sx)^?~\memarg)
+   S; F; (\I32.\CONST~i)~(t.\LOAD({N}\K{\_}\sx)^?~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast)}&
      S; F; (t.\CONST~\extend\F{\_}\sx_{N,|t|}(n))
    \end{array}
@@ -499,7 +490,7 @@ Memory Instructions
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~k)~(t.\ATOMIC^?.\LOAD({N}\K{\_}\sx)^?~\memarg)
+   S; F; (\I32.\CONST~k)~(t.\LOAD({N}\K{\_}\sx)^?~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)}&
      S; F; \TRAP
    \end{array}
@@ -512,7 +503,7 @@ Memory Instructions
    %
    ~\\
    \begin{array}[t]{@{}r@{~}l@{}}
-   (\where & \ord = \SEQCST \iff \ATOMIC ~\mbox{is present}, \otherwise \ord = \UNORD \\
+   (\where & \ord = \UNORD \\
    \wedge & N = |t| \wedge \sx = \K{u} \iff~\mbox{not present} \\
    \wedge & a = F.\AMODULE.\MIMEMS[0] \\
    \wedge & \X{ea} = i + \memarg.\OFFSET) \\
@@ -522,49 +513,41 @@ Memory Instructions
 
 .. _exec-store:
 .. _exec-storen:
-.. _exec-atomic-store:
-.. _exec-atomic-storen:
 
-:math:`t\K{.}\ATOMIC^?.\STORE{N}^?~\memarg`
-...........................................
+:math:`t\K{.}\STORE{N}^?~\memarg`
+.................................
 
-1. Assert: due to :ref:`validation <valid-storen>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
+1. Let :math:`\ord` be :math:`\UNORD`.
 
-2. Pop the value :math:`t.\CONST~c` from the stack.
+2. Assert: due to :ref:`validation <valid-storen>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
 
-3. Assert: due to :ref:`validation <valid-storen>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+3. Pop the value :math:`t.\CONST~c` from the stack.
 
-4. Pop the value :math:`\I32.\CONST~i` from the stack.
+4. Assert: due to :ref:`validation <valid-storen>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
 
-5. Let :math:`\X{ea}` be the integer :math:`i + \memarg.\OFFSET`.
+5. Pop the value :math:`\I32.\CONST~i` from the stack.
 
-6. If :math:`N` is not part of the instruction, then:
+6. Let :math:`\X{ea}` be the integer :math:`i + \memarg.\OFFSET`.
+
+7. If :math:`N` is not part of the instruction, then:
 
    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
 
    b. Let :math:`b^\ast` be the byte sequence :math:`\bytes_t(c)`.
 
-7. Else:
+8. Else:
 
    a. Let :math:`n` be the result of computing :math:`\wrap_{|t|,N}(c)`.
 
    b. Let :math:`b^\ast` be the byte sequence :math:`\bytes_{\iN}(n)`.
 
-8. If :math:`\ATOMIC` is not part of the instruction, then:
+9. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
 
-   a. Let :math:`\ord` be :math:`\UNORD`.
+10. Assert: due to :ref:`validation <valid-storen>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
 
-9. Else:
+11. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
 
-   a. Let :math:`\ord` be :math:`\SEQCST`.
-
-10. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
-
-11. Assert: due to :ref:`validation <valid-storen>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
-
-12. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
-
-13. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
+12. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
 
     a. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
 
@@ -576,7 +559,7 @@ Memory Instructions
 
     d. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast`.
 
-14. Else:
+13. Else:
 
     a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
@@ -590,7 +573,7 @@ Memory Instructions
    ~\\[-1ex]
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE~\memarg) &\stepto& S'; F; \epsilon
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE~\memarg) &\stepto& S'; F; \epsilon
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -600,7 +583,7 @@ Memory Instructions
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE{N}~\memarg) &\stepto& S'; F; \epsilon
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE{N}~\memarg) &\stepto& S'; F; \epsilon
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -610,14 +593,14 @@ Memory Instructions
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE{N}^?~\memarg) &\stepto& S; F; \TRAP
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\STORE{N}^?~\memarg) &\stepto& S; F; \TRAP
    \end{array}
    \\ \qquad
      (\otherwise)
    \\[1ex]
    %
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE{N}~\memarg)
+   S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE{N}~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)~(\AWR_{\ord}~a.\LDATA[\X{ea}]~b^\ast)}&
      S; F; \epsilon
    \end{array}
@@ -632,7 +615,7 @@ Memory Instructions
    %
    ~\\
    \begin{array}{lcl@{\qquad}l}
-   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\ATOMIC^?.\STORE{N}^?~\memarg)
+   S; F; (\I32.\CONST~k)~(t.\CONST~c)~(t.\STORE{N}^?~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)}&
      S; F; \TRAP
    \end{array}
@@ -645,7 +628,7 @@ Memory Instructions
    %
    ~\\
    \begin{array}[t]{@{}r@{~}l@{}}
-   (\where & \ord = \SEQCST \iff \ATOMIC ~\mbox{is present}, \otherwise \ord = \UNORD \\
+   (\where & \ord = \UNORD \\
    \wedge & N = |t| \iff ~\mbox{not present} \\
    \wedge & a = F.\AMODULE.\MIMEMS[0] \\
    \wedge & \X{ea} = i + \memarg.\OFFSET) \\
@@ -819,13 +802,38 @@ Memory Instructions
    In practice, the choice depends on the :ref:`resources <impl-exec>` available to the :ref:`embedder <embedder>`.
 
 
+
+.. index:: atomic memory instruction, memory, frame, module
+   pair: execution; instruction
+   single: abstract syntax; instruction
+.. _exec-instr-atomic-memory:
+
+Atomic Memory Instructions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. _exec-atomic-load:
+.. _exec-atomic-loadn:
+
+:math:`t\K{.}\ATOMICLOAD({N}\K{\_u})^?~\memarg`
+...............................................
+
+The rules are identical to :ref:`non-atomic loads <exec-atomic-load>`, except that :math:`\ord = \SEQCST`.
+
+
+.. _exec-atomic-store:
+.. _exec-atomic-storen:
+
+:math:`t\K{.}\ATOMICSTORE{N}^?~\memarg`
+.......................................
+
+The rules are identical to :ref:`non-atomic stores <exec-atomic-store>`, except that :math:`\ord = \SEQCST`.
+
+
 .. _exec-atomic-rmw:
 .. _exec-atomic-rmwn:
 
 :math:`t\K{.}\ATOMICRMW({N}\K{\_u})^?\K{.}\atomicop~\memarg`
 ............................................................
-
-.. todo:: move this and the following instructions up before the bulk ones
 
 .. todo:: update text to match formalism
 

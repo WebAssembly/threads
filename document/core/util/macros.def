@@ -383,8 +383,6 @@
 .. |REINTERPRET| mathdef:: \xref{syntax/instructions}{syntax-instr-numeric}{\K{reinterpret}}
 
 .. |ATOMIC| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic}}
-.. |MEMORYATOMICWAIT| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.wait}}
-.. |MEMORYATOMICNOTIFY| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.notify}}
 .. |ATOMICADD| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{add}}
 .. |ATOMICSUB| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{sub}}
 .. |ATOMICAND| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{and}}
@@ -395,6 +393,8 @@
 .. |ATOMICLOAD| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.load}}
 .. |ATOMICSTORE| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.store}}
 .. |ATOMICRMW| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.rmw}}
+.. |MEMORYATOMICWAIT| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.wait}}
+.. |MEMORYATOMICNOTIFY| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.notify}}
 
 
 .. Instructions, non-terminals
