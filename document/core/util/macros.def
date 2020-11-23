@@ -173,8 +173,8 @@
 
 .. |to| mathdef:: \xref{syntax/types}{syntax-functype}{\rightarrow}
 
-.. |I8| mathdef:: \xref{exec/runtime}{syntax-storagetype}{\K{i8}}
-.. |I16| mathdef:: \xref{exec/runtime}{syntax-storagetype}{\K{i16}}
+.. |I8| mathdef:: \xref{exec/numeric}{syntax-storagetype}{\K{i8}}
+.. |I16| mathdef:: \xref{exec/numeric}{syntax-storagetype}{\K{i16}}
 .. |I32| mathdef:: \xref{syntax/types}{syntax-valtype}{\K{i32}}
 .. |I64| mathdef:: \xref{syntax/types}{syntax-valtype}{\K{i64}}
 .. |F32| mathdef:: \xref{syntax/types}{syntax-valtype}{\K{f32}}

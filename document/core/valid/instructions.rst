@@ -606,7 +606,7 @@ Atomic Memory Instructions
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`4`.
 
-* Then the instruction is valid with type :math:`[\I32~\I64] \to [\I64]`.
+* Then the instruction is valid with type :math:`[\I32~\I32] \to [\I32]`.
 
 .. math::
    \frac{
@@ -614,10 +614,10 @@ Atomic Memory Instructions
      \qquad
      2^{\memarg.\ALIGN} = 4
    }{
-     C \vdash \MEMORYATOMICNOTIFY~\memarg : [\I32~\I64] \to [\I64]
+     C \vdash \MEMORYATOMICNOTIFY~\memarg : [\I32~\I32] \to [\I32]
    }
 
-.. _valid-memory.atomic.wait:
+.. _valid-memory.atomic.waitn:
 
 :math:`\MEMORYATOMICWAIT{N}~\memarg`
 ....................................

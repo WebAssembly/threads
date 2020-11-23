@@ -16,7 +16,7 @@ Numeric Instructions
 ~~~~~~~~~~~~~~~~~~~~
 
 Numeric instructions are defined in terms of the generic :ref:`numeric operators <exec-numeric>`.
-The mapping of numeric instructions to their underlying operators is expressed by the following definition:
+The mapping of :ref:`numeric <syntax-instr-numeric>` and :ref:`atomic <syntax-instr-atomic-memory>` instructions to their underlying operators is expressed by the following definition:
 
 .. math::
    \begin{array}{lll@{\qquad}l}
@@ -381,7 +381,7 @@ Memory Instructions
 ~~~~~~~~~~~~~~~~~~~
 
 .. note::
-   The alignment :math:`\memarg.\ALIGN` in load and store instructions does not affect the semantics of accesses to :ref:`unshared <syntax-unshared>` :ref:`memories <syntax-mem>`.
+   The alignment :math:`\memarg.\ALIGN` in load and store instructions does not affect the semantics of non-atomic accesses to :ref:`memories <syntax-mem>`.
    It is an indication that the offset :math:`\X{ea}` at which the memory is accessed is intended to satisfy the property :math:`\X{ea} \mod 2^{\memarg.\ALIGN} = 0`.
    A WebAssembly implementation can use this hint to optimize for the intended use.
    Unaligned access violating that property is still allowed and must succeed regardless of the annotation.
@@ -391,28 +391,34 @@ Memory Instructions
 .. _exec-load:
 .. _exec-loadn:
 
-:math:`t\K{.}\LOAD{N}(\K{\_}\sx)^?~\memarg`
+:math:`t\K{.}\LOAD({N}\K{\_}\sx)^?~\memarg`
 ...........................................
 
 1. Let :math:`\ord` be :math:`\UNORD`.
 
-2. Assert: due to :ref:`validation <valid-loadn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+2. If :math:`N` and :math:`\sx` are part of the instruction, then:
 
-3. Pop the value :math:`\I32.\CONST~i` from the stack.
+   a. Let :math:`\X{st}` be the :ref:`pro forma type <aux-bytes>` :math:`\iN`.
 
-4. Let :math:`\X{ea}` be the integer :math:`i + \memarg.\OFFSET`.
-
-5. If :math:`N` is not part of the instruction, then:
+3. Else:
 
    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
 
-6. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+   b. Let :math:`\X{st}` be the :ref:`value type <syntax-valtype>` :math:`t`.
 
-7. Assert: due to :ref:`validation <valid-loadn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+4. Assert: due to :ref:`validation <valid-loadn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
 
-8. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+5. Pop the value :math:`\I32.\CONST~i` from the stack.
 
-9. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
+6. Let :math:`\X{ea}` be the integer :math:`i + \memarg.\OFFSET`.
+
+7. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+8. Assert: due to :ref:`validation <valid-loadn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+9. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+10. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
 
    a. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
 
@@ -422,7 +428,7 @@ Memory Instructions
 
    c. Let :math:`b^\ast` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
 
-10. Else:
+11. Else:
 
     a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
@@ -432,17 +438,11 @@ Memory Instructions
 
     c. Perform the :ref:`action <syntax-act>` :math:`(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast)` to read the bytes :math:`b^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
-11. If :math:`N` and :math:`\sx` are part of the instruction, then:
+12. Let :math:`c_{\X{st}}` be the integer for which :math:`\bytes_{\X{st}}(n) = b^\ast`.
 
-    a. Let :math:`c_{\X{st}}` be the integer for which :math:`\bytes_{\iN}(n) = b^\ast`.
+13. Let :math:`c` be the result of computing :math:`\extendtsx_{\X{st},|t|}(c_{\X{st}})`.
 
-    b. Let :math:`c` be the result of computing :math:`\extendsx_{N,|t|}(c_{\X{st}})`.
-
-12. Else:
-
-    a. Let :math:`c` be the constant for which :math:`\bytes_t(c) = b^\ast`.
-
-13. Push the value :math:`t.\CONST~c` to the stack.
+14. Push the value :math:`t.\CONST~c` to the stack.
 
 .. math::
    ~\\[-1ex]
@@ -511,35 +511,37 @@ Memory Instructions
 
 1. Let :math:`\ord` be :math:`\UNORD`.
 
-2. Assert: due to :ref:`validation <valid-storen>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
+2. If :math:`N` is part of the instruction, then:
 
-3. Pop the value :math:`t.\CONST~c` from the stack.
+   a. Let :math:`\X{st}` be the :ref:`pro forma type <aux-bytes>` :math:`\iN`.
 
-4. Assert: due to :ref:`validation <valid-storen>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
-
-5. Pop the value :math:`\I32.\CONST~i` from the stack.
-
-6. Let :math:`\X{ea}` be the integer :math:`i + \memarg.\OFFSET`.
-
-7. If :math:`N` is not part of the instruction, then:
+3. Else:
 
    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
 
-   b. Let :math:`b^\ast` be the byte sequence :math:`\bytes_t(c)`.
+   b. Let :math:`\X{st}` be the :ref:`value type <syntax-valtype>` :math:`t`.
 
-8. Else:
+4. Assert: due to :ref:`validation <valid-storen>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
 
-   a. Let :math:`c_{\X{st}}` be the result of computing :math:`\wrap_{|t|,N}(c)`.
+5. Pop the value :math:`t.\CONST~c` from the stack.
 
-   b. Let :math:`b^\ast` be the byte sequence :math:`\bytes_{\iN}(c_{\X{st}})`.
+6. Assert: due to :ref:`validation <valid-storen>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
 
-9. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+7. Pop the value :math:`\I32.\CONST~i` from the stack.
 
-10. Assert: due to :ref:`validation <valid-storen>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+8. Let :math:`\X{ea}` be the integer :math:`i + \memarg.\OFFSET`.
 
-11. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+9. Let :math:`c_{\X{st}}` be the result of computing :math:`\wrapt_{t,\X{st}}(c)`.
 
-12. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
+10. Let :math:`b^\ast` be the byte sequence :math:`\bytes_{\X{st}}(c_{\X{st}})`.
+
+11. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+12. Assert: due to :ref:`validation <valid-storen>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+13. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+14. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
 
     a. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
 
@@ -551,7 +553,7 @@ Memory Instructions
 
     d. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast`.
 
-13. Else:
+15. Else:
 
     a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
@@ -638,7 +640,7 @@ Memory Instructions
 
 5. Else:
 
-   a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+   a. Perform the :ref:`action <syntax-act>` :math:`(\ARD_{\SEQCST}~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
 6. Let :math:`\X{sz}` be :math:`n` divided by the :ref:`page size <page-size>`.
 
@@ -658,7 +660,7 @@ Memory Instructions
    %
    ~\\
    \begin{array}{lcl@{\qquad}l}
-   S; F; \MEMORYSIZE &\stepto^{(\ARD~a.\LLEN~n)}& S; F; (\I32.\CONST~\X{sz})
+   S; F; \MEMORYSIZE &\stepto^{(\ARD_{\SEQCST}~a.\LLEN~n)}& S; F; (\I32.\CONST~\X{sz})
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -705,7 +707,7 @@ Memory Instructions
 
 8. Else:
 
-   a. Either:
+   a. Either successfully grow the memory:
 
       i. Let :math:`k` be :math:`n` multiplied by the :ref:`page size <page-size>`.
 
@@ -717,9 +719,9 @@ Memory Instructions
 
       v. Push the value :math:`\I32.\CONST~\X{sz}` to the stack.
 
-   b. Or:
+   b. Or indicate failure:
 
-      i. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~l)` to read the length :math:`l` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+      i. Perform the :ref:`action <syntax-act>` :math:`(\ARD_{\SEQCST}~a.\LLEN~l)` to read the length :math:`l` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
       ii. Push the value :math:`\I32.\CONST~\X{err}` to the stack.
 
@@ -761,7 +763,7 @@ Memory Instructions
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
    S; F; (\I32.\CONST~n)~\MEMORYGROW
-     &\stepto^{(\ARD~a.\LLEN~n)}&
+     &\stepto^{(\ARD_{\SEQCST}~a.\LLEN~n)}&
      S; F; (\I32.\CONST~{-1})
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -818,31 +820,37 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 :math:`t\K{.}\ATOMICRMW({N}\K{\_u})^?\K{.}\atop~\memarg`
 ........................................................
 
-1. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
+1. If :math:`N` and :math:`\K{\_u}` are part of the instruction, then:
 
-2. Pop the value :math:`t.\CONST~c_2` from the stack.
+   a. Let :math:`\X{st}` be the :ref:`pro forma type <aux-bytes>` :math:`\iN`.
 
-3. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
-
-4. Pop the value :math:`\I32.\CONST~i` from the stack.
-
-5. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
-
-6. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
-
-   a. Trap.
-
-7. If :math:`N` is not part of the instruction, then:
+2. Else:
 
    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
 
-8. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+   b. Let :math:`\X{st}` be the :ref:`value type <syntax-valtype>` :math:`t`.
 
-9. Assert: due to :ref:`validation <valid-atomic.rmwn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+3. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
 
-10. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+4. Pop the value :math:`t.\CONST~c_2` from the stack.
 
-11. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
+5. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+
+6. Pop the value :math:`\I32.\CONST~i` from the stack.
+
+7. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+
+8. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
+
+   a. Trap.
+
+9. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+10. Assert: due to :ref:`validation <valid-atomic.rmwn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+11. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+12. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
 
     a. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
 
@@ -852,7 +860,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 
     c. Let :math:`b^\ast_{\F{r}}` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
 
-12. Else:
+13. Else:
 
     a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
@@ -860,35 +868,23 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 
        i. Trap.
 
-    c. Perform the atomic :ref:`action <syntax-act>` :math:`(\ARMW_{\ord}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{r}}^\ast)` to read the bytes :math:`b_{\F{r}}^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a` and replace them with bytes :math:`b_{\F{w}}^\ast` (which are defined below).
+    c. Perform the atomic :ref:`action <syntax-act>` :math:`(\ARMW_{\SEQCST}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{w}}^\ast)` to read the bytes :math:`b_{\F{r}}^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a` and replace them with bytes :math:`b_{\F{w}}^\ast` (which are defined below).
 
-13. If :math:`N` and :math:`\sx` are part of the instruction, then:
+14. Let :math:`c_{\F{r}}` be the integer for which :math:`\bytes_{\X{st}}(n) = b_{\F{r}}^\ast`.
 
-    a. Let :math:`c_{\F{r}}` be the integer for which :math:`\bytes_{\iN}(n) = b_{\F{r}}^\ast`.
+15. Let :math:`c_1` be the result of computing :math:`\extendtu_{\X{st},t}(c_{\F{r}})`.
 
-    b. Let :math:`c_1` be the result of computing :math:`\extendsx_{N,|t|}(c_{\F{r}})`.
+16. Let :math:`c` be the result of computing :math:`\atop_t(c_1, c_2)`.
 
-14. Else:
+17. Let :math:`c_{\F{w}}` be the result of computing :math:`\wrapt_{t,\X{st}}(c)`.
 
-    a. Let :math:`c_1` be the constant for which :math:`\bytes_t(c_1) = b_{\F{r}}^\ast`.
+18. Let :math:`b^\ast_{\F{w}}` be the byte sequence :math:`\bytes_{\X{st}}(c_{\F{w}})`.
 
-15. Let :math:`c` be the result of computing :math:`\atop_t(c_1, c_2)`.
-
-16. If :math:`N` is part of the instruction, then:
-
-    a. Let :math:`c_{\F{w}}` be the result of computing :math:`\wrap_{|t|,N}(c)`.
-
-    b. Let :math:`b^\ast_{\F{w}}` be the byte sequence :math:`\bytes_{\iN}(c_{\F{w}})`.
-
-17. Else:
-
-    b. Let :math:`b^\ast_{\F{w}}` be the byte sequence :math:`\bytes_t(c_{\F{w}})`.
-
-18. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
+19. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
 
     a. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast_{\F{w}}`.
 
-19. Push the value :math:`t.\CONST~c` to the stack.
+20. Push the value :math:`t.\CONST~c` to the stack.
 
 .. math::
    \begin{array}{l}
@@ -961,31 +957,41 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 :math:`t\K{.}\ATOMICRMW({N}\K{\_u})^?\K{.}\ATCMPXCHG~\memarg`
 .............................................................
 
-1. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` :math:`t` is on the top of the stack.
+.. todo:: should only emit |ARMW| if the condition is true?
 
-2. Pop the value :math:`t.\CONST~c_2` from the stack.
+1. If :math:`N` and :math:`\K{\_u}` are part of the instruction, then:
 
-3. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+   a. Let :math:`\X{st}` be the :ref:`pro forma type <aux-bytes>` :math:`\iN`.
 
-4. Pop the value :math:`\I32.\CONST~i` from the stack.
-
-5. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
-
-6. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
-
-   a. Trap.
-
-7. If :math:`N` is not part of the instruction, then:
+2. Else:
 
    a. Let :math:`N` be the :ref:`bit width <syntax-valtype>` :math:`|t|` of :ref:`value type <syntax-valtype>` :math:`t`.
 
-8. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+   b. Let :math:`\X{st}` be the :ref:`value type <syntax-valtype>` :math:`t`.
 
-9. Assert: due to :ref:`validation <valid-atomic.rmwn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+3. Assert: due to :ref:`validation <valid-atomic.rmwn>`, two values of :ref:`value type <syntax-valtype>` :math:`t` are on the top of the stack.
 
-10. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+4. Pop the value :math:`t.\CONST~c_3` from the stack.
 
-11. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
+5. Pop the value :math:`t.\CONST~c_2` from the stack.
+
+6. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+
+7. Pop the value :math:`\I32.\CONST~i` from the stack.
+
+8. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+
+9. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
+
+   a. Trap.
+
+10. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+11. Assert: due to :ref:`validation <valid-atomic.rmwn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+12. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+13. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
 
     a. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
 
@@ -995,7 +1001,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 
     c. Let :math:`b^\ast_{\F{r}}` be the byte sequence :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]`.
 
-12. Else:
+14. Else:
 
     a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
@@ -1003,41 +1009,29 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 
        i. Trap.
 
-    c. Perform the atomic :ref:`action <syntax-act>` :math:`(\ARMW_{\ord}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{r}}^\ast)` to read the bytes :math:`b_{\F{r}}^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a` and replace them with bytes :math:`b_{\F{w}}^\ast` (which are defined below).
+    c. Perform the atomic :ref:`action <syntax-act>` :math:`(\ARMW_{\SEQCST}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{w}}^\ast)` to read the bytes :math:`b_{\F{r}}^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a` and replace them with bytes :math:`b_{\F{w}}^\ast` (which are defined below).
 
-13. If :math:`N` and :math:`\sx` are part of the instruction, then:
+15. Let :math:`c_{\F{r}}` be the integer for which :math:`\bytes_{\X{st}}(n) = b_{\F{r}}^\ast`.
 
-    a. Let :math:`c_{\F{r}}` be the integer for which :math:`\bytes_{\iN}(n) = b_{\F{r}}^\ast`.
+16. Let :math:`c_1` be the result of computing :math:`\extendtu_{\X{st},t}(c_{\F{r}})`.
 
-    b. Let :math:`c_1` be the result of computing :math:`\extendsx_{N,|t|}(c_{\F{r}})`.
-
-14. Else:
-
-    a. Let :math:`c_1` be the constant for which :math:`\bytes_t(c_1) = b_{\F{r}}^\ast`.
-
-15. If :math:`c_1` equals :math:`c_2`, then:
+17. If :math:`c_1` equals :math:`c_2`, then:
 
     a. Let :math:`c` be :math:`c_2`.
 
-16. Else:
+18. Else:
 
     a. Let :math:`c` be :math:`c_3`.
 
-17. If :math:`N` is part of the instruction, then:
+19. Let :math:`c_{\F{w}}` be the result of computing :math:`\wrapt_{t,\X{st}}(c)`.
 
-    a. Let :math:`c_{\F{w}}` be the result of computing :math:`\wrap_{|t|,N}(c)`.
+20. Let :math:`b^\ast_{\F{w}}` be the byte sequence :math:`\bytes_{\X{st}}(c_{\F{w}})`.
 
-    b. Let :math:`b^\ast_{\F{w}}` be the byte sequence :math:`\bytes_{\iN}(c_{\F{w}})`.
-
-18. Else:
-
-    b. Let :math:`b^\ast_{\F{w}}` be the byte sequence :math:`\bytes_t(c_{\F{w}})`.
-
-19. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
+21. If the memory is local, i.e., :math:`S.\SMEMS[a]` exists, then:
 
     a. Replace the bytes :math:`\X{mem}.\MIDATA[\X{ea} \slice N/8]` with :math:`b^\ast_{\F{w}}`.
 
-20. Push the value :math:`t.\CONST~c` to the stack.
+22. Push the value :math:`t.\CONST~c` to the stack.
 
 .. math::
    \begin{array}{l}
@@ -1106,12 +1100,13 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \end{array}
 
 
-.. _exec-memory.atomic.wait:
+.. _exec-memory.atomic.waitn:
 
 :math:`\MEMORYATOMICWAIT{N}`
 ............................
 
 .. todo:: update to new rules
+.. todo:: operand order does not match validation and threads overview
 .. todo:: add text
 
 .. todo:: add semantics for non-shared memories

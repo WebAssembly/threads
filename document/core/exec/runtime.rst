@@ -174,7 +174,7 @@ Syntactically, a local store is defined as a :ref:`map <notation-map>` from know
      \globalinst \\
    \end{array}
 
-It is an invariant of the semantics that none of the memory instances :math:`\meminst` in a store is :ref:`shared <syntax-shared>`.
+It is an invariant of the semantics that none of the memory instances :math:`\meminst` in a local store is :ref:`shared <syntax-shared>`.
 
 .. [#gc]
    In practice, implementations may apply techniques like garbage collection to remove objects from the store that are no longer referenced.
@@ -762,7 +762,7 @@ Global Reduction
 *Global reduction* is concerned with allocation in the global store and synchronization between multiple :ref:`threads <syntax-thread>`.
 It emits a (possibly empty) set of events that are produced by the corresponding step of computation.
 
-Formally, glboal reduction is a relation
+Formally, global reduction is a relation
 
 .. math::
    \config \stepto^{\evt^\ast} \config
