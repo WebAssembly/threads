@@ -398,7 +398,7 @@ Memory Instructions
 
 2. If :math:`N` and :math:`\sx` are part of the instruction, then:
 
-   a. Let :math:`\X{st}` be the :ref:`pro forma type <aux-bytes>` :math:`\iN`.
+   a. Let :math:`\X{st}` be the :ref:`storage type <syntax-storagetype>` :math:`\iN`.
 
 3. Else:
 
@@ -436,7 +436,7 @@ Memory Instructions
 
        i. Trap.
 
-    c. Perform the :ref:`action <syntax-act>` :math:`(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast)` to read the bytes :math:`b^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+    c. Perform the :ref:`action <syntax-act>` :math:`(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast)` to read :math:`N/8` bytes :math:`b^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
 12. Let :math:`c_{\X{st}}` be the integer for which :math:`\bytes_{\X{st}}(n) = b^\ast`.
 
@@ -513,7 +513,7 @@ Memory Instructions
 
 2. If :math:`N` is part of the instruction, then:
 
-   a. Let :math:`\X{st}` be the :ref:`pro forma type <aux-bytes>` :math:`\iN`.
+   a. Let :math:`\X{st}` be the :ref:`storage type <syntax-storagetype>` :math:`\iN`.
 
 3. Else:
 
@@ -822,7 +822,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 
 1. If :math:`N` and :math:`\K{\_u}` are part of the instruction, then:
 
-   a. Let :math:`\X{st}` be the :ref:`pro forma type <aux-bytes>` :math:`\iN`.
+   a. Let :math:`\X{st}` be the :ref:`storage type <syntax-storagetype>` :math:`\iN`.
 
 2. Else:
 
@@ -868,7 +868,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 
        i. Trap.
 
-    c. Perform the atomic :ref:`action <syntax-act>` :math:`(\ARMW_{\SEQCST}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{w}}^\ast)` to read the bytes :math:`b_{\F{r}}^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a` and replace them with bytes :math:`b_{\F{w}}^\ast` (which are defined below).
+    c. Perform the atomic :ref:`action <syntax-act>` :math:`(\ARMW_{\SEQCST}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{w}}^\ast)` to read :math:`N/8` bytes :math:`b_{\F{r}}^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a` and replace them with bytes :math:`b_{\F{w}}^\ast` (which are defined below).
 
 14. Let :math:`c_{\F{r}}` be the integer for which :math:`\bytes_{\X{st}}(n) = b_{\F{r}}^\ast`.
 
@@ -926,7 +926,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
      \wedge & \X{ea} + N/8 \leq n \\
      \wedge & \X{ea} \mod N/8 = 0 \\
      \wedge & c_1 = \extendtu_{\X{st},t}(\bytes^{-1}_{\X{st}}(b_{\F{r}}^\ast)) \\
-     \wedge & b_{\F{r}}^\ast = \bytes_{\X{st}}(\wrapt_{t,\X{st}}(\atop_t(c_1, c_2)))) \\
+     \wedge & b_{\F{w}}^\ast = \bytes_{\X{st}}(\wrapt_{t,\X{st}}(\atop_t(c_1, c_2)))) \\
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -961,7 +961,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 
 1. If :math:`N` and :math:`\K{\_u}` are part of the instruction, then:
 
-   a. Let :math:`\X{st}` be the :ref:`pro forma type <aux-bytes>` :math:`\iN`.
+   a. Let :math:`\X{st}` be the :ref:`storage type <syntax-storagetype>` :math:`\iN`.
 
 2. Else:
 
@@ -1009,7 +1009,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 
        i. Trap.
 
-    c. Perform the atomic :ref:`action <syntax-act>` :math:`(\ARMW_{\SEQCST}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{w}}^\ast)` to read the bytes :math:`b_{\F{r}}^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a` and replace them with bytes :math:`b_{\F{w}}^\ast` (which are defined below).
+    c. Perform the atomic :ref:`action <syntax-act>` :math:`(\ARMW_{\SEQCST}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{w}}^\ast)` to read :math:`N/8` bytes :math:`b_{\F{r}}^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a` and replace them with bytes :math:`b_{\F{w}}^\ast` (which are defined below).
 
 15. Let :math:`c_{\F{r}}` be the integer for which :math:`\bytes_{\X{st}}(n) = b_{\F{r}}^\ast`.
 

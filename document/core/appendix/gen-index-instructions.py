@@ -267,7 +267,7 @@ INSTRUCTIONS = [
     Instruction(r'\I64.\TRUNC\K{\_sat}\_\F64\K{\_s}', r'\hex{FC}~~6', r'[\F64] \to [\I64]', r'valid-cvtop', r'exec-cvtop', r'op-trunc_sat_s'),
     Instruction(r'\I64.\TRUNC\K{\_sat\_}\F64\K{\_u}', r'\hex{FC}~~7', r'[\F64] \to [\I64]', r'valid-cvtop', r'exec-cvtop', r'op-trunc_sat_u'),
     Instruction(None, r'\hex{FD}'),
-    Instruction(r'\MEMORYATOMICNOTIFY~\memarg', r'\hex{FE}~\hex{00}', r'[\I32~\I64] \to [\I64]', r'valid-memory.atomic.notify'),
+    Instruction(r'\MEMORYATOMICNOTIFY~\memarg', r'\hex{FE}~\hex{00}', r'[\I32~\I32] \to [\I32]', r'valid-memory.atomic.notify'),
     Instruction(r'\MEMORYATOMICWAIT\K{32}~\memarg', r'\hex{FE}~\hex{01}', r'[\I32~\I32~\I64] \to [\I32]', r'valid-memory.atomic.waitn'),
     Instruction(r'\MEMORYATOMICWAIT\K{64}~\memarg', r'\hex{FE}~\hex{02}', r'[\I32~\I64~\I64] \to [\I32]', r'valid-memory.atomic.waitn'),
     Instruction(r'\I32.\ATOMICLOAD~\memarg', r'\hex{FE}~\hex{10}', r'[\I32] \to [\I32]', r'valid-atomic.load', r'exec-atomic.load'),
