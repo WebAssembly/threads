@@ -393,45 +393,10 @@ In contrast,</p>
 </div>
 <div class="section" id="atomic-memory-instructions">
 <span id="valid-instr-atomic-memory"></span><span id="index-5"></span><h2>Atomic Memory Instructions<a class="headerlink" href="#atomic-memory-instructions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-notify-xref-syntax-instructions-syntax-memarg-mathit-memarg">
-<span id="valid-atomic-notify"></span><h3><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.notify}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-notify-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
-<li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math notranslate nohighlight">\(4\)</span>.</p></li>
-<li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}]\)</span>.</p></li>
-</ul>
-<div class="math notranslate nohighlight">
-\[\frac{
-  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
-  \qquad
-  2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = 4
-}{
-  C \vdash \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.notify}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}]
-}\]</div>
-</div>
-<div class="section" id="xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-wait-n-xref-syntax-instructions-syntax-memarg-mathit-memarg">
-<span id="valid-atomic-wait"></span><h3><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-wait-n-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
-<li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math notranslate nohighlight">\(N\)</span> divided by <span class="math notranslate nohighlight">\(8\)</span>.</p></li>
-<li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\mathsf{i}{N}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]\)</span>.</p></li>
-</ul>
-<div class="math notranslate nohighlight">
-\[\frac{
-  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
-  \qquad
-  2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = N/8
-}{
-  C \vdash \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\mathsf{i}{N}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]
-}\]</div>
-</div>
 <div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-load-xref-syntax-instructions-syntax-memarg-mathit-memarg">
 <span id="valid-atomic-load"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-load-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
 <li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">width</span></a> of <span class="math notranslate nohighlight">\(t\)</span> divided by <span class="math notranslate nohighlight">\(8\)</span>.</p></li>
 <li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</p></li>
 </ul>
@@ -448,7 +413,6 @@ In contrast,</p>
 <span id="valid-atomic-loadn"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}{N}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-load-n-mathsf-u-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
 <li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math notranslate nohighlight">\(N/8\)</span>.</p></li>
 <li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</p></li>
 </ul>
@@ -465,7 +429,6 @@ In contrast,</p>
 <span id="valid-atomic-store"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-store-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
 <li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">width</span></a> of <span class="math notranslate nohighlight">\(t\)</span> divided by <span class="math notranslate nohighlight">\(8\)</span>.</p></li>
 <li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} []\)</span>.</p></li>
 </ul>
@@ -482,7 +445,6 @@ In contrast,</p>
 <span id="valid-atomic-storen"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-store-n-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
 <li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math notranslate nohighlight">\(N/8\)</span>.</p></li>
 <li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} []\)</span>.</p></li>
 </ul>
@@ -495,11 +457,10 @@ In contrast,</p>
   C \vdash t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} []
 }\]</div>
 </div>
-<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-mathsf-xref-syntax-instructions-syntax-atomicop-mathit-atomicop-xref-syntax-instructions-syntax-memarg-mathit-memarg">
-<span id="valid-atomic-rmw"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-mathsf-xref-syntax-instructions-syntax-atomicop-mathit-atomicop-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-mathsf-xref-syntax-instructions-syntax-atop-mathit-atop-xref-syntax-instructions-syntax-memarg-mathit-memarg">
+<span id="valid-atomic-rmw"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-mathsf-xref-syntax-instructions-syntax-atop-mathit-atop-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
 <li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">width</span></a> of <span class="math notranslate nohighlight">\(t\)</span> divided by <span class="math notranslate nohighlight">\(8\)</span>.</p></li>
 <li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</p></li>
 </ul>
@@ -509,14 +470,13 @@ In contrast,</p>
   \qquad
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = |t|/8
 }{
-  C \vdash t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]
+  C \vdash t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]
 }\]</div>
 </div>
-<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-xref-syntax-instructions-syntax-atomicop-mathit-atomicop-mathsf-u-xref-syntax-instructions-syntax-memarg-mathit-memarg">
-<span id="valid-atomic-rmwn"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-xref-syntax-instructions-syntax-atomicop-mathit-atomicop-mathsf-u-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-xref-syntax-instructions-syntax-atop-mathit-atop-mathsf-u-xref-syntax-instructions-syntax-memarg-mathit-memarg">
+<span id="valid-atomic-rmwn"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{.}\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-xref-syntax-instructions-syntax-atop-mathit-atop-mathsf-u-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
 <li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math notranslate nohighlight">\(N/8\)</span>.</p></li>
 <li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</p></li>
 </ul>
@@ -526,14 +486,13 @@ In contrast,</p>
   \qquad
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = N/8
 }{
-  C \vdash t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]
+  C \vdash t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{.}\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]
 }\]</div>
 </div>
 <div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-cmpxchg-xref-syntax-instructions-syntax-memarg-mathit-memarg">
 <span id="valid-atomic-rmw-cmpxchg"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-cmpxchg-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
 <li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">width</span></a> of <span class="math notranslate nohighlight">\(t\)</span> divided by <span class="math notranslate nohighlight">\(8\)</span>.</p></li>
 <li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</p></li>
 </ul>
@@ -550,7 +509,6 @@ In contrast,</p>
 <span id="valid-atomic-rmwn-cmpxchg"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-cmpxchg-mathsf-u-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
 <li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math notranslate nohighlight">\(N/8\)</span>.</p></li>
 <li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]\)</span>.</p></li>
 </ul>
@@ -561,6 +519,40 @@ In contrast,</p>
   2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = N/8
 }{
   C \vdash t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~t~t] \href{../syntax/types.html#syntax-functype}{\rightarrow} [t]
+}\]</div>
+</div>
+<div class="section" id="xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-notify-xref-syntax-instructions-syntax-memarg-mathit-memarg">
+<span id="valid-memory-atomic-notify"></span><h3><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.notify}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-notify-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
+<li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math notranslate nohighlight">\(4\)</span>.</p></li>
+<li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]\)</span>.</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\frac{
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  \qquad
+  2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = 4
+}{
+  C \vdash \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.notify}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]
+}\]</div>
+</div>
+<div class="section" id="xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-wait-n-xref-syntax-instructions-syntax-memarg-mathit-memarg">
+<span id="valid-memory-atomic-waitn"></span><h3><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-wait-n-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>The memory <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span> must be defined in the context.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-share}{\mathit{share}}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-memtype"><span class="std std-ref">memory type</span></a> <span class="math notranslate nohighlight">\(C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0]\)</span>.</p></li>
+<li><p>The alignment <span class="math notranslate nohighlight">\(2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}}\)</span> must be equal to <span class="math notranslate nohighlight">\(N\)</span> divided by <span class="math notranslate nohighlight">\(8\)</span>.</p></li>
+<li><p>Then the instruction is valid with type <span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\mathsf{i}{N}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]\)</span>.</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\frac{
+  C.\href{../valid/conventions.html#context}{\mathsf{mems}}[0] = \href{../syntax/types.html#syntax-memtype}{\mathit{memtype}}
+  \qquad
+  2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = N/8
+}{
+  C \vdash \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} : [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\mathsf{i}{N}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]
 }\]</div>
 </div>
 </div>

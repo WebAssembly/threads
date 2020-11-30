@@ -79,10 +79,10 @@
 <span id="index-instr"></span><span id="index-0"></span><h1>Index of Instructions<a class="headerlink" href="#index-of-instructions" title="Permalink to this headline">¶</a></h1>
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 25%" />
+<col style="width: 24%" />
 <col style="width: 11%" />
 <col style="width: 19%" />
-<col style="width: 19%" />
+<col style="width: 20%" />
 <col style="width: 27%" />
 </colgroup>
 <thead>
@@ -1332,20 +1332,20 @@
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.notify}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(\def\mathdef431#1{\mathtt{0x#1}}\mathdef431{FE}~\def\mathdef432#1{\mathtt{0x#1}}\mathdef432{00}\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}]\)</span></p></td>
-<td><p><a class="reference internal" href="../valid/instructions.html#valid-atomic-notify"><span class="std std-ref">validation</span></a></p></td>
+<td><p><span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]\)</span></p></td>
+<td><p><a class="reference internal" href="../valid/instructions.html#valid-memory-atomic-notify"><span class="std std-ref">validation</span></a></p></td>
 <td></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}\mathsf{32}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(\def\mathdef433#1{\mathtt{0x#1}}\mathdef433{FE}~\def\mathdef434#1{\mathtt{0x#1}}\mathdef434{01}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]\)</span></p></td>
-<td><p><a class="reference internal" href="../valid/instructions.html#valid-atomic-wait"><span class="std std-ref">validation</span></a></p></td>
+<td><p><a class="reference internal" href="../valid/instructions.html#valid-memory-atomic-waitn"><span class="std std-ref">validation</span></a></p></td>
 <td></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}\mathsf{64}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(\def\mathdef435#1{\mathtt{0x#1}}\mathdef435{FE}~\def\mathdef436#1{\mathtt{0x#1}}\mathdef436{02}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\([\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}~\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}] \href{../syntax/types.html#syntax-functype}{\rightarrow} [\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}]\)</span></p></td>
-<td><p><a class="reference internal" href="../valid/instructions.html#valid-atomic-wait"><span class="std std-ref">validation</span></a></p></td>
+<td><p><a class="reference internal" href="../valid/instructions.html#valid-memory-atomic-waitn"><span class="std std-ref">validation</span></a></p></td>
 <td></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span></p></td>

@@ -167,7 +167,7 @@ a time stamp <span class="math notranslate nohighlight">\(\href{../exec/runtime.
 <span id="notation-attime"></span><h3>Conventions<a class="headerlink" href="#conventions" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p>The meta variable <span class="math notranslate nohighlight">\(h\)</span> ranges over time stamps where clear from context.</p></li>
-<li><p>The notation <span class="math notranslate nohighlight">\((X~\href{../exec/runtime.html#syntax-time}{\mathsf{at}}~\href{../exec/runtime.html#syntax-time}{\mathit{time}})\)</span> is a shorthand for the <a class="reference internal" href="../syntax/conventions.html#notation-record"><span class="std std-ref">record</span></a> <span class="math notranslate nohighlight">\(\{\href{../exec/runtime.html#syntax-time}{\mathsf{val}}~X, \href{../exec/runtime.html#syntax-time}{\mathsf{time}}~\href{../exec/runtime.html#syntax-time}{\mathit{time}}\}\)</span> that annotates a semantic object <span class="math notranslate nohighlight">\(X\)</span> with a time stamp <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-time}{\mathit{time}}\)</span>.</p></li>
+<li><p>The notation <span class="math notranslate nohighlight">\((X~\href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}}~h)\)</span> is a shorthand for the <a class="reference internal" href="../syntax/conventions.html#notation-record"><span class="std std-ref">record</span></a> <span class="math notranslate nohighlight">\(\{\href{../exec/runtime.html#syntax-time}{\mathsf{val}}~X, \href{../exec/runtime.html#syntax-time}{\mathsf{time}}~h\}\)</span> that annotates a semantic object <span class="math notranslate nohighlight">\(X\)</span> with a time stamp <span class="math notranslate nohighlight">\(h\)</span>.</p></li>
 </ul>
 </div>
 </div>
@@ -191,7 +191,7 @@ It consists of the runtime representation of all <em>instances</em> of <a class=
   \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} ~|~
   \href{../exec/runtime.html#syntax-globalinst}{\mathit{globalinst}} \\
 \end{array}\end{split}\]</div>
-<p>It is an invariant of the semantics that none of the memory instances <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}\)</span> in a store is <span class="math notranslate nohighlight">\(shared &lt;syntax-shared&gt;\)</span>.</p>
+<p>It is an invariant of the semantics that none of the memory instances <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}\)</span> in a local store is <a class="reference internal" href="../syntax/types.html#syntax-shared"><span class="std std-ref">shared</span></a>.</p>
 <dl class="footnote brackets">
 <dt class="label" id="gc"><span class="brackets"><a class="fn-backref" href="#id4">1</a></span></dt>
 <dd><p>In practice, implementations may apply techniques like garbage collection to remove objects from the store that are no longer referenced.
@@ -208,7 +208,7 @@ It consists of the runtime representation of all <em>instances</em> of <a class=
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{llll}
 \def\mathdef1548#1{{}}\mathdef1548{(shared store)} &amp; \href{../exec/runtime.html#syntax-sharedstore}{\mathit{sharedstore}} &amp;::=&amp;
-  (\href{../exec/runtime.html#syntax-memaddr}{\mathit{memaddr}} \mapsto \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} \href{../exec/runtime.html#syntax-time}{\mathsf{at}} \href{../exec/runtime.html#syntax-time}{\mathit{time}})^\ast, \\
+  (\href{../exec/runtime.html#syntax-memaddr}{\mathit{memaddr}} \mapsto \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} \href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}} \href{../exec/runtime.html#syntax-time}{\mathit{time}})^\ast, \\
 \end{array}\end{split}\]</div>
 <p>It is an invariant of the semantics that all memory instances <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}\)</span> in a shared store are <span class="math notranslate nohighlight">\(shared &lt;syntax-shared&gt;\)</span>.</p>
 <div class="admonition note">
@@ -531,7 +531,7 @@ Each event is annotated with a <a class="reference internal" href="#syntax-time"
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{llcl}
 \def\mathdef1548#1{{}}\mathdef1548{(event)} &amp; \href{../exec/runtime.html#syntax-evt}{\mathit{evt}} &amp;::=&amp;
-  \href{../exec/runtime.html#syntax-act}{\mathit{act}}^\ast~\href{../exec/runtime.html#syntax-time}{\mathsf{at}}~\href{../exec/runtime.html#syntax-time}{\mathit{time}} \\
+  \href{../exec/runtime.html#syntax-act}{\mathit{act}}^\ast~\href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}}~\href{../exec/runtime.html#syntax-time}{\mathit{time}} \\
 \def\mathdef1548#1{{}}\mathdef1548{(action)} &amp; \href{../exec/runtime.html#syntax-act}{\mathit{act}} &amp;::=&amp;
   \href{../exec/runtime.html#syntax-act}{\mathsf{rd}}_{\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}}~\href{../exec/runtime.html#syntax-loc}{\mathit{loc}}~\href{../exec/runtime.html#syntax-storeval}{\mathit{storeval}} \\&amp;&amp;|&amp;
   \href{../exec/runtime.html#syntax-act}{\mathsf{wr}}_{\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}}~\href{../exec/runtime.html#syntax-loc}{\mathit{loc}}~\href{../exec/runtime.html#syntax-storeval}{\mathit{storeval}} \\&amp;&amp;|&amp;
@@ -571,7 +571,7 @@ Its form and meaning is outside the scope of this specification.</p>
 <div class="section" id="convention">
 <h3>Convention<a class="headerlink" href="#convention" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>The actions <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}_{\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}}\)</span> and <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-act}{\mathsf{wr}}_{\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}}\)</span> are abbreviated to :math:just <cite>ARD</cite> and <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-act}{\mathsf{wr}}\)</span> when <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}\)</span> is <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathsf{unord}}\)</span>.</p></li>
+<li><p>The actions <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}_{\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}}\)</span> and <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-act}{\mathsf{wr}}_{\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}}\)</span> are abbreviated to just <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}\)</span> and <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-act}{\mathsf{wr}}\)</span> when <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}\)</span> is <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathsf{unord}}\)</span>.</p></li>
 </ul>
 <div class="admonition-todo admonition" id="id15">
 <p class="admonition-title">Todo</p>
@@ -591,7 +591,7 @@ It consists of the local <a class="reference internal" href="#syntax-store"><spa
 \def\mathdef1548#1{{}}\mathdef1548{(global configuration)} &amp; \href{../exec/runtime.html#syntax-config}{\mathit{config}} &amp;::=&amp;
   \href{../exec/runtime.html#syntax-sharedstore}{\mathit{sharedstore}}; \href{../exec/runtime.html#syntax-thread}{\mathit{thread}}^\ast \\
 \def\mathdef1548#1{{}}\mathdef1548{(thread)} &amp; \href{../exec/runtime.html#syntax-thread}{\mathit{thread}} &amp;::=&amp;
-  \href{../exec/runtime.html#syntax-store}{\mathit{store}}; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast~\href{../exec/runtime.html#syntax-time}{\mathsf{at}}~\href{../exec/runtime.html#syntax-time}{\mathit{time}} \\
+  \href{../exec/runtime.html#syntax-store}{\mathit{store}}; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast~\href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}}~\href{../exec/runtime.html#syntax-time}{\mathit{time}} \\
 \def\mathdef1548#1{{}}\mathdef1548{(local configuration)} &amp; \href{../exec/runtime.html#syntax-config}{\mathit{lconfig}} &amp;::=&amp;
   \href{../exec/runtime.html#syntax-store}{\mathit{store}}; \href{../exec/runtime.html#syntax-frame}{\mathit{frame}}; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast \\
 \end{array}\end{split}\]</div>
@@ -612,21 +612,21 @@ that define how a single step of execution modifies these configurations, respec
 <h3>Global Reduction<a class="headerlink" href="#global-reduction" title="Permalink to this headline">¶</a></h3>
 <p><em>Global reduction</em> is concerned with allocation in the global store and synchronization between multiple <a class="reference internal" href="#syntax-thread"><span class="std std-ref">threads</span></a>.
 It emits a (possibly empty) set of events that are produced by the corresponding step of computation.</p>
-<p>Formally, glboal reduction is a relation</p>
+<p>Formally, global reduction is a relation</p>
 <div class="math notranslate nohighlight">
 \[\href{../exec/runtime.html#syntax-config}{\mathit{config}} \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}^\ast} \href{../exec/runtime.html#syntax-config}{\mathit{config}}\]</div>
 <p>defined by inductive rewrite rules on global configurations.</p>
 <p>The following structural rule for global reduction delegates to local reduction for single thread execution:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{&#64;{}c&#64;{}}
-\mathit{SS}; P_1^\ast~(S; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast \href{../exec/runtime.html#syntax-time}{\mathsf{at}} h)~P_2^\ast
-  \qquad \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{\href{../exec/runtime.html#syntax-act}{\mathit{act}}^\ast \href{../exec/runtime.html#syntax-time}{\mathsf{at}} h'} \qquad
-  \mathit{SS}; P_1^\ast~(S'; {\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}'}^\ast \href{../exec/runtime.html#syntax-time}{\mathsf{at}} h')~P_2^\ast \\
+\mathit{SS}; P_1^\ast~(S; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast \href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}} h)~P_2^\ast
+  \qquad \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{\href{../exec/runtime.html#syntax-act}{\mathit{act}}^\ast \href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}} h'} \qquad
+  \mathit{SS}; P_1^\ast~(S'; {\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}'}^\ast \href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}} h')~P_2^\ast \\
   \qquad (
     \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
     \mathrel{\mbox{if}} &amp; S; F_\epsilon; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{\href{../exec/runtime.html#syntax-act}{\mathit{act}}^\ast} S'; F'; {\href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}'}^\ast) \\
     \wedge &amp; h \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} h' \\
-    \wedge &amp; (S(\href{../exec/runtime.html#syntax-addr}{\mathit{addr}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}})).\href{../exec/runtime.html#syntax-time}{\mathsf{time}} \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} h')^\ast \\
+    \wedge &amp; (\mathit{SS}(\href{../exec/runtime.html#syntax-addr}{\mathit{addr}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}})).\href{../exec/runtime.html#syntax-time}{\mathsf{time}} \href{../exec/relaxed.html#relaxed-prechb}{\mathrel{\prec_{\mathsf{hb}}}} h')^\ast \\
     \wedge &amp; F_\epsilon = \{\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}~\{\}\}) \\
     \end{array}
 \end{array}\end{split}\]</div>

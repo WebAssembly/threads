@@ -89,7 +89,7 @@
 <div class="section" id="numeric-instructions">
 <span id="exec-instr-numeric"></span><span id="index-1"></span><h2>Numeric Instructions<a class="headerlink" href="#numeric-instructions" title="Permalink to this headline">¶</a></h2>
 <p>Numeric instructions are defined in terms of the generic <a class="reference internal" href="numerics.html#exec-numeric"><span class="std std-ref">numeric operators</span></a>.
-The mapping of numeric instructions to their underlying operators is expressed by the following definition:</p>
+The mapping of <a class="reference internal" href="../syntax/instructions.html#syntax-instr-numeric"><span class="std std-ref">numeric</span></a> and <a class="reference internal" href="../syntax/instructions.html#syntax-instr-atomic-memory"><span class="std std-ref">atomic</span></a> instructions to their underlying operators is expressed by the following definition:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{lll&#64;{\qquad}l}
 \mathit{op}_{\mathsf{i}N}(n_1,\dots,n_k) &amp;=&amp; \mathrm{i}\mathit{op}_N(n_1,\dots,n_k) \\
@@ -363,97 +363,100 @@ S; F; \href{../exec/runtime.html#syntax-val}{\mathit{val}}~(\href{../syntax/inst
 <span id="exec-instr-memory"></span><span id="exec-memarg"></span><span id="index-4"></span><h2>Memory Instructions<a class="headerlink" href="#memory-instructions" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The alignment <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}\)</span> in load and store instructions does not affect the semantics.
+<p>The alignment <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}\)</span> in load and store instructions does not affect the semantics of non-atomic accesses to <a class="reference internal" href="../syntax/modules.html#syntax-mem"><span class="std std-ref">memories</span></a>.
 It is an indication that the offset <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> at which the memory is accessed is intended to satisfy the property <span class="math notranslate nohighlight">\(\mathit{ea} \mathbin{\mathrm{mod}} 2^{\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{align}}} = 0\)</span>.
 A WebAssembly implementation can use this hint to optimize for the intended use.
 Unaligned access violating that property is still allowed and must succeed regardless of the annotation.
 However, it may be substantially slower on some hardware.</p>
 </div>
-<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-xref-syntax-instructions-syntax-instr-memory-mathsf-load-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-xref-syntax-instructions-syntax-instr-memory-mathsf-load-n-mathsf-xref-syntax-instructions-syntax-sx-mathit-sx-xref-syntax-instructions-syntax-memarg-mathit-memarg">
-<span id="exec-atomic-loadn"></span><span id="exec-atomic-load"></span><span id="exec-loadn"></span><span id="exec-load"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic}}^?.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span> and <span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic}}^?.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}{N}\mathsf{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-xref-syntax-instructions-syntax-instr-memory-mathsf-load-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-xref-syntax-instructions-syntax-instr-memory-mathsf-load-n-mathsf-xref-syntax-instructions-syntax-sx-mathit-sx-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>update text to match formalism</p>
-</div>
+<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-memory-mathsf-load-n-mathsf-xref-syntax-instructions-syntax-sx-mathit-sx-xref-syntax-instructions-syntax-memarg-mathit-memarg">
+<span id="exec-loadn"></span><span id="exec-load"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}({N}\mathsf{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}})^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-memory-mathsf-load-n-mathsf-xref-syntax-instructions-syntax-sx-mathit-sx-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
-<li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-loadn"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-loadn"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-loadn"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}\)</span> is on the top of the stack.</p></li>
-<li><p>Pop the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i\)</span> from the stack.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> be the integer <span class="math notranslate nohighlight">\(i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}\)</span>.</p></li>
-<li><p>If <span class="math notranslate nohighlight">\(N\)</span> is not part of the instruction, then:</p>
-<ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(N\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">bit width</span></a> <span class="math notranslate nohighlight">\(|t|\)</span> of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
-</ol>
-</li>
-<li><p>If <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span> is larger than the length of <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}\)</span>, then:</p>
-<ol class="loweralpha simple">
-<li><p>Trap.</p></li>
-</ol>
-</li>
-<li><p>Let <span class="math notranslate nohighlight">\(b^\ast\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}\)</span> be <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathsf{unord}}\)</span>.</p></li>
 <li><p>If <span class="math notranslate nohighlight">\(N\)</span> and <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}\)</span> are part of the instruction, then:</p>
 <ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(n\)</span> be the integer for which <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(n) = b^\ast\)</span>.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(c\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-extend-u}{\mathrm{extend}}\mathrm{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}_{N,|t|}(n)\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{st}\)</span> be the <a class="reference internal" href="numerics.html#syntax-storagetype"><span class="std std-ref">storage type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/values.html#syntax-int}{\mathit{i}N}\)</span>.</p></li>
 </ol>
 </li>
 <li><p>Else:</p>
 <ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(c\)</span> be the constant for which <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_t(c) = b^\ast\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(N\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">bit width</span></a> <span class="math notranslate nohighlight">\(|t|\)</span> of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{st}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
 </ol>
 </li>
+<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-loadn"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}\)</span> is on the top of the stack.</p></li>
+<li><p>Pop the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i\)</span> from the stack.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> be the integer <span class="math notranslate nohighlight">\(i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
+<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-loadn"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
+<li><p>If the memory is local, i.e., <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists, then:</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span> is larger than the length of <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}\)</span>, then:</p>
+<ol class="lowerroman simple">
+<li><p>Trap.</p></li>
+</ol>
+</li>
+<li><p>Let <span class="math notranslate nohighlight">\(b^\ast\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span>.</p></li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="11">
+<li><p>Else:</p>
+<ol class="loweralpha simple">
+<li><p>Perform the <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)\)</span> to read the length <span class="math notranslate nohighlight">\(n\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(n\)</span> is smaller than <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span>, or both <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}\)</span> is <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}}\)</span> and <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> is not divisible by <span class="math notranslate nohighlight">\(N/8\)</span>, then:</p>
+<ol class="lowerroman simple">
+<li><p>Trap.</p></li>
+</ol>
+</li>
+<li><p>Perform the <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}_{\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[\mathit{ea}]~b^\ast)\)</span> to read <span class="math notranslate nohighlight">\(N/8\)</span> bytes <span class="math notranslate nohighlight">\(b^\ast\)</span> from data offset <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span>.</p></li>
+</ol>
+</li>
+<li><p>Let <span class="math notranslate nohighlight">\(c_{\mathit{st}}\)</span> be the integer for which <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(n) = b^\ast\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(c\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-extendt}{\mathrm{extend}^{\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}^?}}_{\mathit{st},|t|}(c_{\mathit{st}})\)</span>.</p></li>
 <li><p>Push the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c\)</span> to the stack.</p></li>
 </ol>
 <div class="math notranslate nohighlight">
 \[\begin{split}~\\[-1ex]
 \begin{array}{l}
 \begin{array}{lcl&#64;{\qquad}l}
-S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}) &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp; S; F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)
-\end{array}
-\\ \qquad
-  \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
-  (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] \\
-  \wedge &amp; \mathit{ea} + |t|/8 \leq |\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}| \\
-  \wedge &amp; \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_t(c) = \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} |t|/8])
-  \end{array}
-\\[1ex]
-\begin{array}{lcl&#64;{\qquad}l}
-S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}{N}\mathsf{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}) &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp;
-  S; F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\href{../exec/numerics.html#op-extend-u}{\mathrm{extend}}\mathrm{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}_{N,|t|}(n))
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}({N}\mathsf{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}})^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}) &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp;
+  S; F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)
 \end{array}
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
   (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] \\
   \wedge &amp; \mathit{ea} + N/8 \leq |\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}| \\
-  \wedge &amp; \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(n) = \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8])
+  \wedge &amp; (\href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{unord}} \vee \mathit{ea} \mathbin{\mathrm{mod}} N/8 = 0) \\
+  \wedge &amp; c = \href{../exec/numerics.html#op-extendt}{\mathrm{extend}^{\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}^?}}_{\mathit{st},t}(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}^{-1}_{\mathit{st}}(\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]))) \\
   \end{array}
 \\[1ex]
 \begin{array}{lcl&#64;{\qquad}l}
 S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~k)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}({N}\mathsf{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}})^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}) &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp; S; F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}
 \end{array}
 \\ \qquad
-  (\mathrel{\mbox{otherwise}}, \mathrel{\mbox{if}} \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{type}} = \href{../syntax/types.html#syntax-limits}{\mathit{limits}}~\href{../syntax/types.html#syntax-memtype}{\mathsf{unshared}})
-\\[1ex]
+  (\mathrel{\mbox{otherwise}}, \mathrel{\mbox{if}} S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{defined})
+\\
 %
+~\\
 \begin{array}{lcl&#64;{\qquad}l}
-S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic}}^?.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}({N}\mathsf{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}})^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}({N}\mathsf{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}})?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
   &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)~(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}_{\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[\mathit{ea}]~b^\ast)}&amp;
-  S; F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\href{../exec/numerics.html#op-extend-u}{\mathrm{extend}}\mathrm{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}_{N,|t|}(n))
+  S; F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)
 \end{array}
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
   (\mathrel{\mbox{if}} &amp; S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{undefined} \\
   \wedge &amp; \mathit{ea} + N/8 \leq n \\
   \wedge &amp; (\href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{unord}} \vee \mathit{ea} \mathbin{\mathrm{mod}} N/8 = 0) \\
-  \wedge &amp; b^\ast = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(n)) \\
+  \wedge &amp; c = \href{../exec/numerics.html#op-extendt}{\mathrm{extend}^{\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}^?}}_{\mathit{st},t}(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}^{-1}_{\mathit{st}}(b^\ast))) \\
   \end{array}
 \\[1ex]
 \begin{array}{lcl&#64;{\qquad}l}
-S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~k)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic}}^?.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}({N}\mathsf{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}})^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~k)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{load}}({N}\mathsf{\_}\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}})^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
   &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)}&amp;
   S; F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}
 \end{array}
@@ -462,76 +465,79 @@ S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/
   (\mathrel{\mbox{if}} &amp; S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{undefined} \\
   \wedge &amp; (\mathit{ea} + N/8 &gt; n \vee \href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}} \wedge \mathit{ea} \mathbin{\mathrm{mod}} N/8 \neq 0)) \\
   \end{array}
-\\[2ex]
+\\
+%
+~\\
 \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
-(\mathrel{\mbox{where}} &amp; \href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}} \mathrel{\mbox{if}} \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic}} ~\mbox{is present}, \mathrel{\mbox{otherwise}} \href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{unord}} \\
-\wedge &amp; N = |t| \wedge \href{../syntax/instructions.html#syntax-sx}{\mathit{sx}} = \mathsf{u} \mathrel{\mbox{if}} ~\mbox{not present} \\
+(\mathrel{\mbox{where}} &amp; \href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{unord}} \\
+\wedge &amp; N = |t| \mathrel{\mbox{if}} N~\mbox{not present} \\
+\wedge &amp; \mathit{st} = t \mathrel{\mbox{if}} N~\mbox{not present}, ~\href{../syntax/values.html#syntax-int}{\mathit{i}N} \mathrel{\mbox{otherwise}} \\
 \wedge &amp; a = F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0] \\
 \wedge &amp; \mathit{ea} = i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}) \\
 \end{array}
 \end{array}\end{split}\]</div>
 </div>
-<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-xref-syntax-instructions-syntax-instr-memory-mathsf-store-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-xref-syntax-instructions-syntax-instr-memory-mathsf-store-n-xref-syntax-instructions-syntax-memarg-mathit-memarg">
-<span id="exec-atomic-storen"></span><span id="exec-atomic-store"></span><span id="exec-storen"></span><span id="exec-store"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic}}^?.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{store}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span> and <span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic}}^?.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{store}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-xref-syntax-instructions-syntax-instr-memory-mathsf-store-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-xref-syntax-instructions-syntax-instr-memory-mathsf-store-n-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id2">
-<p class="admonition-title">Todo</p>
-<p>update text to match formalism</p>
-</div>
+<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-memory-mathsf-store-n-xref-syntax-instructions-syntax-memarg-mathit-memarg">
+<span id="exec-storen"></span><span id="exec-store"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{store}}{N}^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-memory-mathsf-store-n-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
-<li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-storen"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-storen"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}\)</span> be <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathsf{unord}}\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(N\)</span> is part of the instruction, then:</p>
+<ol class="loweralpha simple">
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{st}\)</span> be the <a class="reference internal" href="numerics.html#syntax-storagetype"><span class="std std-ref">storage type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/values.html#syntax-int}{\mathit{i}N}\)</span>.</p></li>
+</ol>
+</li>
+<li><p>Else:</p>
+<ol class="loweralpha simple">
+<li><p>Let <span class="math notranslate nohighlight">\(N\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">bit width</span></a> <span class="math notranslate nohighlight">\(|t|\)</span> of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{st}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+</ol>
+</li>
 <li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-storen"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span> is on the top of the stack.</p></li>
 <li><p>Pop the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c\)</span> from the stack.</p></li>
 <li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-storen"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}\)</span> is on the top of the stack.</p></li>
 <li><p>Pop the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i\)</span> from the stack.</p></li>
 <li><p>Let <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> be the integer <span class="math notranslate nohighlight">\(i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}\)</span>.</p></li>
-<li><p>If <span class="math notranslate nohighlight">\(N\)</span> is not part of the instruction, then:</p>
+<li><p>Let <span class="math notranslate nohighlight">\(c_{\mathit{st}}\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-wrapt}{\mathrm{wrap}}_{t,\mathit{st}}(c)\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(b^\ast\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(c_{\mathit{st}})\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
+<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-storen"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
+<li><p>If the memory is local, i.e., <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists, then:</p>
 <ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(N\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">bit width</span></a> <span class="math notranslate nohighlight">\(|t|\)</span> of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
-</ol>
-</li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
+<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-storen"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}\)</span> exists.</p></li>
 <li><p>If <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span> is larger than the length of <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}\)</span>, then:</p>
 <ol class="loweralpha simple">
 <li><p>Trap.</p></li>
 </ol>
 </li>
-<li><p>If <span class="math notranslate nohighlight">\(N\)</span> is part of the instruction, then:</p>
-<ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(n\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{|t|,N}(c)\)</span>.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(b^\ast\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(n)\)</span>.</p></li>
+<li><p>Replace the bytes <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span> with <span class="math notranslate nohighlight">\(b^\ast\)</span>.</p></li>
 </ol>
 </li>
 <li><p>Else:</p>
 <ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(b^\ast\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_t(c)\)</span>.</p></li>
+<li><p>Perform the <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)\)</span> to read the length <span class="math notranslate nohighlight">\(n\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(n\)</span> is smaller than <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span>, or both <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}\)</span> is <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}}\)</span> and <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> is not divisible by <span class="math notranslate nohighlight">\(N/8\)</span>, then:</p>
+<ol class="lowerroman simple">
+<li><p>Trap.</p></li>
 </ol>
 </li>
-<li><p>Replace the bytes <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span> with <span class="math notranslate nohighlight">\(b^\ast\)</span>.</p></li>
+<li><p>Perform the <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{wr}}_{\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[\mathit{ea}]~b^\ast)\)</span> to write the bytes <span class="math notranslate nohighlight">\(b^\ast\)</span> to data offset <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span>.</p></li>
+</ol>
+</li>
 </ol>
 <div class="math notranslate nohighlight">
 \[\begin{split}~\\[-1ex]
 \begin{array}{l}
 \begin{array}{lcl&#64;{\qquad}l}
-S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{store}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}) &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp; S'; F; \epsilon
-\end{array}
-\\ \qquad
-  \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
-  (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] \\
-  \wedge &amp; \mathit{ea} + |t|/8 \leq |\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}| \\
-  \wedge &amp; S' = S \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a].\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} |t|/8] = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_t(c)
-  \end{array}
-\\[1ex]
-\begin{array}{lcl&#64;{\qquad}l}
-S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{store}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}) &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp; S'; F; \epsilon
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{store}}{N}^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}) &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp; S'; F; \epsilon
 \end{array}
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
   (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] \\
   \wedge &amp; \mathit{ea} + N/8 \leq |\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}| \\
-  \wedge &amp; S' = S \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a].\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8] = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{|t|,N}(c))
+  \wedge &amp; (\href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{unord}} \vee \mathit{ea} \mathbin{\mathrm{mod}} N/8 = 0) \\
+  \wedge &amp; S' = S \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a].\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8] = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(\href{../exec/numerics.html#op-wrapt}{\mathrm{wrap}}_{t,\mathit{st}}(c))
   \end{array}
 \\[1ex]
 \begin{array}{lcl&#64;{\qquad}l}
@@ -539,10 +545,11 @@ S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/
 \end{array}
 \\ \qquad
   (\mathrel{\mbox{otherwise}})
-\\[1ex]
+\\
 %
+~\\
 \begin{array}{lcl&#64;{\qquad}l}
-S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic}}^?.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{store}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{store}}{N}^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
   &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)~(\href{../exec/runtime.html#syntax-act}{\mathsf{wr}}_{\href{../exec/runtime.html#syntax-ord}{\mathit{ord}}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[\mathit{ea}]~b^\ast)}&amp;
   S; F; \epsilon
 \end{array}
@@ -551,11 +558,11 @@ S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/
   (\mathrel{\mbox{if}} &amp; S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{undefined} \\
   \wedge &amp; \mathit{ea} + N/8 \leq n \\
   \wedge &amp; (\href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{unord}} \vee \mathit{ea} \mathbin{\mathrm{mod}} N/8 = 0) \\
-  \wedge &amp; b^\ast = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{|t|,N}(c))
+  \wedge &amp; b^\ast = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(\href{../exec/numerics.html#op-wrapt}{\mathrm{wrap}}_{t,\mathit{st}}(c))
   \end{array}
 \\[1ex]
 \begin{array}{lcl&#64;{\qquad}l}
-S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~k)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic}}^?.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{store}}{N}^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~k)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{store}}{N}^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
   &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)}&amp;
   S; F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}
 \end{array}
@@ -564,10 +571,13 @@ S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/
   (\mathrel{\mbox{if}} &amp; S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{undefined} \\
   \wedge &amp; (\mathit{ea} + N/8 &gt; n \vee \href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}} \wedge \mathit{ea} \mathbin{\mathrm{mod}} N/8 \neq 0)) \\
   \end{array}
-\\[2ex]
+\\
+%
+~\\
 \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
-(\mathrel{\mbox{where}} &amp; \href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}} \mathrel{\mbox{if}} \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic}} ~\mbox{is present}, \mathrel{\mbox{otherwise}} \href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{unord}} \\
-\wedge &amp; N = |t| \wedge \href{../syntax/instructions.html#syntax-sx}{\mathit{sx}} = \mathsf{u} \mathrel{\mbox{if}} ~\mbox{not present} \\
+(\mathrel{\mbox{where}} &amp; \href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{unord}} \\
+\wedge &amp; N = |t| \mathrel{\mbox{if}} N~\mbox{not present} \\
+\wedge &amp; \mathit{st} = t \mathrel{\mbox{if}} N~\mbox{not present}, ~\mathit{st} = \href{../syntax/values.html#syntax-int}{\mathit{i}N} \mathrel{\mbox{otherwise}} \\
 \wedge &amp; a = F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0] \\
 \wedge &amp; \mathit{ea} = i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}) \\
 \end{array}
@@ -575,17 +585,22 @@ S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/
 </div>
 <div class="section" id="xref-syntax-instructions-syntax-instr-memory-mathsf-memory-size">
 <span id="exec-memory-size"></span><h3><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.size}}\)</span><a class="headerlink" href="#xref-syntax-instructions-syntax-instr-memory-mathsf-memory-size" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id3">
-<p class="admonition-title">Todo</p>
-<p>update text to match formalism</p>
-</div>
 <ol class="arabic simple">
 <li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
 <li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-memory-size"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
 <li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-memory-size"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists.</p></li>
+<li><p>If the memory is local, i.e., <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists, then:</p>
+<ol class="loweralpha simple">
 <li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\mathit{sz}\)</span> be the length of <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}\)</span> divided by the <a class="reference internal" href="runtime.html#page-size"><span class="std std-ref">page size</span></a>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(n\)</span> be the length of <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}\)</span>.</p></li>
+</ol>
+</li>
+<li><p>Else:</p>
+<ol class="loweralpha simple">
+<li><p>Perform the <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}_{\href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)\)</span> to read the length <span class="math notranslate nohighlight">\(n\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span>.</p></li>
+</ol>
+</li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{sz}\)</span> be <span class="math notranslate nohighlight">\(n\)</span> divided by the <a class="reference internal" href="runtime.html#page-size"><span class="std std-ref">page size</span></a>.</p></li>
 <li><p>Push the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\mathit{sz}\)</span> to the stack.</p></li>
 </ol>
 <div class="math notranslate nohighlight">
@@ -598,10 +613,11 @@ S; F; \href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.size
   (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] \\
   \wedge &amp; |\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}| = \mathit{sz}\cdot64\,\mathrm{Ki}) \\
   \end{array}
-\\[1ex]
+\\
 %
+~\\
 \begin{array}{lcl&#64;{\qquad}l}
-S; F; \href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.size}} &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)}&amp; S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\mathit{sz})
+S; F; \href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.size}} &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}_{\href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)}&amp; S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\mathit{sz})
 \end{array}
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
@@ -616,30 +632,45 @@ S; F; \href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.size
 </div>
 <div class="section" id="xref-syntax-instructions-syntax-instr-memory-mathsf-memory-grow">
 <span id="exec-memory-grow"></span><h3><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.grow}}\)</span><a class="headerlink" href="#xref-syntax-instructions-syntax-instr-memory-mathsf-memory-grow" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id4">
-<p class="admonition-title">Todo</p>
-<p>update text to match formalism</p>
-</div>
 <ol class="arabic simple">
-<li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-memory-grow"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-memory-grow"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\mathit{sz}\)</span> be the length of <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> divided by the <a class="reference internal" href="runtime.html#page-size"><span class="std std-ref">page size</span></a>.</p></li>
 <li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-memory-grow"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}\)</span> is on the top of the stack.</p></li>
 <li><p>Pop the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~n\)</span> from the stack.</p></li>
 <li><p>Let <span class="math notranslate nohighlight">\(\mathit{err}\)</span> be the <span class="math notranslate nohighlight">\(\href{../syntax/values.html#syntax-int}{\mathit{i32}}\)</span> value <span class="math notranslate nohighlight">\(2^{32}-1\)</span>, for which <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-signed}{\mathrm{signed}}_{32}(\mathit{err})\)</span> is <span class="math notranslate nohighlight">\(-1\)</span>.</p></li>
-<li><p>Either, try <a class="reference internal" href="modules.html#grow-mem"><span class="std std-ref">growing</span></a> <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> by <span class="math notranslate nohighlight">\(n\)</span> <a class="reference internal" href="runtime.html#page-size"><span class="std std-ref">pages</span></a>:</p></li>
-</ol>
-<blockquote>
-<div><ol class="loweralpha simple">
+<li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
+<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-memory-grow"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
+<li><p>If the memory is local, i.e., <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists, then:</p>
+<ol class="loweralpha simple">
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{sz}\)</span> be the length of <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> divided by the <a class="reference internal" href="runtime.html#page-size"><span class="std std-ref">page size</span></a>.</p></li>
+<li><p>Either, try <a class="reference internal" href="modules.html#grow-mem"><span class="std std-ref">growing</span></a> <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> by <span class="math notranslate nohighlight">\(n\)</span> <a class="reference internal" href="runtime.html#page-size"><span class="std std-ref">pages</span></a>:</p>
+<ol class="lowerroman simple">
 <li><p>If it succeeds, push the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\mathit{sz}\)</span> to the stack.</p></li>
 <li><p>Else, push the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\mathit{err}\)</span> to the stack.</p></li>
 </ol>
-</div></blockquote>
-<ol class="arabic simple" start="11">
+</li>
 <li><p>Or, push the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\mathit{err}\)</span> to the stack.</p></li>
+</ol>
+</li>
+<li><p>Else:</p>
+<ol class="loweralpha simple">
+<li><p>Either successfully grow the memory:</p>
+<ol class="lowerroman simple">
+<li><p>Let <span class="math notranslate nohighlight">\(k\)</span> be <span class="math notranslate nohighlight">\(n\)</span> multiplied by the <a class="reference internal" href="runtime.html#page-size"><span class="std std-ref">page size</span></a>.</p></li>
+<li><p>Perform the <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{rmw}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~l~(l+k))\)</span> to update the current length <span class="math notranslate nohighlight">\(l\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span> to <span class="math notranslate nohighlight">\(l+k\)</span>.</p></li>
+<li><p>Perform the <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{wr}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[l]~(0)^k)\)</span> to append <span class="math notranslate nohighlight">\(k\)</span> zero bytes to the end of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{sz}\)</span> be <span class="math notranslate nohighlight">\(l\)</span> divided by the <a class="reference internal" href="runtime.html#page-size"><span class="std std-ref">page size</span></a>.</p></li>
+<li><p>Push the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\mathit{sz}\)</span> to the stack.</p></li>
+</ol>
+</li>
+<li><p>Or indicate failure:</p>
+<ol class="lowerroman simple">
+<li><p>Perform the <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}_{\href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~l)\)</span> to read the length <span class="math notranslate nohighlight">\(l\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span>.</p></li>
+<li><p>Push the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\mathit{err}\)</span> to the stack.</p></li>
+</ol>
+</li>
+</ol>
+</li>
 </ol>
 <div class="math notranslate nohighlight">
 \[\begin{split}~\\[-1ex]
@@ -650,7 +681,7 @@ S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
   (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] \\
-  \wedge &amp; \mathit{sz} = |\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}|/64\,\mathrm{Ki} \\
+  \wedge &amp; \mathit{sz} = |\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}| / 64\,\mathrm{Ki} \\
   \wedge &amp; S' = S \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] = \href{../exec/modules.html#grow-mem}{\mathrm{growmem}}(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a], n)) \\
   \end{array}
 \\[1ex]
@@ -661,37 +692,41 @@ S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
   (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]) \\
   \end{array}
-\\[1ex]
+\\
 %
+~\\
+\\
 \begin{array}{lcl&#64;{\qquad}l}
-S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.grow}}
-  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rmw}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n~(n+k))~(\href{../exec/runtime.html#syntax-act}{\mathsf{wr}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[n]~(0)^k)}&amp;
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~n)~\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.grow}}
+  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rmw}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~l~(l+k))~(\href{../exec/runtime.html#syntax-act}{\mathsf{wr}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[l]~(0)^k)}&amp;
   S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~\mathit{sz})
 \end{array}
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
   (\mathrel{\mbox{if}} &amp; S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{undefined} \\
-  \wedge &amp; n = \mathit{sz} \cdot 64\,\mathrm{Ki} \\
-  \wedge &amp; k = i \cdot 64\,\mathrm{Ki}) \\
+  \wedge &amp; \mathit{sz} = l / 64\,\mathrm{Ki} \\
+  \wedge &amp; n = k / 64\,\mathrm{Ki}) \\
   \end{array}
 \\[1ex]
 \begin{array}{lcl&#64;{\qquad}l}
 S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~n)~\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.grow}}
-  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)}&amp;
+  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}_{\href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)}&amp;
   S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~{-1})
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
   (\mathrel{\mbox{if}} &amp; S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{undefined}) \\
   \end{array}
 \end{array}
-\\[2ex]
+\\
+%
+~\\
 \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
 (\mathrel{\mbox{where}} &amp; a = F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]) \\
 \end{array}
 \end{array}\end{split}\]</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.grow}}\)</span> instruction is non-deterministic.
+<p>The <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{memory.grow}}\)</span> instruction is non-deterministic, even on unshared memories.
 It may either succeed, returning the old memory size <span class="math notranslate nohighlight">\(\mathit{sz}\)</span>,
 or fail, returning <span class="math notranslate nohighlight">\({-1}\)</span>.
 Failure <em>must</em> occur if the referenced memory instance has a maximum size defined that would be exceeded.
@@ -702,193 +737,297 @@ In practice, the choice depends on the <a class="reference internal" href="../ap
 </div>
 <div class="section" id="atomic-memory-instructions">
 <span id="exec-instr-atomic-memory"></span><span id="index-5"></span><h2>Atomic Memory Instructions<a class="headerlink" href="#atomic-memory-instructions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-load-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-load-n-mathsf-u-xref-syntax-instructions-syntax-memarg-mathit-memarg">
-<h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span> and <span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}{N}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-load-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-load-n-mathsf-u-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference internal" href="#exec-atomic-load"><span class="std std-ref">above</span></a>.</p>
+<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-load-n-mathsf-u-xref-syntax-instructions-syntax-memarg-mathit-memarg">
+<span id="exec-atomic-loadn"></span><span id="exec-atomic-load"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}({N}\mathsf{\_u})^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-load-n-mathsf-u-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
+<p>The rules are identical to <a class="reference internal" href="#exec-load"><span class="std std-ref">non-atomic loads</span></a>, except that <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}}\)</span>.</p>
 </div>
-<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-store-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-store-n-xref-syntax-instructions-syntax-memarg-mathit-memarg">
-<h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span> and <span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}{N}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-store-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-store-n-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference internal" href="#exec-atomic-store"><span class="std std-ref">above</span></a>.</p>
+<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-store-n-xref-syntax-instructions-syntax-memarg-mathit-memarg">
+<span id="exec-atomic-storen"></span><span id="exec-atomic-store"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}{N}^?~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-store-n-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
+<p>The rules are identical to <a class="reference internal" href="#exec-store"><span class="std std-ref">non-atomic stores</span></a>, except that <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-ord}{\mathit{ord}} = \href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}}\)</span>.</p>
 </div>
-<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-xref-syntax-instructions-syntax-atomicop-mathit-atomicop-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-u-xref-syntax-instructions-syntax-atomicop-mathit-atomicop-xref-syntax-instructions-syntax-memarg-mathit-memarg">
-<span id="exec-atomic-rmwn"></span><span id="exec-atomic-rmw"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span> and <span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{\_u.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-xref-syntax-instructions-syntax-atomicop-mathit-atomicop-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-u-xref-syntax-instructions-syntax-atomicop-mathit-atomicop-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id5">
-<p class="admonition-title">Todo</p>
-<p>update text to match formalism</p>
-</div>
+<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-u-mathsf-xref-syntax-instructions-syntax-atop-mathit-atop-xref-syntax-instructions-syntax-memarg-mathit-memarg">
+<span id="exec-atomic-rmwn"></span><span id="exec-atomic-rmw"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?\mathsf{.}\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-u-mathsf-xref-syntax-instructions-syntax-atop-mathit-atop-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
-<li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(N\)</span> and <span class="math notranslate nohighlight">\(\mathsf{\_u}\)</span> are part of the instruction, then:</p>
+<ol class="loweralpha simple">
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{st}\)</span> be the <a class="reference internal" href="numerics.html#syntax-storagetype"><span class="std std-ref">storage type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/values.html#syntax-int}{\mathit{i}N}\)</span>.</p></li>
+</ol>
+</li>
+<li><p>Else:</p>
+<ol class="loweralpha simple">
+<li><p>Let <span class="math notranslate nohighlight">\(N\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">bit width</span></a> <span class="math notranslate nohighlight">\(|t|\)</span> of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{st}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+</ol>
+</li>
 <li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span> is on the top of the stack.</p></li>
 <li><p>Pop the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2\)</span> from the stack.</p></li>
 <li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}\)</span> is on the top of the stack.</p></li>
 <li><p>Pop the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i\)</span> from the stack.</p></li>
 <li><p>Let <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> be <span class="math notranslate nohighlight">\(i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}\)</span>.</p></li>
-<li><p>If <span class="math notranslate nohighlight">\(N\)</span> is not part of the instruction, then:</p>
-<ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(N\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">bit width</span></a> <span class="math notranslate nohighlight">\(|t|\)</span> of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
-</ol>
-</li>
-<li><p>If <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span> is larger than the length of <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}\)</span>, then:</p>
-<ol class="loweralpha simple">
-<li><p>Trap.</p></li>
-</ol>
-</li>
 <li><p>If <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> modulo <span class="math notranslate nohighlight">\(N/8\)</span> is not equal to <span class="math notranslate nohighlight">\(0\)</span>, then:</p>
 <ol class="loweralpha simple">
 <li><p>Trap.</p></li>
 </ol>
 </li>
-<li><p>Let <span class="math notranslate nohighlight">\(b^\ast_r\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span>.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(c_1\)</span> be the integer for which <span class="math notranslate nohighlight">\(bytes_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(m) = b^\ast_r\)</span>.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(m\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}_t(c_1, c_2)\)</span>.</p></li>
-<li><p>If <span class="math notranslate nohighlight">\(N\)</span> is part of the instruction, then:</p>
+<li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
+<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
+<li><p>If the memory is local, i.e., <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists, then:</p>
 <ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(n\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{|t|,N}(m)\)</span>.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(b^\ast_w\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(n)\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span> is larger than the length of <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}\)</span>, then:</p>
+<ol class="loweralpha simple">
+<li><p>Trap.</p></li>
+</ol>
+</li>
+<li><p>Let <span class="math notranslate nohighlight">\(b^\ast_{\mathrm{r}}\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span>.</p></li>
 </ol>
 </li>
 <li><p>Else:</p>
 <ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(b^\ast_w\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_t(m)\)</span>.</p></li>
+<li><p>Perform the <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)\)</span> to read the length <span class="math notranslate nohighlight">\(n\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(n\)</span> is smaller than <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span>, or <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> is not divisible by <span class="math notranslate nohighlight">\(N/8\)</span>, then:</p>
+<ol class="lowerroman simple">
+<li><p>Trap.</p></li>
 </ol>
 </li>
-<li><p>Replace the bytes <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span> with <span class="math notranslate nohighlight">\(b^\ast_w\)</span>.</p></li>
-<li><p>Push the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_1\)</span> to the stack.</p></li>
+<li><p>Perform the atomic <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{rmw}}_{\href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[\mathit{ea}]~b_{\mathrm{r}}^\ast~b_{\mathrm{w}}^\ast)\)</span> to read <span class="math notranslate nohighlight">\(N/8\)</span> bytes <span class="math notranslate nohighlight">\(b_{\mathrm{r}}^\ast\)</span> from data offset <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span> and replace them with bytes <span class="math notranslate nohighlight">\(b_{\mathrm{w}}^\ast\)</span> (which are defined below).</p></li>
+</ol>
+</li>
+<li><p>Let <span class="math notranslate nohighlight">\(c_{\mathrm{r}}\)</span> be the integer for which <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(n) = b_{\mathrm{r}}^\ast\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(c_1\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-extendt}{\mathrm{extend}^{\mathsf{u}^?}}_{\mathit{st},t}(c_{\mathrm{r}})\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(c\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}_t(c_1, c_2)\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(c_{\mathrm{w}}\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-wrapt}{\mathrm{wrap}}_{t,\mathit{st}}(c)\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(b^\ast_{\mathrm{w}}\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(c_{\mathrm{w}})\)</span>.</p></li>
+<li><p>If the memory is local, i.e., <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists, then:</p>
+<ol class="loweralpha simple">
+<li><p>Replace the bytes <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span> with <span class="math notranslate nohighlight">\(b^\ast_{\mathrm{w}}\)</span>.</p></li>
+</ol>
+</li>
+<li><p>Push the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c\)</span> to the stack.</p></li>
 </ol>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{l}
 \begin{array}{lcl&#64;{\qquad}l}
-F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
-  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)~(\href{../exec/runtime.html#syntax-act}{\mathsf{rmw}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[\mathit{ea}]~b_1^\ast~b^\ast)}&amp;
-  F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_1)
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp;
+  S'; F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_1)
 \end{array}
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
-  (\mathrel{\mbox{if}} &amp; \mathit{ea} + N/8 \leq n \\
+  (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] \\
+  \wedge &amp; \mathit{ea} + N/8 \leq n \\
   \wedge &amp; \mathit{ea} \mathbin{\mathrm{mod}} N/8 = 0 \\
-  \wedge &amp; b_1^\ast = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(c_1) \\
-  \wedge &amp; b^\ast = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{|t|,N}(\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}_t(c_1, c_2)))) \\
+  \wedge &amp; c_1 = \href{../exec/numerics.html#op-extendt}{\mathrm{extend}^{\mathsf{u}^?}}_{\mathit{st},t}(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}^{-1}_{\mathit{st}}(\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8])) \\
+  \wedge &amp; S' = S \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a].\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8] = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(\href{../exec/numerics.html#op-wrapt}{\mathrm{wrap}}_{t,\mathit{st}}(\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}_t(c_1, c_2)))) \\
   \end{array}
 \\[1ex]
 \begin{array}{lcl&#64;{\qquad}l}
-F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~k)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
-  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)}&amp;
-  F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~k)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp;
+  S; F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}
 \end{array}
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
-  (\mathrel{\mbox{if}} &amp; \mathit{ea} + N/8 &gt; n \vee \mathit{ea} \mathbin{\mathrm{mod}} N/8 \neq 0) \\
+  (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] \\
+  \wedge &amp; \mathit{ea} + N/8 &gt; n \vee \mathit{ea} \mathbin{\mathrm{mod}} N/8 \neq 0) \\
   \end{array}
-\\[2ex]
-(\mathrel{\mbox{where}} N = |t| \mathrel{\mbox{if}} ~\mbox{not present}) \\
-\\[2ex]
+\\
+%
+~\\
+\begin{array}{lcl&#64;{\qquad}l}
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)~(\href{../exec/runtime.html#syntax-act}{\mathsf{rmw}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[\mathit{ea}]~b_{\mathrm{r}}^\ast~b_{\mathrm{w}}^\ast)}&amp;
+  S; F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_1)
+\end{array}
+\\ \qquad
+  \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
+  (\mathrel{\mbox{if}} &amp; S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{undefined} \\
+  \wedge &amp; \mathit{ea} + N/8 \leq n \\
+  \wedge &amp; \mathit{ea} \mathbin{\mathrm{mod}} N/8 = 0 \\
+  \wedge &amp; c_1 = \href{../exec/numerics.html#op-extendt}{\mathrm{extend}^{\mathsf{u}^?}}_{\mathit{st},t}(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}^{-1}_{\mathit{st}}(b_{\mathrm{r}}^\ast)) \\
+  \wedge &amp; b_{\mathrm{w}}^\ast = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(\href{../exec/numerics.html#op-wrapt}{\mathrm{wrap}}_{t,\mathit{st}}(\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}_t(c_1, c_2)))) \\
+  \end{array}
+\\[1ex]
+\begin{array}{lcl&#64;{\qquad}l}
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~k)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)}&amp;
+  S; F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}
+\end{array}
+\\ \qquad
+  \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
+  (\mathrel{\mbox{if}} &amp; S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{undefined} \\
+  \wedge &amp; \mathit{ea} + N/8 &gt; n \vee \mathit{ea} \mathbin{\mathrm{mod}} N/8 \neq 0) \\
+  \end{array}
+\\
+%
+~\\
 \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
-(\mathrel{\mbox{where}} &amp; N = |t| \mathrel{\mbox{if}} ~\mbox{not present} \\
+(\mathrel{\mbox{where}} &amp; N = |t| \mathrel{\mbox{if}} N~\mbox{not present} \\
+\wedge &amp; \mathit{st} = t \mathrel{\mbox{if}} N~\mbox{not present}, ~\mathit{st} = \href{../syntax/values.html#syntax-int}{\mathit{i}N} \mathrel{\mbox{otherwise}} \\
 \wedge &amp; a = F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0] \\
 \wedge &amp; \mathit{ea} = i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}) \\
 \end{array}
 \end{array}\end{split}\]</div>
 </div>
-<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-cmpxchg-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-u-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-cmpxchg-xref-syntax-instructions-syntax-memarg-mathit-memarg">
-<span id="exec-atomic-rmwn-cmpxchg"></span><span id="exec-atomic-rmw-cmpxchg"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span> and <span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}{N}\mathsf{\_u.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-cmpxchg-xref-syntax-instructions-syntax-memarg-mathit-memarg-and-t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-u-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-cmpxchg-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id6">
+<div class="section" id="t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-u-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-cmpxchg-xref-syntax-instructions-syntax-memarg-mathit-memarg">
+<span id="exec-atomic-rmwn-cmpxchg"></span><span id="exec-atomic-rmw-cmpxchg"></span><h3><span class="math notranslate nohighlight">\(t\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}\)</span><a class="headerlink" href="#t-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-atomic-rmw-n-mathsf-u-mathsf-xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-cmpxchg-xref-syntax-instructions-syntax-memarg-mathit-memarg" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="id1">
 <p class="admonition-title">Todo</p>
-<p>update text to match formalism</p>
+<p>should only emit <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-act}{\mathsf{rmw}}\)</span> if the condition is true?</p>
 </div>
 <ol class="arabic simple">
-<li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn-cmpxchg"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn-cmpxchg"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn-cmpxchg"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span> is on the top of the stack.</p></li>
-<li><p>Pop the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_3\)</span> from the stack.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn-cmpxchg"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span> is on the top of the stack.</p></li>
-<li><p>Pop the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2\)</span> from the stack.</p></li>
-<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn-cmpxchg"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}\)</span> is on the top of the stack.</p></li>
-<li><p>Pop the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i\)</span> from the stack.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> be <span class="math notranslate nohighlight">\(i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}\)</span>.</p></li>
-<li><p>If <span class="math notranslate nohighlight">\(N\)</span> is not part of the instruction, then:</p>
+<li><p>If <span class="math notranslate nohighlight">\(N\)</span> and <span class="math notranslate nohighlight">\(\mathsf{\_u}\)</span> are part of the instruction, then:</p>
+<ol class="loweralpha simple">
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{st}\)</span> be the <a class="reference internal" href="numerics.html#syntax-storagetype"><span class="std std-ref">storage type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/values.html#syntax-int}{\mathit{i}N}\)</span>.</p></li>
+</ol>
+</li>
+<li><p>Else:</p>
 <ol class="loweralpha simple">
 <li><p>Let <span class="math notranslate nohighlight">\(N\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">bit width</span></a> <span class="math notranslate nohighlight">\(|t|\)</span> of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{st}\)</span> be the <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
 </ol>
 </li>
-<li><p>If <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span> is larger than the length of <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}\)</span>, then:</p>
-<ol class="loweralpha simple">
-<li><p>Trap.</p></li>
-</ol>
-</li>
+<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn"><span class="std std-ref">validation</span></a>, two values of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(t\)</span> are on the top of the stack.</p></li>
+<li><p>Pop the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_3\)</span> from the stack.</p></li>
+<li><p>Pop the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2\)</span> from the stack.</p></li>
+<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn"><span class="std std-ref">validation</span></a>, a value of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value type</span></a> <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}\)</span> is on the top of the stack.</p></li>
+<li><p>Pop the value <span class="math notranslate nohighlight">\(\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i\)</span> from the stack.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> be <span class="math notranslate nohighlight">\(i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}\)</span>.</p></li>
 <li><p>If <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> modulo <span class="math notranslate nohighlight">\(N/8\)</span> is not equal to <span class="math notranslate nohighlight">\(0\)</span>, then:</p>
 <ol class="loweralpha simple">
 <li><p>Trap.</p></li>
 </ol>
 </li>
-<li><p>Let <span class="math notranslate nohighlight">\(b^\ast_r\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span>.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(c_1\)</span> be the integer for which <span class="math notranslate nohighlight">\(bytes_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(m) = b^\ast_r\)</span>.</p></li>
-<li><p>If <span class="math notranslate nohighlight">\(N\)</span> is part of the instruction, then:</p>
+<li><p>Let <span class="math notranslate nohighlight">\(F\)</span> be the <a class="reference internal" href="conventions.html#exec-notation-textual"><span class="std std-ref">current</span></a> <a class="reference internal" href="runtime.html#syntax-frame"><span class="std std-ref">frame</span></a>.</p></li>
+<li><p>Assert: due to <a class="reference internal" href="../valid/instructions.html#valid-atomic-rmwn"><span class="std std-ref">validation</span></a>, <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span> exists.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(a\)</span> be the <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0]\)</span>.</p></li>
+<li><p>If the memory is local, i.e., <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists, then:</p>
 <ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(n\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{|t|,N}(c_3)\)</span>.</p></li>
-<li><p>Let <span class="math notranslate nohighlight">\(b^\ast_w\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(n)\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(\mathit{mem}\)</span> be the <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span> is larger than the length of <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}\)</span>, then:</p>
+<ol class="loweralpha simple">
+<li><p>Trap.</p></li>
+</ol>
+</li>
+<li><p>Let <span class="math notranslate nohighlight">\(b^\ast_{\mathrm{r}}\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span>.</p></li>
 </ol>
 </li>
 <li><p>Else:</p>
 <ol class="loweralpha simple">
-<li><p>Let <span class="math notranslate nohighlight">\(b^\ast_w\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_t(c_3)\)</span>.</p></li>
+<li><p>Perform the <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)\)</span> to read the length <span class="math notranslate nohighlight">\(n\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(n\)</span> is smaller than <span class="math notranslate nohighlight">\(\mathit{ea} + N/8\)</span>, or <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> is not divisible by <span class="math notranslate nohighlight">\(N/8\)</span>, then:</p>
+<ol class="lowerroman simple">
+<li><p>Trap.</p></li>
 </ol>
 </li>
-<li><p>If <span class="math notranslate nohighlight">\(c_1 = c_2\)</span>, then:</p>
+<li><p>Perform the atomic <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">action</span></a> <span class="math notranslate nohighlight">\((\href{../exec/runtime.html#syntax-act}{\mathsf{rmw}}_{\href{../exec/runtime.html#syntax-ord}{\mathsf{seqcst}}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[\mathit{ea}]~b_{\mathrm{r}}^\ast~b_{\mathrm{w}}^\ast)\)</span> to read <span class="math notranslate nohighlight">\(N/8\)</span> bytes <span class="math notranslate nohighlight">\(b_{\mathrm{r}}^\ast\)</span> from data offset <span class="math notranslate nohighlight">\(\mathit{ea}\)</span> of the shared <a class="reference internal" href="runtime.html#syntax-meminst"><span class="std std-ref">memory instance</span></a> at <a class="reference internal" href="runtime.html#syntax-memaddr"><span class="std std-ref">memory address</span></a> <span class="math notranslate nohighlight">\(a\)</span> and replace them with bytes <span class="math notranslate nohighlight">\(b_{\mathrm{w}}^\ast\)</span> (which are defined below).</p></li>
+</ol>
+</li>
+<li><p>Let <span class="math notranslate nohighlight">\(c_{\mathrm{r}}\)</span> be the integer for which <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(n) = b_{\mathrm{r}}^\ast\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(c_1\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-extendt}{\mathrm{extend}^{\mathsf{u}^?}}_{\mathit{st},t}(c_{\mathrm{r}})\)</span>.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(c_1\)</span> equals <span class="math notranslate nohighlight">\(c_2\)</span>, then:</p>
 <ol class="loweralpha simple">
-<li><p>Replace the bytes <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span> with <span class="math notranslate nohighlight">\(b^\ast_w\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(c\)</span> be <span class="math notranslate nohighlight">\(c_2\)</span>.</p></li>
 </ol>
 </li>
-<li><p>Push the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_1\)</span> to the stack.</p></li>
+<li><p>Else:</p>
+<ol class="loweralpha simple">
+<li><p>Let <span class="math notranslate nohighlight">\(c\)</span> be <span class="math notranslate nohighlight">\(c_3\)</span>.</p></li>
+</ol>
+</li>
+<li><p>Let <span class="math notranslate nohighlight">\(c_{\mathrm{w}}\)</span> be the result of computing <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-wrapt}{\mathrm{wrap}}_{t,\mathit{st}}(c)\)</span>.</p></li>
+<li><p>Let <span class="math notranslate nohighlight">\(b^\ast_{\mathrm{w}}\)</span> be the byte sequence <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(c_{\mathrm{w}})\)</span>.</p></li>
+<li><p>If the memory is local, i.e., <span class="math notranslate nohighlight">\(S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a]\)</span> exists, then:</p>
+<ol class="loweralpha simple">
+<li><p>Replace the bytes <span class="math notranslate nohighlight">\(\mathit{mem}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8]\)</span> with <span class="math notranslate nohighlight">\(b^\ast_{\mathrm{w}}\)</span>.</p></li>
+</ol>
+</li>
+<li><p>Push the value <span class="math notranslate nohighlight">\(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c\)</span> to the stack.</p></li>
 </ol>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{l}
 \begin{array}{lcl&#64;{\qquad}l}
-F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_3)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
-  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)~(\href{../exec/runtime.html#syntax-act}{\mathsf{rmw}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[\mathit{ea}]~b_1^\ast~b^\ast)}&amp;
-  F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_1)
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_3)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp;
+  S'; F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)
 \end{array}
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
-  (\mathrel{\mbox{if}} &amp; \mathit{ea} + |t|/8 \leq n \\
-  \wedge &amp; \mathit{ea} \mathbin{\mathrm{mod}} |t|/8 = 0 \\
-  \wedge &amp; b_1^\ast = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(c_1) \\
+  (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] \\
+  \wedge &amp; \mathit{ea} + N/8 \leq n \\
+  \wedge &amp; \mathit{ea} \mathbin{\mathrm{mod}} N/8 = 0 \\
+  \wedge &amp; c_1 = \href{../exec/numerics.html#op-extendt}{\mathrm{extend}^{\mathsf{u}^?}}_{\mathit{st},t}(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}^{-1}_{\mathit{st}}(\href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}}.\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8])) \\
   \wedge &amp; ((c_1 = c_2 \wedge c = c_1) \vee (c_1 \neq c_2 \wedge c = c_3)) \\
-  \wedge &amp; b^\ast = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\href{../syntax/values.html#syntax-int}{\mathit{i}N}}(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{|t|,N}(c))) \\
+  \wedge &amp; S' = S \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a].\href{../exec/runtime.html#syntax-meminst}{\mathsf{data}}[\mathit{ea} \href{../syntax/conventions.html#notation-slice}{\mathrel{\mathbf{:}}} N/8] = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(\href{../exec/numerics.html#op-wrapt}{\mathrm{wrap}}_{t,\mathit{st}}(c))) \\
   \end{array}
 \\[1ex]
 \begin{array}{lcl&#64;{\qquad}l}
-F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~k)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_3)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}&amp;
+  S; F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}
+\end{array}
+\\ \qquad
+  \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
+  (\mathrel{\mbox{if}} &amp; \href{../exec/runtime.html#syntax-meminst}{\mathit{meminst}} = S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] \\
+  \wedge &amp; \mathit{ea} + N/8 &gt; n \vee \mathit{ea} \mathbin{\mathrm{mod}} N/8 \neq 0) \\
+  \end{array}
+\\
+%
+~\\
+\begin{array}{lcl&#64;{\qquad}l}
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_3)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
+  &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)~(\href{../exec/runtime.html#syntax-act}{\mathsf{rmw}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{data}}[\mathit{ea}]~b_{\mathrm{r}}^\ast~b_{\mathrm{w}}^\ast)}&amp;
+  F; (t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c)
+\end{array}
+\\ \qquad
+  \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
+  (\mathrel{\mbox{if}} &amp; S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{undefined} \\
+  \wedge &amp; \mathit{ea} + N/8 \leq n \\
+  \wedge &amp; \mathit{ea} \mathbin{\mathrm{mod}} N/8 = 0 \\
+  \wedge &amp; c_1 = \href{../exec/numerics.html#op-extendt}{\mathrm{extend}^{\mathsf{u}^?}}_{\mathit{st},t}(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}^{-1}_{\mathit{st}}(b_{\mathrm{r}}^\ast)) \\
+  \wedge &amp; ((c_1 = c_2 \wedge c = c_1) \vee (c_1 \neq c_2 \wedge c = c_3)) \\
+  \wedge &amp; b_{\mathrm{w}}^\ast = \href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(\href{../exec/numerics.html#op-wrapt}{\mathrm{wrap}}_{t,\mathit{st}}(c))) \\
+  \end{array}
+\\[1ex]
+\begin{array}{lcl&#64;{\qquad}l}
+S; F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~i)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_2)~(t.\href{../syntax/instructions.html#syntax-instr-numeric}{\mathsf{const}}~c_3)~(t.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}({N}\mathsf{\_u})^?.\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}})
   &amp;\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{(\href{../exec/runtime.html#syntax-act}{\mathsf{rd}}~a.\href{../exec/runtime.html#syntax-loc}{\mathsf{len}}~n)}&amp;
   F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}
 \end{array}
 \\ \qquad
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
-  (\mathrel{\mbox{if}} &amp; \mathit{ea} + N/8 &gt; n \vee \mathit{ea} \mathbin{\mathrm{mod}} N/8 \neq 0) \\
+  (\mathrel{\mbox{if}} &amp; S.\href{../exec/runtime.html#syntax-store}{\mathsf{mems}}[a] ~\mbox{undefined} \\
+  \wedge &amp; \mathit{ea} + N/8 &gt; n \vee \mathit{ea} \mathbin{\mathrm{mod}} N/8 \neq 0) \\
   \end{array}
-\\[2ex]
+\\
+%
+~\\
 \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
-(\mathrel{\mbox{where}} &amp; N = |t| \mathrel{\mbox{if}} ~\mbox{not present} \\
+(\mathrel{\mbox{where}} &amp; N = |t| \mathrel{\mbox{if}} N~\mbox{not present} \\
+\wedge &amp; \mathit{st} = t \mathrel{\mbox{if}} N~\mbox{not present}, ~\mathit{st} = \href{../syntax/values.html#syntax-int}{\mathit{i}N} \mathrel{\mbox{otherwise}} \\
 \wedge &amp; a = F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0] \\
 \wedge &amp; \mathit{ea} = i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}) \\
 \end{array}
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-wait-n">
-<span id="exec-wait"></span><h3><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}{N}\)</span><a class="headerlink" href="#xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-wait-n" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id7">
+<span id="exec-memory-atomic-waitn"></span><h3><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}{N}\)</span><a class="headerlink" href="#xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-wait-n" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="id2">
 <p class="admonition-title">Todo</p>
 <p>update to new rules</p>
 </div>
-<div class="admonition-todo admonition" id="id8">
+<div class="admonition-todo admonition" id="id3">
+<p class="admonition-title">Todo</p>
+<p>operand order does not match validation and threads overview</p>
+</div>
+<div class="admonition-todo admonition" id="id4">
 <p class="admonition-title">Todo</p>
 <p>add text</p>
+</div>
+<div class="admonition-todo admonition" id="id5">
+<p class="admonition-title">Todo</p>
+<p>add semantics for non-shared memories</p>
 </div>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{l}
@@ -925,7 +1064,9 @@ F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}.\href{../syntax/ins
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
   (\mathrel{\mbox{if}} i + N/8 &gt; n \vee i \mathbin{\mathrm{mod}} N/8 \neq 0) \\
   \end{array}
-\\[2ex]
+\\
+%
+~\\
 \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
 (\mathrel{\mbox{where}} &amp; a = F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}.\href{../exec/runtime.html#syntax-moduleinst}{\mathsf{memaddrs}}[0] \\
 \wedge &amp; \mathit{ea} = i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}) \\
@@ -933,12 +1074,16 @@ F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i64}}.\href{../syntax/ins
 \end{array}\end{split}\]</div>
 </div>
 <div class="section" id="xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-notify">
-<span id="exec-notify"></span><h3><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.notify}}\)</span><a class="headerlink" href="#xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-notify" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id9">
+<span id="exec-memory-atomic-notify"></span><h3><span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.notify}}\)</span><a class="headerlink" href="#xref-syntax-instructions-syntax-instr-atomic-memory-mathsf-memory-atomic-notify" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="id6">
+<p class="admonition-title">Todo</p>
+<p>add semantics for non-shared memories</p>
+</div>
+<div class="admonition-todo admonition" id="id7">
 <p class="admonition-title">Todo</p>
 <p>update to new rules</p>
 </div>
-<div class="admonition-todo admonition" id="id10">
+<div class="admonition-todo admonition" id="id8">
 <p class="admonition-title">Todo</p>
 <p>add text; operand order? is the trap case correct (issue #105)?</p>
 </div>
@@ -963,7 +1108,9 @@ F; (\href{../syntax/types.html#syntax-valtype}{\mathsf{i32}}.\href{../syntax/ins
   \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
   (\mathrel{\mbox{if}} i &gt; n) \\
   \end{array}
-\\[2ex]
+\\
+%
+~\\
 \begin{array}[t]{&#64;{}r&#64;{~}l&#64;{}}
 (\mathrel{\mbox{where}} &amp; \mathit{ea} = i + \href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}}.\href{../syntax/instructions.html#syntax-instr-memory}{\mathsf{offset}}) \\
 \end{array}
@@ -1328,7 +1475,7 @@ S; \href{../exec/runtime.html#syntax-val}{\mathit{val}}^n~(\href{../exec/runtime
 </div>
 <div class="section" id="host-functions">
 <span id="exec-invoke-host"></span><span id="index-9"></span><h3>Host Functions<a class="headerlink" href="#host-functions" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id11">
+<div class="admonition-todo admonition" id="id9">
 <p class="admonition-title">Todo</p>
 <p>this has to change completely</p>
 </div>
@@ -1378,7 +1525,7 @@ However, the effects of any such call are subsumed by the non-deterministic beha
 </div>
 <div class="section" id="expressions">
 <span id="exec-expr"></span><span id="index-10"></span><h2>Expressions<a class="headerlink" href="#expressions" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="id12">
+<div class="admonition-todo admonition" id="id10">
 <p class="admonition-title">Todo</p>
 <p>update to not use state</p>
 </div>

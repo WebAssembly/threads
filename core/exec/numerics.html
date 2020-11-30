@@ -126,13 +126,15 @@ When several of these placeholders occur in a single clause, then they must be r
 </li>
 </ul>
 <div class="section" id="representations">
-<span id="aux-bits"></span><span id="index-1"></span><h2>Representations<a class="headerlink" href="#representations" title="Permalink to this headline">¶</a></h2>
+<span id="syntax-storagetype"></span><span id="aux-bits"></span><span id="index-1"></span><h2>Representations<a class="headerlink" href="#representations" title="Permalink to this headline">¶</a></h2>
 <p>Numbers have an underlying binary representation as a sequence of bits:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{lll&#64;{\qquad}l}
 \href{../exec/numerics.html#aux-bits}{\mathrm{bits}}_{\mathsf{i}N}(i) &amp;=&amp; \href{../exec/numerics.html#aux-ibits}{\mathrm{ibits}}_N(i) \\
 \href{../exec/numerics.html#aux-bits}{\mathrm{bits}}_{\mathsf{f}N}(z) &amp;=&amp; \href{../exec/numerics.html#aux-fbits}{\mathrm{fbits}}_N(z) \\
 \end{array}\end{split}\]</div>
+<p>Per convention, the type index of these functions range over <em>storage types</em>,
+which are a pro forma extension of <a class="reference internal" href="../syntax/types.html#syntax-valtype"><span class="std std-ref">value types</span></a> that includes the additional integer sizes <span class="math notranslate nohighlight">\(\href{../exec/numeric.html#syntax-storagetype}{\mathsf{i8}}\)</span> and <span class="math notranslate nohighlight">\(\href{../exec/numeric.html#syntax-storagetype}{\mathsf{i16}}\)</span>.</p>
 <p>Each of these functions is a bijection, hence they are invertible.</p>
 <div class="section" id="integers">
 <span id="aux-ibits"></span><span id="index-2"></span><h3>Integers<a class="headerlink" href="#integers" title="Permalink to this headline">¶</a></h3>
@@ -163,10 +165,11 @@ When several of these placeholders occur in a single clause, then they must be r
 <p>When a number is stored into <a class="reference internal" href="../syntax/modules.html#syntax-mem"><span class="std std-ref">memory</span></a>, it is converted into a sequence of <a class="reference internal" href="../syntax/values.html#syntax-byte"><span class="std std-ref">bytes</span></a> in <a class="reference external" href="https://en.wikipedia.org/wiki/Endianness#Little-endian">little endian</a> byte order:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{lll&#64;{\qquad}l}
-\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_t(i) &amp;=&amp; \href{../exec/numerics.html#aux-littleendian}{\mathrm{littleendian}}(\href{../exec/numerics.html#aux-bits}{\mathrm{bits}}_t(i)) \\[1ex]
+\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}_{\mathit{st}}(i) &amp;=&amp; \href{../exec/numerics.html#aux-littleendian}{\mathrm{littleendian}}(\href{../exec/numerics.html#aux-bits}{\mathrm{bits}}_{\mathit{st}}(i)) \\[1ex]
 \href{../exec/numerics.html#aux-littleendian}{\mathrm{littleendian}}(\epsilon) &amp;=&amp; \epsilon \\
 \href{../exec/numerics.html#aux-littleendian}{\mathrm{littleendian}}(d^8~{d'}^\ast~) &amp;=&amp; \href{../exec/numerics.html#aux-littleendian}{\mathrm{littleendian}}({d'}^\ast)~\href{../exec/numerics.html#aux-ibits}{\mathrm{ibits}}_8^{-1}(d^8) \\
 \end{array}\end{split}\]</div>
+<p>The type index of the <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#aux-bytes}{\mathrm{bytes}}\)</span> function ranges over <a class="reference internal" href="#syntax-storagetype"><span class="std std-ref">storage types</span></a>.</p>
 <p>Again these functions are invertable bijections.</p>
 </div>
 </div>
@@ -1133,6 +1136,15 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \href{../exec/numerics.html#op-extend-s}{\mathrm{extend}^{\mathsf{s}}}_{M,N}(i) &amp;=&amp; \href{../exec/numerics.html#aux-signed}{\mathrm{signed}}_N^{-1}(\href{../exec/numerics.html#aux-signed}{\mathrm{signed}}_M(i)) \\
 \end{array}\end{split}\]</div>
 </div>
+<div class="section" id="xref-exec-numerics-op-extendt-mathrm-extend-xref-syntax-instructions-syntax-sx-mathit-sx-mathit-st-t-c">
+<span id="op-extendt"></span><h3><span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-extendt}{\mathrm{extend}^{\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}^?}}_{\mathit{st},t}(c)\)</span><a class="headerlink" href="#xref-exec-numerics-op-extendt-mathrm-extend-xref-syntax-instructions-syntax-sx-mathit-sx-mathit-st-t-c" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Assert: Either <span class="math notranslate nohighlight">\(\mathit{st} = t\)</span>, or <span class="math notranslate nohighlight">\(t\)</span> is an an integer type and <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}\)</span> is present.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(\mathit{st} = t\)</span>, return <span class="math notranslate nohighlight">\(c\)</span>.</p></li>
+<li><p>Else, return <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-extend-u}{\mathrm{extend}^{\href{../syntax/instructions.html#syntax-sx}{\mathit{sx}}}}_{|\mathit{st}|,|t|}(c)\)</span>.</p></li>
+</ul>
+<p>The source type <span class="math notranslate nohighlight">\(\mathit{st}\)</span> of this function ranges over <a class="reference internal" href="#syntax-storagetype"><span class="std std-ref">storage types</span></a>.</p>
+</div>
 <div class="section" id="xref-exec-numerics-op-wrap-mathrm-wrap-m-n-i">
 <span id="op-wrap"></span><h3><span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{M,N}(i)\)</span><a class="headerlink" href="#xref-exec-numerics-op-wrap-mathrm-wrap-m-n-i" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
@@ -1142,6 +1154,15 @@ then its sign is non-deterministic and the <a class="reference internal" href=".
 \[\begin{split}\begin{array}{lll&#64;{\qquad}l}
 \href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{M,N}(i) &amp;=&amp; i \mathbin{\mathrm{mod}} 2^N \\
 \end{array}\end{split}\]</div>
+</div>
+<div class="section" id="xref-exec-numerics-op-wrapt-mathrm-wrap-t-mathit-st-c">
+<span id="op-wrapt"></span><h3><span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-wrapt}{\mathrm{wrap}}_{t,\mathit{st}}(c)\)</span><a class="headerlink" href="#xref-exec-numerics-op-wrapt-mathrm-wrap-t-mathit-st-c" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Assert: Either <span class="math notranslate nohighlight">\(\mathit{st} = t\)</span>, or <span class="math notranslate nohighlight">\(t\)</span> is an an integer type.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(\mathit{st} = t\)</span>, return <span class="math notranslate nohighlight">\(c\)</span>.</p></li>
+<li><p>Else, return <span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-wrap}{\mathrm{wrap}}_{|t|,|\mathit{st}|}(c)\)</span>.</p></li>
+</ul>
+<p>The target type <span class="math notranslate nohighlight">\(\mathit{st}\)</span> of this function ranges over <a class="reference internal" href="#syntax-storagetype"><span class="std std-ref">storage types</span></a>.</p>
 </div>
 <div class="section" id="xref-exec-numerics-op-trunc-u-mathrm-trunc-mathsf-u-m-n-z">
 <span id="op-trunc-u"></span><h3><span class="math notranslate nohighlight">\(\href{../exec/numerics.html#op-trunc-u}{\mathrm{trunc}^{\mathsf{u}}}_{M,N}(z)\)</span><a class="headerlink" href="#xref-exec-numerics-op-trunc-u-mathrm-trunc-mathsf-u-m-n-z" title="Permalink to this headline">¶</a></h3>

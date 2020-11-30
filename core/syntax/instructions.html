@@ -286,11 +286,11 @@ This restriction may be lifted in future versions.</p>
 </div>
 </div>
 <div class="section" id="atomic-memory-instructions">
-<span id="syntax-instr-atomic-memory"></span><span id="syntax-atomicop"></span><span id="index-5"></span><h2>Atomic Memory Instructions<a class="headerlink" href="#atomic-memory-instructions" title="Permalink to this headline">¶</a></h2>
+<span id="syntax-instr-atomic-memory"></span><span id="syntax-atop"></span><span id="index-5"></span><h2>Atomic Memory Instructions<a class="headerlink" href="#atomic-memory-instructions" title="Permalink to this headline">¶</a></h2>
 <p>Instructions in this group are concerned with accessing <a class="reference internal" href="modules.html#syntax-mem"><span class="std std-ref">linear memory</span></a> atomically.</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}\begin{array}{llll}
-\def\mathdef1807#1{{}}\mathdef1807{atomic operator} &amp; \href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}} &amp;::=&amp;
+\[\begin{split}\begin{array}{llcl}
+\def\mathdef1807#1{{}}\mathdef1807{atomic operator} &amp; \href{../syntax/instructions.html#syntax-atop}{\mathit{atop}} &amp;::=&amp;
   \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{add}} ~|~
   \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{sub}} ~|~
   \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{and}} ~|~
@@ -298,25 +298,25 @@ This restriction may be lifted in future versions.</p>
   \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{xor}} ~|~
   \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{xchg}} \\
 \def\mathdef1807#1{{}}\mathdef1807{instruction} &amp; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}} &amp;::=&amp;
-  \dots ~|~ \\&amp;&amp;&amp;
-  \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.notify}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}\mathit{nn}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
+  \dots \\&amp;&amp;|&amp;
+  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
   \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}\mathsf{8\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~
   \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}\mathsf{16\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~
-  \mathsf{i64.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}\mathsf{32\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
+  \mathsf{i64.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}\mathsf{32\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
   \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}\mathsf{8}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~
   \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}\mathsf{16}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~
-  \mathsf{i64.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}\mathsf{32}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{8.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{16.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \mathsf{i64.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{32.}\href{../syntax/instructions.html#syntax-atomicop}{\mathit{atomicop}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{8.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{16.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} ~|~ \\&amp;&amp;&amp;
-  \mathsf{i64.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{32.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\
+  \mathsf{i64.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}\mathsf{32}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{8.}\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{16.}\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \mathsf{i64.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{32.}\href{../syntax/instructions.html#syntax-atop}{\mathit{atop}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{8.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \mathsf{i}\mathit{nn}\mathsf{.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{16.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \mathsf{i64.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\mathsf{32.}\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}\mathsf{\_u}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.notify}}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\&amp;&amp;|&amp;
+  \href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}\mathit{nn}~\href{../syntax/instructions.html#syntax-memarg}{\mathit{memarg}} \\
 \end{array}\end{split}\]</div>
 <p>Memory is accessed atomically using the <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.load}}\)</span>, <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.store}}\)</span>, and
 <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\)</span> instructions.
@@ -324,12 +324,12 @@ All instructions take a <em>memory immediate</em> <span class="math notranslate 
 Unlike non-atomic memory access instructions, only integer <a class="reference internal" href="types.html#syntax-valtype"><span class="std std-ref">value types</span></a> can be used.
 Also unlike non-atomic memory access instructions, there are no sign extension modes; atomic memory accesses are always zero-extending.</p>
 <p>The <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{atomic.rmw}}\)</span> instructions are <a class="reference external" href="https://en.wikipedia.org/wiki/Read-modify-write">read-modify-write</a> instructions.
-They each have an <a class="reference internal" href="#syntax-atomicop"><span class="std std-ref">atomicop</span></a>, which specifies how memory will be modified.
+They each have an <em>atomic operator</em>, which specifies how memory will be modified.
 Each instruction returns the value read from memory before modification.
-The <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{xchg}}\)</span> <a class="reference internal" href="#syntax-atomicop"><span class="std std-ref">atomicop</span></a> doesn’t use the read value, but instead stores its argument unmodified.
-The <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}\)</span> <a class="reference internal" href="#syntax-atomicop"><span class="std std-ref">atomicop</span></a> is similar, but only performs this action conditionally,
+The <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{xchg}}\)</span> operator doesn’t use the read value, but instead stores its argument unmodified.
+The <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{cmpxchg}}\)</span> operator is similar, but only performs this action conditionally,
 if the read value is equal to a provided comparison argument.
-All other <a class="reference internal" href="#syntax-atomicop"><span class="std std-ref">atomicops</span></a> have behavior of the <a class="reference internal" href="#syntax-ibinop"><span class="std std-ref">ibinop</span></a> of the same name.</p>
+All other atomic operators have the same behavior as the <a class="reference internal" href="#syntax-ibinop"><span class="std std-ref">binary operator</span></a> of the same name.</p>
 <p>The <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}\)</span> and <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.notify}}\)</span> instructions provide primitive
 synchronization between <a class="reference internal" href="../exec/runtime.html#syntax-thread"><span class="std std-ref">threads</span></a>.
 The <span class="math notranslate nohighlight">\(\href{../syntax/instructions.html#syntax-instr-atomic-memory}{\mathsf{memory.atomic.wait}}\)</span> instructions atomically load a value from the calculated effective address and compare it to an expected value.
