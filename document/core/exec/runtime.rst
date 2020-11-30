@@ -139,7 +139,7 @@ Conventions
 
 * The meta variable :math:`h` ranges over time stamps where clear from context.
 
-* The notation :math:`(X~\AT~\time)` is a shorthand for the :ref:`record <notation-record>` :math:`\{\ATVAL~X, \ATTIME~\time\}` that annotates a semantic object :math:`X` with a time stamp :math:`\time`.
+* The notation :math:`(X~\AT~h)` is a shorthand for the :ref:`record <notation-record>` :math:`\{\ATVAL~X, \ATTIME~h\}` that annotates a semantic object :math:`X` with a time stamp :math:`h`.
 
 
 .. index:: ! store, address, function instance, table instance, memory instance, global instance, module, allocation
@@ -174,7 +174,7 @@ Syntactically, a local store is defined as a :ref:`map <notation-map>` from know
      \globalinst \\
    \end{array}
 
-It is an invariant of the semantics that none of the memory instances :math:`\meminst` in a store is :math:`shared <syntax-shared>`.
+It is an invariant of the semantics that none of the memory instances :math:`\meminst` in a local store is :ref:`shared <syntax-shared>`.
 
 .. [#gc]
    In practice, implementations may apply techniques like garbage collection to remove objects from the store that are no longer referenced.
@@ -707,7 +707,7 @@ Its form and meaning is outside the scope of this specification.
 Convention
 ..........
 
-* The actions :math:`\ARD_{\ord}` and :math:`\AWR_{\ord}` are abbreviated to :math:just `\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
+* The actions :math:`\ARD_{\ord}` and :math:`\AWR_{\ord}` are abbreviated to just :math:`\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
 
 .. todo:: define notational shorthands over actions and events (or better put that in relaxed.rst?)
 
@@ -762,7 +762,7 @@ Global Reduction
 *Global reduction* is concerned with allocation in the global store and synchronization between multiple :ref:`threads <syntax-thread>`.
 It emits a (possibly empty) set of events that are produced by the corresponding step of computation.
 
-Formally, glboal reduction is a relation
+Formally, global reduction is a relation
 
 .. math::
    \config \stepto^{\evt^\ast} \config
@@ -780,7 +780,7 @@ The following structural rule for global reduction delegates to local reduction 
        \begin{array}[t]{@{}r@{~}l@{}}
        \iff & S; F_\epsilon; \instr^\ast \stepto^{\act^\ast} S'; F'; {\instr'}^\ast) \\
        \wedge & h \prechb h' \\
-       \wedge & (S(\addr(\act)).\ATTIME \prechb h')^\ast \\
+       \wedge & (\X{SS}(\addr(\act)).\ATTIME \prechb h')^\ast \\
        \wedge & F_\epsilon = \{\AMODULE~\{\}\}) \\
        \end{array}
    \end{array}
