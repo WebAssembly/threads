@@ -535,7 +535,7 @@ let rec command mode cmd =
   | Assertion ass -> assertion mode ass
   | Thread (x_opt, cmds) ->
     [Node ("thread " ^ var_opt x_opt, List.concat_map (command mode) cmds)]
-  | Wait x -> [Node ("wait " ^ x.it, [])]
+  | Wait x_opt -> [Node ("wait " ^ var_opt x_opt, [])]
   | Meta _ -> assert false
 
 let script mode scr = Lib.List.concat_map (command mode) scr

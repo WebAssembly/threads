@@ -280,11 +280,36 @@ let print_results rs =
 
 module Map = Map.Make(String)
 
-let quote : script ref = ref []
-let scripts : script Map.t ref = ref Map.empty
-let modules : Ast.module_ Map.t ref = ref Map.empty
-let instances : Instance.module_inst Map.t ref = ref Map.empty
-let registry : Instance.module_inst Map.t ref = ref Map.empty
+type task = Task of (task -> unit) list ref
+
+type config =
+  { quote : script ref;
+    scripts : script Map.t ref;
+    threads : task Map.t ref;
+    modules : Ast.module_ Map.t ref;
+    instances : Instance.module_inst Map.t ref;
+    registry : Instance.module_inst Map.t ref;
+    tasks : task list ref;
+  }
+
+let config () =
+  { quote = ref [];
+    scripts = ref Map.empty;
+    threads = ref Map.empty;
+    modules = ref Map.empty;
+    instances = ref Map.empty;
+    registry = ref Map.empty;
+    tasks = ref [];
+  }
+
+let local c =
+  { (config ()) with
+    scripts = ref !(c.scripts);
+    threads = ref !(c.threads);
+    modules = ref !(c.modules);
+    instances = ref !(c.instances);
+    tasks = c.tasks;
+  }
 
 let bind map x_opt y =
   let map' =
@@ -300,19 +325,20 @@ let lookup category map x_opt at =
       (if key = "" then "no " ^ category ^ " defined"
        else "unknown " ^ category ^ " " ^ key)
 
-let lookup_script = lookup "script" scripts
-let lookup_module = lookup "module" modules
-let lookup_instance = lookup "module" instances
+let lookup_script c = lookup "script" c.scripts
+let lookup_thread c = lookup "thread" c.threads
+let lookup_module c = lookup "module" c.modules
+let lookup_instance c = lookup "module" c.instances
 
-let lookup_registry module_name item_name _t =
-  match Instance.export (Map.find module_name !registry) item_name with
+let lookup_registry c module_name item_name _t =
+  match Instance.export (Map.find module_name !(c.registry)) item_name with
   | Some ext -> ext
   | None -> raise Not_found
 
 
 (* Running *)
 
-let rec run_definition def : Ast.module_ =
+let rec run_definition c def : Ast.module_ =
   match def.it with
   | Textual m -> m
   | Encoded (name, bs) ->
@@ -321,13 +347,13 @@ let rec run_definition def : Ast.module_ =
   | Quoted (_, s) ->
     trace "Parsing quote...";
     let def' = Parse.string_to_module s in
-    run_definition def'
+    run_definition c def'
 
-let run_action act : Values.value list =
+let run_action c act : Values.value list =
   match act.it with
   | Invoke (x_opt, name, vs) ->
     trace ("Invoking function \"" ^ Ast.string_of_name name ^ "\"...");
-    let inst = lookup_instance x_opt act.at in
+    let inst = lookup_instance c x_opt act.at in
     (match Instance.export inst name with
     | Some (Instance.ExternFunc f) ->
       Eval.invoke f (List.map (fun v -> v.it) vs)
@@ -337,7 +363,7 @@ let run_action act : Values.value list =
 
  | Get (x_opt, name) ->
     trace ("Getting global \"" ^ Ast.string_of_name name ^ "\"...");
-    let inst = lookup_instance x_opt act.at in
+    let inst = lookup_instance c x_opt act.at in
     (match Instance.export inst name with
     | Some (Instance.ExternGlobal gl) -> [Global.load gl]
     | Some _ -> Assert.error act.at "export is not a global"
@@ -382,11 +408,11 @@ let assert_message at name msg re =
     Assert.error at ("wrong " ^ name ^ " error")
   end
 
-let run_assertion ass =
+let run_assertion c ass =
   match ass.it with
   | AssertMalformed (def, re) ->
     trace "Asserting malformed...";
-    (match ignore (run_definition def) with
+    (match ignore (run_definition c def) with
     | exception Decode.Code (_, msg) -> assert_message ass.at "decoding" msg re
     | exception Parse.Syntax (_, msg) -> assert_message ass.at "parsing" msg re
     | _ -> Assert.error ass.at "expected decoding/parsing error"
@@ -395,7 +421,7 @@ let run_assertion ass =
   | AssertInvalid (def, re) ->
     trace "Asserting invalid...";
     (match
-      let m = run_definition def in
+      let m = run_definition c def in
       Valid.check_module m
     with
     | exception Valid.Invalid (_, msg) ->
@@ -405,7 +431,7 @@ let run_assertion ass =
 
   | AssertUnlinkable (def, re) ->
     trace "Asserting unlinkable...";
-    let m = run_definition def in
+    let m = run_definition c def in
     if not !Flags.unchecked then Valid.check_module m;
     (match
       let imports = Import.link m in
@@ -418,7 +444,7 @@ let run_assertion ass =
 
   | AssertUninstantiable (def, re) ->
     trace "Asserting trap...";
-    let m = run_definition def in
+    let m = run_definition c def in
     if not !Flags.unchecked then Valid.check_module m;
     (match
       let imports = Import.link m in
@@ -431,29 +457,29 @@ let run_assertion ass =
 
   | AssertReturn (act, rs) ->
     trace ("Asserting return...");
-    let got_vs = run_action act in
+    let got_vs = run_action c act in
     assert_result ass.at got_vs rs
 
   | AssertTrap (act, re) ->
     trace ("Asserting trap...");
-    (match run_action act with
+    (match run_action c act with
     | exception Eval.Trap (_, msg) -> assert_message ass.at "runtime" msg re
     | _ -> Assert.error ass.at "expected runtime error"
     )
 
   | AssertExhaustion (act, re) ->
     trace ("Asserting exhaustion...");
-    (match run_action act with
+    (match run_action c act with
     | exception Eval.Exhaustion (_, msg) ->
       assert_message ass.at "exhaustion" msg re
     | _ -> Assert.error ass.at "expected exhaustion error"
     )
 
-let rec run_command cmd =
+let rec run_command c cmd task =
   match cmd.it with
   | Module (x_opt, def) ->
-    quote := cmd :: !quote;
-    let m = run_definition def in
+    c.quote := cmd :: !(c.quote);
+    let m = run_definition c def in
     if not !Flags.unchecked then begin
       trace "Checking...";
       Valid.check_module m;
@@ -462,87 +488,100 @@ let rec run_command cmd =
         print_module x_opt m
       end
     end;
-    bind scripts x_opt [cmd];
-    bind modules x_opt m;
+    bind c.scripts x_opt [cmd];
+    bind c.modules x_opt m;
     if not !Flags.dry then begin
       trace "Initializing...";
       let imports = Import.link m in
       let inst = Eval.init m imports in
-      bind instances x_opt inst
+      bind c.instances x_opt inst
     end
 
   | Register (name, x_opt) ->
-    quote := cmd :: !quote;
+    c.quote := cmd :: !(c.quote);
     if not !Flags.dry then begin
       trace ("Registering module \"" ^ Ast.string_of_name name ^ "\"...");
-      let inst = lookup_instance x_opt cmd.at in
-      registry := Map.add (Utf8.encode name) inst !registry;
-      Import.register name (lookup_registry (Utf8.encode name))
+      let inst = lookup_instance c x_opt cmd.at in
+      c.registry := Map.add (Utf8.encode name) inst !(c.registry);
+      Import.register name (lookup_registry c (Utf8.encode name))
     end
 
   | Action act ->
-    quote := cmd :: !quote;
+    c.quote := cmd :: !(c.quote);
     if not !Flags.dry then begin
-      let vs = run_action act in
+      let vs = run_action c act in
       if vs <> [] then print_values vs
     end
 
   | Assertion ass ->
-    quote := cmd :: !quote;
+    c.quote := cmd :: !(c.quote);
     if not !Flags.dry then begin
-      run_assertion ass
+      run_assertion c ass
     end
 
-  | Thread (x_opt, act) ->
-    (* TODO *)
-    assert false
+  | Thread (x_opt, cmds) ->
+    let task = Task (ref (List.map (run_command c) cmds)) in
+    c.tasks := task :: !(c.tasks);
+    bind c.threads x_opt task
 
-  | Wait x ->
-    (* TODO *)
-    assert false
+  | Wait x_opt ->
+    if lookup_thread c x_opt cmd.at <> Task (ref []) then begin
+      let Task steps = task in
+      steps := run_command c cmd :: !steps
+    end
 
   | Meta cmd ->
-    run_meta cmd
+    run_meta c cmd
 
-and run_meta cmd =
+and run_meta c cmd =
   match cmd.it with
   | Script (x_opt, script) ->
-    run_quote_script script;
-    bind scripts x_opt (lookup_script None cmd.at)
+    run_quote_script c script;
+    bind c.scripts x_opt (lookup_script c None cmd.at)
 
   | Input (x_opt, file) ->
-    (try if not (input_file file run_quote_script) then
+    (try if not (input_file file (run_quote_script c)) then
       Abort.error cmd.at "aborting"
     with Sys_error msg -> IO.error cmd.at msg);
-    bind scripts x_opt (lookup_script None cmd.at);
+    bind c.scripts x_opt (lookup_script c None cmd.at);
     if x_opt <> None then begin
-      bind modules x_opt (lookup_module None cmd.at);
+      bind c.modules x_opt (lookup_module c None cmd.at);
       if not !Flags.dry then begin
-        bind instances x_opt (lookup_instance None cmd.at)
+        bind c.instances x_opt (lookup_instance c None cmd.at)
       end
     end
 
   | Output (x_opt, Some file) ->
     (try
       output_file file
-        (fun () -> lookup_script x_opt cmd.at)
-        (fun () -> lookup_module x_opt cmd.at)
+        (fun () -> lookup_script c x_opt cmd.at)
+        (fun () -> lookup_module c x_opt cmd.at)
     with Sys_error msg -> IO.error cmd.at msg)
 
   | Output (x_opt, None) ->
-    (try output_stdout (fun () -> lookup_module x_opt cmd.at)
+    (try output_stdout (fun () -> lookup_module c x_opt cmd.at)
     with Sys_error msg -> IO.error cmd.at msg)
 
-and run_script script =
-  List.iter run_command script
+and run_step c =
+  let Task steps as task =
+    List.nth !(c.tasks) (Random.int (List.length !(c.tasks))) in
+  match !steps with
+  | [] -> run_step c
+  | step::steps' -> steps := steps'; step task
 
-and run_quote_script script =
-  let save_quote = !quote in
-  quote := [];
-  (try run_script script with exn -> quote := save_quote; raise exn);
-  bind scripts None (List.rev !quote);
-  quote := !quote @ save_quote
+and run_script c script =
+  let task = Task (ref (List.map (run_command c) script)) in
+  c.tasks := task :: !(c.tasks);
+  while task <> Task (ref []) do
+    run_step c
+  done
 
-let run_file file = input_file file run_script
-let run_string string = input_string string run_script
-let run_stdin () = input_stdin run_script
+and run_quote_script c script =
+  let c' = local c in
+  run_script c' script;
+  bind c.scripts None (List.rev !(c'.quote));
+  c.quote := !(c'.quote) @ !(c.quote)
+
+let run_file c file = input_file file (run_script c)
+let run_string c string = input_string string (run_script c)
+let run_stdin c = input_stdin (run_script c)

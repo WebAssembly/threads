@@ -38,7 +38,7 @@ and command' =
   | Action of action
   | Assertion of assertion
   | Thread of var option * command list
-  | Wait of var
+  | Wait of var option
   | Meta of meta
 
 and meta = meta' Source.phrase

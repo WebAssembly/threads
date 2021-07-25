@@ -899,7 +899,7 @@ cmd :
   | script_module { Module (fst $1, snd $1) @@ at () }
   | LPAR REGISTER name module_var_opt RPAR { Register ($3, $4) @@ at () }
   | LPAR THREAD thread_var_opt cmd_list RPAR { Thread ($3, $4) @@ at () }
-  | LPAR WAIT thread_var RPAR { Wait $3 @@ at () }
+  | LPAR WAIT thread_var_opt RPAR { Wait $3 @@ at () }
   | meta { Meta $1 @@ at () }
 
 cmd_list :
