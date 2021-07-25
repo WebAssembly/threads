@@ -163,6 +163,14 @@ function match_result(actual, expected) {
       };
   }
 }
+
+function thread(f) {
+  // TODO: spawn thread and run f in it; return a handle for the thread
+}
+
+function wait(t) {
+  // TODO: wait for thread t to terminate
+}
 |}
 
 
@@ -393,6 +401,7 @@ let of_action mods act =
       Some (of_wrapper mods x_opt name (get gt), [t])
     | _ -> None
     )
+  | Eval -> assert false
 
 let of_assertion' mods act name args wrapper_opt =
   let act_js, act_wrapper_opt = of_action mods act in
@@ -447,10 +456,11 @@ let of_command mods cmd =
   | Thread (x_opt, cmds) ->
     (* TODO *)
     assert false
-  | Wait x ->
+  | Wait x_opt ->
     (* TODO *)
     assert false
-  | Meta _ -> assert false
+  | Meta _
+  | Implicit _ -> assert false
 
 let of_script scr =
   (if !Flags.harness then harness else "") ^

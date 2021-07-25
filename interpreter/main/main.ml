@@ -42,13 +42,13 @@ let () =
     configure ();
     Arg.parse argspec
       (fun file -> add_arg ("(input " ^ quote file ^ ")")) usage;
-    let config = Run.config () in
-    List.iter (fun arg -> if not (Run.run_string config arg) then exit 1) !args;
+    let context = Run.context () in
+    List.iter (fun arg -> if not (Run.run_string context arg) then exit 1) !args;
     if !args = [] then Flags.interactive := true;
     if !Flags.interactive then begin
       Flags.print_sig := true;
       banner ();
-      Run.run_stdin config
+      Run.run_stdin context
     end
   with exn ->
     flush_all ();

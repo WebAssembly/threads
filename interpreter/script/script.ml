@@ -10,6 +10,7 @@ type action = action' Source.phrase
 and action' =
   | Invoke of var option * Ast.name * Ast.literal list
   | Get of var option * Ast.name
+  | Eval
 
 type nanop = nanop' Source.phrase
 and nanop' = (unit, unit, nan, nan) Values.op
@@ -40,12 +41,13 @@ and command' =
   | Thread of var option * command list
   | Wait of var option
   | Meta of meta
+  | Implicit of command
 
 and meta = meta' Source.phrase
 and meta' =
   | Input of var option * string
   | Output of var option * string option
-  | Script of var option * script
+  | Script of var option * script * command list
 
 and script = command list
 

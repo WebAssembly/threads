@@ -907,7 +907,7 @@ cmd_list :
   | cmd cmd_list { $1 :: $2 }
 
 meta :
-  | LPAR SCRIPT script_var_opt cmd_list RPAR { Script ($3, $4) @@ at () }
+  | LPAR SCRIPT script_var_opt cmd_list RPAR { Script ($3, $4, []) @@ at () }
   | LPAR INPUT script_var_opt STRING RPAR { Input ($3, $4) @@ at () }
   | LPAR OUTPUT script_var_opt STRING RPAR { Output ($3, Some $4) @@ at () }
   | LPAR OUTPUT script_var_opt RPAR { Output ($3, None) @@ at () }
