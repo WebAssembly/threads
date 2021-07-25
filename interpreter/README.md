@@ -374,6 +374,8 @@ binscript: <cmd>*
 cmd:
   <module>                                   ;; define, validate, and initialize module
   ( register <string> <name>? )              ;; register module for imports
+  ( thread <name>? cmd* )                    ;; spawn thread
+  ( wait <name> )                            ;; join thread
   <action>                                   ;; perform action and print results
   <assertion>                                ;; assert result of an action
 
@@ -394,7 +396,8 @@ assertion:
   ( assert_trap <module> <failure> )         ;; assert module traps on instantiation
 
 result:
-  ( <val_type>.const <numpat> )
+  ( <val_type>.const <numpat> )              ;; numeric result
+  ( oneof result* )                          ;; non-deterministic result
 
 numpat:
   <value>                                    ;; literal result

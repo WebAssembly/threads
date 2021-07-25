@@ -490,21 +490,21 @@ let action mode act =
     Node ("invoke" ^ access x_opt name, List.map (literal mode) lits)
   | Get (x_opt, name) ->
     Node ("get" ^ access x_opt name, [])
-  | Join x ->
-    Node ("join " ^ x.it, [])
 
 let nan = function
   | CanonicalNan -> "nan:canonical"
   | ArithmeticNan -> "nan:arithmetic"
 
-let result mode res =
+let rec result mode res =
   match res.it with
   | LitResult lit -> literal mode lit
   | NanResult nanop ->
-    match nanop.it with
+    (match nanop.it with
     | Values.I32 _ | Values.I64 _ -> assert false
     | Values.F32 n -> Node ("f32.const " ^ nan n, [])
     | Values.F64 n -> Node ("f64.const " ^ nan n, [])
+    )
+  | OneofResult ress -> Node ("oneof", List.map (result mode) ress)
 
 let assertion mode ass =
   match ass.it with
@@ -527,13 +527,15 @@ let assertion mode ass =
   | AssertExhaustion (act, re) ->
     [Node ("assert_exhaustion", [action mode act; Atom (string re)])]
 
-let command mode cmd =
+let rec command mode cmd =
   match cmd.it with
   | Module (x_opt, def) -> [definition mode x_opt def]
   | Register (n, x_opt) -> [Node ("register " ^ name n ^ var_opt x_opt, [])]
   | Action act -> [action mode act]
   | Assertion ass -> assertion mode ass
-  | Thread (x_opt, act) -> [Node ("thread " ^ var_opt x_opt, [action mode act])]
+  | Thread (x_opt, cmds) ->
+    [Node ("thread " ^ var_opt x_opt, List.concat_map (command mode) cmds)]
+  | Wait x -> [Node ("wait " ^ x.it, [])]
   | Meta _ -> assert false
 
 let script mode scr = Lib.List.concat_map (command mode) scr

@@ -176,10 +176,10 @@ let inline_type_explicit (c : context) x ft at =
 %token FUNC START TYPE PARAM RESULT LOCAL GLOBAL
 %token TABLE ELEM MEMORY DATA OFFSET IMPORT EXPORT TABLE
 %token MODULE BIN QUOTE
-%token SCRIPT REGISTER THREAD JOIN INVOKE GET
+%token SCRIPT REGISTER THREAD WAIT INVOKE GET
 %token ASSERT_MALFORMED ASSERT_INVALID ASSERT_SOFT_INVALID ASSERT_UNLINKABLE
 %token ASSERT_RETURN ASSERT_TRAP ASSERT_EXHAUSTION
-%token NAN
+%token NAN ONEOF
 %token INPUT OUTPUT
 %token EOF
 
@@ -875,8 +875,6 @@ action :
     { Invoke ($3, $4, $5) @@ at () }
   | LPAR GET module_var_opt name RPAR
     { Get ($3, $4) @@ at() }
-  | LPAR JOIN thread_var RPAR
-    { Join $3 @@ at () }
 
 assertion :
   | LPAR ASSERT_MALFORMED script_module STRING RPAR
@@ -900,7 +898,8 @@ cmd :
   | assertion { Assertion $1 @@ at () }
   | script_module { Module (fst $1, snd $1) @@ at () }
   | LPAR REGISTER name module_var_opt RPAR { Register ($3, $4) @@ at () }
-  | LPAR THREAD thread_var_opt action RPAR { Thread ($3, $4) @@ at () }
+  | LPAR THREAD thread_var_opt cmd_list RPAR { Thread ($3, $4) @@ at () }
+  | LPAR WAIT thread_var RPAR { Wait $3 @@ at () }
   | meta { Meta $1 @@ at () }
 
 cmd_list :
@@ -923,6 +922,7 @@ const_list :
 result :
   | const { LitResult $1 @@ at () }
   | LPAR CONST NAN RPAR { NanResult (nanop $2 ($3 @@ ati 3)) @@ at () }
+  | LPAR ONEOF result result_list RPAR { OneofResult ($3 :: $4) @@ at () }
 
 result_list :
   | /* empty */ { [] }

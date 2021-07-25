@@ -10,7 +10,6 @@ type action = action' Source.phrase
 and action' =
   | Invoke of var option * Ast.name * Ast.literal list
   | Get of var option * Ast.name
-  | Join of var
 
 type nanop = nanop' Source.phrase
 and nanop' = (unit, unit, nan, nan) Values.op
@@ -20,6 +19,7 @@ type result = result' Source.phrase
 and result' =
   | LitResult of Ast.literal
   | NanResult of nanop
+  | OneofResult of result list
 
 type assertion = assertion' Source.phrase
 and assertion' =
@@ -37,7 +37,8 @@ and command' =
   | Register of Ast.name * var option
   | Action of action
   | Assertion of assertion
-  | Thread of var option * action
+  | Thread of var option * command list
+  | Wait of var
   | Meta of meta
 
 and meta = meta' Source.phrase

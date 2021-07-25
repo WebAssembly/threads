@@ -248,18 +248,22 @@ let string_of_nan = function
   | CanonicalNan -> "nan:canonical"
   | ArithmeticNan -> "nan:arithmetic"
 
-let type_of_result r =
-  match r with
+let rec type_of_result r =
+  match r.it with
   | LitResult v -> Values.type_of v.it
   | NanResult n -> Values.type_of n.it
+  | OneofResult rs -> type_of_result (List.hd rs)
 
-let string_of_result r =
-  match r with
+let rec string_of_result r =
+  match r.it with
   | LitResult v -> Values.string_of_value v.it
   | NanResult nanop ->
-    match nanop.it with
+    (match nanop.it with
     | Values.I32 _ | Values.I64 _ -> assert false
     | Values.F32 n | Values.F64 n -> string_of_nan n
+    )
+  | OneofResult rs ->
+    "(" ^ String.concat " | " (List.map string_of_result rs) ^ ")"
 
 let string_of_results = function
   | [r] -> string_of_result r
@@ -340,29 +344,28 @@ let run_action act : Values.value list =
     | None -> Assert.error act.at "undefined export"
     )
 
-  (* TODO(binji) *)
-  | Join x ->
-    assert false
+let rec match_result at v r =
+  let open Values in
+  match r.it with
+  | LitResult v' -> v = v'.it
+  | NanResult nanop ->
+    (match nanop.it, v with
+    | F32 CanonicalNan, F32 z -> z = F32.pos_nan || z = F32.neg_nan
+    | F64 CanonicalNan, F64 z -> z = F64.pos_nan || z = F64.neg_nan
+    | F32 ArithmeticNan, F32 z ->
+      let pos_nan = F32.to_bits F32.pos_nan in
+      Int32.logand (F32.to_bits z) pos_nan = pos_nan
+    | F64 ArithmeticNan, F64 z ->
+      let pos_nan = F64.to_bits F64.pos_nan in
+      Int64.logand (F64.to_bits z) pos_nan = pos_nan
+    | _, _ -> false
+    )
+  | OneofResult rs -> List.exists (match_result at v) rs
 
 let assert_result at got expect =
-  let open Values in
   if
     List.length got <> List.length expect ||
-    List.exists2 (fun v r ->
-      match r with
-      | LitResult v' -> v <> v'.it
-      | NanResult nanop ->
-        match nanop.it, v with
-        | F32 CanonicalNan, F32 z -> z <> F32.pos_nan && z <> F32.neg_nan
-        | F64 CanonicalNan, F64 z -> z <> F64.pos_nan && z <> F64.neg_nan
-        | F32 ArithmeticNan, F32 z ->
-          let pos_nan = F32.to_bits F32.pos_nan in
-          Int32.logand (F32.to_bits z) pos_nan <> pos_nan
-        | F64 ArithmeticNan, F64 z ->
-          let pos_nan = F64.to_bits F64.pos_nan in
-          Int64.logand (F64.to_bits z) pos_nan <> pos_nan
-        | _, _ -> false
-    ) got expect
+    not (List.for_all2 (match_result at) got expect)
   then begin
     print_string "Result: "; print_values got;
     print_string "Expect: "; print_results expect;
@@ -429,8 +432,7 @@ let run_assertion ass =
   | AssertReturn (act, rs) ->
     trace ("Asserting return...");
     let got_vs = run_action act in
-    let expect_rs = List.map (fun r -> r.it) rs in
-    assert_result ass.at got_vs expect_rs
+    assert_result ass.at got_vs rs
 
   | AssertTrap (act, re) ->
     trace ("Asserting trap...");
@@ -491,8 +493,13 @@ let rec run_command cmd =
       run_assertion ass
     end
 
-  (* TODO(binji) *)
-  | Thread (x_opt, act) -> assert false
+  | Thread (x_opt, act) ->
+    (* TODO *)
+    assert false
+
+  | Wait x ->
+    (* TODO *)
+    assert false
 
   | Meta cmd ->
     run_meta cmd

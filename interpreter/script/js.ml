@@ -133,21 +133,34 @@ function assert_return(action, ...expected) {
     throw new Error(expected.length + " value(s) expected, got " + actual.length);
   }
   for (let i = 0; i < actual.length; ++i) {
-    switch (expected[i]) {
-      case "nan:canonical":
-      case "nan:arithmetic":
-      case "nan:any":
-        // Note that JS can't reliably distinguish different NaN values,
-        // so there's no good way to test that it's a canonical NaN.
-        if (!Number.isNaN(actual[i])) {
-          throw new Error("Wasm return value NaN expected, got " + actual[i]);
-        };
-        return;
-      default:
-        if (!Object.is(actual[i], expected[i])) {
-          throw new Error("Wasm return value " + expected[i] + " expected, got " + actual[i]);
-        };
-    }
+    match_result(actual[i], expected[i]);
+  }
+}
+
+function match_result(actual, expected) {
+  switch (expected) {
+    case "nan:canonical":
+    case "nan:arithmetic":
+    case "nan:any":
+      // Note that JS can't reliably distinguish different NaN values,
+      // so there's no good way to test that it's a canonical NaN.
+      if (!Number.isNaN(actual)) {
+        throw new Error("Wasm return value NaN expected, got " + actual);
+      };
+      return;
+    default:
+      if (Array.isArray(expected)) {
+        for (let i = 0; i < expected.length; ++i) {
+          try {
+            match_result(actual, expected[i]);
+            return;
+          } catch (e) {}
+        }
+        throw new Error("Wasm return value in " + expected + " expected, got " + actual);
+      }
+      if (!Object.is(actual, expected)) {
+        throw new Error("Wasm return value " + expected + " expected, got " + actual);
+      };
   }
 }
 |}
@@ -257,6 +270,9 @@ let assert_return ress ts at =
         Compare (eq_of t') @@ at;
         Test (Values.I32 I32Op.Eqz) @@ at;
         BrIf (0l @@ at) @@ at ]
+    | OneofResult ress ->
+      (* TODO *)
+      assert false
   in [], List.flatten (List.rev_map test ress)
 
 let wrap module_name item_name wrap_action wrap_assertion at =
@@ -333,13 +349,16 @@ let of_nan = function
   | CanonicalNan -> "nan:canonical"
   | ArithmeticNan -> "nan:arithmetic"
 
-let of_result res =
+let rec of_result res =
   match res.it with
   | LitResult lit -> of_literal lit
   | NanResult nanop ->
-    match nanop.it with
+    (match nanop.it with
     | Values.I32 _ | Values.I64 _ -> assert false
     | Values.F32 n | Values.F64 n -> of_nan n
+    )
+  | OneofResult ress ->
+    "[" ^ String.concat ", " (List.map of_result ress) ^ "]"
 
 let rec of_definition def =
   match def.it with
@@ -374,9 +393,6 @@ let of_action mods act =
       Some (of_wrapper mods x_opt name (get gt), [t])
     | _ -> None
     )
-  (* TODO(binji): *)
-  | Join x ->
-    assert false
 
 let of_assertion' mods act name args wrapper_opt =
   let act_js, act_wrapper_opt = of_action mods act in
@@ -408,9 +424,6 @@ let of_assertion mods ass =
   | AssertExhaustion (act, _) ->
     of_assertion' mods act "assert_exhaustion" [] None
 
-(* TODO(binji): *)
-let of_thread mods x_opt act = assert false
-
 let of_command mods cmd =
   "\n// " ^ Filename.basename cmd.at.left.file ^
     ":" ^ string_of_int cmd.at.left.line ^ "\n" ^
@@ -431,8 +444,12 @@ let of_command mods cmd =
     of_assertion' mods act "run" [] None ^ "\n"
   | Assertion ass ->
     of_assertion mods ass ^ "\n"
-  | Thread (x_opt, act) ->
-    of_thread mods x_opt act ^ "\n"
+  | Thread (x_opt, cmds) ->
+    (* TODO *)
+    assert false
+  | Wait x ->
+    (* TODO *)
+    assert false
   | Meta _ -> assert false
 
 let of_script scr =
