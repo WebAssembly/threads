@@ -517,7 +517,7 @@ let rec run_command c cmd : command list =
       let inst, config' = Eval.init !(c.config) c.thread m imports in
       bind c.instances x_opt inst;
       c.config := config';
-      [Implicit (Action (Eval @@ cmd.at) @@ cmd.at) @@ cmd.at]
+      [Action (Eval @@ cmd.at) @@ cmd.at]
     end
 
   | Register (name, x_opt) ->
@@ -532,7 +532,7 @@ let rec run_command c cmd : command list =
   | Action act ->
     if !Flags.dry then [] else begin
       match run_action c act with
-      | None -> [Implicit (Action (Eval @@ cmd.at) @@ cmd.at) @@ cmd.at]
+      | None -> [Action (Eval @@ cmd.at) @@ cmd.at]
       | Some vs -> if vs <> [] then print_values vs; []
     end
 
@@ -540,7 +540,7 @@ let rec run_command c cmd : command list =
     if !Flags.dry then [] else begin
       match run_assertion c ass with
       | None -> []
-      | Some ass' -> [Implicit (Assertion ass' @@ cmd.at) @@ cmd.at]
+      | Some ass' -> [Assertion ass' @@ cmd.at]
     end
 
   | Thread (x_opt, xs, cmds) ->
@@ -565,24 +565,24 @@ let rec run_command c cmd : command list =
     if !(task.script) = [] then
       []
     else
-      [Implicit (Wait x_opt @@ cmd.at) @@ cmd.at]
+      [Wait x_opt @@ cmd.at]
 
   | Meta cmd ->
     List.map (fun m -> Meta m @@ cmd.at) (run_meta c cmd)
 
-  | Implicit cmd ->
-    run_command c cmd
-
 and run_meta c cmd : meta list =
   match cmd.it with
-  | Script (x_opt, [], quote) ->
+  | Script (x_opt, [], [], quote) ->
     bind c.scripts x_opt (List.rev quote);
     []
 
-  | Script (x_opt, cmd::cmds, quote) ->
-    let cmds' = run_command c cmd in
+  | Script (x_opt, [], cmd::cmds, quote) ->
     let quote' = quote_command cmd in
-    [Script (x_opt, cmds' @ cmds, quote' @ quote) @@ cmd.at]
+    [Script (x_opt, [cmd], cmds, quote' @ quote) @@ cmd.at]
+
+  | Script (x_opt, cmd::cmds1, cmds2, quote) ->
+    let cmds' = run_command c cmd in
+    [Script (x_opt, cmds' @ cmds1, cmds2, quote) @@ cmd.at]
 
   | Input (x_opt, file) ->
     let script = ref [] in
@@ -593,7 +593,7 @@ and run_meta c cmd : meta list =
     | [{it = Module (None, def); at}] -> script := [Module (x_opt, def) @@ at]
     | _ -> ()
     );
-    [Script (x_opt, !script, []) @@ cmd.at]
+    [Script (x_opt, [], !script, []) @@ cmd.at]
 
   | Output (x_opt, Some file) ->
     (try
@@ -612,11 +612,10 @@ and quote_command cmd : command list =
   match cmd.it with
   | Module _ | Register _ | Action _ | Assertion _ | Thread _ | Wait _ -> [cmd]
   | Meta meta -> quote_meta meta
-  | Implicit _ -> []
 
 and quote_meta cmd : command list =
   match cmd.it with
-  | Script (_, [], quote) -> quote
+  | Script (_, [], [], quote) -> quote
   | Script _ | Input _ | Output _ -> []
 
 let run_script c script =

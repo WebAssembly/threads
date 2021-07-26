@@ -475,8 +475,7 @@ let rec of_command c cmd =
     "});\n"
   | Wait x_opt ->
     "wait(" ^ of_var_opt c.threads x_opt ^ ");\n"
-  | Meta _
-  | Implicit _ -> assert false
+  | Meta _ -> assert false
 
 let of_script scr =
   (if !Flags.harness then harness else "") ^

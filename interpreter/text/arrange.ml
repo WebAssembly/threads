@@ -542,7 +542,6 @@ let rec command mode cmd =
     ]
   | Wait x_opt -> [Node ("wait" ^ var_opt x_opt, [])]
   | Meta met -> [meta mode met]
-  | Implicit cmd' -> [Node ("implicit", command mode cmd')]
 
 and meta mode met =
   match met.it with
@@ -552,7 +551,7 @@ and meta mode met =
     Node ("output" ^ var_opt x_opt, [Atom (" \"" ^ file ^ "\"")])
   | Output (x_opt, None) ->
     Node ("output" ^ var_opt x_opt, [])
-  | Script (x_opt, _, _) ->
+  | Script (x_opt, _, _, _) ->
     Node ("script" ^ var_opt x_opt, [Atom "..."])
 
 let script mode scr = Lib.List.concat_map (command mode) scr

@@ -41,13 +41,12 @@ and command' =
   | Thread of var option * var list * command list
   | Wait of var option
   | Meta of meta
-  | Implicit of command
 
 and meta = meta' Source.phrase
 and meta' =
   | Input of var option * string
   | Output of var option * string option
-  | Script of var option * script * command list
+  | Script of var option * script * script * command list
 
 and script = command list
 
