@@ -854,10 +854,7 @@ inline_module1 :  /* Sugar */
 
 thread_var_opt :
   | /* empty */ { None }
-  | thread_var { Some $1 }
-
-thread_var :
-  | VAR { $1 @@ at () }
+  | VAR { Some ($1 @@ at ()) }
 
 script_var_opt :
   | /* empty */ { None }
@@ -894,13 +891,19 @@ cmd :
   | assertion { Assertion $1 @@ at () }
   | script_module { Module (fst $1, snd $1) @@ at () }
   | LPAR REGISTER name module_var_opt RPAR { Register ($3, $4) @@ at () }
-  | LPAR THREAD thread_var_opt cmd_list RPAR { Thread ($3, $4) @@ at () }
+  | LPAR THREAD thread_var_opt shared_cmd_list RPAR
+    { let xs, cs = $4 in Thread ($3, xs, cs) @@ at () }
   | LPAR WAIT thread_var_opt RPAR { Wait $3 @@ at () }
   | meta { Meta $1 @@ at () }
 
 cmd_list :
   | /* empty */ { [] }
   | cmd cmd_list { $1 :: $2 }
+
+shared_cmd_list :
+  | cmd_list { [], $1 }
+  | LPAR SHARED LPAR MODULE VAR RPAR RPAR shared_cmd_list
+    { let xs, cs = $8 in ($5 @@ ati 5) :: xs, cs }
 
 meta :
   | LPAR SCRIPT script_var_opt cmd_list RPAR { Script ($3, $4, []) @@ at () }

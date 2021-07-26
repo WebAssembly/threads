@@ -38,7 +38,7 @@ and command' =
   | Register of Ast.name * var option
   | Action of action
   | Assertion of assertion
-  | Thread of var option * command list
+  | Thread of var option * var list * command list
   | Wait of var option
   | Meta of meta
   | Implicit of command

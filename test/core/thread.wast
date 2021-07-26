@@ -2,7 +2,7 @@
   (memory (export "shared") 1 1 shared)
 )
 
-(thread $T1
+(thread $T1 (shared (module $Mem))
   (register "mem" $Mem)
   (module
     (memory (import "mem" "shared") 1 10 shared)
@@ -13,7 +13,7 @@
   (invoke "run")
 )
 
-(thread $T2
+(thread $T2 (shared (module $Mem))
   (register "mem" $Mem)
   (module
     (memory (import "mem" "shared") 1 1 shared)

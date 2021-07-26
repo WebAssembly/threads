@@ -374,10 +374,13 @@ binscript: <cmd>*
 cmd:
   <module>                                   ;; define, validate, and initialize module
   ( register <string> <name>? )              ;; register module for imports
-  ( thread <name>? cmd* )                    ;; spawn thread
+  ( thread <name>? <shared>* cmd* )          ;; spawn thread
   ( wait <name> )                            ;; join thread
   <action>                                   ;; perform action and print results
   <assertion>                                ;; assert result of an action
+
+shared:
+  ( shared ( module <name> ) )
 
 module:
   ( module <name>? binary <string>* )        ;; module in binary format (may be malformed)

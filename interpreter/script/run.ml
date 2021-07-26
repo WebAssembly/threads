@@ -314,13 +314,7 @@ let context () =
   context_for (ref ec) t
 
 let local c =
-  { c with
-    scripts = ref !(c.scripts);
-    threads = ref !(c.threads);
-    modules = ref !(c.modules);
-    instances = ref !(c.instances);
-    registry = ref Map.empty;
-  }
+  {(context_for c.config c.thread) with tasks = c.tasks}
 
 let bind map x_opt y =
   let map' =
@@ -549,11 +543,18 @@ let rec run_command c cmd : command list =
       | Some ass' -> [Implicit (Assertion ass' @@ cmd.at) @@ cmd.at]
     end
 
-  | Thread (x_opt, cmds) ->
+  | Thread (x_opt, xs, cmds) ->
     let thread, config' = Eval.spawn !(c.config) in
-    let is_shared _ inst = Instance.shared_module inst = Types.Shared in
-    let instances = ref (Map.filter is_shared !(c.instances)) in
-    let task = {context = {(local c) with thread; instances}; script = ref cmds} in
+    let task = {context = {(local c) with thread}; script = ref cmds} in
+    List.iter (fun x ->
+      if not !Flags.dry then begin
+      let inst = lookup_instance c (Some x) x.at in
+        if Instance.shared_module inst <> Types.Shared then
+          IO.error x.at ("module " ^ x.it ^ " is not sharable");
+        bind task.context.instances (Some x) inst
+      end;
+      bind task.context.modules (Some x) (lookup_module c (Some x) cmd.at)
+    ) xs;
     c.config := config';
     c.tasks := task :: !(c.tasks);
     bind c.threads x_opt task;

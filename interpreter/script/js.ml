@@ -164,8 +164,8 @@ function match_result(actual, expected) {
   }
 }
 
-function thread(f) {
-  // TODO: spawn thread and run f in it; return a handle for the thread
+function thread(shared, f) {
+  // TODO: spawn thread, share instances, and run f in it; return a handle for the thread
 }
 
 function wait(t) {
@@ -466,9 +466,11 @@ let rec of_command c cmd =
     of_assertion' c act "run" [] None ^ "\n"
   | Assertion ass ->
     of_assertion c ass ^ "\n"
-  | Thread (x_opt, cmds) ->
+  | Thread (x_opt, xs, cmds) ->
     "let " ^ current_var c.threads ^
-    " = thread(function () {" ^
+    " = thread([" ^
+    String.concat ", " (List.map (fun x -> "\"" ^ x.it ^ "\"") xs) ^
+    "], function () {" ^
     String.concat "" (List.map (of_command c) cmds) ^
     "});\n"
   | Wait x_opt ->

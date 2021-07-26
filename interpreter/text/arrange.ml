@@ -535,8 +535,11 @@ let rec command mode cmd =
   | Register (n, x_opt) -> [Node ("register " ^ name n ^ var_opt x_opt, [])]
   | Action act -> [action mode act]
   | Assertion ass -> assertion mode ass
-  | Thread (x_opt, cmds) ->
-    [Node ("thread" ^ var_opt x_opt, List.concat_map (command mode) cmds)]
+  | Thread (x_opt, xs, cmds) ->
+    [Node ("thread" ^ var_opt x_opt,
+      List.map (fun x -> Node ("shared", [Node ("module " ^ x.it, [])])) xs @
+      List.concat_map (command mode) cmds)
+    ]
   | Wait x_opt -> [Node ("wait" ^ var_opt x_opt, [])]
   | Meta met -> [meta mode met]
   | Implicit cmd' -> [Node ("implicit", command mode cmd')]
