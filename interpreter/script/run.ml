@@ -288,25 +288,23 @@ type task =
 
 and context =
 {
-  quote : script ref;
-  tasks : task list ref;
   scripts : script Map.t ref;
   threads : task Map.t ref;
   modules : Ast.module_ Map.t ref;
   instances : Instance.module_inst Map.t ref;
   registry : Instance.module_inst Map.t ref;
+  tasks : task list ref;
   config : Eval.config ref;
   thread : Eval.thread_id;
 }
 
 let context_for config thread =
-  { quote = ref [];
-    tasks = ref [];
-    scripts = ref Map.empty;
+  { scripts = ref Map.empty;
     threads = ref Map.empty;
     modules = ref Map.empty;
     instances = ref Map.empty;
     registry = ref Map.empty;
+    tasks = ref [];
     config;
     thread;
   }
@@ -317,7 +315,6 @@ let context () =
 
 let local c =
   { c with
-    quote = ref [];
     scripts = ref !(c.scripts);
     threads = ref !(c.threads);
     modules = ref !(c.modules);
@@ -509,7 +506,6 @@ let run_assertion c ass : assertion option =
 let rec run_command c cmd : command list =
   match cmd.it with
   | Module (x_opt, def) ->
-    c.quote := cmd :: !(c.quote);
     let m = run_definition c def in
     if not !Flags.unchecked then begin
       trace "Checking...";
@@ -531,7 +527,6 @@ let rec run_command c cmd : command list =
     end
 
   | Register (name, x_opt) ->
-    c.quote := cmd :: !(c.quote);
     if !Flags.dry then [] else begin
       trace ("Registering module \"" ^ Ast.string_of_name name ^ "\"...");
       let inst = lookup_instance c x_opt cmd.at in
@@ -541,7 +536,6 @@ let rec run_command c cmd : command list =
     end
 
   | Action act ->
-    c.quote := cmd :: !(c.quote);
     if !Flags.dry then [] else begin
       match run_action c act with
       | None -> [Implicit (Action (Eval @@ cmd.at) @@ cmd.at) @@ cmd.at]
@@ -549,7 +543,6 @@ let rec run_command c cmd : command list =
     end
 
   | Assertion ass ->
-    c.quote := cmd :: !(c.quote);
     if !Flags.dry then [] else begin
       match run_assertion c ass with
       | None -> []
@@ -557,7 +550,6 @@ let rec run_command c cmd : command list =
     end
 
   | Thread (x_opt, cmds) ->
-    c.quote := cmd :: !(c.quote);
     let thread, config' = Eval.spawn !(c.config) in
     let is_shared _ inst = Instance.shared_module inst = Types.Shared in
     let instances = ref (Map.filter is_shared !(c.instances)) in
@@ -568,7 +560,6 @@ let rec run_command c cmd : command list =
     []
 
   | Wait x_opt ->
-    c.quote := cmd :: !(c.quote);
     let task = lookup_thread c x_opt cmd.at in
     if !(task.script) = [] then
       []
@@ -576,16 +567,15 @@ let rec run_command c cmd : command list =
       [Implicit (Wait x_opt @@ cmd.at) @@ cmd.at]
 
   | Meta cmd ->
-    List.map (fun m -> Implicit (Meta m @@ cmd.at) @@ cmd.at) (run_meta c cmd)
+    List.map (fun m -> Meta m @@ cmd.at) (run_meta c cmd)
 
   | Implicit cmd ->
-    run_command {c with quote = ref []} cmd
+    run_command c cmd
 
 and run_meta c cmd : meta list =
   match cmd.it with
   | Script (x_opt, [], quote) ->
     bind c.scripts None (List.rev quote);
-    c.quote := quote @ !(c.quote);
     bind c.scripts x_opt (lookup_script c None cmd.at);
     if x_opt <> None then begin
       bind c.modules x_opt (lookup_module c None cmd.at);
@@ -596,9 +586,9 @@ and run_meta c cmd : meta list =
     []
 
   | Script (x_opt, cmd::cmds, quote) ->
-    let c' = {(local c) with quote = ref quote} in
     let cmds' = run_command c cmd in
-    [Script (x_opt, cmds' @ cmds, !(c'.quote)) @@ cmd.at]
+    let quote' = quote_command cmd in
+    [Script (x_opt, cmds' @ cmds, quote' @ quote) @@ cmd.at]
 
   | Input (x_opt, file) ->
     let script = ref [] in
@@ -619,6 +609,17 @@ and run_meta c cmd : meta list =
     (try output_stdout (fun () -> lookup_module c x_opt cmd.at)
     with Sys_error msg -> IO.error cmd.at msg);
     []
+
+and quote_command cmd : command list =
+  match cmd.it with
+  | Module _ | Register _ | Action _ | Assertion _ | Thread _ | Wait _ -> [cmd]
+  | Meta meta -> quote_meta meta
+  | Implicit _ -> []
+
+and quote_meta cmd : command list =
+  match cmd.it with
+  | Script (_, [], quote) -> quote
+  | Script _ | Input _ | Output _ -> []
 
 let run_script c script =
   let task = {context = c; script = ref script} in
