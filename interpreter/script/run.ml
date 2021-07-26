@@ -576,14 +576,7 @@ let rec run_command c cmd : command list =
 and run_meta c cmd : meta list =
   match cmd.it with
   | Script (x_opt, [], quote) ->
-    bind c.scripts None (List.rev quote);
-    bind c.scripts x_opt (lookup_script c None cmd.at);
-    if x_opt <> None then begin
-      bind c.modules x_opt (lookup_module c None cmd.at);
-      if not !Flags.dry then begin
-        bind c.instances x_opt (lookup_instance c None cmd.at)
-      end
-    end;
+    bind c.scripts x_opt (List.rev quote);
     []
 
   | Script (x_opt, cmd::cmds, quote) ->
@@ -596,6 +589,10 @@ and run_meta c cmd : meta list =
     (try if not (input_file file ((:=) script)) then
       Abort.error cmd.at "aborting"
     with Sys_error msg -> IO.error cmd.at msg);
+    (match !script with
+    | [{it = Module (None, def); at}] -> script := [Module (x_opt, def) @@ at]
+    | _ -> ()
+    );
     [Script (x_opt, !script, []) @@ cmd.at]
 
   | Output (x_opt, Some file) ->
