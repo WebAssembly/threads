@@ -252,7 +252,7 @@ let rec type_of_result r =
   match r.it with
   | LitResult v -> Values.type_of v.it
   | NanResult n -> Values.type_of n.it
-  | OneofResult rs -> type_of_result (List.hd rs)
+  | EitherResult rs -> type_of_result (List.hd rs)
 
 let rec string_of_result r =
   match r.it with
@@ -262,7 +262,7 @@ let rec string_of_result r =
     | Values.I32 _ | Values.I64 _ -> assert false
     | Values.F32 n | Values.F64 n -> string_of_nan n
     )
-  | OneofResult rs ->
+  | EitherResult rs ->
     "(" ^ String.concat " | " (List.map string_of_result rs) ^ ")"
 
 let string_of_results = function
@@ -412,7 +412,7 @@ let rec match_result at v r =
       Int64.logand (F64.to_bits z) pos_nan = pos_nan
     | _, _ -> false
     )
-  | OneofResult rs -> List.exists (match_result at v) rs
+  | EitherResult rs -> List.exists (match_result at v) rs
 
 let assert_result at got expect =
   if

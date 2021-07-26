@@ -20,7 +20,7 @@ type result = result' Source.phrase
 and result' =
   | LitResult of Ast.literal
   | NanResult of nanop
-  | OneofResult of result list
+  | EitherResult of result list
 
 type assertion = assertion' Source.phrase
 and assertion' =

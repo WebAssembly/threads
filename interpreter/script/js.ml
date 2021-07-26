@@ -251,7 +251,7 @@ let run ts at =
   [], []
 
 let assert_return ress ts at =
-  let test res =
+  let rec test res =
     match res.it with
     | LitResult lit ->
       let t', reinterpret = reinterpret_of (Values.type_of lit.it) in
@@ -281,9 +281,17 @@ let assert_return ress ts at =
         Compare (eq_of t') @@ at;
         Test (Values.I32 I32Op.Eqz) @@ at;
         BrIf (0l @@ at) @@ at ]
-    | OneofResult ress ->
-      (* TODO *)
-      assert false
+    | EitherResult ress ->
+      [ Block (ValBlockType None,
+          List.map (fun res ->
+            Block (ValBlockType None,
+              test res @
+              [Br (1l @@ res.at) @@ res.at]
+            ) @@ res.at
+          ) ress @
+          [Br (1l @@ at) @@ at]
+        ) @@ at
+      ]
   in [], List.flatten (List.rev_map test ress)
 
 let wrap module_name item_name wrap_action wrap_assertion at =
@@ -368,7 +376,7 @@ let rec of_result res =
     | Values.I32 _ | Values.I64 _ -> assert false
     | Values.F32 n | Values.F64 n -> of_nan n
     )
-  | OneofResult ress ->
+  | EitherResult ress ->
     "[" ^ String.concat ", " (List.map of_result ress) ^ "]"
 
 let rec of_definition def =

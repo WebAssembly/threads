@@ -451,7 +451,7 @@ rule token = parse
   | "assert_exhaustion" { ASSERT_EXHAUSTION }
   | "nan:canonical" { NAN Script.CanonicalNan }
   | "nan:arithmetic" { NAN Script.ArithmeticNan }
-  | "oneof" { ONEOF }
+  | "either" { EITHER }
   | "input" { INPUT }
   | "output" { OUTPUT }
 

@@ -397,7 +397,7 @@ assertion:
 
 result:
   ( <val_type>.const <numpat> )              ;; numeric result
-  ( oneof result* )                          ;; non-deterministic result
+  ( either result+ )                         ;; non-deterministic result
 
 numpat:
   <value>                                    ;; literal result

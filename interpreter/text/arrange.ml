@@ -506,7 +506,7 @@ let rec result mode res =
     | Values.F32 n -> Node ("f32.const " ^ nan n, [])
     | Values.F64 n -> Node ("f64.const " ^ nan n, [])
     )
-  | OneofResult ress -> Node ("oneof", List.map (result mode) ress)
+  | EitherResult ress -> Node ("either", List.map (result mode) ress)
 
 let assertion mode ass =
   match ass.it with

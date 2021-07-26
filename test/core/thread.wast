@@ -21,7 +21,7 @@
       (i32.load (i32.const 0))
     )
   )
-  (assert_return (invoke "run") (oneof (i32.const 0) (i32.const 42)))
+  (assert_return (invoke "run") (either (i32.const 0) (i32.const 42)))
 )
 
 (wait $T1)

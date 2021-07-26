@@ -179,7 +179,7 @@ let inline_type_explicit (c : context) x ft at =
 %token SCRIPT REGISTER THREAD WAIT INVOKE GET
 %token ASSERT_MALFORMED ASSERT_INVALID ASSERT_SOFT_INVALID ASSERT_UNLINKABLE
 %token ASSERT_RETURN ASSERT_TRAP ASSERT_EXHAUSTION
-%token NAN ONEOF
+%token NAN EITHER
 %token INPUT OUTPUT
 %token EOF
 
@@ -889,10 +889,6 @@ assertion :
   | LPAR ASSERT_TRAP action STRING RPAR { AssertTrap ($3, $4) @@ at () }
   | LPAR ASSERT_EXHAUSTION action STRING RPAR { AssertExhaustion ($3, $4) @@ at () }
 
-assertion_list :
-  | /* empty */ { [] }
-  | assertion assertion_list { $1 :: $2 }
-
 cmd :
   | action { Action $1 @@ at () }
   | assertion { Assertion $1 @@ at () }
@@ -922,7 +918,7 @@ const_list :
 result :
   | const { LitResult $1 @@ at () }
   | LPAR CONST NAN RPAR { NanResult (nanop $2 ($3 @@ ati 3)) @@ at () }
-  | LPAR ONEOF result result_list RPAR { OneofResult ($3 :: $4) @@ at () }
+  | LPAR EITHER result result_list RPAR { EitherResult ($3 :: $4) @@ at () }
 
 result_list :
   | /* empty */ { [] }
