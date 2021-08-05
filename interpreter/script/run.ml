@@ -250,9 +250,11 @@ let string_of_nan = function
 
 let rec type_of_result r =
   match r.it with
-  | LitResult v -> Values.type_of v.it
-  | NanResult n -> Values.type_of n.it
-  | EitherResult rs -> type_of_result (List.hd rs)
+  | LitResult v -> Some (Values.type_of v.it)
+  | NanResult n -> Some (Values.type_of n.it)
+  | EitherResult rs ->
+    let ts = List.map type_of_result rs in
+    List.fold_left (fun t1 t2 -> if t1 = t2 then t1 else None) (List.hd ts) ts
 
 let rec string_of_result r =
   match r.it with
@@ -269,10 +271,18 @@ let string_of_results = function
   | [r] -> string_of_result r
   | rs -> "[" ^ String.concat " " (List.map string_of_result rs) ^ "]"
 
+let string_of_value_type_opt = function
+  | Some t -> Types.string_of_value_type t
+  | None -> "?"
+
+let string_of_value_type_opts = function
+  | [t] -> string_of_value_type_opt t
+  | ts -> "[" ^ String.concat " " (List.map string_of_value_type_opt ts) ^ "]"
+
 let print_results rs =
   let ts = List.map type_of_result rs in
   Printf.printf "%s : %s\n"
-    (string_of_results rs) (Types.string_of_value_types ts);
+    (string_of_results rs) (string_of_value_type_opts ts);
   flush_all ()
 
 

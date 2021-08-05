@@ -538,7 +538,7 @@ let rec command mode cmd =
   | Thread (x_opt, xs, cmds) ->
     [Node ("thread" ^ var_opt x_opt,
       List.map (fun x -> Node ("shared", [Node ("module " ^ x.it, [])])) xs @
-      List.concat_map (command mode) cmds)
+      Lib.List.concat_map (command mode) cmds)
     ]
   | Wait x_opt -> [Node ("wait" ^ var_opt x_opt, [])]
   | Meta met -> [meta mode met]

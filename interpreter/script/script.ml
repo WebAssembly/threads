@@ -46,7 +46,12 @@ and meta = meta' Source.phrase
 and meta' =
   | Input of var option * string
   | Output of var option * string option
-  | Script of var option * script * script * command list
+  | Script of var option * (* s1 : *) script * (* s2 : *) script * (* q : *) script
+    (* s1 @ s2 is remaining script to run
+     * q is script quote of original commands with inputs expanded (reversed)
+     * s1 contains reduced commands that must not be quoted
+     * s2 contains original commands that still need quoting
+     *)
 
 and script = command list
 
