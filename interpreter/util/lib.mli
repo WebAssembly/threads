@@ -14,6 +14,8 @@ sig
   val table : int -> (int -> 'a) -> 'a list
   val take : int -> 'a list -> 'a list (* raises Failure *)
   val drop : int -> 'a list -> 'a list (* raises Failure *)
+  val split : int -> 'a list -> 'a list * 'a list (* raises Failure *)
+  val extract : int -> 'a list -> 'a list * 'a * 'a list (* raises Failure *)
 
   val last : 'a list -> 'a (* raises Failure *)
   val split_last : 'a list -> 'a list * 'a (* raises Failure *)
@@ -31,6 +33,7 @@ sig
   val nth : 'a list -> int32 -> 'a (* raises Failure *)
   val take : int32 -> 'a list -> 'a list (* raises Failure *)
   val drop : int32 -> 'a list -> 'a list (* raises Failure *)
+  val split : int32 -> 'a list -> 'a list * 'a list (* raises Failure *)
 end
 
 module Array32 :
@@ -61,6 +64,7 @@ sig
   val get : 'a option -> 'a -> 'a
   val map : ('a -> 'b) -> 'a option -> 'b option
   val app : ('a -> unit) -> 'a option -> unit
+  val fold : 'b -> ('a -> 'b) -> 'a option -> 'b
 end
 
 module Int :

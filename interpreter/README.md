@@ -374,8 +374,13 @@ binscript: <cmd>*
 cmd:
   <module>                                   ;; define, validate, and initialize module
   ( register <string> <name>? )              ;; register module for imports
+  ( thread <name>? <shared>* cmd* )          ;; spawn thread
+  ( wait <name> )                            ;; join thread
   <action>                                   ;; perform action and print results
   <assertion>                                ;; assert result of an action
+
+shared:
+  ( shared ( module <name> ) )
 
 module:
   ( module <name>? binary <string>* )        ;; module in binary format (may be malformed)
@@ -394,7 +399,8 @@ assertion:
   ( assert_trap <module> <failure> )         ;; assert module traps on instantiation
 
 result:
-  ( <val_type>.const <numpat> )
+  ( <val_type>.const <numpat> )              ;; numeric result
+  ( either result+ )                         ;; non-deterministic result
 
 numpat:
   <value>                                    ;; literal result

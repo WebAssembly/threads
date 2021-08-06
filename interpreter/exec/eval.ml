@@ -57,15 +57,34 @@ and admin_instr' =
   | Label of int32 * instr list * code
   | Frame of int32 * frame * code
 
-type config =
+type thread =
 {
   frame : frame;
   code : code;
   budget : int;  (* to model stack overflow *)
 }
 
+type config = thread list
+type thread_id = int
+type status = Running | Result of value list | Trap of exn
+
 let frame inst locals = {inst; locals}
-let config inst vs es = {frame = frame inst []; code = vs, es; budget = 300}
+let thread inst vs es = {frame = frame inst []; code = vs, es; budget = 300}
+let empty_thread = thread empty_module_inst [] []
+let empty_config = []
+let spawn (c : config) = List.length c, c @ [empty_thread]
+
+let status (c : config) (n : thread_id) : status =
+  let t = List.nth c n in
+  match t.code with
+  | vs, [] -> Result (List.rev vs)
+  | [], {it = Trapping msg; at} :: _ -> Trap (Trap.Error (at, msg))
+  | _ -> Running
+
+let clear (c : config) (n : thread_id) : config =
+  let ts1, t, ts2 = Lib.List.extract n c in
+  ts1 @ [{t with code = [], []}] @ ts2
+
 
 let plain e = Plain e.it @@ e.at
 
@@ -122,11 +141,12 @@ let check_align addr ty sz at =
  *   v  : value
  *   es : instr list
  *   vs : value stack
+ *   t : thread
  *   c : config
  *)
 
-let rec step (c : config) : config =
-  let {frame; code = vs, es; _} = c in
+let rec step_thread (t : thread) : thread =
+  let {frame; code = vs, es; _} = t in
   let e = List.hd es in
   let vs', es' =
     match e.it, vs with
@@ -355,7 +375,7 @@ let rec step (c : config) : config =
       )
 
     | Trapping msg, vs ->
-      assert false
+      [], [Trapping msg @@ e.at]
 
     | Returning vs', vs ->
       Crash.error e.at "undefined frame"
@@ -379,8 +399,8 @@ let rec step (c : config) : config =
       vs, [Breaking (Int32.sub k 1l, vs0) @@ at]
 
     | Label (n, es0, code'), vs ->
-      let c' = step {c with code = code'} in
-      vs, [Label (n, es0, c'.code) @@ e.at]
+      let t' = step_thread {t with code = code'} in
+      vs, [Label (n, es0, t'.code) @@ e.at]
 
     | Frame (n, frame', (vs', [])), vs ->
       vs' @ vs, []
@@ -392,10 +412,10 @@ let rec step (c : config) : config =
       take n vs0 e.at @ vs, []
 
     | Frame (n, frame', code'), vs ->
-      let c' = step {frame = frame'; code = code'; budget = c.budget - 1} in
-      vs, [Frame (n, c'.frame, c'.code) @@ e.at]
+      let t' = step_thread {frame = frame'; code = code'; budget = t.budget - 1} in
+      vs, [Frame (n, t'.frame, t'.code) @@ e.at]
 
-    | Invoke func, vs when c.budget = 0 ->
+    | Invoke func, vs when t.budget = 0 ->
       Exhaustion.error e.at "call stack exhausted"
 
     | Invoke func, vs ->
@@ -413,37 +433,44 @@ let rec step (c : config) : config =
         try List.rev (f (List.rev args)) @ vs', []
         with Crash (_, msg) -> Crash.error e.at msg
       )
-  in {c with code = vs', es' @ List.tl es}
+  in {t with code = vs', es' @ List.tl es}
 
 
-let rec eval (c : config) : value stack =
-  match c.code with
-  | vs, [] ->
-    vs
+let rec step (c : config) (n : thread_id) : config =
+  let ts1, t, ts2 = Lib.List.extract n c in
+  if snd t.code = [] then
+    step c n
+  else
+    let t' = try step_thread t with Stack_overflow ->
+      Exhaustion.error (List.hd (snd t.code)).at "call stack exhausted"
+    in ts1 @ [t'] @ ts2
 
-  | vs, {it = Trapping msg; at} :: _ ->
-    Trap.error at msg
-
-  | vs, es ->
-    eval (step c)
+let rec eval (c : config ref) (n : thread_id) : value list =
+  match status !c n with
+  | Result vs -> vs
+  | Trap e -> raise e
+  | Running ->
+    let c' = step !c n in
+    c := c'; eval c n
 
 
 (* Functions & Constants *)
 
-let invoke (func : func_inst) (vs : value list) : value list =
+let invoke c n (func : func_inst) (vs : value list) : config =
   let at = match func with Func.AstFunc (_,_, f) -> f.at | _ -> no_region in
   let FuncType (ins, out) = Func.type_of func in
   if List.map Values.type_of vs <> ins then
     Crash.error at "wrong number or types of arguments";
-  let c = config empty_module_inst (List.rev vs) [Invoke func @@ at] in
-  try List.rev (eval c) with Stack_overflow ->
-    Exhaustion.error at "call stack exhausted"
+  let ts1, t, ts2 = Lib.List.extract n c in
+  let vs', es' = t.code in
+  let code = List.rev vs @ vs', (Invoke func @@ at) :: es' in
+  ts1 @ [{t with code}] @ ts2
 
 let eval_const (inst : module_inst) (const : const) : value =
-  let c = config inst [] (List.map plain const.it) in
-  match eval c with
+  let t = thread inst [] (List.map plain const.it) in
+  match eval (ref [t]) 0 with
   | [v] -> v
-  | vs -> Crash.error const.at "wrong number of results on stack"
+  | _ -> Crash.error const.at "wrong number of results on stack"
 
 let i32 (v : value) at =
   match v with
@@ -518,7 +545,7 @@ let add_import (m : module_) (ext : extern) (im : import) (inst : module_inst)
   | ExternMemory mem -> {inst with memories = mem :: inst.memories}
   | ExternGlobal glob -> {inst with globals = glob :: inst.globals}
 
-let init (m : module_) (exts : extern list) : module_inst =
+let init c n (m : module_) (exts : extern list) : module_inst * config =
   let
     { imports; tables; memories; globals; funcs; types;
       exports; elems; data; start
@@ -545,5 +572,5 @@ let init (m : module_) (exts : extern list) : module_inst =
   let init_datas = List.map (init_memory inst) data in
   List.iter (fun f -> f ()) init_elems;
   List.iter (fun f -> f ()) init_datas;
-  Lib.Option.app (fun x -> ignore (invoke (func inst x) [])) start;
-  inst
+  let c' = Lib.Option.fold c (fun x -> invoke c n (func inst x) []) start in
+  inst, c'
