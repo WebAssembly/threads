@@ -436,8 +436,7 @@ For the web embedding, `memory.atomic.notify` is equivalent in behavior to execu
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
 1. Let `int32array` be [`Int32Array`][](`buffer`).
-1. Let `fcount` be `count` if `count` is >= 0, otherwise `∞`.
-1. Let `result` be [`Atomics.notify`][](`int32array`, `address`, `fcount`).
+1. Let `result` be [`Atomics.notify`][](`int32array`, `address`, `count`).
 1. Return `result` converted to an `i32`.
 
 ## Fence operator
