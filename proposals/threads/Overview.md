@@ -400,23 +400,14 @@ For the web embedding, `memory.atomic.wait32` is equivalent in behavior to execu
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
 
-`memory.atomic.wait64` has no equivalent in ECMAScript as it is currently specified, as there is
-no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of a
-64-bit integer. That said, the behavior can be approximated as follows:
+Similarly, `memory.atomic.wait64` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
-1. Let `int64array` be `Int64Array`[](`buffer`), where `Int64Array` is a
-   typed-array constructor that allows 64-bit integer views with an element size
-   of `8`.
+1. Let `int64array` be `BigInt64Array`[](`buffer`)
 1. Let `result` be [`Atomics.wait`][](`int64array`, `address`, `expected`, `timeout` / 1e6),
    where `address`, `expected`, and `timeout` are the operands to the `wait` operator
-   as described above. The [`Atomics.wait`][] operation is modified:
-   1. `ValidateSharedIntegerTypedArray` will fail if the typed-array type is not an
-      `Int64Array`.
-   1. `value` is not converted to an `Int32`, but kept in a 64-bit integer
-      representation.
-   1. `indexedPosition` is (`i` x 8) + `offset`
+   as described above.
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
 
