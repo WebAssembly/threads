@@ -416,9 +416,10 @@ Similarly, `memory.atomic.wait64` is equivalent in behavior to executing the fol
 The notify operator takes two operands: an address operand and a count as an
 unsigned `i32`. The operation will notify as many waiters as are waiting on the
 same effective address, up to the maximum as specified by `count`. The operator
-returns the number of waiters that were woken as an unsigned `i32`. Note that if
-the notify operator is used with an unshared linear memory, the number of
-waiters will always be zero.
+returns the number of waiters that were woken as an unsigned `i32`. Note that
+there is no way to create a waiter on unshared linear memory from within Wasm,
+so if the notify operator is used with an unshared linear memory, the number of
+waiters will always be zero unless the host has created such a waiter.
 
   * `memory.atomic.notify`: notify `count` threads waiting on the given address via `memory.atomic.wait32` or `memory.atomic.wait64`
 
