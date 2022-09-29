@@ -311,6 +311,7 @@ let rec instr e =
     | Convert op -> cvtop op, []
     | MemoryAtomicWait op -> memoryatomicwaitop op, []
     | MemoryAtomicNotify op -> memoryatomicnotifyop op, []
+    | AtomicFence -> "atomic.fence", []
     | AtomicLoad op -> atomicloadop op, []
     | AtomicStore op -> atomicstoreop op, []
     | AtomicRmw (rmwop, op) -> atomicrmwop op rmwop, []

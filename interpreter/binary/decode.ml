@@ -466,6 +466,7 @@ let rec instr s =
     | 0x00 -> let a, o = memop s in memory_atomic_notify a o
     | 0x01 -> let a, o = memop s in memory_atomic_wait32 a o
     | 0x02 -> let a, o = memop s in memory_atomic_wait64 a o
+    | 0x03 -> expect 0x00 s "zero flag expected"; atomic_fence
 
     | 0x10 -> let a, o = memop s in i32_atomic_load a o
     | 0x11 -> let a, o = memop s in i64_atomic_load a o

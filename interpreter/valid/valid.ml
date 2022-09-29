@@ -308,6 +308,9 @@ let rec check_instr (c : context) (e : instr) (s : infer_stack_type) : op_type =
     check_memop c memop (fun sz -> sz) e.at;
     [I32Type; memop.ty; I64Type] --> [I32Type]
 
+  | AtomicFence ->
+    [] --> []
+
   | AtomicLoad memop ->
     check_memop c memop (fun sz -> sz) e.at;
     [I32Type] --> [memop.ty]
