@@ -347,3 +347,11 @@ function assert_return_nan(action) {
         };
     }, "A wast module that must return NaN.");
 }
+
+function thread() {
+  throw new Error("NYI: concurrent tests not supported in synchronous mode");
+}
+
+function wait() {
+  throw new Error("NYI: concurrent tests not supported in synchronous mode");
+}

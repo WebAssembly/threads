@@ -179,19 +179,19 @@ function wait(t) {
 module NameMap = Map.Make(struct type t = Ast.name let compare = compare end)
 module Map = Map.Make(String)
 
-type 'a defs = {mutable env : 'a Map.t; mutable current : int}
+type 'a defs = {mutable env : 'a Map.t; mutable current : int; prefix : string}
 type exports = extern_type NameMap.t
-type context = {modules : exports defs; threads : unit defs}
+type context = {modules : exports defs; threads : string defs}
 
 let exports m : exports =
   List.fold_left
     (fun map exp -> NameMap.add exp.it.name (export_type m exp) map)
     NameMap.empty m.it.exports
 
-let defs () : 'a defs = {env = Map.empty; current = 0}
-let context () : context = {modules = defs (); threads = defs ()}
+let defs (pre : string) : 'a defs = {env = Map.empty; current = 0; prefix = pre}
+let context () : context = {modules = defs "_M"; threads = defs "_T"}
 
-let current_var (defs : 'a defs) = "$" ^ string_of_int defs.current
+let current_var (defs : 'a defs) = "$" ^ defs.prefix ^ string_of_int defs.current
 let of_var_opt (defs : 'a defs) = function
   | None -> current_var defs
   | Some x -> x.it
@@ -444,7 +444,7 @@ let of_assertion c ass =
   | AssertExhaustion (act, _) ->
     of_assertion' c act "assert_exhaustion" [] None
 
-let rec of_command c cmd =
+let rec of_command stem c cmd =
   "\n// " ^ Filename.basename cmd.at.left.file ^
     ":" ^ string_of_int cmd.at.left.line ^ "\n" ^
   match cmd.it with
@@ -467,16 +467,27 @@ let rec of_command c cmd =
   | Assertion ass ->
     of_assertion c ass ^ "\n"
   | Thread (x_opt, xs, cmds) ->
+    if x_opt = None then failwith "NYI: JS printing can't handle anonymous thread commands";
+    let worker_contents = String.concat "" (List.map (of_command stem c) cmds) in
+    bind c.threads x_opt worker_contents;
+    let fname = Filename.remove_extension(stem) ^ of_var_opt c.threads x_opt ^ Filename.extension(stem) in
     "let " ^ current_var c.threads ^
     " = thread([" ^
-    String.concat ", " (List.map (fun x -> "\"" ^ x.it ^ "\"") xs) ^
-    "], function () {" ^
-    String.concat "" (List.map (of_command c) cmds) ^
-    "});\n"
+    String.concat ", " (List.map (fun x -> "[\"" ^ x.it ^ "\", " ^ x.it ^ "]") xs) ^
+    "], " ^ "\"" ^ fname ^ "\"" ^ ");\n" ^
+    (if x_opt = None then "" else
+    "let " ^ of_var_opt c.threads x_opt ^
+    " = " ^ current_var c.threads ^ ";\n")
   | Wait x_opt ->
+    if x_opt = None then failwith "NYI: JS printing can't handle anonymous thread commands";
     "wait(" ^ of_var_opt c.threads x_opt ^ ");\n"
   | Meta _ -> assert false
 
-let of_script scr =
-  (if !Flags.harness then harness else "") ^
-  String.concat "" (List.map (of_command (context ())) scr)
+let of_script stem scr =
+  let ctx = context () in
+  let str = ((if !Flags.harness then harness else "") ^
+            String.concat "" (List.map (of_command stem ctx) scr)) in
+  str,
+    (if not (Map.is_empty (ctx.threads.env)) && !Flags.harness then failwith "NYI: JS printing can't handle thread commands with synchronous harness";
+      ctx.threads.env
+    ) 

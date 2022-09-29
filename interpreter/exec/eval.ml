@@ -334,6 +334,7 @@ let rec step_thread (t : thread) : thread =
       | MemoryAtomicNotify {offset; ty; sz; _}, I32 count :: I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_i32_u i in
+
         (try
           check_align addr ty sz e.at;
           let _ = Memory.load_value mem addr offset ty in

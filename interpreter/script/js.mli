@@ -1,1 +1,1 @@
-val of_script : Script.script -> string
+val of_script : string -> Script.script -> string * (string Map.Make(String).t)

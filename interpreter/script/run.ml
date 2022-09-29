@@ -12,8 +12,9 @@ exception Abort = Abort.Error
 exception Assert = Assert.Error
 exception IO = IO.Error
 
-let trace name = if !Flags.trace then print_endline ("-- " ^ name)
+module StringMap = Map.Make(String)
 
+let trace name = if !Flags.trace then print_endline ("-- " ^ name)
 
 (* File types *)
 
@@ -68,10 +69,19 @@ let create_script_file mode file get_script _ =
 
 let create_js_file file get_script _ =
   trace ("Converting (" ^ file ^ ")...");
-  let js = Js.of_script (get_script ()) in
+  let (js,js_workers) = Js.of_script file (get_script ()) in
+  StringMap.iter
+    (fun key scr ->
+       let fname = Filename.remove_extension(file) ^ key ^ Filename.extension(file) in
+       let oc = open_out (fname) in
+       try
+         trace ("Writing (" ^ fname ^ ")...");
+         output_string oc scr;
+         close_out oc
+       with exn -> close_out oc; raise exn) js_workers;
   let oc = open_out file in
   try
-    trace "Writing...";
+    trace ("Writing (" ^ file ^ ")...");
     output_string oc js;
     close_out oc
   with exn -> close_out oc; raise exn
