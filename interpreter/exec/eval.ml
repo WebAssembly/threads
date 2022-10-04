@@ -133,7 +133,7 @@ let check_align addr ty sz at =
     Trap.error at "unaligned atomic memory access"
 
 let check_shared mem at =
-  if (shared_memory_type (Memory.type_of mem)) != Shared then
+  if shared_memory_type (Memory.type_of mem) <> Shared then
     Trap.error at "expected shared memory"
 
 
