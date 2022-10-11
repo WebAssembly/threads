@@ -259,6 +259,7 @@ rule token = parse
         intop ("i" ^ sz)
           (memory_atomic_wait32 (opt a 2))
           (memory_atomic_wait64 (opt a 3)) o) }
+  | "atomic.fence" { ATOMIC_FENCE }
   | (ixx as t)".atomic.load"
     { ATOMIC_LOAD (fun a o ->
         intop t (i32_atomic_load (opt a 2)) (i64_atomic_load (opt a 3)) o) }

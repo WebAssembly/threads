@@ -132,6 +132,10 @@ let check_align addr ty sz at =
   if not (Memory.is_aligned addr ty sz) then
     Trap.error at "unaligned atomic memory access"
 
+let check_shared mem at =
+  if shared_memory_type (Memory.type_of mem) <> Shared then
+    Trap.error at "expected shared memory"
+
 
 (* Evaluation *)
 
@@ -319,6 +323,7 @@ let rec step_thread (t : thread) : thread =
         (try
           assert (sz = None);
           check_align addr ty sz e.at;
+          check_shared mem e.at;
           let v = Memory.load_value mem addr offset ty in
           if v = ve then
             assert false  (* TODO *)
@@ -326,11 +331,20 @@ let rec step_thread (t : thread) : thread =
             I32 1l :: vs', []  (* Not equal *)
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
 
-      | MemoryAtomicNotify x, I32 count :: I32 i :: vs' ->
+      | MemoryAtomicNotify {offset; ty; sz; _}, I32 count :: I32 i :: vs' ->
+        let mem = memory frame.inst (0l @@ e.at) in
+        let addr = I64_convert.extend_i32_u i in
+        (try
+          check_align addr ty sz e.at;
+          let _ = Memory.load_value mem addr offset ty in
           if count = 0l then
             I32 0l :: vs', []  (* Trivial case waking 0 waiters *)
           else
             assert false  (* TODO *)
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+
+      | AtomicFence, vs ->
+        vs, []
 
       | MemorySize, vs ->
         let mem = memory frame.inst (0l @@ e.at) in
