@@ -241,6 +241,7 @@ Lexically, an |Toffset| or |Talign| phrase is considered a single :ref:`keyword 
 Atomic Memory Instructions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. _text-atomic-fence:
 .. _text-atomic-wait:
 .. _text-atomic-notify:
 .. _text-atomic-load:
@@ -258,7 +259,8 @@ The offset immediate to atomic memory instructions is optional, and defaults to
    \production{instruction} & \Tplaininstr_I &::=& \dots \phantom{thisshouldbeenoughnowitissee} && \phantom{thisshouldbeenough} \\ &&|&
      \text{memory.atomic.notify}~~m{:}\Tmemarg_4 &\Rightarrow& \MEMORYATOMICNOTIFY~m \\ &&|&
      \text{memory.atomic.wait32}~~m{:}\Tmemarg_4 &\Rightarrow& \MEMORYATOMICWAIT\K{32}~m \\ &&|&
-     \text{memory.atomic.wait64}~~m{:}\Tmemarg_8 &\Rightarrow& \MEMORYATOMICWAIT\K{64}~m \\
+     \text{memory.atomic.wait64}~~m{:}\Tmemarg_8 &\Rightarrow& \MEMORYATOMICWAIT\K{64}~m \\ &&|&
+     \text{memory.atomic.fence} &\Rightarrow& \MEMORYATOMICFENCE \\
    \end{array}
 
 .. math::

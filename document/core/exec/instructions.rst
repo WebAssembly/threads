@@ -1195,6 +1195,13 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \end{array}
    \end{array}
 
+.. _exec-memory.atomic.fence:
+
+:math:`\MEMORYATOMICFENCE`
+..........................
+
+.. todo::
+   Add semantics for fence.
 
 .. index:: control instructions, structured control, label, block, branch, result type, label index, function index, type index, vector, address, table address, table instance, store, frame
    pair: execution; instruction

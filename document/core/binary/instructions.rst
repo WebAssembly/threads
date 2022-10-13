@@ -185,6 +185,7 @@ Atomic Memory Instructions
 
 Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is encoded with a different byte code. Loads, stores and RMW instructions are followed by the encoding of their |memarg| immediate.
 
+.. _binary-atomic-fence:
 .. _binary-atomic-wait:
 .. _binary-atomic-notify:
 .. _binary-atomic-load:
@@ -200,6 +201,7 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
      \hex{FE}~\hex{00}~~m{:}\Bmemarg &\Rightarrow& \MEMORYATOMICNOTIFY~m \\ &&|&
      \hex{FE}~\hex{01}~~m{:}\Bmemarg &\Rightarrow& \MEMORYATOMICWAIT\K{32}~m \\ &&|&
      \hex{FE}~\hex{02}~~m{:}\Bmemarg &\Rightarrow& \MEMORYATOMICWAIT\K{64}~m \\
+     \hex{FE}~\hex{03}~\hex{00} &\Rightarrow& \MEMORYATOMICFENCE \\
    \end{array}
 
 
