@@ -395,6 +395,7 @@
 .. |ATOMICRMW| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.rmw}}
 .. |MEMORYATOMICWAIT| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.wait}}
 .. |MEMORYATOMICNOTIFY| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.notify}}
+.. |MEMORYATOMICFENCE| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.fence}}
 
 
 .. Instructions, non-terminals

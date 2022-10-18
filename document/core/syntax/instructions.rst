@@ -308,7 +308,8 @@ Instructions in this group are concerned with accessing :ref:`linear memory <syn
      \K{i}\X{nn}\K{.}\ATOMICRMW\K{16.}\ATCMPXCHG\K{\_u}~\memarg \\&&|&
      \K{i64.}\ATOMICRMW\K{32.}\ATCMPXCHG\K{\_u}~\memarg \\&&|&
      \MEMORYATOMICNOTIFY~\memarg \\&&|&
-     \MEMORYATOMICWAIT\X{nn}~\memarg \\
+     \MEMORYATOMICWAIT\X{nn}~\memarg \\&&|&
+     \MEMORYATOMICFENCE \\
    \end{array}
 
 Memory is accessed atomically using the |ATOMICLOAD|, |ATOMICSTORE|, and
@@ -325,12 +326,13 @@ The |ATCMPXCHG| operator is similar, but only performs this action conditionally
 if the read value is equal to a provided comparison argument.
 All other atomic operators have the same behavior as the :ref:`binary operator <syntax-ibinop>` of the same name.
 
-The |MEMORYATOMICWAIT| and |MEMORYATOMICNOTIFY| instructions provide primitive
+The |MEMORYATOMICWAIT|, |MEMORYATOMICNOTIFY|, and |MEMORYATOMICFENCE| instructions provide primitive
 synchronization between :ref:`threads <syntax-thread>`.
 The |MEMORYATOMICWAIT| instructions atomically load a value from the calculated effective address and compare it to an expected value.
 If they are equal, the thread is then suspended until a given timeout expires or another thread wakes it.
 The |MEMORYATOMICNOTIFY| instruction wakes threads that are waiting on a given
 address, up to a given maximum.
+The |MEMORYATOMICFENCE| instruction takes no operands, and returns nothing. It is intended to preserve the synchronization guarantees of the fence operators of higher-level languages. Unlike other atomic operators, it does not target a particular linear memory.
 
 
 .. index:: ! control instruction, ! structured control, ! label, ! block, ! block type, ! branch, ! unwinding, result type, label index, function index, type index, vector, trap, function, table, function type, value type, type index

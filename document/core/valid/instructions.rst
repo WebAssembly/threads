@@ -639,6 +639,21 @@ Atomic Memory Instructions
      C \vdash \MEMORYATOMICWAIT{N}~\memarg : [\I32~\K{i}{N}~\I64] \to [\I32]
    }
 
+.. _valid-memory.atomic.fence:
+
+:math:`\MEMORYATOMICFENCE`
+..........................
+
+* The instruction is valid with type :math:`[] \to []`.
+
+.. math::
+   \frac{
+   }{
+     C \vdashinstr \MEMORYATOMICFENCE : [] \to []
+   }
+
+.. note::
+   The |MEMORYATOMICFENCE| instruction may occur in modules which declare no memory without causing a validation error.
 
 .. index:: control instructions, structured control, label, block, branch, block type, result type, label index, function index, type index, vector, polymorphism, context
    pair: validation; instruction
