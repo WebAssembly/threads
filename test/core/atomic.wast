@@ -437,69 +437,6 @@
 (assert_trap (invoke "i64.atomic.rmw16.cmpxchg_u" (i32.const 1) (i64.const 0) (i64.const 0)) "unaligned atomic")
 (assert_trap (invoke "i64.atomic.rmw32.cmpxchg_u" (i32.const 1) (i64.const 0) (i64.const 0)) "unaligned atomic")
 
-;; wait/notify
-(module
-  (memory 1 1 shared)
-
-  (func (export "init") (param $value i64) (i64.store (i32.const 0) (local.get $value)))
-
-  (func (export "memory.atomic.notify") (param $addr i32) (param $count i32) (result i32)
-      (memory.atomic.notify (local.get 0) (local.get 1)))
-  (func (export "memory.atomic.wait32") (param $addr i32) (param $expected i32) (param $timeout i64) (result i32)
-      (memory.atomic.wait32 (local.get 0) (local.get 1) (local.get 2)))
-  (func (export "memory.atomic.wait64") (param $addr i32) (param $expected i64) (param $timeout i64) (result i32)
-      (memory.atomic.wait64 (local.get 0) (local.get 1) (local.get 2)))
-)
-
-(invoke "init" (i64.const 0xffffffffffff))
-
-;; wait returns immediately if values do not match
-(assert_return (invoke "memory.atomic.wait32" (i32.const 0) (i32.const 0) (i64.const 0)) (i32.const 1))
-(assert_return (invoke "memory.atomic.wait64" (i32.const 0) (i64.const 0) (i64.const 0)) (i32.const 1))
-
-;; notify always returns
-(assert_return (invoke "memory.atomic.notify" (i32.const 0) (i32.const 0)) (i32.const 0))
-
-;; OOB wait and notify always trap
-(assert_trap (invoke "memory.atomic.wait32" (i32.const 65536) (i32.const 0) (i64.const 0)) "out of bounds memory access")
-(assert_trap (invoke "memory.atomic.wait64" (i32.const 65536) (i64.const 0) (i64.const 0)) "out of bounds memory access")
-
-;; in particular, notify always traps even if waking 0 threads
-(assert_trap (invoke "memory.atomic.notify" (i32.const 65536) (i32.const 0)) "out of bounds memory access")
-
-;; similarly, unaligned wait and notify always trap
-(assert_trap (invoke "memory.atomic.wait32" (i32.const 65531) (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "memory.atomic.wait64" (i32.const 65524) (i64.const 0) (i64.const 0)) "unaligned atomic")
-
-(assert_trap (invoke "memory.atomic.notify" (i32.const 65531) (i32.const 0)) "unaligned atomic")
-
-;; atomic.wait traps on unshared memory even if it wouldn't block
-(module
-  (memory 1 1)
-
-  (func (export "init") (param $value i64) (i64.store (i32.const 0) (local.get $value)))
-
-  (func (export "memory.atomic.notify") (param $addr i32) (param $count i32) (result i32)
-      (memory.atomic.notify (local.get 0) (local.get 1)))
-  (func (export "memory.atomic.wait32") (param $addr i32) (param $expected i32) (param $timeout i64) (result i32)
-      (memory.atomic.wait32 (local.get 0) (local.get 1) (local.get 2)))
-  (func (export "memory.atomic.wait64") (param $addr i32) (param $expected i64) (param $timeout i64) (result i32)
-      (memory.atomic.wait64 (local.get 0) (local.get 1) (local.get 2)))
-)
-
-(invoke "init" (i64.const 0xffffffffffff))
-
-(assert_trap (invoke "memory.atomic.wait32" (i32.const 0) (i32.const 0) (i64.const 0)) "expected shared memory")
-(assert_trap (invoke "memory.atomic.wait64" (i32.const 0) (i64.const 0) (i64.const 0)) "expected shared memory")
-
-;; notify still works
-(assert_return (invoke "memory.atomic.notify" (i32.const 0) (i32.const 0)) (i32.const 0))
-
-;; OOB and unaligned notify still trap
-(assert_trap (invoke "memory.atomic.notify" (i32.const 65536) (i32.const 0)) "out of bounds memory access")
-(assert_trap (invoke "memory.atomic.notify" (i32.const 65531) (i32.const 0)) "unaligned atomic")
-
-
 ;; unshared memory is OK
 (module
   (memory 1 1)

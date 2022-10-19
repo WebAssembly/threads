@@ -34,6 +34,8 @@ let numeric_error at = function
        string_of_int i ^ ", got " ^ Types.string_of_value_type (type_of v))
   | exn -> raise exn
 
+(* Must be positive and non-zero *)
+let timeout_epsilon = 1000000L
 
 (* Administrative Expressions & Configurations *)
 
@@ -57,11 +59,19 @@ and admin_instr' =
   | Label of int32 * instr list * code
   | Frame of int32 * frame * code
 
+type suspend_signal =
+    No_signal
+    (* memory, cell index, target timestamp *)
+  | Wait_signal of memory_inst * Memory.address * float
+    (* memory, cell index, number of threads to wake *)
+  | Notify_signal of memory_inst * Memory.address * int32
+
 type thread =
 {
   frame : frame;
   code : code;
   budget : int;  (* to model stack overflow *)
+  suspend_signal : suspend_signal
 }
 
 type config = thread list
@@ -69,7 +79,7 @@ type thread_id = int
 type status = Running | Result of value list | Trap of exn
 
 let frame inst locals = {inst; locals}
-let thread inst vs es = {frame = frame inst []; code = vs, es; budget = 300}
+let thread inst vs es = {frame = frame inst []; code = vs, es; budget = 300; suspend_signal = No_signal}
 let empty_thread = thread empty_module_inst [] []
 let empty_config = []
 let spawn (c : config) = List.length c, c @ [empty_thread]
@@ -150,305 +160,348 @@ let check_shared mem at =
  *)
 
 let rec step_thread (t : thread) : thread =
-  let {frame; code = vs, es; _} = t in
-  let e = List.hd es in
-  let vs', es' =
-    match e.it, vs with
-    | Plain e', vs ->
-      (match e', vs with
-      | Unreachable, vs ->
-        vs, [Trapping "unreachable executed" @@ e.at]
-
-      | Nop, vs ->
-        vs, []
-
-      | Block (bt, es'), vs ->
-        let FuncType (ts1, ts2) = block_type frame.inst bt in
-        let n1 = Lib.List32.length ts1 in
-        let n2 = Lib.List32.length ts2 in
-        let args, vs' = take n1 vs e.at, drop n1 vs e.at in
-        vs', [Label (n2, [], (args, List.map plain es')) @@ e.at]
-
-      | Loop (bt, es'), vs ->
-        let FuncType (ts1, ts2) = block_type frame.inst bt in
-        let n1 = Lib.List32.length ts1 in
-        let args, vs' = take n1 vs e.at, drop n1 vs e.at in
-        vs', [Label (n1, [e' @@ e.at], (args, List.map plain es')) @@ e.at]
-
-      | If (bt, es1, es2), I32 0l :: vs' ->
-        vs', [Plain (Block (bt, es2)) @@ e.at]
-
-      | If (bt, es1, es2), I32 i :: vs' ->
-        vs', [Plain (Block (bt, es1)) @@ e.at]
-
-      | Br x, vs ->
-        [], [Breaking (x.it, vs) @@ e.at]
-
-      | BrIf x, I32 0l :: vs' ->
-        vs', []
-
-      | BrIf x, I32 i :: vs' ->
-        vs', [Plain (Br x) @@ e.at]
-
-      | BrTable (xs, x), I32 i :: vs' when I32.ge_u i (Lib.List32.length xs) ->
-        vs', [Plain (Br x) @@ e.at]
-
-      | BrTable (xs, x), I32 i :: vs' ->
-        vs', [Plain (Br (Lib.List32.nth xs i)) @@ e.at]
-
-      | Return, vs ->
-        [], [Returning vs @@ e.at]
-
-      | Call x, vs ->
-        vs, [Invoke (func frame.inst x) @@ e.at]
-
-      | CallIndirect x, I32 i :: vs ->
-        let func = func_elem frame.inst (0l @@ e.at) i e.at in
-        if type_ frame.inst x <> Func.type_of func then
-          vs, [Trapping "indirect call type mismatch" @@ e.at]
-        else
-          vs, [Invoke func @@ e.at]
-
-      | Drop, v :: vs' ->
-        vs', []
-
-      | Select, I32 0l :: v2 :: v1 :: vs' ->
-        v2 :: vs', []
-
-      | Select, I32 i :: v2 :: v1 :: vs' ->
-        v1 :: vs', []
-
-      | LocalGet x, vs ->
-        !(local frame x) :: vs, []
-
-      | LocalSet x, v :: vs' ->
-        local frame x := v;
-        vs', []
-
-      | LocalTee x, v :: vs' ->
-        local frame x := v;
-        v :: vs', []
-
-      | GlobalGet x, vs ->
-        Global.load (global frame.inst x) :: vs, []
-
-      | GlobalSet x, v :: vs' ->
-        (try Global.store (global frame.inst x) v; vs', []
-        with Global.NotMutable -> Crash.error e.at "write to immutable global"
-           | Global.Type -> Crash.error e.at "type mismatch at global write")
-
-      | Load {offset; ty; sz; _}, I32 i :: vs' ->
-        let mem = memory frame.inst (0l @@ e.at) in
-        let addr = I64_convert.extend_i32_u i in
-        (try
-          let v =
-            match sz with
-            | None -> Memory.load_value mem addr offset ty
-            | Some (sz, ext) -> Memory.load_packed sz ext mem addr offset ty
-          in v :: vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
-
-      | Store {offset; sz; _}, v :: I32 i :: vs' ->
-        let mem = memory frame.inst (0l @@ e.at) in
-        let addr = I64_convert.extend_i32_u i in
-        (try
-          (match sz with
-          | None -> Memory.store_value mem addr offset v
-          | Some sz -> Memory.store_packed sz mem addr offset v
-          );
-          vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
-
-      | AtomicLoad {offset; ty; sz; _}, I32 i :: vs' ->
-        let mem = memory frame.inst (0l @@ e.at) in
-        let addr = I64_convert.extend_i32_u i in
-        (try
-          check_align addr ty sz e.at;
-          let v =
-            match sz with
-            | None -> Memory.load_value mem addr offset ty
-            | Some sz -> Memory.load_packed sz ZX mem addr offset ty
-          in v :: vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
-
-      | AtomicStore {offset; ty; sz; _}, v :: I32 i :: vs' ->
-        let mem = memory frame.inst (0l @@ e.at) in
-        let addr = I64_convert.extend_i32_u i in
-        (try
-          check_align addr ty sz e.at;
-          (match sz with
-          | None -> Memory.store_value mem addr offset v
-          | Some sz -> Memory.store_packed sz mem addr offset v
-          );
-          vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
-
-      | AtomicRmw (rmwop, {offset; ty; sz; _}), v :: I32 i :: vs' ->
-        let mem = memory frame.inst (0l @@ e.at) in
-        let addr = I64_convert.extend_i32_u i in
-        (try
-          check_align addr ty sz e.at;
-          let v1 =
-            match sz with
-            | None -> Memory.load_value mem addr offset ty
-            | Some sz -> Memory.load_packed sz ZX mem addr offset ty
-          in let v2 = Eval_numeric.eval_rmwop rmwop v1 v
-          in (match sz with
-          | None -> Memory.store_value mem addr offset v2
-          | Some sz -> Memory.store_packed sz mem addr offset v2
-          );
-          v1 :: vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
-
-      | AtomicRmwCmpXchg {offset; ty; sz; _}, vn :: ve :: I32 i :: vs' ->
-        let mem = memory frame.inst (0l @@ e.at) in
-        let addr = I64_convert.extend_i32_u i in
-        (try
-          check_align addr ty sz e.at;
-          let v1 =
-            match sz with
-            | None -> Memory.load_value mem addr offset ty
-            | Some sz -> Memory.load_packed sz ZX mem addr offset ty
-          in (if v1 = ve then
-                match sz with
-                | None -> Memory.store_value mem addr offset vn
-                | Some sz -> Memory.store_packed sz mem addr offset vn
-          );
-          v1 :: vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
-
-      | MemoryAtomicWait {offset; ty; sz; _}, I64 timeout :: ve :: I32 i :: vs' ->
-        let mem = memory frame.inst (0l @@ e.at) in
-        let addr = I64_convert.extend_i32_u i in
-        (try
-          assert (sz = None);
-          check_align addr ty sz e.at;
-          check_shared mem e.at;
-          let v = Memory.load_value mem addr offset ty in
-          if v = ve then
-            assert false  (* TODO *)
+  let {frame; code = vs, es; budget; suspend_signal} = t in
+  match suspend_signal with
+  (* TODO: meaningful timestamp handling *)
+  | Wait_signal _ -> t
+  (* notify signal should have been handled and cleared already *)
+  | Notify_signal _ -> assert false
+  | No_signal ->
+    let e = List.hd es in
+    let vs', es', susp_signal =
+      match e.it, vs with
+      | Plain e', vs ->
+        (match e', vs with
+        | Unreachable, vs ->
+          vs, [Trapping "unreachable executed" @@ e.at], No_signal
+  
+        | Nop, vs ->
+          vs, [], No_signal
+  
+        | Block (bt, es'), vs ->
+          let FuncType (ts1, ts2) = block_type frame.inst bt in
+          let n1 = Lib.List32.length ts1 in
+          let n2 = Lib.List32.length ts2 in
+          let args, vs' = take n1 vs e.at, drop n1 vs e.at in
+          vs', [Label (n2, [], (args, List.map plain es')) @@ e.at], No_signal
+  
+        | Loop (bt, es'), vs ->
+          let FuncType (ts1, ts2) = block_type frame.inst bt in
+          let n1 = Lib.List32.length ts1 in
+          let args, vs' = take n1 vs e.at, drop n1 vs e.at in
+          vs', [Label (n1, [e' @@ e.at], (args, List.map plain es')) @@ e.at], No_signal
+  
+        | If (bt, es1, es2), I32 0l :: vs' ->
+          vs', [Plain (Block (bt, es2)) @@ e.at], No_signal
+  
+        | If (bt, es1, es2), I32 i :: vs' ->
+          vs', [Plain (Block (bt, es1)) @@ e.at], No_signal
+  
+        | Br x, vs ->
+          [], [Breaking (x.it, vs) @@ e.at], No_signal
+  
+        | BrIf x, I32 0l :: vs' ->
+          vs', [], No_signal
+  
+        | BrIf x, I32 i :: vs' ->
+          vs', [Plain (Br x) @@ e.at], No_signal
+  
+        | BrTable (xs, x), I32 i :: vs' when I32.ge_u i (Lib.List32.length xs) ->
+          vs', [Plain (Br x) @@ e.at], No_signal
+  
+        | BrTable (xs, x), I32 i :: vs' ->
+          vs', [Plain (Br (Lib.List32.nth xs i)) @@ e.at], No_signal
+  
+        | Return, vs ->
+          [], [Returning vs @@ e.at], No_signal
+  
+        | Call x, vs ->
+          vs, [Invoke (func frame.inst x) @@ e.at], No_signal
+  
+        | CallIndirect x, I32 i :: vs ->
+          let func = func_elem frame.inst (0l @@ e.at) i e.at in
+          if type_ frame.inst x <> Func.type_of func then
+            vs, [Trapping "indirect call type mismatch" @@ e.at], No_signal
           else
-            I32 1l :: vs', []  (* Not equal *)
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+            vs, [Invoke func @@ e.at], No_signal
+  
+        | Drop, v :: vs' ->
+          vs', [], No_signal
+  
+        | Select, I32 0l :: v2 :: v1 :: vs' ->
+          v2 :: vs', [], No_signal
+  
+        | Select, I32 i :: v2 :: v1 :: vs' ->
+          v1 :: vs', [], No_signal
+  
+        | LocalGet x, vs ->
+          !(local frame x) :: vs, [], No_signal
+  
+        | LocalSet x, v :: vs' ->
+          local frame x := v;
+          vs', [], No_signal
+  
+        | LocalTee x, v :: vs' ->
+          local frame x := v;
+          v :: vs', [], No_signal
+  
+        | GlobalGet x, vs ->
+          Global.load (global frame.inst x) :: vs, [], No_signal
+  
+        | GlobalSet x, v :: vs' ->
+          (try Global.store (global frame.inst x) v; vs', [], No_signal
+          with Global.NotMutable -> Crash.error e.at "write to immutable global"
+             | Global.Type -> Crash.error e.at "type mismatch at global write")
+  
+        | Load {offset; ty; sz; _}, I32 i :: vs' ->
+          let mem = memory frame.inst (0l @@ e.at) in
+          let addr = I64_convert.extend_i32_u i in
+          (try
+            let v =
+              match sz with
+              | None -> Memory.load_value mem addr offset ty
+              | Some (sz, ext) -> Memory.load_packed sz ext mem addr offset ty
+            in v :: vs', [], No_signal
+          with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], No_signal)
+  
+        | Store {offset; sz; _}, v :: I32 i :: vs' ->
+          let mem = memory frame.inst (0l @@ e.at) in
+          let addr = I64_convert.extend_i32_u i in
+          (try
+            (match sz with
+            | None -> Memory.store_value mem addr offset v
+            | Some sz -> Memory.store_packed sz mem addr offset v
+            );
+            vs', [], No_signal
+          with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], No_signal);
+  
+        | AtomicLoad {offset; ty; sz; _}, I32 i :: vs' ->
+          let mem = memory frame.inst (0l @@ e.at) in
+          let addr = I64_convert.extend_i32_u i in
+          (try
+            check_align addr ty sz e.at;
+            let v =
+              match sz with
+              | None -> Memory.load_value mem addr offset ty
+              | Some sz -> Memory.load_packed sz ZX mem addr offset ty
+            in v :: vs', [], No_signal
+          with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], No_signal)
+  
+        | AtomicStore {offset; ty; sz; _}, v :: I32 i :: vs' ->
+          let mem = memory frame.inst (0l @@ e.at) in
+          let addr = I64_convert.extend_i32_u i in
+          (try
+            check_align addr ty sz e.at;
+            (match sz with
+            | None -> Memory.store_value mem addr offset v
+            | Some sz -> Memory.store_packed sz mem addr offset v
+            );
+            vs', [], No_signal
+          with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], No_signal);
+  
+        | AtomicRmw (rmwop, {offset; ty; sz; _}), v :: I32 i :: vs' ->
+          let mem = memory frame.inst (0l @@ e.at) in
+          let addr = I64_convert.extend_i32_u i in
+          (try
+            check_align addr ty sz e.at;
+            let v1 =
+              match sz with
+              | None -> Memory.load_value mem addr offset ty
+              | Some sz -> Memory.load_packed sz ZX mem addr offset ty
+            in let v2 = Eval_numeric.eval_rmwop rmwop v1 v
+            in (match sz with
+            | None -> Memory.store_value mem addr offset v2
+            | Some sz -> Memory.store_packed sz mem addr offset v2
+            );
+            v1 :: vs', [], No_signal
+          with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], No_signal)
+  
+        | AtomicRmwCmpXchg {offset; ty; sz; _}, vn :: ve :: I32 i :: vs' ->
+          let mem = memory frame.inst (0l @@ e.at) in
+          let addr = I64_convert.extend_i32_u i in
+          (try
+            check_align addr ty sz e.at;
+            let v1 =
+              match sz with
+              | None -> Memory.load_value mem addr offset ty
+              | Some sz -> Memory.load_packed sz ZX mem addr offset ty
+            in (if v1 = ve then
+                  match sz with
+                  | None -> Memory.store_value mem addr offset vn
+                  | Some sz -> Memory.store_packed sz mem addr offset vn
+            );
+            v1 :: vs', [], No_signal
+          with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], No_signal);
+  
+        | MemoryAtomicWait {offset; ty; sz; _}, I64 timeout :: ve :: I32 i :: vs' ->
+          let mem = memory frame.inst (0l @@ e.at) in
+          let addr = I64_convert.extend_i32_u i in
+          (try
+            assert (sz = None);
+            check_align addr ty sz e.at;
+            check_shared mem e.at;
+            let v = Memory.load_value mem addr offset ty in
+            if v = ve then
+              if timeout >= 0L && timeout < timeout_epsilon then
+                I32 2l :: vs', [], No_signal (* Treat as though wait timed out immediately *)
+              else
+                (* TODO: meaningful timestamp handling *)
+                vs', [], (Wait_signal (mem, addr, 0.))
+            else
+              I32 1l :: vs', [], No_signal  (* Not equal *)
+          with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], No_signal)
+  
+        | MemoryAtomicNotify {offset; ty; sz; _}, I32 count :: I32 i :: vs' ->
+          let mem = memory frame.inst (0l @@ e.at) in
+          let addr = I64_convert.extend_i32_u i in
+          (try
+            check_align addr ty sz e.at;
+            let _ = Memory.load_value mem addr offset ty in
+            if count = 0l then
+              I32 0l :: vs', [], No_signal  (* Trivial case waking 0 waiters *)
+            else
+              vs', [], (Notify_signal (mem, addr, count))
+          with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], No_signal)
+  
+        | AtomicFence, vs ->
+          vs, [], No_signal
+  
+        | MemorySize, vs ->
+          let mem = memory frame.inst (0l @@ e.at) in
+          I32 (Memory.size mem) :: vs, [], No_signal
+  
+        | MemoryGrow, I32 delta :: vs' ->
+          let mem = memory frame.inst (0l @@ e.at) in
+          let old_size = Memory.size mem in
+          let result =
+            try Memory.grow mem delta; old_size
+            with Memory.SizeOverflow | Memory.SizeLimit | Memory.OutOfMemory -> -1l
+          in I32 result :: vs', [], No_signal
+  
+        | Const v, vs ->
+          v.it :: vs, [], No_signal
+  
+        | Test testop, v :: vs' ->
+          (try value_of_bool (Eval_numeric.eval_testop testop v) :: vs', [], No_signal
+          with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at], No_signal)
+  
+        | Compare relop, v2 :: v1 :: vs' ->
+          (try value_of_bool (Eval_numeric.eval_relop relop v1 v2) :: vs', [], No_signal
+          with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at], No_signal)
+  
+        | Unary unop, v :: vs' ->
+          (try Eval_numeric.eval_unop unop v :: vs', [], No_signal
+          with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at], No_signal)
+  
+        | Binary binop, v2 :: v1 :: vs' ->
+          (try Eval_numeric.eval_binop binop v1 v2 :: vs', [], No_signal
+          with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at], No_signal)
+  
+        | Convert cvtop, v :: vs' ->
+          (try Eval_numeric.eval_cvtop cvtop v :: vs', [], No_signal
+          with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at], No_signal)
+  
+        | _ ->
+          let s1 = string_of_values (List.rev vs) in
+          let s2 = string_of_value_types (List.map type_of (List.rev vs)) in
+          Crash.error e.at
+            ("missing or ill-typed operand on stack (" ^ s1 ^ " : " ^ s2 ^ ")")
+        )
+  
+      | Trapping msg, vs ->
+        [], [Trapping msg @@ e.at], No_signal
+  
+      | Returning vs', vs ->
+        Crash.error e.at "undefined frame"
+  
+      | Breaking (k, vs'), vs ->
+        Crash.error e.at "undefined label"
+  
+      | Label (n, es0, (vs', [])), vs ->
+        vs' @ vs, [], No_signal
+  
+      | Label (n, es0, (vs', {it = Trapping msg; at} :: es')), vs ->
+        vs, [Trapping msg @@ at], No_signal
+  
+      | Label (n, es0, (vs', {it = Returning vs0; at} :: es')), vs ->
+        vs, [Returning vs0 @@ at], No_signal
+  
+      | Label (n, es0, (vs', {it = Breaking (0l, vs0); at} :: es')), vs ->
+        take n vs0 e.at @ vs, List.map plain es0, No_signal
+  
+      | Label (n, es0, (vs', {it = Breaking (k, vs0); at} :: es')), vs ->
+        vs, [Breaking (Int32.sub k 1l, vs0) @@ at], No_signal
+  
+      | Label (n, es0, code'), vs ->
+        let t' = step_thread {t with code = code'} in
+        vs, [Label (n, es0, t'.code) @@ e.at], t'.suspend_signal
+  
+      | Frame (n, frame', (vs', [])), vs ->
+        vs' @ vs, [], No_signal
+  
+      | Frame (n, frame', (vs', {it = Trapping msg; at} :: es')), vs ->
+        vs, [Trapping msg @@ at], No_signal
+  
+      | Frame (n, frame', (vs', {it = Returning vs0; at} :: es')), vs ->
+        take n vs0 e.at @ vs, [], No_signal
+  
+      | Frame (n, frame', code'), vs ->
+        let t' = step_thread {frame = frame'; code = code'; budget = t.budget - 1; suspend_signal = t.suspend_signal} in
+        vs, [Frame (n, t'.frame, t'.code) @@ e.at], t'.suspend_signal
+  
+      | Invoke func, vs when t.budget = 0 ->
+        Exhaustion.error e.at "call stack exhausted"
+  
+      | Invoke func, vs ->
+        let FuncType (ins, out) = func_type_of func in
+        let n1, n2 = Lib.List32.length ins, Lib.List32.length out in
+        let args, vs' = take n1 vs e.at, drop n1 vs e.at in
+        (match func with
+        | Func.AstFunc (t, inst', f) ->
+          let locals' = List.rev args @ List.map default_value f.it.locals in
+          let frame' = {inst = !inst'; locals = List.map ref locals'} in
+          let instr' = [Label (n2, [], ([], List.map plain f.it.body)) @@ f.at] in
+          vs', [Frame (n2, frame', ([], instr')) @@ e.at], No_signal
+  
+        | Func.HostFunc (t, f) ->
+          try List.rev (f (List.rev args)) @ vs', [], No_signal
+          with Crash (_, msg) -> Crash.error e.at msg
+        )
+    in {t with code = vs', es' @ List.tl es; suspend_signal = susp_signal}
 
-      | MemoryAtomicNotify {offset; ty; sz; _}, I32 count :: I32 i :: vs' ->
-        let mem = memory frame.inst (0l @@ e.at) in
-        let addr = I64_convert.extend_i32_u i in
-        (try
-          check_align addr ty sz e.at;
-          let _ = Memory.load_value mem addr offset ty in
-          if count = 0l then
-            I32 0l :: vs', []  (* Trivial case waking 0 waiters *)
-          else
-            assert false  (* TODO *)
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+let rec push_to_inner_stack (c : code) (v : value) : code =
+  let vs, es = c in
+  match es with
+  | {it = Label (n, es0, c'); at} :: es' ->
+    vs, {it = Label (n, es0, push_to_inner_stack c' v); at} :: es'
+  | {it = Frame (n, f, c'); at} :: es' ->
+    vs, {it = Frame (n, f, push_to_inner_stack c' v); at} :: es'
+  | _ ->
+    v :: vs, es
 
-      | AtomicFence, vs ->
-        vs, []
+let wake_one (t : thread) (m : memory_inst) (addr : Memory.address) : (thread * int32) =
+  match t.suspend_signal with
+  | No_signal ->
+    t, 0l
+  | Notify_signal _ ->
+    assert false (* no other threads should be signalling notify *)
+  | Wait_signal (m', addr', timeout) ->
+    if Memory.is_same_memory m m' && addr = addr' then
+      {t with code = push_to_inner_stack t.code (I32 0l); suspend_signal = No_signal}, 1l
+    else
+      t, 0l
 
-      | MemorySize, vs ->
-        let mem = memory frame.inst (0l @@ e.at) in
-        I32 (Memory.size mem) :: vs, []
-
-      | MemoryGrow, I32 delta :: vs' ->
-        let mem = memory frame.inst (0l @@ e.at) in
-        let old_size = Memory.size mem in
-        let result =
-          try Memory.grow mem delta; old_size
-          with Memory.SizeOverflow | Memory.SizeLimit | Memory.OutOfMemory -> -1l
-        in I32 result :: vs', []
-
-      | Const v, vs ->
-        v.it :: vs, []
-
-      | Test testop, v :: vs' ->
-        (try value_of_bool (Eval_numeric.eval_testop testop v) :: vs', []
-        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at])
-
-      | Compare relop, v2 :: v1 :: vs' ->
-        (try value_of_bool (Eval_numeric.eval_relop relop v1 v2) :: vs', []
-        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at])
-
-      | Unary unop, v :: vs' ->
-        (try Eval_numeric.eval_unop unop v :: vs', []
-        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at])
-
-      | Binary binop, v2 :: v1 :: vs' ->
-        (try Eval_numeric.eval_binop binop v1 v2 :: vs', []
-        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at])
-
-      | Convert cvtop, v :: vs' ->
-        (try Eval_numeric.eval_cvtop cvtop v :: vs', []
-        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at])
-
-      | _ ->
-        let s1 = string_of_values (List.rev vs) in
-        let s2 = string_of_value_types (List.map type_of (List.rev vs)) in
-        Crash.error e.at
-          ("missing or ill-typed operand on stack (" ^ s1 ^ " : " ^ s2 ^ ")")
-      )
-
-    | Trapping msg, vs ->
-      [], [Trapping msg @@ e.at]
-
-    | Returning vs', vs ->
-      Crash.error e.at "undefined frame"
-
-    | Breaking (k, vs'), vs ->
-      Crash.error e.at "undefined label"
-
-    | Label (n, es0, (vs', [])), vs ->
-      vs' @ vs, []
-
-    | Label (n, es0, (vs', {it = Trapping msg; at} :: es')), vs ->
-      vs, [Trapping msg @@ at]
-
-    | Label (n, es0, (vs', {it = Returning vs0; at} :: es')), vs ->
-      vs, [Returning vs0 @@ at]
-
-    | Label (n, es0, (vs', {it = Breaking (0l, vs0); at} :: es')), vs ->
-      take n vs0 e.at @ vs, List.map plain es0
-
-    | Label (n, es0, (vs', {it = Breaking (k, vs0); at} :: es')), vs ->
-      vs, [Breaking (Int32.sub k 1l, vs0) @@ at]
-
-    | Label (n, es0, code'), vs ->
-      let t' = step_thread {t with code = code'} in
-      vs, [Label (n, es0, t'.code) @@ e.at]
-
-    | Frame (n, frame', (vs', [])), vs ->
-      vs' @ vs, []
-
-    | Frame (n, frame', (vs', {it = Trapping msg; at} :: es')), vs ->
-      vs, [Trapping msg @@ at]
-
-    | Frame (n, frame', (vs', {it = Returning vs0; at} :: es')), vs ->
-      take n vs0 e.at @ vs, []
-
-    | Frame (n, frame', code'), vs ->
-      let t' = step_thread {frame = frame'; code = code'; budget = t.budget - 1} in
-      vs, [Frame (n, t'.frame, t'.code) @@ e.at]
-
-    | Invoke func, vs when t.budget = 0 ->
-      Exhaustion.error e.at "call stack exhausted"
-
-    | Invoke func, vs ->
-      let FuncType (ins, out) = func_type_of func in
-      let n1, n2 = Lib.List32.length ins, Lib.List32.length out in
-      let args, vs' = take n1 vs e.at, drop n1 vs e.at in
-      (match func with
-      | Func.AstFunc (t, inst', f) ->
-        let locals' = List.rev args @ List.map default_value f.it.locals in
-        let frame' = {inst = !inst'; locals = List.map ref locals'} in
-        let instr' = [Label (n2, [], ([], List.map plain f.it.body)) @@ f.at] in
-        vs', [Frame (n2, frame', ([], instr')) @@ e.at]
-
-      | Func.HostFunc (t, f) ->
-        try List.rev (f (List.rev args)) @ vs', []
-        with Crash (_, msg) -> Crash.error e.at msg
-      )
-  in {t with code = vs', es' @ List.tl es}
-
+let rec wake (c : config) (m : memory_inst) (addr : Memory.address) (count : int32) : (config * int32) =
+  if count = 0l then
+    c, 0l
+  else
+    match c with
+    | [] ->
+      c, 0l
+    | t :: ts ->
+      let t', count' = wake_one t m addr in
+      let ts', count'' = wake ts m addr (Int32.sub count count') in
+      (t' :: ts', Int32.add count' count'')
 
 let rec step (c : config) (n : thread_id) : config =
   let ts1, t, ts2 = Lib.List.extract n c in
@@ -457,7 +510,12 @@ let rec step (c : config) (n : thread_id) : config =
   else
     let t' = try step_thread t with Stack_overflow ->
       Exhaustion.error (List.hd (snd t.code)).at "call stack exhausted"
-    in ts1 @ [t'] @ ts2
+    in match t'.suspend_signal with
+       | Notify_signal (m, addr, count) ->
+         let ts1', count1 = wake ts1 m addr count in
+         let ts2', count2 = wake ts2 m addr (Int32.sub count count1) in
+         ts1' @ [{t' with code = push_to_inner_stack t'.code (I32 (Int32.add count1 count2)); suspend_signal = No_signal}] @ ts2'
+       | _ -> ts1 @ [t'] @ ts2
 
 let rec eval (c : config ref) (n : thread_id) : value list =
   match status !c n with
