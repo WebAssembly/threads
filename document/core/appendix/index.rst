@@ -11,6 +11,7 @@ Appendix
    algorithm
    custom
    properties
+   changes
 
 .. only:: singlehtml
 
@@ -19,3 +20,4 @@ Appendix
       index-types
       index-instructions
       index-rules
+

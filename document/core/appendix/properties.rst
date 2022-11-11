@@ -23,25 +23,12 @@ In order to state and prove soundness precisely, the typing rules must be extend
 
 
 .. index:: value, value type, result, result type, trap
-.. _valid-val:
 .. _valid-result:
 
-Values and Results
-~~~~~~~~~~~~~~~~~~
+Results
+~~~~~~~
 
-:ref:`Values <syntax-val>` and :ref:`results <syntax-result>` can be classified by :ref:`value types <syntax-valtype>` and :ref:`result types <syntax-resulttype>` as follows.
-
-:ref:`Values <syntax-val>` :math:`t.\CONST~c`
-.............................................
-
-* The value is valid with :ref:`value type <syntax-valtype>` :math:`t`.
-
-.. math::
-   \frac{
-   }{
-     \vdashval t.\CONST~c : t
-   }
-
+:ref:`Results <syntax-result>` can be classified by :ref:`result types <syntax-resulttype>` as follows.
 
 :ref:`Results <syntax-result>` :math:`\val^\ast`
 ................................................
@@ -56,9 +43,9 @@ Values and Results
 
 .. math::
    \frac{
-     (\vdashval \val : t)^\ast
+     (S \vdashval \val : t)^\ast
    }{
-     \vdashresult \val^\ast : [t^\ast]
+     S \vdashresult \val^\ast : [t^\ast]
    }
 
 
@@ -70,7 +57,7 @@ Values and Results
 .. math::
    \frac{
    }{
-     \vdashresult \TRAP : [t^\ast]
+     S \vdashresult \TRAP : [t^\ast]
    }
 
 
@@ -102,6 +89,10 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
 
 * Each :ref:`global instance <syntax-globalinst>` :math:`\globalinst_i` in :math:`S.\SGLOBALS` must be :ref:`valid <valid-globalinst>` with some  :ref:`global type <syntax-globaltype>` :math:`\globaltype_i`.
 
+* Each :ref:`element instance <syntax-eleminst>` :math:`\eleminst_i` in :math:`S.\SELEMS` must be :ref:`valid <valid-eleminst>` with some :ref:`reference type <syntax-reftype>` :math:`\reftype_i`.
+
+* Each :ref:`data instance <syntax-datainst>` :math:`\datainst_i` in :math:`S.\SDATAS` must be :ref:`valid <valid-datainst>`.
+
 * Then the store is valid.
 
 .. math::
@@ -116,11 +107,17 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
      \qquad
      (S \vdashglobalinst \globalinst : \globaltype)^\ast
      \\
+     (S \vdasheleminst \eleminst : \reftype)^\ast
+     \qquad
+     (S \vdashdatainst \datainst \ok)^\ast
+     \\
      S = \{
        \SFUNCS~\funcinst^\ast,
        \STABLES~\tableinst^\ast,
        \SMEMS~\meminst^\ast,
-       \SGLOBALS~\globalinst^\ast \}
+       \SGLOBALS~\globalinst^\ast,
+       \SELEMS~\eleminst^\ast,
+       \SDATAS~\datainst^\ast \}
      \end{array}
    }{
      \vdashstore S \ok
@@ -185,7 +182,7 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
      \forall S_1, \val^\ast,~
        {\vdashstore S_1 \ok} \wedge
        {\vdashstoreextends S \extendsto S_1} \wedge
-       {\vdashresult \val^\ast : [t_1^\ast]}
+       {S_1 \vdashresult \val^\ast : [t_1^\ast]}
        \Longrightarrow {} \\ \qquad
        \X{hf}(S_1; \val^\ast) \supset \emptyset \wedge {} \\ \qquad
      \forall R \in \X{hf}(S_1; \val^\ast),~
@@ -193,7 +190,7 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
        \exists S_2, \result,~
        {\vdashstore S_2 \ok} \wedge
        {\vdashstoreextends S_1 \extendsto S_2} \wedge
-       {\vdashresult \result : [t_2^\ast]} \wedge
+       {S_2 \vdashresult \result : [t_2^\ast]} \wedge
        R = (S_2; \result)
      \end{array}
    }{
@@ -211,26 +208,28 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
 .. index:: table type, table instance, limits, function address
 .. _valid-tableinst:
 
-:ref:`Table Instances <syntax-tableinst>` :math:`\{ \TIELEM~(\X{fa}^?)^n, \TIMAX~m^? \}`
-..............................................................................................
+:ref:`Table Instances <syntax-tableinst>` :math:`\{ \TITYPE~(\limits~t), \TIELEM~\reff^\ast \}`
+...............................................................................................
 
-* For each optional :ref:`function address <syntax-funcaddr>` :math:`\X{fa}^?_i` in the table elements :math:`(\X{fa}^?)^n`:
+* The :ref:`table type <syntax-tabletype>` :math:`\limits~t` must be :ref:`valid <valid-tabletype>`.
 
-  * Either :math:`\X{fa}^?_i` is empty.
+* The length of :math:`\reff^\ast` must equal :math:`\limits.\LMIN`.
 
-  * Or the :ref:`external value <syntax-externval>` :math:`\EVFUNC~\X{fa}` must be :ref:`valid <valid-externval-func>` with some :ref:`external type <syntax-externtype>` :math:`\ETFUNC~\X{ft}`.
+* For each :ref:`reference <syntax-ref>` :math:`\reff_i` in the table's elements :math:`\reff^n`:
 
-* The :ref:`limits <syntax-limits>` :math:`\{\LMIN~n, \LMAX~m^?\}` must be :ref:`valid <valid-limits>` within range :math:`2^{32}`.
+  * The :ref:`reference <syntax-ref>` :math:`\reff_i` must be :ref:`valid <valid-ref>` with :ref:`reference type <syntax-reftype>` :math:`t`.
 
-* Then the table instance is valid with :ref:`table type <syntax-tabletype>` :math:`\{\LMIN~n, \LMAX~m^?\}~\FUNCREF`.
+* Then the table instance is valid with :ref:`table type <syntax-tabletype>` :math:`\limits~t`.
 
 .. math::
    \frac{
-     ((S \vdash \EVFUNC~\X{fa} : \ETFUNC~\functype)^?)^n
+     \vdashtabletype \limits~t \ok
      \qquad
-     \vdashlimits \{\LMIN~n, \LMAX~m^?\} : 2^{32}
+     n = \limits.\LMIN
+     \qquad
+     (S \vdash \reff : t)^n
    }{
-     S \vdashtableinst \{ \TIELEM~(\X{fa}^?)^n, \TIMAX~m^? \} : \{\LMIN~n, \LMAX~m^?\}~\FUNCREF
+     S \vdashtableinst \{ \TITYPE~(\limits~t), \TIELEM~\reff^n \} : \limits~t
    }
 
 
@@ -278,15 +277,57 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
 .. index:: global type, global instance, value, mutability
 .. _valid-globalinst:
 
-:ref:`Global Instances <syntax-globalinst>` :math:`\{ \GIVALUE~(t.\CONST~c), \GIMUT~\mut \}`
-............................................................................................
+:ref:`Global Instances <syntax-globalinst>` :math:`\{ \GITYPE~(\mut~t), \GIVALUE~\val \}`
+.........................................................................................
 
-* The global instance is valid with :ref:`global type <syntax-globaltype>` :math:`\mut~t`.
+* The :ref:`global type <syntax-globaltype>` :math:`\mut~t` must be :ref:`valid <valid-globaltype>`.
+
+* The :ref:`value <syntax-val>` :math:`\val` must be :ref:`valid <valid-val>` with :ref:`value type <syntax-valtype>` :math:`t`.
+
+* Then the global instance is valid with :ref:`global type <syntax-globaltype>` :math:`\mut~t`.
+
+.. math::
+   \frac{
+     \vdashglobaltype \mut~t \ok
+     \qquad
+     S \vdashval \val : t
+   }{
+     S \vdashglobalinst \{ \GITYPE~(\mut~t), \GIVALUE~\val \} : \mut~t
+   }
+
+
+.. index:: element instance, reference
+.. _valid-eleminst:
+
+:ref:`Element Instances <syntax-eleminst>` :math:`\{ \EIELEM~\X{fa}^\ast \}`
+............................................................................
+
+* For each :ref:`reference <syntax-ref>` :math:`\reff_i` in the elements :math:`\reff^n`:
+
+  * The :ref:`reference <syntax-ref>` :math:`\reff_i` must be :ref:`valid <valid-ref>` with :ref:`reference type <syntax-reftype>` :math:`t`.
+
+* Then the element instance is valid with :ref:`reference type <syntax-reftype>` :math:`t`.
+
+.. math::
+   \frac{
+     (S \vdash \reff : t)^\ast
+   }{
+     S \vdasheleminst \{ \EITYPE~t, \EIELEM~\reff^\ast \} : t
+   }
+
+
+.. index:: data instance, byte
+.. _valid-datainst:
+
+:ref:`Data Instances <syntax-eleminst>` :math:`\{ \DIDATA~b^\ast \}`
+....................................................................
+
+* The data instance is valid.
 
 .. math::
    \frac{
    }{
-     S \vdashglobalinst \{ \GIVALUE~(t.\CONST~c), \GIMUT~\mut \} : \mut~t
+     S \vdashdatainst \{ \DIDATA~b^\ast \} \ok
    }
 
 
@@ -324,6 +365,10 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
 
 * For each :ref:`global address <syntax-globaladdr>` :math:`\globaladdr_i` in :math:`\moduleinst.\MIGLOBALS`, the :ref:`external value <syntax-externval>` :math:`\EVGLOBAL~\globaladdr_i` must be :ref:`valid <valid-externval-global>` with some :ref:`external type <syntax-externtype>` :math:`\ETGLOBAL~\globaltype_i`.
 
+* For each :ref:`element address <syntax-elemaddr>` :math:`\elemaddr_i` in :math:`\moduleinst.\MIELEMS`, the :ref:`element instance <syntax-eleminst>` :math:`S.\SELEMS[\elemaddr_i]` must be :ref:`valid <valid-eleminst>` with some :ref:`reference type <syntax-reftype>` :math:`\reftype_i`.
+
+* For each :ref:`data address <syntax-dataaddr>` :math:`\dataaddr_i` in :math:`\moduleinst.\MIDATAS`, the :ref:`data instance <syntax-datainst>` :math:`S.\SDATAS[\dataaddr_i]` must be :ref:`valid <valid-datainst>`.
+
 * Each :ref:`export instance <syntax-exportinst>` :math:`\exportinst_i` in :math:`\moduleinst.\MIEXPORTS` must be :ref:`valid <valid-exportinst>`.
 
 * For each :ref:`export instance <syntax-exportinst>` :math:`\exportinst_i` in :math:`\moduleinst.\MIEXPORTS`, the :ref:`name <syntax-name>` :math:`\exportinst_i.\EINAME` must be different from any other name occurring in :math:`\moduleinst.\MIEXPORTS`.
@@ -336,7 +381,12 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
 
 * Let :math:`\globaltype^\ast` be the concatenation of all :math:`\globaltype_i` in order.
 
-* Then the module instance is valid with :ref:`context <context>` :math:`\{\CTYPES~\functype^\ast, \CFUNCS~{\functype'}^\ast, \CTABLES~\tabletype^\ast, \CMEMS~\memtype^\ast, \CGLOBALS~\globaltype^\ast\}`.
+* Let :math:`\reftype^\ast` be the concatenation of all :math:`\reftype_i` in order.
+
+* Let :math:`n` be the length of :math:`\moduleinst.\MIDATAS`.
+
+* Then the module instance is valid with :ref:`context <context>`
+  :math:`\{\CTYPES~\functype^\ast,` :math:`\CFUNCS~{\functype'}^\ast,` :math:`\CTABLES~\tabletype^\ast,` :math:`\CMEMS~\memtype^\ast,` :math:`\CGLOBALS~\globaltype^\ast,` :math:`\CELEMS~\reftype^\ast,` :math:`\CDATAS~{\ok}^n\}`.
 
 .. math::
    ~\\[-1ex]
@@ -352,6 +402,10 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
      \qquad
      (S \vdashexternval \EVGLOBAL~\globaladdr : \ETGLOBAL~\globaltype)^\ast
      \\
+     (S \vdasheleminst S.\SELEMS[\elemaddr] : \reftype)^\ast
+     \qquad
+     (S \vdashdatainst S.\SDATAS[\dataaddr] \ok)^n
+     \\
      (S \vdashexportinst \exportinst \ok)^\ast
      \qquad
      (\exportinst.\EINAME)^\ast ~\mbox{disjoint}
@@ -363,14 +417,18 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
        \MIFUNCS & \funcaddr^\ast, \\
        \MITABLES & \tableaddr^\ast, \\
        \MIMEMS & \memaddr^\ast, \\
-       \MIGLOBALS & \globaladdr^\ast \\
+       \MIGLOBALS & \globaladdr^\ast, \\
+       \MIELEMS & \elemaddr^\ast, \\
+       \MIDATAS & \dataaddr^n, \\
        \MIEXPORTS & \exportinst^\ast ~\} : \{
          \begin{array}[t]{@{}l@{~}l@{}}
          \CTYPES & \functype^\ast, \\
          \CFUNCS & {\functype'}^\ast, \\
          \CTABLES & \tabletype^\ast, \\
          \CMEMS & \memtype^\ast, \\
-         \CGLOBALS & \globaltype^\ast ~\}
+         \CGLOBALS & \globaltype^\ast, \\
+         \CELEMS & \reftype^\ast, \\
+         \CDATAS & {\ok}^n ~\}
          \end{array}
        \end{array}
    }
@@ -452,7 +510,7 @@ Finally, :ref:`frames <syntax-frame>` are classified with *frame contexts*, whic
 
 * Each :ref:`value <syntax-val>` :math:`\val_i` in :math:`\val^\ast` must be :ref:`valid <valid-val>` with some :ref:`value type <syntax-valtype>` :math:`t_i`.
 
-* Let :math:`t^\ast` the concatenation of all :math:`t_i` in order.
+* Let :math:`t^\ast` be the concatenation of all :math:`t_i` in order.
 
 * Let :math:`C'` be the same :ref:`context <context>` as :math:`C`, but with the :ref:`value types <syntax-valtype>` :math:`t^\ast` prepended to the |CLOCALS| vector.
 
@@ -462,7 +520,7 @@ Finally, :ref:`frames <syntax-frame>` are classified with *frame contexts*, whic
    \frac{
      S \vdashmoduleinst \moduleinst : C
      \qquad
-     (\vdashval \val : t)^\ast
+     (S \vdashval \val : t)^\ast
    }{
      S \vdashframe \{\ALOCALS~\val^\ast, \AMODULE~\moduleinst\} : (C, \CLOCALS~t^\ast)
    }
@@ -493,6 +551,37 @@ To that end, all previous typing judgements :math:`C \vdash \X{prop}` are genera
    }
 
 
+.. index:: extern address
+
+:math:`\REFEXTERNADDR~\externaddr`
+..................................
+
+* The instruction is valid with type :math:`[] \to [\EXTERNREF]`.
+
+.. math::
+   \frac{
+   }{
+     S; C \vdashadmininstr \REFEXTERNADDR~\externaddr : [] \to [\EXTERNREF]
+   }
+
+
+.. index:: function address, extern value, extern type, function type
+
+:math:`\REFFUNCADDR~\funcaddr`
+..............................
+
+* The :ref:`external function value <syntax-externval>` :math:`\EVFUNC~\funcaddr` must be :ref:`valid <valid-externval-func>` with :ref:`external function type <syntax-externtype>` :math:`\ETFUNC~\functype`.
+
+* Then the instruction is valid with type :math:`[] \to [\FUNCREF]`.
+
+.. math::
+   \frac{
+     S \vdashexternval \EVFUNC~\funcaddr : \ETFUNC~\functype
+   }{
+     S; C \vdashadmininstr \REFFUNCADDR~\funcaddr : [] \to [\FUNCREF]
+   }
+
+
 .. index:: function address, extern value, extern type, function type
 
 :math:`\INVOKE~\funcaddr`
@@ -507,54 +596,6 @@ To that end, all previous typing judgements :math:`C \vdash \X{prop}` are genera
      S \vdashexternval \EVFUNC~\funcaddr : \ETFUNC~[t_1^\ast] \to [t_2^\ast]
    }{
      S; C \vdashadmininstr \INVOKE~\funcaddr : [t_1^\ast] \to [t_2^\ast]
-   }
-
-
-.. index:: element, table, table address, module instance, function index
-
-:math:`\INITELEM~\tableaddr~o~x^n`
-..................................
-
-* The :ref:`external table value <syntax-externval>` :math:`\EVTABLE~\tableaddr` must be :ref:`valid <valid-externval-table>` with some :ref:`external table type <syntax-externtype>` :math:`\ETTABLE~\limits~\FUNCREF`.
-
-* The index :math:`o + n` must be smaller than or equal to :math:`\limits.\LMIN`.
-
-* The :ref:`module instance <syntax-moduleinst>` :math:`\moduleinst` must be :ref:`valid <valid-moduleinst>` with some :ref:`context <context>` :math:`C`.
-
-* Each :ref:`function index <syntax-funcidx>` :math:`x_i` in :math:`x^n` must be defined in the context :math:`C`.
-
-* Then the instruction is valid.
-
-.. math::
-   \frac{
-     S \vdashexternval \EVTABLE~\tableaddr : \ETTABLE~\limits~\FUNCREF
-     \qquad
-     o + n \leq \limits.\LMIN
-     \qquad
-     (C.\CFUNCS[x] = \functype)^n
-   }{
-     S; C \vdashadmininstr \INITELEM~\tableaddr~o~x^n \ok
-   }
-
-
-.. index:: data, memory, memory address, byte
-
-:math:`\INITDATA~\memaddr~o~b^n`
-................................
-
-* The :ref:`external memory value <syntax-externval>` :math:`\EVMEM~\memaddr` must be :ref:`valid <valid-externval-mem>` with some :ref:`external memory type <syntax-externtype>` :math:`\ETMEM~\limits`.
-
-* The index :math:`o + n` must be smaller than or equal to :math:`\limits.\LMIN` divided by the :ref:`page size <page-size>` :math:`64\,\F{Ki}`.
-
-* Then the instruction is valid.
-
-.. math::
-   \frac{
-     S \vdashexternval \EVMEM~\memaddr : \ETMEM~\limits
-     \qquad
-     o + n \leq \limits.\LMIN \cdot 64\,\F{Ki}
-   }{
-     S; C \vdashadmininstr \INITDATA~\memaddr~o~b^n \ok
    }
 
 
@@ -633,6 +674,10 @@ a store state :math:`S'` extends state :math:`S`, written :math:`S \extendsto S'
 
 * The length of :math:`S.\SGLOBALS` must not shrink.
 
+* The length of :math:`S.\SELEMS` must not shrink.
+
+* The length of :math:`S.\SDATAS` must not shrink.
+
 * For each :ref:`function instance <syntax-funcinst>` :math:`\funcinst_i` in the original :math:`S.\SFUNCS`, the new function instance must be an :ref:`extension <extend-funcinst>` of the old.
 
 * For each :ref:`table instance <syntax-tableinst>` :math:`\tableinst_i` in the original :math:`S.\STABLES`, the new table instance must be an :ref:`extension <extend-tableinst>` of the old.
@@ -641,21 +686,31 @@ a store state :math:`S'` extends state :math:`S`, written :math:`S \extendsto S'
 
 * For each :ref:`global instance <syntax-globalinst>` :math:`\globalinst_i` in the original :math:`S.\SGLOBALS`, the new global instance must be an :ref:`extension <extend-globalinst>` of the old.
 
+* For each :ref:`element instance <syntax-eleminst>` :math:`\eleminst_i` in the original :math:`S.\SELEMS`, the new global instance must be an :ref:`extension <extend-eleminst>` of the old.
+
+* For each :ref:`data instance <syntax-datainst>` :math:`\datainst_i` in the original :math:`S.\SDATAS`, the new global instance must be an :ref:`extension <extend-datainst>` of the old.
+
 .. math::
    \frac{
      \begin{array}{@{}ccc@{}}
      S_1.\SFUNCS = \funcinst_1^\ast &
      S_2.\SFUNCS = {\funcinst'_1}^\ast~\funcinst_2^\ast &
-     (\funcinst_1 \extendsto \funcinst'_1)^\ast \\
+     (\vdashfuncinstextends \funcinst_1 \extendsto \funcinst'_1)^\ast \\
      S_1.\STABLES = \tableinst_1^\ast &
      S_2.\STABLES = {\tableinst'_1}^\ast~\tableinst_2^\ast &
-     (\tableinst_1 \extendsto \tableinst'_1)^\ast \\
+     (\vdashtableinstextends \tableinst_1 \extendsto \tableinst'_1)^\ast \\
      S_1.\SMEMS = \meminst_1^\ast &
      S_2.\SMEMS = {\meminst'_1}^\ast~\meminst_2^\ast &
-     (\meminst_1 \extendsto \meminst'_1)^\ast \\
+     (\vdashmeminstextends \meminst_1 \extendsto \meminst'_1)^\ast \\
      S_1.\SGLOBALS = \globalinst_1^\ast &
      S_2.\SGLOBALS = {\globalinst'_1}^\ast~\globalinst_2^\ast &
-     (\globalinst_1 \extendsto \globalinst'_1)^\ast \\
+     (\vdashglobalinstextends \globalinst_1 \extendsto \globalinst'_1)^\ast \\
+     S_1.\SELEMS = \eleminst_1^\ast &
+     S_2.\SELEMS = {\eleminst'_1}^\ast~\eleminst_2^\ast &
+     (\vdasheleminstextends \eleminst_1 \extendsto \eleminst'_1)^\ast \\
+     S_1.\SDATAS = \datainst_1^\ast &
+     S_2.\SDATAS = {\datainst'_1}^\ast~\datainst_2^\ast &
+     (\vdashdatainstextends \datainst_1 \extendsto \datainst'_1)^\ast \\
      \end{array}
    }{
      \vdashstoreextends S_1 \extendsto S_2
@@ -683,15 +738,15 @@ a store state :math:`S'` extends state :math:`S`, written :math:`S \extendsto S'
 :ref:`Table Instance <syntax-tableinst>` :math:`\tableinst`
 ...........................................................
 
-* The length of :math:`\tableinst.\TIELEM` must not shrink.
+* The :ref:`table type <syntax-tabletype>` :math:`\tableinst.\TITYPE` must remain unchanged.
 
-* The value of :math:`\tableinst.\TIMAX` must remain unchanged.
+* The length of :math:`\tableinst.\TIELEM` must not shrink.
 
 .. math::
    \frac{
      n_1 \leq n_2
    }{
-     \vdashtableinstextends \{\TIELEM~(\X{fa}_1^?)^{n_1}, \TIMAX~m\} \extendsto \{\TIELEM~(\X{fa}_2^?)^{n_2}, \TIMAX~m\}
+     \vdashtableinstextends \{\TITYPE~\X{tt}, \TIELEM~(\X{fa}_1^?)^{n_1}\} \extendsto \{\TITYPE~\X{tt}, \TIELEM~(\X{fa}_2^?)^{n_2}\}
    }
 
 
@@ -723,24 +778,55 @@ a store state :math:`S'` extends state :math:`S`, written :math:`S \extendsto S'
      \vdashmeminstextends \{\MITYPE~\X{mt}\} \extendsto \{\MITYPE~\X{mt}\}
    }
 
-
 .. index:: global instance, value, mutability
 .. _extend-globalinst:
 
 :ref:`Global Instance <syntax-globalinst>` :math:`\globalinst`
 ..............................................................
 
-* The :ref:`mutability <syntax-mut>` :math:`\globalinst.\GIMUT` must remain unchanged.
+* The :ref:`global type <syntax-globaltype>` :math:`\globalinst.\GITYPE` must remain unchanged.
 
-* The :ref:`value type <syntax-valtype>` of the :ref:`value <syntax-val>` :math:`\globalinst.\GIVALUE` must remain unchanged.
+* Let :math:`\mut~t` be the structure of :math:`\globalinst.\GITYPE`.
 
-* If :math:`\globalinst.\GIMUT` is |MCONST|, then the :ref:`value <syntax-val>` :math:`\globalinst.\GIVALUE` must remain unchanged.
+* If :math:`\mut` is |MCONST|, then the :ref:`value <syntax-val>` :math:`\globalinst.\GIVALUE` must remain unchanged.
 
 .. math::
    \frac{
-     \mut = \MVAR \vee c_1 = c_2
+     \mut = \MVAR \vee \val_1 = \val_2
    }{
-     \vdashglobalinstextends \{\GIVALUE~(t.\CONST~c_1), \GIMUT~\mut\} \extendsto \{\GIVALUE~(t.\CONST~c_2), \GIMUT~\mut\}
+     \vdashglobalinstextends \{\GITYPE~(\mut~t), \GIVALUE~\val_1\} \extendsto \{\GITYPE~(\mut~t), \GIVALUE~\val_2\}
+   }
+
+
+.. index:: element instance
+.. _extend-eleminst:
+
+:ref:`Element Instance <syntax-eleminst>` :math:`\eleminst`
+...........................................................
+
+* The vector :math:`\eleminst.\EIELEM` must either remain unchanged or shrink to length :math:`0`.
+
+.. math::
+   \frac{
+     \X{fa}_1^\ast = \X{fa}_2^\ast \vee \X{fa}_2^\ast = \epsilon
+   }{
+     \vdasheleminstextends \{\EIELEM~\X{fa}_1^\ast\} \extendsto \{\EIELEM~\X{fa}_2^\ast\}
+   }
+
+
+.. index:: data instance
+.. _extend-datainst:
+
+:ref:`Data Instance <syntax-datainst>` :math:`\datainst`
+........................................................
+
+* The vector :math:`\datainst.\DIDATA` must either remain unchanged or shrink to length :math:`0`.
+
+.. math::
+   \frac{
+     b_1^\ast = b_2^\ast \vee b_2^\ast = \epsilon
+   }{
+     \vdashdatainstextends \{\DIDATA~b_1^\ast\} \extendsto \{\DIDATA~b_2^\ast\}
    }
 
 
@@ -752,7 +838,7 @@ Theorems
 ~~~~~~~~
 
 Given the definition of :ref:`valid configurations <valid-config>`,
-the standard soundness theorems hold. [#cite-cpp2018]_
+the standard soundness theorems hold. [#cite-cpp2018]_ [#cite-fm2021]_
 
 **Theorem (Preservation).**
 If a :ref:`configuration <syntax-config>` :math:`S;T` is :ref:`valid <valid-config>` with :ref:`result type <syntax-resulttype>` :math:`[t^\ast]` (i.e., :math:`\vdashconfig S;T : [t^\ast]`),
@@ -793,8 +879,12 @@ Sequential Consistency of Data-Race-Free Programs
    Andreas Haas, Andreas Rossberg, Derek Schuff, Ben Titzer, Dan Gohman, Luke Wagner, Alon Zakai, JF Bastien, Michael Holman. |PLDI2017|_. Proceedings of the 38th ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI 2017). ACM 2017.
 
 .. [#cite-cpp2018]
-   A machine-verified version of the formalization and soundness proof is described in the following article:
+   A machine-verified version of the formalization and soundness proof of the PLDI 2017 paper is described in the following article:
    Conrad Watt. |CPP2018|_. Proceedings of the 7th ACM SIGPLAN Conference on Certified Programs and Proofs (CPP 2018). ACM 2018.
+
+.. [#cite-fm2021]
+   Machine-verified formalizations and soundness proofs of the semantics from the official specification are described in the following article:
+   Conrad Watt, Xiaojia Rao, Jean Pichon-Pharabod, Martin Bodin, Philippa Gardner. |FM2021|_. Proceedings of the 24th International Symposium on Formal Methods (FM 2021). Springer 2021.
 
 .. [#cite-oopsla2019]
    The formalization of the relaxed memory model is derived from the following article:

@@ -10,9 +10,11 @@
   (func (export "func-i64->i64") (param i64) (result i64) (local.get 0))
   (global (export "global-i32") i32 (i32.const 55))
   (global (export "global-f32") f32 (f32.const 44))
+  (global (export "global-mut-i64") (mut i64) (i64.const 66))
   (table (export "table-10-inf") 10 funcref)
-  ;; (table (export "table-10-20") 10 20 funcref)
+  (table (export "table-10-20") 10 20 funcref)
   (memory (export "memory-2-inf") 2)
+  ;; Multiple memories are not yet supported
   ;; (memory (export "memory-2-4") 2 4)
 )
 
@@ -28,11 +30,9 @@
   (type $func_f64 (func (param f64)))
 
   (import "spectest" "print_i32" (func (param i32)))
-  ;; JavaScript can't handle i64 yet.
-  ;; (func (import "spectest" "print_i64") (param i64))
+  (func (import "spectest" "print_i64") (param i64))
   (import "spectest" "print_i32" (func $print_i32 (param i32)))
-  ;; JavaScript can't handle i64 yet.
-  ;; (import "spectest" "print_i64" (func $print_i64 (param i64)))
+  (import "spectest" "print_i64" (func $print_i64 (param i64)))
   (import "spectest" "print_f32" (func $print_f32 (param f32)))
   (import "spectest" "print_f64" (func $print_f64 (param f64)))
   (import "spectest" "print_i32_f32" (func $print_i32_f32 (param i32 f32)))
@@ -70,14 +70,12 @@
   (func (export "print64") (param $i i64)
     (local $x f64)
     (local.set $x (f64.convert_i64_s (call $i64->i64 (local.get $i))))
-    ;; JavaScript can't handle i64 yet.
-    ;; (call 1 (local.get $i))
+    (call 1 (local.get $i))
     (call $print_f64_f64
       (f64.add (local.get $x) (f64.const 1))
       (f64.const 53)
     )
-    ;; JavaScript can't handle i64 yet.
-    ;; (call $print_i64 (local.get $i))
+    (call $print_i64 (local.get $i))
     (call $print_f64 (local.get $x))
     (call $print_f64-2 (local.get $x))
     (call_indirect (type $func_f64) (local.get $x) (i32.const 1))
@@ -94,6 +92,26 @@
   )
   "unknown type"
 )
+
+;; Export sharing name with import
+(module
+  (import "spectest" "print_i32" (func $imported_print (param i32)))
+  (func (export "print_i32") (param $i i32)
+    (call $imported_print (local.get $i))
+  )
+)
+
+(assert_return (invoke "print_i32" (i32.const 13)))
+
+;; Export sharing name with import
+(module
+  (import "spectest" "print_i32" (func $imported_print (param i32)))
+  (func (export "print_i32") (param $i i32) (param $j i32) (result i32)
+    (i32.add (local.get $i) (local.get $j))
+  )
+)
+
+(assert_return (invoke "print_i32" (i32.const 5) (i32.const 11)) (i32.const 16))
 
 (module (import "test" "func" (func)))
 (module (import "test" "func-i32" (func (param i32))))
@@ -212,8 +230,7 @@
   (import "spectest" "global_i32" (global $x i32))
   (global $y (import "spectest" "global_i32") i32)
 
-  ;; JavaScript can't handle i64 yet.
-  ;; (import "spectest" "global_i64" (global i64))
+  (import "spectest" "global_i64" (global i64))
   (import "spectest" "global_f32" (global f32))
   (import "spectest" "global_f64" (global f64))
 
@@ -230,6 +247,7 @@
 
 (module (import "test" "global-i32" (global i32)))
 (module (import "test" "global-f32" (global f32)))
+(module (import "test" "global-mut-i64" (global (mut i64))))
 
 (assert_unlinkable
   (module (import "test" "unknown" (global i32)))
@@ -238,6 +256,55 @@
 (assert_unlinkable
   (module (import "spectest" "unknown" (global i32)))
   "unknown import"
+)
+
+(assert_unlinkable
+  (module (import "test" "global-i32" (global i64)))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-i32" (global f32)))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-i32" (global f64)))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-i32" (global (mut i32))))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-f32" (global i32)))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-f32" (global i64)))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-f32" (global f64)))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-f32" (global (mut f32))))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-mut-i64" (global (mut i32))))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-mut-i64" (global (mut f32))))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-mut-i64" (global (mut f64))))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "global-mut-i64" (global i64)))
+  "incompatible import type"
 )
 
 (assert_unlinkable
@@ -270,11 +337,11 @@
 
 (module
   (type (func (result i32)))
-  (import "spectest" "table" (table 10 20 funcref))
-  (elem 0 (i32.const 1) $f $g)
+  (import "spectest" "table" (table $tab 10 20 funcref))
+  (elem (table $tab) (i32.const 1) func $f $g)
 
   (func (export "call") (param i32) (result i32)
-    (call_indirect (type 0) (local.get 0))
+    (call_indirect $tab (type 0) (local.get 0))
   )
   (func $f (result i32) (i32.const 11))
   (func $g (result i32) (i32.const 22))
@@ -289,11 +356,11 @@
 
 (module
   (type (func (result i32)))
-  (table (import "spectest" "table") 10 20 funcref)
-  (elem 0 (i32.const 1) $f $g)
+  (table $tab (import "spectest" "table") 10 20 funcref)
+  (elem (table $tab) (i32.const 1) func $f $g)
 
   (func (export "call") (param i32) (result i32)
-    (call_indirect (type 0) (local.get 0))
+    (call_indirect $tab (type 0) (local.get 0))
   )
   (func $f (result i32) (i32.const 11))
   (func $g (result i32) (i32.const 22))
@@ -306,22 +373,25 @@
 (assert_trap (invoke "call" (i32.const 100)) "undefined element")
 
 
-(assert_invalid
-  (module (import "" "" (table 10 funcref)) (import "" "" (table 10 funcref)))
-  "multiple tables"
-)
-(assert_invalid
-  (module (import "" "" (table 10 funcref)) (table 10 funcref))
-  "multiple tables"
-)
-(assert_invalid
-  (module (table 10 funcref) (table 10 funcref))
-  "multiple tables"
+(module
+  (import "spectest" "table" (table 0 funcref))
+  (import "spectest" "table" (table 0 funcref))
+  (table 10 funcref)
+  (table 10 funcref)
 )
 
 (module (import "test" "table-10-inf" (table 10 funcref)))
 (module (import "test" "table-10-inf" (table 5 funcref)))
 (module (import "test" "table-10-inf" (table 0 funcref)))
+(module (import "test" "table-10-20" (table 10 funcref)))
+(module (import "test" "table-10-20" (table 5 funcref)))
+(module (import "test" "table-10-20" (table 0 funcref)))
+(module (import "test" "table-10-20" (table 10 20 funcref)))
+(module (import "test" "table-10-20" (table 5 20 funcref)))
+(module (import "test" "table-10-20" (table 0 20 funcref)))
+(module (import "test" "table-10-20" (table 10 25 funcref)))
+(module (import "test" "table-10-20" (table 5 25 funcref)))
+(module (import "test" "table-10-20" (table 0 25 funcref)))
 (module (import "spectest" "table" (table 10 funcref)))
 (module (import "spectest" "table" (table 5 funcref)))
 (module (import "spectest" "table" (table 0 funcref)))
@@ -346,6 +416,14 @@
 )
 (assert_unlinkable
   (module (import "test" "table-10-inf" (table 10 20 funcref)))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "table-10-20" (table 12 20 funcref)))
+  "incompatible import type"
+)
+(assert_unlinkable
+  (module (import "test" "table-10-20" (table 10 18 funcref)))
   "incompatible import type"
 )
 (assert_unlinkable
@@ -380,7 +458,7 @@
 
 (module
   (import "spectest" "memory" (memory 1 2))
-  (data 0 (i32.const 10) "\10")
+  (data (memory 0) (i32.const 10) "\10")
 
   (func (export "load") (param i32) (result i32) (i32.load (local.get 0)))
 )
@@ -392,7 +470,7 @@
 
 (module
   (memory (import "spectest" "memory") 1 2)
-  (data 0 (i32.const 10) "\10")
+  (data (memory 0) (i32.const 10) "\10")
 
   (func (export "load") (param i32) (result i32) (i32.load (local.get 0)))
 )
@@ -493,6 +571,26 @@
 (assert_return (invoke "grow" (i32.const 0)) (i32.const 2))
 (assert_return (invoke "grow" (i32.const 1)) (i32.const -1))
 (assert_return (invoke "grow" (i32.const 0)) (i32.const 2))
+
+(module $Mgm
+  (memory (export "memory") 1) ;; initial size is 1
+  (func (export "grow") (result i32) (memory.grow (i32.const 1)))
+)
+(register "grown-memory" $Mgm)
+(assert_return (invoke $Mgm "grow") (i32.const 1)) ;; now size is 2
+(module $Mgim1
+  ;; imported memory limits should match, because external memory size is 2 now
+  (memory (export "memory") (import "grown-memory" "memory") 2) 
+  (func (export "grow") (result i32) (memory.grow (i32.const 1)))
+)
+(register "grown-imported-memory" $Mgim1)
+(assert_return (invoke $Mgim1 "grow") (i32.const 2)) ;; now size is 3
+(module $Mgim2
+  ;; imported memory limits should match, because external memory size is 3 now
+  (import "grown-imported-memory" "memory" (memory 3))
+  (func (export "size") (result i32) (memory.size))
+)
+(assert_return (invoke $Mgim2 "size") (i32.const 3))
 
 ;; Shared Memory
 

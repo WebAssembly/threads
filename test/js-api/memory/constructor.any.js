@@ -1,4 +1,5 @@
 // META: global=window,dedicatedworker,jsshell
+// META: script=/wasm/jsapi/assertions.js
 // META: script=/wasm/jsapi/memory/assertions.js
 
 function assert_Memory(memory, expected) {
@@ -96,7 +97,16 @@ test(() => {
       assert_unreached(`Should not call [[HasProperty]] with ${x}`);
     },
     get(o, x) {
-      return 0;
+      // Due to the requirement not to supply both minimum and initial, we need to ignore one of them.
+      switch (x) {
+        case "shared":
+          return false;
+        case "initial":
+        case "maximum":
+          return 0;
+        default:
+          return undefined;
+      }
     },
   });
   new WebAssembly.Memory(proxy);

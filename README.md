@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/WebAssembly/threads.svg?branch=master)](https://travis-ci.org/WebAssembly/threads)
+![Build Status](https://github.com/WebAssembly/threads/actions/workflows/main.yml/badge.svg)
+
 
 # Threads Proposal for WebAssembly
 

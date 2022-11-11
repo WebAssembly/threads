@@ -3,10 +3,10 @@ Title: WebAssembly Web API
 Shortname: wasm-web-api
 Group: wasm
 Status: ED
-Level: 1
-TR: https://www.w3.org/TR/wasm-web-api-1/
+Level: 2
+TR: https://www.w3.org/TR/wasm-web-api-2/
 ED: https://webassembly.github.io/spec/web-api/
-Editor: Ms2ger (Igalia)
+Editor: Ms2ger, Igalia
 Repository: WebAssembly/spec
 Abstract: This document describes the integration of WebAssembly with the broader web platform.
 Markup Shorthands: css no, markdown yes
@@ -32,12 +32,6 @@ Prepare For TR: true
     "title": "WebAssembly JS Integration Specification",
     "publisher": "W3C WebAssembly Community Group",
     "status": "Draft"
-  },
-  "SECURECONTEXTS": {
-    "href": "https://w3c.github.io/webappsec-secure-contexts/",
-    "title": "Secure Contexts",
-    "publisher": "WebAppSec WG",
-    "status": "Candidate Recommendation"
   }
 }
 </pre>
@@ -77,7 +71,6 @@ urlPrefix: https://webassembly.github.io/spec/js-api/; spec: WASMJS
         text: create a memory object; url: #create-a-memory-object
 url:https://html.spec.whatwg.org/#cors-same-origin;text:CORS-same-origin;type:dfn;spec:HTML
 url:https://fetch.spec.whatwg.org/#concept-body-consume-body;text:consume body;type:dfn;spec:FETCH
-url:https://w3c.github.io/webappsec-secure-contexts/#environment-settings-object-contextually-secure; text:contextually secure; type: dfn; spec: SECURECONTEXTS
 </pre>
 
 <pre class='link-defaults'>
@@ -131,7 +124,7 @@ Note: This algorithm accepts a {{Response}} object, or a
 
         1. If |response| is not [=CORS-same-origin=], [=reject=] |returnValue| with a {{TypeError}} and abort these substeps.
         1. If |response|'s [=response/status=] is not an [=ok status=], [=reject=] |returnValue| with a {{TypeError}} and abort these substeps.
-        1. [=Consume body|consume=] |response|'s body as an {{ArrayBuffer}}, and let |bodyPromise| be the result.
+        1. [=Consume body|Consume=] |response|'s body as an {{ArrayBuffer}}, and let |bodyPromise| be the result.
 
             Note: Although it is specified here that the response is consumed entirely before compilation proceeds, that is purely for ease of specification; implementations are likely to instead perform processing in a streaming fashion. The difference is unobservable, and thus the simpler model is specified. <!-- Using consume is a bit silly as it creates an ArrayBuffer but then we just want the underlying bytes. This is because of how streams is specced in terms of promises and JS objects whereas we want to operate more directly on the underlying concept. We can revisit this if things change in the Streams/Fetch specs. -->
 
@@ -172,13 +165,13 @@ Web user agents must augment the {{Module}} interface with the <code>[<a extende
 
 The [=serialization steps=], given |value|, |serialized|, and |forStorage|, are:
 
-    1. If |forStorage| is true, throw a "<a exception>DataCloneError</a>" {{DOMException}}
+    1. If |forStorage| is true, throw a "<a exception>DataCloneError</a>" {{DOMException}}.
 
     1. Set |serialized|.\[[Bytes]] to the [=sub-serialization=] of |value|.\[[Bytes]].
 
     1. Set |serialized|.\[[AgentCluster]] to the [=current Realm=]'s corresponding [=agent cluster=].
 
-The [=deserialization steps=], given |serialized| and |value|, are:
+The [=deserialization steps=], given |serialized|, |value|, and |targetRealm| are:
 
     1. Let |bytes| be the [=sub-deserialization=] of |serialized|.\[[Bytes]].
 
@@ -211,7 +204,7 @@ example) even though the exact format of implementation-dependent stack trace
 strings does not always match, the locations are easily understandable and the
 same across browsers.
 
-To achieve the same goal of a common representations for WebAssembly constructs, the
+To achieve the same goal of a common representation for WebAssembly constructs, the
 following conventions are adopted.
 
 A WebAssembly location is a reference to a particular instruction in the binary, and may be
@@ -280,17 +273,27 @@ application/wasm
 <dt>Encoding Considerations:</dt>
  <dd>binary</dd>
 <dt>Security Considerations:</dt>
- <dd>See see WebAssembly Core Security Considerations<br/>
- https://www.w3.org/TR/wasm-core/#security-considerations%E2%91%A0</dd>
+ <dd>
+  <p>WebAssembly is a standard, a safe, portable, low-level code format. The
+  security considerations associated with executing WebAssembly code are
+  described in https://www.w3.org/TR/wasm-core/#security-considerations.</p>
+  <p>The WebAssembly format includes no integrity or privacy protection. If
+  such protection is needed it must be provided externally, e.g., through
+  the use of HTTPS.</p>
+ </dd>
 <dt>Interoperability Considerations:</dt>
- <dd>See see WebAssembly Core Conformance<br/>
+ <dd>See WebAssembly Core Conformance<br/>
  https://www.w3.org/TR/wasm-core/#conformance</dd>
 <dt>Published specification:</dt>
- https://www.w3.org/TR/wasm-core-1/
+ <dd>https://www.w3.org/TR/wasm-core-1/
  https://www.w3.org/TR/wasm-js-api-1/
- https://www.w3.org/TR/wasm-web-api-1/
+ https://www.w3.org/TR/wasm-web-api-1/</dd>
 <dt>Application Usage:</dt>
- <dd>The application/wasm media type is already in use as the type used to describe WebAssembly files when sent over HTTP to be executed by browsers, which is a common scenario. Additionally, several WebAssembly runtimes that take advantage of the safety and portability while targeting efficient execution and compact representation.</dd>
+ <dd>The application/wasm media type is intended for use as the type used to
+ describe WebAssembly files when sent over HTTP to be executed by browsers,
+ which is a common scenario. Additionally, the type is used by several
+ WebAssembly runtimes that take advantage of the safety and portability
+ while targeting efficient execution and compact representation.</dd>
 <dt>Fragment Identifier Considerations:</dt>
  <dd>None</dd>
 <dt>Restrictions on usage:</dt>

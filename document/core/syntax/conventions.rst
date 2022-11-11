@@ -41,6 +41,9 @@ The following conventions are adopted in defining grammar rules for abstract syn
 
 * Some productions are augmented with side conditions in parentheses, ":math:`(\iff \X{condition})`", that provide a shorthand for a combinatorial expansion of the production into many separate cases.
 
+* If the same meta variable or non-terminal symbol appears multiple times in a production, then all those occurrences must have the same instantiation.
+  (This is a shorthand for a side condition requiring multiple different variables to be equal.)
+
 
 .. _notation-epsilon:
 .. _notation-length:
@@ -116,9 +119,9 @@ The following notation is adopted for manipulating such records:
 
 The update notation for sequences and records generalizes recursively to nested components accessed by "paths" :math:`\X{pth} ::= ([\dots] \;| \;.\K{field})^+`:
 
-* :math:`s \with [i]\,\X{pth} = A` is short for :math:`s \with [i] = (s[i] \with \X{pth} = A)`.
+* :math:`s \with [i]\,\X{pth} = A` is short for :math:`s \with [i] = (s[i] \with \X{pth} = A)`,
 
-* :math:`r \with \K{field}\,\X{pth} = A` is short for :math:`r \with \K{field} = (r.\K{field} \with \X{pth} = A)`.
+* :math:`r \with \K{field}\,\X{pth} = A` is short for :math:`r \with \K{field} = (r.\K{field} \with \X{pth} = A)`,
 
 where :math:`r \with~.\K{field} = A` is shortened to :math:`r \with \K{field} = A`.
 

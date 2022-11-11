@@ -33,9 +33,10 @@
   "\00asm" "\01\00\00\00"
   "\04\04\01"                          ;; Table section with 1 entry
   "\70\00\00"                          ;; no max, minimum 0, funcref
-  "\09\07\01"                          ;; Element section with 1 entry
+  "\09\09\01"                          ;; Element section with 1 entry
+  "\02"                                ;; Element with explicit table index
   "\80\00"                             ;; Table index 0, encoded with 2 bytes
-  "\41\00\0b\00"                       ;; (i32.const 0) with no elements
+  "\41\00\0b\00\00"                    ;; (i32.const 0) with no elements
 )
 (module binary
   "\00asm" "\01\00\00\00"
@@ -289,7 +290,7 @@
 (assert_malformed
   (module binary
     "\00asm" "\01\00\00\00"
-    "\01\08\01"                          ;; type section
+    "\01\0c\01"                          ;; type section
     "\60"                                ;; func type
     "\02"                                ;; num params
     "\7f\7e"                             ;; param type
@@ -852,7 +853,7 @@
     "\41\00"                   ;; i32.const 0
     "\41\03"                   ;; i32.const 3
     "\36"                      ;; i32.store
-    "\03"                      ;; alignment 2
+    "\02"                      ;; alignment 2
     "\82\80\80\80\10"          ;; offset 2 with unused bits set
     "\0b"                      ;; end
   )

@@ -4,19 +4,86 @@
 (module
   (table $t 10 funcref)
   (func $f)
-  (elem (i32.const 0))
-  (elem (i32.const 0) $f $f)
+  (func $g)
+
+  ;; Passive
+  (elem funcref)
+  (elem funcref (ref.func $f) (item ref.func $f) (item (ref.null func)) (ref.func $g))
+  (elem func)
+  (elem func $f $f $g $g)
+
+  (elem $p1 funcref)
+  (elem $p2 funcref (ref.func $f) (ref.func $f) (ref.null func) (ref.func $g))
+  (elem $p3 func)
+  (elem $p4 func $f $f $g $g)
+
+  ;; Active
+  (elem (table $t) (i32.const 0) funcref)
+  (elem (table $t) (i32.const 0) funcref (ref.func $f) (ref.null func))
+  (elem (table $t) (i32.const 0) func)
+  (elem (table $t) (i32.const 0) func $f $g)
+  (elem (table $t) (offset (i32.const 0)) funcref)
+  (elem (table $t) (offset (i32.const 0)) func $f $g)
+  (elem (table 0) (i32.const 0) func)
+  (elem (table 0x0) (i32.const 0) func $f $f)
+  (elem (table 0x000) (offset (i32.const 0)) func)
+  (elem (table 0) (offset (i32.const 0)) func $f $f)
+  (elem (table $t) (i32.const 0) func)
+  (elem (table $t) (i32.const 0) func $f $f)
+  (elem (table $t) (offset (i32.const 0)) func)
+  (elem (table $t) (offset (i32.const 0)) func $f $f)
   (elem (offset (i32.const 0)))
+  (elem (offset (i32.const 0)) funcref (ref.func $f) (ref.null func))
+  (elem (offset (i32.const 0)) func $f $f)
   (elem (offset (i32.const 0)) $f $f)
-  (elem 0 (i32.const 0))
-  (elem 0x0 (i32.const 0) $f $f)
-  (elem 0x000 (offset (i32.const 0)))
-  (elem 0 (offset (i32.const 0)) $f $f)
-  (elem $t (i32.const 0))
-  (elem $t (i32.const 0) $f $f)
-  (elem $t (offset (i32.const 0)))
-  (elem $t (offset (i32.const 0)) $f $f)
+  (elem (i32.const 0))
+  (elem (i32.const 0) funcref (ref.func $f) (ref.null func))
+  (elem (i32.const 0) func $f $f)
+  (elem (i32.const 0) $f $f)
+  (elem (i32.const 0) funcref (item (ref.func $f)) (item (ref.null func)))
+
+  (elem $a1 (table $t) (i32.const 0) funcref)
+  (elem $a2 (table $t) (i32.const 0) funcref (ref.func $f) (ref.null func))
+  (elem $a3 (table $t) (i32.const 0) func)
+  (elem $a4 (table $t) (i32.const 0) func $f $g)
+  (elem $a9 (table $t) (offset (i32.const 0)) funcref)
+  (elem $a10 (table $t) (offset (i32.const 0)) func $f $g)
+  (elem $a11 (table 0) (i32.const 0) func)
+  (elem $a12 (table 0x0) (i32.const 0) func $f $f)
+  (elem $a13 (table 0x000) (offset (i32.const 0)) func)
+  (elem $a14 (table 0) (offset (i32.const 0)) func $f $f)
+  (elem $a15 (table $t) (i32.const 0) func)
+  (elem $a16 (table $t) (i32.const 0) func $f $f)
+  (elem $a17 (table $t) (offset (i32.const 0)) func)
+  (elem $a18 (table $t) (offset (i32.const 0)) func $f $f)
+  (elem $a19 (offset (i32.const 0)))
+  (elem $a20 (offset (i32.const 0)) funcref (ref.func $f) (ref.null func))
+  (elem $a21 (offset (i32.const 0)) func $f $f)
+  (elem $a22 (offset (i32.const 0)) $f $f)
+  (elem $a23 (i32.const 0))
+  (elem $a24 (i32.const 0) funcref (ref.func $f) (ref.null func))
+  (elem $a25 (i32.const 0) func $f $f)
+  (elem $a26 (i32.const 0) $f $f)
+
+  ;; Declarative
+  (elem declare funcref)
+  (elem declare funcref (ref.func $f) (ref.func $f) (ref.null func) (ref.func $g))
+  (elem declare func)
+  (elem declare func $f $f $g $g)
+
+  (elem $d1 declare funcref)
+  (elem $d2 declare funcref (ref.func $f) (ref.func $f) (ref.null func) (ref.func $g))
+  (elem $d3 declare func)
+  (elem $d4 declare func $f $f $g $g)
 )
+
+(module
+  (func $f)
+  (func $g)
+
+  (table $t funcref (elem (ref.func $f) (ref.null func) (ref.func $g)))
+)
+
 
 ;; Basic use
 
@@ -81,6 +148,16 @@
 (assert_return (invoke "call-7") (i32.const 65))
 (assert_return (invoke "call-9") (i32.const 66))
 
+(assert_invalid
+  (module (table 1 funcref) (global i32 (i32.const 0)) (elem (global.get 0) $f) (func $f))
+  "unknown global"
+)
+(assert_invalid
+  (module (table 1 funcref) (global $g i32 (i32.const 0)) (elem (global.get $g) $f) (func $f))
+  "unknown global"
+)
+
+
 ;; Corner cases
 
 (module
@@ -139,108 +216,129 @@
 
 ;; Invalid bounds for elements
 
-(assert_unlinkable
+(assert_trap
   (module
     (table 0 funcref)
     (func $f)
     (elem (i32.const 0) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
 
-(assert_unlinkable
+(assert_trap
   (module
     (table 0 0 funcref)
     (func $f)
     (elem (i32.const 0) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
 
-(assert_unlinkable
+(assert_trap
   (module
     (table 0 1 funcref)
     (func $f)
     (elem (i32.const 0) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
 
-(assert_unlinkable
+(assert_trap
   (module
     (table 0 funcref)
     (elem (i32.const 1))
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
-
-(assert_unlinkable
+(assert_trap
   (module
     (table 10 funcref)
     (func $f)
     (elem (i32.const 10) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
-(assert_unlinkable
+(assert_trap
   (module
     (import "spectest" "table" (table 10 funcref))
     (func $f)
     (elem (i32.const 10) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
 
-(assert_unlinkable
+(assert_trap
   (module
     (table 10 20 funcref)
     (func $f)
     (elem (i32.const 10) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
-(assert_unlinkable
+(assert_trap
   (module
     (import "spectest" "table" (table 10 funcref))
     (func $f)
     (elem (i32.const 10) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
 
-(assert_unlinkable
+(assert_trap
   (module
     (table 10 funcref)
     (func $f)
     (elem (i32.const -1) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
-(assert_unlinkable
+(assert_trap
   (module
     (import "spectest" "table" (table 10 funcref))
     (func $f)
     (elem (i32.const -1) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
 
-(assert_unlinkable
+(assert_trap
   (module
     (table 10 funcref)
     (func $f)
     (elem (i32.const -10) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
-(assert_unlinkable
+(assert_trap
   (module
     (import "spectest" "table" (table 10 funcref))
     (func $f)
     (elem (i32.const -10) $f)
   )
-  "elements segment does not fit"
+  "out of bounds table access"
 )
+
+;; Implicitly dropped elements
+
+(module
+  (table 10 funcref)
+  (elem $e (i32.const 0) func $f)
+  (func $f)
+  (func (export "init")
+    (table.init $e (i32.const 0) (i32.const 0) (i32.const 1))
+  )
+)
+(assert_trap (invoke "init") "out of bounds table access")
+
+(module
+  (table 10 funcref)
+  (elem $e declare func $f)
+  (func $f)
+  (func (export "init")
+    (table.init $e (i32.const 0) (i32.const 0) (i32.const 1))
+  )
+)
+(assert_trap (invoke "init") "out of bounds table access")
 
 ;; Element without table
 
@@ -261,6 +359,49 @@
   )
   "type mismatch"
 )
+
+(assert_invalid
+  (module
+    (table 1 funcref)
+    (elem (ref.null func))
+  )
+  "type mismatch"
+)
+
+(assert_invalid
+  (module 
+    (table 1 funcref)
+    (elem (offset (;empty instruction sequence;)))
+  )
+  "type mismatch"
+)
+
+(assert_invalid
+  (module
+    (table 1 funcref)
+    (elem (offset (i32.const 0) (i32.const 0)))
+  )
+  "type mismatch"
+)
+
+(assert_invalid
+  (module
+    (global (import "test" "global-i32") i32)
+    (table 1 funcref)
+    (elem (offset (global.get 0) (global.get 0)))
+  )
+  "type mismatch"
+)
+
+(assert_invalid
+  (module
+    (global (import "test" "global-i32") i32)
+    (table 1 funcref)
+    (elem (offset (global.get 0) (i32.const 0)))
+  )
+  "type mismatch"
+)
+
 
 (assert_invalid
   (module
@@ -294,11 +435,91 @@
   "constant expression required"
 )
 
-;; Use of internal globals in constant expressions is not allowed in MVP.
-;; (assert_invalid
-;;   (module (memory 1) (data (global.get $g)) (global $g (mut i32) (i32.const 0)))
-;;   "constant expression required"
-;; )
+(assert_invalid
+  (module
+    (global $g (import "test" "g") (mut i32))
+    (table 1 funcref)
+    (elem (global.get $g))
+  )
+  "constant expression required"
+)
+
+(assert_invalid
+   (module 
+     (table 1 funcref)
+     (elem (global.get 0))
+   )
+   "unknown global 0"
+)
+
+(assert_invalid
+   (module
+     (global (import "test" "global-i32") i32)
+     (table 1 funcref)
+     (elem (global.get 1))
+   )
+   "unknown global 1"
+)
+
+(assert_invalid
+   (module 
+     (global (import "test" "global-mut-i32") (mut i32))
+     (table 1 funcref)
+     (elem (global.get 0))
+   )
+   "constant expression required"
+)
+
+;; Invalid elements
+
+(assert_invalid
+  (module
+    (table 1 funcref)
+    (elem (i32.const 0) funcref (ref.null extern))
+  )
+  "type mismatch"
+)
+
+(assert_invalid
+  (module
+    (table 1 funcref)
+    (elem (i32.const 0) funcref (item (ref.null func) (ref.null func)))
+  )
+  "type mismatch"
+)
+
+(assert_invalid
+  (module
+    (table 1 funcref)
+    (elem (i32.const 0) funcref (i32.const 0))
+  )
+  "type mismatch"
+)
+
+(assert_invalid
+  (module
+    (table 1 funcref)
+    (elem (i32.const 0) funcref (item (i32.const 0)))
+  )
+  "type mismatch"
+)
+
+(assert_invalid
+  (module
+    (table 1 funcref)
+    (elem (i32.const 0) funcref (item (call $f)))
+    (func $f (result funcref) (ref.null func))
+  )
+  "constant expression required"
+)
+
+(assert_invalid
+  (module
+    (table 1 funcref)
+    (elem (i32.const 0) funcref (item (i32.add (i32.const 0) (i32.const 1))))
+  )
+  "constant expression required"
+)
 
 ;; Two elements target the same slot
 
@@ -379,3 +600,59 @@
 (assert_return (invoke $module1 "call-7") (i32.const 67))
 (assert_return (invoke $module1 "call-8") (i32.const 69))
 (assert_return (invoke $module1 "call-9") (i32.const 70))
+
+;; Element segments must match element type of table
+
+(assert_invalid
+  (module (func $f) (table 1 externref) (elem (i32.const 0) $f))
+  "type mismatch"
+)
+
+(assert_invalid
+  (module (table 1 funcref) (elem (i32.const 0) externref (ref.null extern)))
+  "type mismatch"
+)
+
+(assert_invalid
+  (module
+    (func $f)
+    (table $t 1 externref)
+    (elem $e funcref (ref.func $f))
+    (func (table.init $t $e (i32.const 0) (i32.const 0) (i32.const 1))))
+  "type mismatch"
+)
+
+(assert_invalid
+  (module
+    (table $t 1 funcref)
+    (elem $e externref (ref.null extern))
+    (func (table.init $t $e (i32.const 0) (i32.const 0) (i32.const 1))))
+  "type mismatch"
+)
+
+;; Initializing a table with an externref-type element segment
+
+(module $m
+	(table $t (export "table") 2 externref)
+	(func (export "get") (param $i i32) (result externref)
+	      (table.get $t (local.get $i)))
+	(func (export "set") (param $i i32) (param $x externref)
+	      (table.set $t (local.get $i) (local.get $x))))
+
+(register "exporter" $m)
+
+(assert_return (invoke $m "get" (i32.const 0)) (ref.null extern))
+(assert_return (invoke $m "get" (i32.const 1)) (ref.null extern))
+
+(assert_return (invoke $m "set" (i32.const 0) (ref.extern 42)))
+(assert_return (invoke $m "set" (i32.const 1) (ref.extern 137)))
+
+(assert_return (invoke $m "get" (i32.const 0)) (ref.extern 42))
+(assert_return (invoke $m "get" (i32.const 1)) (ref.extern 137))
+
+(module
+  (import "exporter" "table" (table $t 2 externref))
+  (elem (i32.const 0) externref (ref.null extern)))
+
+(assert_return (invoke $m "get" (i32.const 0)) (ref.null extern))
+(assert_return (invoke $m "get" (i32.const 1)) (ref.extern 137))
