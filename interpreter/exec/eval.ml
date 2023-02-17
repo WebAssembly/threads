@@ -426,89 +426,89 @@ let rec step_thread (t : thread) : thread =
           vs', []
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
 
-      | AtomicLoad {offset; ty; sz; _}, I32 i :: vs' ->
+      | AtomicLoad {offset; ty; pack; _}, Num (I32 i) :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_i32_u i in
         (try
-          check_align addr ty sz e.at;
-          let v =
-            match sz with
-            | None -> Memory.load_value mem addr offset ty
-            | Some sz -> Memory.load_packed sz ZX mem addr offset ty
-          in v :: vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+          check_align addr ty pack e.at;
+          let n =
+            match pack with
+            | None -> Memory.load_num mem addr offset ty
+            | Some sz -> Memory.load_num_packed sz ZX mem addr offset ty
+         in Num n :: vs', []
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
 
-      | AtomicStore {offset; ty; sz; _}, v :: I32 i :: vs' ->
+      | AtomicStore {offset; ty; pack; _}, Num n :: Num (I32 i) :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_i32_u i in
         (try
-          check_align addr ty sz e.at;
-          (match sz with
-          | None -> Memory.store_value mem addr offset v
-          | Some sz -> Memory.store_packed sz mem addr offset v
+          check_align addr ty pack e.at;
+          (match pack with
+          | None -> Memory.store_num mem addr offset n
+          | Some sz -> Memory.store_num_packed sz mem addr offset n
           );
           vs', []
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
 
-      | AtomicRmw (rmwop, {offset; ty; sz; _}), v :: I32 i :: vs' ->
+      | AtomicRmw (rmwop, {offset; ty; pack; _}), Num n :: Num (I32 i) :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_i32_u i in
         (try
-          check_align addr ty sz e.at;
-          let v1 =
-            match sz with
-            | None -> Memory.load_value mem addr offset ty
-            | Some sz -> Memory.load_packed sz ZX mem addr offset ty
-          in let v2 = Eval_numeric.eval_rmwop rmwop v1 v
-          in (match sz with
-          | None -> Memory.store_value mem addr offset v2
-          | Some sz -> Memory.store_packed sz mem addr offset v2
+          check_align addr ty pack e.at;
+          let n1 =
+            match pack with
+            | None -> Memory.load_num mem addr offset ty
+            | Some sz -> Memory.load_num_packed sz ZX mem addr offset ty
+          in let v2 = Eval_num.eval_rmwop rmwop n1 n
+          in (match pack with
+          | None -> Memory.store_num mem addr offset v2
+          | Some sz -> Memory.store_num_packed sz mem addr offset v2
           );
-          v1 :: vs', []
+          Num n1 :: vs', []
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
 
-      | AtomicRmwCmpXchg {offset; ty; sz; _}, vn :: ve :: I32 i :: vs' ->
+      | AtomicRmwCmpXchg {offset; ty; pack; _}, Num vn :: ve :: Num (I32 i) :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_i32_u i in
         (try
-          check_align addr ty sz e.at;
-          let v1 =
-            match sz with
-            | None -> Memory.load_value mem addr offset ty
-            | Some sz -> Memory.load_packed sz ZX mem addr offset ty
-          in (if v1 = ve then
-                match sz with
-                | None -> Memory.store_value mem addr offset vn
-                | Some sz -> Memory.store_packed sz mem addr offset vn
+          check_align addr ty pack e.at;
+          let n1 =
+            match pack with
+            | None -> Memory.load_num mem addr offset ty
+            | Some sz -> Memory.load_num_packed sz ZX mem addr offset ty
+          in (if Num n1 = ve then
+                match pack with
+                | None -> Memory.store_num mem addr offset vn
+                | Some sz -> Memory.store_num_packed sz mem addr offset vn
           );
-          v1 :: vs', []
+          Num n1 :: vs', []
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
 
-      | MemoryAtomicWait {offset; ty; sz; _}, I64 timeout :: ve :: I32 i :: vs' ->
+      | MemoryAtomicWait {offset; ty; pack; _}, Num (I64 timeout) :: ve :: Num (I32 i) :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_i32_u i in
         (try
-          assert (sz = None);
-          check_align addr ty sz e.at;
+          assert (pack = None);
+          check_align addr ty pack e.at;
           check_shared mem e.at;
-          let v = Memory.load_value mem addr offset ty in
-          if v = ve then
-            assert false  (* TODO *)
-          else
-            I32 1l :: vs', []  (* Not equal *)
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+          let n1 =  Memory.load_num mem addr offset ty in
+          (if Num n1 = ve then
+             assert false  (* TODO *)
+           else
+             Num (I32 1l) :: vs', [])  (* Not equal *)
+         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
 
-      | MemoryAtomicNotify {offset; ty; sz; _}, I32 count :: I32 i :: vs' ->
+      | MemoryAtomicNotify {offset; ty; pack; _}, Num (I32 count) :: Num (I32 i) :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_i32_u i in
         (try
-          check_align addr ty sz e.at;
-          let _ = Memory.load_value mem addr offset ty in
-          if count = 0l then
-            I32 0l :: vs', []  (* Trivial case waking 0 waiters *)
-          else
-            assert false  (* TODO *)
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+          check_align addr ty pack e.at;
+          let _ = Memory.load_num mem addr offset ty in
+          (if count = 0l then
+             Num (I32 0l) :: vs', []  (* Trivial case waking 0 waiters *)
+           else
+             assert false)  (* TODO *)
+         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
 
       | AtomicFence, vs ->
         vs, []
@@ -806,11 +806,6 @@ let eval_const (inst : module_inst) (const : const) : value =
   | [v] -> v
   | _ -> Crash.error const.at "wrong number of results on stack"
 
-let i32 (v : value) at =
-  match v with
-  | I32 i -> i
-  | _ -> Crash.error at "type error: i32 value expected"
-
 
 (* Modules *)
 
@@ -933,6 +928,8 @@ let init c n (m : module_) (exts : extern list) : module_inst * config =
   List.iter (init_func inst) fs;
   let es_elem = List.concat (Lib.List32.mapi run_elem elems) in
   let es_data = List.concat (Lib.List32.mapi run_data datas) in
+  let es_start = Lib.Option.get (Lib.Option.map run_start start) [] in
+  let c' = Lib.Option.fold c (eval (thread inst [] (List.map plain (es_elem @ es_data @ es_start))) c) in
   let c' = Lib.Option.fold c (fun x -> invoke c n (func inst x) []) start in
   inst, c'
 

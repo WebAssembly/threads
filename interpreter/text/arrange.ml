@@ -834,6 +834,7 @@ let rec command mode cmd =
   | Register (n, x_opt) -> [Node ("register " ^ name n ^ var_opt x_opt, [])]
   | Action act -> [action mode act]
   | Assertion ass -> assertion mode ass
+  | Meta _ -> assert false
   | Thread (x_opt, xs, cmds) ->
     [Node ("thread" ^ var_opt x_opt,
       List.map (fun x -> Node ("shared", [Node ("module " ^ x.it, [])])) xs @

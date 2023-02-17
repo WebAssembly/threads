@@ -252,12 +252,12 @@ let string_of_nan = function
 
 let rec type_of_result r =
   match r.it with
-  | NumResult (NumPat n) -> Some (Types.NumType (Values.type_of_num n.it))
-  | NumResult (NanPat n) -> Some (Types.NumType (Values.type_of_num n.it))
-  | VecResult (VecPat _) -> Some (Types.VecType Types.V128Type)
-  | RefResult (RefPat r) -> Some (Types.RefType (Values.type_of_ref r.it))
-  | RefResult (RefTypePat t) -> Some (Types.RefType t)
- | EitherResult rs ->
+  | NumResult (NumPat n) -> Types.NumType (Values.type_of_num n.it)
+  | NumResult (NanPat n) -> Types.NumType (Values.type_of_num n.it)
+  | VecResult (VecPat _) -> Types.VecType Types.V128Type
+  | RefResult (RefPat r) -> Types.RefType (Values.type_of_ref r.it)
+  | RefResult (RefTypePat t) -> Types.RefType t
+  | EitherResult rs ->
     let ts = List.map type_of_result rs in
     List.fold_left (fun t1 t2 -> if t1 = t2 then t1 else None) (List.hd ts) ts
 

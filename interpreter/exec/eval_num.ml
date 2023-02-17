@@ -63,7 +63,7 @@ struct
       | RmwOr -> IXX.or_
       | RmwXor -> IXX.xor
       | RmwXchg -> fun x y -> y (* Return the "new" value, y *)
-    in fun v1 v2 -> to_value (f (of_value 1 v1) (of_value 2 v2))
+    in fun v1 v2 -> to_num (f (of_num 1 v1) (of_num 2 v2))
 end
 
 module I32Op = IntOp (I32) (I32Num)

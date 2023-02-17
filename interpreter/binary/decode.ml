@@ -516,7 +516,7 @@ let rec instr s =
     | 0x10l -> table_size (at var s)
     | 0x11l -> table_fill (at var s)
 
-    | n -> illegal s pos b n
+    | n -> illegal2 s pos b n
     )
 
   | 0xfd ->

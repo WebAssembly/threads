@@ -21,10 +21,16 @@ exception OutOfMemory
 
 let page_size = 0x10000L (* 64 KiB *)
 
-let valid_limits {min; max} =
-  match max with
+let is_aligned a t sz =
+  let align =
+    match sz with
+    | None -> Types.num_size t
+    | Some s -> Types.packed_size s
+  in Int64.(logand a (of_int (align - 1))) = 0L
+
+let within_limits n = function
   | None -> true
-  | Some m -> I32.le_u min m
+  | Some max -> I32.le_u n max
 
 let create n =
   if I32.gt_u n 0x10000l then raise SizeOverflow else
@@ -49,17 +55,13 @@ let type_of mem =
   MemoryType ({min = size mem; max = mem.max}, mem.shared)
 
 let grow mem delta =
-  let MemoryType lim = mem.ty in
-  assert (lim.min = size mem);
-  let old_size = lim.min in
+  let old_size = size mem in
   let new_size = Int32.add old_size delta in
   if I32.gt_u old_size new_size then raise SizeOverflow else
-  let lim' = {lim with min = new_size} in
-  if not (valid_limits lim') then raise SizeLimit else
+  if not (within_limits new_size mem.max) then raise SizeLimit else
   let after = create new_size in
   let dim = Array1_64.dim mem.content in
   Array1.blit (Array1_64.sub mem.content 0L dim) (Array1_64.sub after 0L dim);
-  mem.ty <- MemoryType lim';
   mem.content <- after
 
 let load_byte mem a =

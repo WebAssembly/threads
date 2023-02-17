@@ -175,16 +175,16 @@ function match_result(actual, expected) {
         throw new Error("Wasm return value NaN expected, got " + actual);
       };
       return;
-      case "ref.func":
-        if (typeof actual[i] !== "function") {
-          throw new Error("Wasm function return value expected, got " + actual[i]);
-        };
-        return;
-      case "ref.extern":
-        if (actual[i] === null) {
-          throw new Error("Wasm reference return value expected, got " + actual[i]);
-        };
-        return;
+    case "ref.func":
+      if (typeof actual !== "function") {
+        throw new Error("Wasm function return value expected, got " + actual);
+      };
+      return;
+    case "ref.extern":
+      if (actual === null) {
+        throw new Error("Wasm reference return value expected, got " + actual);
+      };
+      return;
     default:
       if (Array.isArray(expected)) {
         for (let i = 0; i < expected.length; ++i) {
@@ -293,6 +293,7 @@ let value v =
   | Values.Ref (ExternRef n) ->
     [Const (Values.I32 n @@ v.at) @@ v.at; Call (externref_idx @@ v.at) @@ v.at]
   | Values.Ref _ -> assert false
+
 
 let invoke ft vs at =
   [ft @@ at], FuncImport (subject_type_idx @@ at) @@ at,
