@@ -170,7 +170,7 @@ Table Types
 .. math::
    \begin{array}{llclll}
    \production{table type} & \Btabletype &::=&
-     \X{et}{:}\Breftype~~\X{lim},0{:}\Blimits &\Rightarrow& \X{lim}~\X{et} \\
+     \X{et}{:}\Breftype~~\X{lim}{:}\Blimits &\Rightarrow& \X{lim}~\X{et} \\
    \end{array}
 
 
