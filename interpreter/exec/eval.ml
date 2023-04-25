@@ -66,7 +66,7 @@ type action =
     (* memory, cell index, target timestamp *)
   | WaitAction of memory_inst * Memory.address * float
     (* memory, cell index, number of threads to wake *)
-  | NotifyAction of memory_inst * Memory.address * int32
+  | NotifyAction of memory_inst * Memory.address * I32.t
 
 type thread =
 {
