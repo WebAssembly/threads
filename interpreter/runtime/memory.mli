@@ -16,7 +16,7 @@ exception OutOfMemory
 
 val page_size : int64
 
-val is_same_memory : memory -> memory -> bool
+val same : memory -> memory -> bool
 
 val is_aligned : address -> value_type -> pack_size option -> bool
 

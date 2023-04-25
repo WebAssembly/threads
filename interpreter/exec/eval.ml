@@ -37,6 +37,7 @@ let numeric_error at = function
 (* Must be positive and non-zero *)
 let timeout_epsilon = 1000000L
 
+
 (* Administrative Expressions & Configurations *)
 
 type 'a stack = 'a list
@@ -61,11 +62,11 @@ and admin_instr' =
   | Suspend of memory_inst * Memory.address * float
 
 type action =
-    No_action
+  | NoAction
     (* memory, cell index, target timestamp *)
-  | Wait_action of memory_inst * Memory.address * float
+  | WaitAction of memory_inst * Memory.address * float
     (* memory, cell index, number of threads to wake *)
-  | Notify_action of memory_inst * Memory.address * int32
+  | NotifyAction of memory_inst * Memory.address * int32
 
 type thread =
 {
@@ -159,10 +160,10 @@ let check_shared mem at =
  *   c : config
  *)
 
-let rec step_thread (t : thread) : (thread * action) =
-  let {frame; code = vs, es; budget} = t in
+let rec step_thread (t : thread) : thread * action =
+  let {frame; code = vs, es; _} = t in
   let e = List.hd es in
-  let vs', es', action =
+  let vs', es', act =
     match e.it, vs with
     | Plain e', vs ->
       (match e', vs with
@@ -354,7 +355,7 @@ let rec step_thread (t : thread) : (thread * action) =
           if count = 0l then
             I32 0l :: vs', [], No_action  (* Trivial case waking 0 waiters *)
           else
-            vs', [], (Notify_action (mem, addr, count))
+            vs', [], Notify_action (mem, addr, count)
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], No_action)
 
       | AtomicFence, vs ->
@@ -466,7 +467,7 @@ let rec step_thread (t : thread) : (thread * action) =
       (* TODO: meaningful timestamp handling *)
       vs, [e], No_action
 
-  in {t with code = vs', es' @ List.tl es}, action
+  in {t with code = vs', es' @ List.tl es}, act
 
 let rec push_to_inner_stack (c : code) (v : value) : code =
   let vs, es = c in
@@ -487,7 +488,7 @@ let rec try_unsuspend (c : code) (m : memory_inst) (addr : Memory.address) : cod
     Lib.Option.map (fun c'' -> vs, {it = Frame (n, f, c''); at} :: es') (try_unsuspend c' m addr)
   | {it = Suspend (m', addr', timeout); at} :: es' ->
     if Memory.is_same_memory m m' && addr = addr' then
-      Some (((I32 0l) :: vs), es')
+      Some (I32 0l :: vs, es')
     else
       None
   | _ ->
@@ -496,7 +497,7 @@ let rec try_unsuspend (c : code) (m : memory_inst) (addr : Memory.address) : cod
 let try_wake_one (t : thread) (m : memory_inst) (addr : Memory.address) : thread option =
   Lib.Option.map (fun c' -> {t with code = c'}) (try_unsuspend t.code m addr)
 
-let rec wake (c : config) (m : memory_inst) (addr : Memory.address) (count : int32) : (config * int32) =
+let rec wake (c : config) (m : memory_inst) (addr : Memory.address) (count : int32) : config * int32 =
   if count = 0l then
     c, 0l
   else
@@ -504,9 +505,9 @@ let rec wake (c : config) (m : memory_inst) (addr : Memory.address) (count : int
     | [] ->
       c, 0l
     | t :: ts ->
-      let t', count' = (match (try_wake_one t m addr) with | None -> t, 0l | Some t'' -> t'', 1l) in
+      let t', count' = match try_wake_one t m addr with | None -> t, 0l | Some t' -> t', 1l in
       let ts', count'' = wake ts m addr (Int32.sub count count') in
-      (t' :: ts', Int32.add count' count'')
+      t' :: ts', Int32.add count' count''
 
 let rec step (c : config) (n : thread_id) : config =
   let ts1, t, ts2 = Lib.List.extract n c in
@@ -515,12 +516,13 @@ let rec step (c : config) (n : thread_id) : config =
   else
     let t', act = try step_thread t with Stack_overflow ->
       Exhaustion.error (List.hd (snd t.code)).at "call stack exhausted"
-    in match act with
-       | Notify_action (m, addr, count) ->
-         let ts1', count1 = wake ts1 m addr count in
-         let ts2', count2 = wake ts2 m addr (Int32.sub count count1) in
-         ts1' @ [{t' with code = push_to_inner_stack t'.code (I32 (Int32.add count1 count2))}] @ ts2'
-       | _ -> ts1 @ [t'] @ ts2
+    in
+    match act with
+    | Notify_action (m, addr, count) ->
+      let ts1', count1 = wake ts1 m addr count in
+      let ts2', count2 = wake ts2 m addr (Int32.sub count count1) in
+      ts1' @ [{t' with code = push_to_inner_stack t'.code (I32 (Int32.add count1 count2))}] @ ts2'
+    | _ -> ts1 @ [t'] @ ts2
 
 let rec eval (c : config ref) (n : thread_id) : value list =
   match status !c n with
