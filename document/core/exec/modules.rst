@@ -422,7 +422,7 @@ Growing :ref:`memories <syntax-meminst>`
        \begin{array}[t]{@{}r@{~}l@{}}
        \iff & \X{len} = n + |\meminst.\MIDATA| / 64\,\F{Ki} \\
        \wedge & \X{len} \leq 2^{16} \\
-       \wedge & \limits = \meminst.\MITYPE \\
+       \wedge & \limits~\UNSHARED = \meminst.\MITYPE \\
        \wedge & \limits' = \limits \with \LMIN = \X{len} \\
        \wedge & \vdashlimits \limits' \ok) \\
        \end{array} \\

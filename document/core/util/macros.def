@@ -206,6 +206,8 @@
 .. |ETMEM| mathdef:: \xref{syntax/types}{syntax-externtype}{\K{mem}}
 .. |ETGLOBAL| mathdef:: \xref{syntax/types}{syntax-externtype}{\K{global}}
 
+.. |SHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{shared}}
+.. |UNSHARED| mathdef:: \xref{syntax/types}{syntax-memtype}{\K{unshared}}
 
 .. Types, non-terminals
 
@@ -221,6 +223,7 @@
 .. |memtype| mathdef:: \xref{syntax/types}{syntax-memtype}{\X{memtype}}
 
 .. |limits| mathdef:: \xref{syntax/types}{syntax-limits}{\X{limits}}
+.. |share| mathdef:: \xref{syntax/types}{syntax-share}{\X{share}}
 .. |mut| mathdef:: \xref{syntax/types}{syntax-mut}{\X{mut}}
 
 .. |externtype| mathdef:: \xref{syntax/types}{syntax-externtype}{\X{externtype}}
@@ -439,6 +442,21 @@
 .. |DEMOTE| mathdef:: \xref{syntax/instructions}{syntax-instr-numeric}{\K{demote}}
 .. |REINTERPRET| mathdef:: \xref{syntax/instructions}{syntax-instr-numeric}{\K{reinterpret}}
 
+.. |ATOMIC| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic}}
+.. |ATADD| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{add}}
+.. |ATSUB| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{sub}}
+.. |ATAND| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{and}}
+.. |ATOR| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{or}}
+.. |ATXOR| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{xor}}
+.. |ATXCHG| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{xchg}}
+.. |ATCMPXCHG| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{cmpxchg}}
+.. |ATOMICLOAD| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.load}}
+.. |ATOMICSTORE| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.store}}
+.. |ATOMICRMW| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.rmw}}
+.. |MEMORYATOMICWAIT| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.wait}}
+.. |MEMORYATOMICNOTIFY| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.notify}}
+.. |MEMORYATOMICFENCE| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.fence}}
+
 .. |VCONST| mathdef:: \xref{syntax/instructions}{syntax-instr-vec}{\K{const}}
 .. |SHUFFLE| mathdef:: \xref{syntax/instructions}{syntax-instr-vec}{\K{shuffle}}
 .. |SWIZZLE| mathdef:: \xref{syntax/instructions}{syntax-instr-vec}{\K{swizzle}}
@@ -544,6 +562,8 @@
 
 .. |instr| mathdef:: \xref{syntax/instructions}{syntax-instr}{\X{instr}}
 .. |expr| mathdef:: \xref{syntax/instructions}{syntax-expr}{\X{expr}}
+
+.. |atop| mathdef:: \xref{syntax/instructions}{syntax-atop}{\X{atop}}
 
 
 
@@ -1035,9 +1055,61 @@
 .. |SELEMS| mathdef:: \xref{exec/runtime}{syntax-store}{\K{elems}}
 .. |SDATAS| mathdef:: \xref{exec/runtime}{syntax-store}{\K{datas}}
 
+
 .. Store, non-terminals
 
 .. |store| mathdef:: \xref{exec/runtime}{syntax-store}{\X{store}}
+
+
+.. Events, terminals
+
+.. |AT| mathdef:: \xref{exec/runtime}{syntax-time}{\mathbin{\K{at}}}
+.. |ATTIME| mathdef:: \xref{exec/runtime}{syntax-time}{\K{time}}
+.. |ATVAL| mathdef:: \xref{exec/runtime}{syntax-time}{\K{val}}
+
+.. |ETIME| mathdef:: \xref{exec/runtime}{syntax-evt}{\K{time}}
+.. |EACTS| mathdef:: \xref{exec/runtime}{syntax-evt}{\K{acts}}
+
+.. |ARD| mathdef:: \xref{exec/runtime}{syntax-act}{\K{rd}}
+.. |AWR| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wr}}
+.. |ARMW| mathdef:: \xref{exec/runtime}{syntax-act}{\K{rmw}}
+
+.. |UNORD| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{unord}}
+.. |SEQCST| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{seqcst}}
+.. |INIT| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{init}}
+
+.. |LLEN| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{len}}
+.. |LDATA| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{data}}
+.. |LELEM| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{elem}}
+.. |LVAL| mathdef:: \xref{exec/runtime}{syntax-loc}{\K{val}}
+
+
+.. Events, non-terminals
+
+.. |time| mathdef:: \xref{exec/runtime}{syntax-time}{\X{time}}
+.. |evt| mathdef:: \xref{exec/runtime}{syntax-evt}{\X{evt}}
+.. |act| mathdef:: \xref{exec/runtime}{syntax-act}{\X{act}}
+.. |hostact| mathdef:: \xref{exec/runtime}{syntax-act}{\X{hostact}}
+.. |ord| mathdef:: \xref{exec/runtime}{syntax-ord}{\X{ord}}
+.. |loc| mathdef:: \xref{exec/runtime}{syntax-loc}{\X{loc}}
+.. |fld| mathdef:: \xref{exec/runtime}{syntax-fld}{\X{fld}}
+.. |storeval| mathdef:: \xref{exec/runtime}{syntax-storeval}{\X{storeval}}
+
+
+.. Relaxed Memory Model Judgements
+
+.. |consistent| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{consistent}}}
+.. |consistentwith| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{consistent-with}}}
+.. |readseachfrom| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{reads-each-from}}}
+.. |readsfrom| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{reads-from}}}
+.. |notear| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{no-tear}}}
+.. |sclastvisible| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{sc-last-visible}}}
+.. |hbconsistent| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{hb-consistent}}}
+.. |valueconsistent| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{value-consistent}}}
+
+.. |prechb| mathdef:: \xref{exec/relaxed}{relaxed-prechb}{\mathrel{\prec_{\K{hb}}}}
+.. |prectot| mathdef:: \xref{exec/relaxed}{relaxed-prectot}{\mathrel{\prec_{\K{tot}}}}
+
 
 
 .. Stack, terminals
@@ -1066,6 +1138,7 @@
 .. |REFEXTERNADDR| mathdef:: \xref{exec/runtime}{syntax-ref.extern}{\K{ref{.}extern}}
 .. |TRAP| mathdef:: \xref{exec/runtime}{syntax-trap}{\K{trap}}
 .. |INVOKE| mathdef:: \xref{exec/runtime}{syntax-invoke}{\K{invoke}}
+.. |WAITX| mathdef:: \xref{exec/runtime}{syntax-waitx}{\K{wait'}}
 
 
 .. Values & Results, non-terminals

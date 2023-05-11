@@ -611,6 +611,71 @@ The |DATADROP| instruction prevents further use of a passive data segment. This 
    This restriction may be lifted in future versions.
 
 
+.. index:: ! atomic memory instruction, ! rmw, ! atomic operator
+   pair: abstract syntax; instruction
+.. _syntax-atop:
+.. _syntax-instr-atomic-memory:
+
+Atomic Memory Instructions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Instructions in this group are concerned with accessing :ref:`linear memory <syntax-mem>` atomically.
+
+.. math::
+   \begin{array}{llcl}
+   \production{atomic operator} & \atop &::=&
+     \ATADD ~|~
+     \ATSUB ~|~
+     \ATAND ~|~
+     \ATOR ~|~
+     \ATXOR ~|~
+     \ATXCHG \\
+   \production{instruction} & \instr &::=&
+     \dots \\&&|&
+     \K{i}\X{nn}\K{.}\ATOMICLOAD~\memarg \\&&|&
+     \K{i}\X{nn}\K{.}\ATOMICSTORE~\memarg \\&&|&
+     \K{i}\X{nn}\K{.}\ATOMICLOAD\K{8\_u}~\memarg ~|~
+     \K{i}\X{nn}\K{.}\ATOMICLOAD\K{16\_u}~\memarg ~|~
+     \K{i64.}\ATOMICLOAD\K{32\_u}~\memarg \\&&|&
+     \K{i}\X{nn}\K{.}\ATOMICSTORE\K{8}~\memarg ~|~
+     \K{i}\X{nn}\K{.}\ATOMICSTORE\K{16}~\memarg ~|~
+     \K{i64.}\ATOMICSTORE\K{32}~\memarg \\&&|&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{.}\atop~\memarg \\&&|&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{8.}\atop\K{\_u}~\memarg \\&&|&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{16.}\atop\K{\_u}~\memarg \\&&|&
+     \K{i64.}\ATOMICRMW\K{32.}\atop\K{\_u}~\memarg \\&&|&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{.}\ATCMPXCHG~\memarg \\&&|&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{8.}\ATCMPXCHG\K{\_u}~\memarg \\&&|&
+     \K{i}\X{nn}\K{.}\ATOMICRMW\K{16.}\ATCMPXCHG\K{\_u}~\memarg \\&&|&
+     \K{i64.}\ATOMICRMW\K{32.}\ATCMPXCHG\K{\_u}~\memarg \\&&|&
+     \MEMORYATOMICNOTIFY~\memarg \\&&|&
+     \MEMORYATOMICWAIT\X{nn}~\memarg \\&&|&
+     \MEMORYATOMICFENCE \\
+   \end{array}
+
+Memory is accessed atomically using the |ATOMICLOAD|, |ATOMICSTORE|, and
+|ATOMICRMW| instructions.
+All instructions take a *memory immediate* |memarg|, just like their non-atomic equivalents.
+Unlike non-atomic memory access instructions, only integer :ref:`value types <syntax-valtype>` can be used.
+Also unlike non-atomic memory access instructions, there are no sign extension modes; atomic memory accesses are always zero-extending.
+
+The |ATOMICRMW| instructions are `read-modify-write <https://en.wikipedia.org/wiki/Read-modify-write>`_ instructions.
+They each have an *atomic operator*, which specifies how memory will be modified.
+Each instruction returns the value read from memory before modification.
+The |ATXCHG| operator doesn't use the read value, but instead stores its argument unmodified.
+The |ATCMPXCHG| operator is similar, but only performs this action conditionally,
+if the read value is equal to a provided comparison argument.
+All other atomic operators have the same behavior as the :ref:`binary operator <syntax-ibinop>` of the same name.
+
+The |MEMORYATOMICWAIT|, |MEMORYATOMICNOTIFY|, and |MEMORYATOMICFENCE| instructions provide primitive
+synchronization between :ref:`threads <syntax-thread>`.
+The |MEMORYATOMICWAIT| instructions atomically load a value from the calculated effective address and compare it to an expected value.
+If they are equal, the thread is then suspended until a given timeout expires or another thread wakes it.
+The |MEMORYATOMICNOTIFY| instruction wakes threads that are waiting on a given
+address, up to a given maximum.
+The |MEMORYATOMICFENCE| instruction takes no operands, and returns nothing. It is intended to preserve the synchronization guarantees of the fence operators of higher-level languages. Unlike other atomic operators, it does not target a particular linear memory.
+
+
 .. index:: ! control instruction, ! structured control, ! label, ! block, ! block type, ! branch, ! unwinding, stack type, label index, function index, type index, vector, trap, function, table, function type, value type, type index
    pair: abstract syntax; instruction
    pair: abstract syntax; block type

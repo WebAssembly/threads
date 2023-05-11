@@ -190,6 +190,41 @@ even where this identity is not observable from within WebAssembly code itself
    hence logical addresses can be arbitrarily large natural numbers.
 
 
+.. index:: ! time stamp, ! happens-before, thread, event
+.. _syntax-time:
+.. _relaxed-prechb:
+
+Time Stamps
+~~~~~~~~~~~
+
+In order to track the relative ordering in the execution of multiple :ref:`threads <syntax-thread>` and the occurrence of :ref:`events <syntax-evt>`,
+the semantics uses a notion of abstract *time stamps*.
+
+.. math::
+   \begin{array}{llll}
+   \production{(time stamp)} & \time &::=&
+     \dots \\
+   \end{array}
+
+Each time stamp denotes a discrete point in time, and is drawn from an infinite set.
+The shape of time stamps is not specified or observable.
+However, time stamps form a partially ordered set:
+a time stamp :math:`\time_1` *happens before* :math:`\time_2`, written :math:`\time_1 \prechb \time_2`, if it is known to have occurred earlier in time.
+
+.. note:
+
+   Although the semantics choses time stamps non-deterministically,
+   it includes conditions that enforce some ordering constraints on the chosen values, thereby imposing an ordering on execeution and events that guarantees well-defined causalities.
+
+   The ordering is partial because some events have an unspecified relative order -- in particular, when they occur in separate threads without intervening synchronisation.
+
+.. _relaxed-prectot:
+.. todo:: define prectot here as well?
+
+
+.. _notation-attime:
+
+
 .. index:: ! instance, function type, function instance, table instance, memory instance, global instance, element instance, data instance, export instance, table address, memory address, global address, element address, data address, index, name
    pair: abstract syntax; module instance
    pair: module; instance
@@ -287,20 +322,29 @@ It also is an invariant that the length of the element vector never exceeds the 
 Memory Instances
 ~~~~~~~~~~~~~~~~
 
+.. todo:: We used to update the memory type when a memory is grown. This does not work for shared memories. In fact, the "current" type of a shared memory is nondeterministic. We need to model that during instantiation somehow.
+
 A *memory instance* is the runtime representation of a linear :ref:`memory <syntax-mem>`.
-It records its :ref:`type <syntax-memtype>` and holds a vector of :ref:`bytes <syntax-byte>`.
+It records its original :ref:`memory type <syntax-memtype>`
+and takes one of two different shapes depending on whether that type is :ref:`shared <syntax-shared>` or not.
+It is an invariant of the semantics that the shape always matches the type.
 
 .. math::
    \begin{array}{llll}
-   \production{memory instance} & \meminst &::=&
-     \{ \MITYPE~\memtype, \MIDATA~\vec(\byte) \} \\
+   \production{(memory instance)} & \meminst &::=&
+     \{ \MITYPE~\limits~\UNSHARED, \MIDATA~\vec(\byte) \} \\ &&|&
+     \{ \MITYPE~\limits~\SHARED \} \\
    \end{array}
 
+The instance of a memory with :ref:`unshared <syntax-unshared>` :ref:`type <syntax-memtype>` holds a vector of :ref:`bytes <syntax-byte>` directly representing its state.
 The length of the vector always is a multiple of the WebAssembly *page size*, which is defined to be the constant :math:`65536` -- abbreviated :math:`64\,\F{Ki}`.
-
 The bytes can be mutated through :ref:`memory instructions <syntax-instr-memory>`, the execution of an active :ref:`data segment <syntax-data>`, or by external means provided by the :ref:`embedder <embedder>`.
-
 It is an invariant of the semantics that the length of the byte vector, divided by page size, never exceeds the maximum size of :math:`\memtype`, if present.
+
+For memories of :ref:`shared <syntax-shared>` :ref:`type <syntax-memtype>`, no state is recorded in the instance itself.
+
+..
+   Instead of representing the contents of a memory directly the abstract machine hence separately records :ref:`traces <relaxed-trace>` of corresponding memory :ref:`events <syntax-evt>` that describe all accesses that occur.
 
 
 .. index:: ! global instance, global, value, mutability, instruction, embedder
@@ -534,7 +578,8 @@ In order to express the reduction of :ref:`traps <trap>`, :ref:`calls <syntax-ca
      \REFEXTERNADDR~\externaddr \\ &&|&
      \INVOKE~\funcaddr \\ &&|&
      \LABEL_n\{\instr^\ast\}~\instr^\ast~\END \\ &&|&
-     \FRAME_n\{\frame\}~\instr^\ast~\END \\
+     \FRAME_n\{\frame\}~\instr^\ast~\END \\ &&|&
+     \WAITX~\loc~n \\
    \end{array}
 
 The |TRAP| instruction represents the occurrence of a trap.
@@ -548,6 +593,14 @@ It unifies the handling of different forms of calls.
 The |LABEL| and |FRAME| instructions model :ref:`labels <syntax-label>` and :ref:`frames <syntax-frame>` :ref:`"on the stack" <exec-notation>`.
 Moreover, the administrative syntax maintains the nesting structure of the original :ref:`structured control instruction <syntax-instr-control>` or :ref:`function body <syntax-func>` and their :ref:`instruction sequences <syntax-instr-seq>` with an |END| marker.
 That way, the end of the inner instruction sequence is known when part of an outer sequence.
+
+.. todo:: describe |WAITX|
+
+.. todo:: add allocation instructions
+
+.. todo:: add host instruction
+
+.. todo:: correctly capture tearing (floats, SIMD)
 
 .. note::
    For example, the :ref:`reduction rule <exec-block>` for |BLOCK| is:
@@ -606,6 +659,75 @@ This definition allows to index active labels surrounding a :ref:`branch <syntax
    When a branch occurs,
    this rule replaces the targeted label and associated instruction sequence with the label's continuation.
    The selected label is identified through the :ref:`label index <syntax-labelidx>` :math:`l`, which corresponds to the number of surrounding |LABEL| instructions that must be hopped over -- which is exactly the count encoded in the index of a block context.
+
+
+.. index:: ! event, ! action, time stamp, external instance, address, store, memory, table, value, byte
+.. _syntax-evt:
+.. _syntax-act:
+.. _syntax-ord:
+.. _syntax-loc:
+.. _syntax-fld:
+.. _syntax-storeval:
+
+Events
+~~~~~~
+
+The interaction of a computation with the :ref:`store <syntax-store>` is described through *events*.
+An event is a (possibly empty) set of *actions*, such as reads and writes,
+that are atomically performed by the execution of an individual :ref:`instruction <syntax-instr>`.
+Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely identifies it.
+
+.. math::
+   \begin{array}{llcl}
+   \production{(event)} & \evt &::=&
+     \act^\ast~\AT~\time \\
+   \production{(action)} & \act &::=&
+     \ARD_{\ord}~\loc~\storeval \\&&|&
+     \AWR_{\ord}~\loc~\storeval \\&&|&
+     \ARMW~\loc~\storeval~\storeval \\&&|&
+     \hostact \\
+   \production{(ordering)} & \ord &::=&
+     \UNORD ~|~
+     \SEQCST ~|~
+     \INIT \\
+   \production{(location)} & \loc &::=&
+     \addr.\fld \\
+   \production{(field)} & \fld &::=&
+     \LLEN ~|~
+     \LDATA[\u32] \\
+   \production{(store value)} & \storeval &::=&
+     \val ~|~
+     b^\ast \\
+   \end{array}
+
+The access of *mutable* shared state is performed through the |ARD|, |AWR|, and |ARMW| actions.
+Each action accesses an abstract *location*, which consists of an :ref:`address <syntax-addr>` of a :ref:`shared <syntax-shared>` :ref:`memory <syntax-meminst>` instance and a symbolic *field* name in the respective object.
+This is either |LLEN| for the size or |LDATA| for the vector of bytes.
+
+In each case, read and write actions record the *store value* that has been read or written, which is either a regular :ref:`value <syntax-val>` or a sequence of :ref:`bytes <syntax-byte>`, depending on the location accessed.
+An |ARMW| event, performing an atomic read-modify-write access, records both the store values read (first) and written (second);
+it is an invariant of the semantics that both are either regular values of the same type or byte sequences of the same length.
+
+|ARD| and |AWR| events are further annotated by a memory *ordering*, which describes whether the access is *unordered*, as e.g. performed by a regular :ref:`load or store instruction <syntax-instr-memory>`, or *sequentially consistent*, as e.g. performed by :ref:`atomic memory instructions <syntax-instr-atomic-memory>`.
+A third ordering, *initialisation*, is used to record the initial value taken by the memory location upon its creation.
+A |ARMW| action always is sequentially consistent.
+
+.. note::
+   Future versions of WebAssembly may introduce additional orderings.
+
+Finally, a *host action* is an action performed outside of WebAssembly code.
+Its form and meaning is outside the scope of this specification.
+
+.. note::
+   An :ref:`embedder <embedder>` may define a custom set of host actions and respective ordering constraints to model other forms of interactions that are not expressible within WebAssembly, but whose ordering relative to WebAssembly events is relevant for the combined semantics.
+
+
+Convention
+..........
+
+* The actions :math:`\ARD_{\ord}` and :math:`\AWR_{\ord}` are abbreviated to just :math:`\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
+
+.. todo:: define notational shorthands over actions and events (or better put that in relaxed.rst?)
 
 
 .. index:: ! configuration, ! thread, store, frame, instruction, module instruction

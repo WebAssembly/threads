@@ -28,12 +28,18 @@ Prepare For TR: true
 urlPrefix: https://tc39.github.io/ecma262/; spec: ECMASCRIPT
     type: interface; for: ECMAScript
         text: ArrayBuffer; url: sec-arraybuffer-objects
+        text: SharedArrayBuffer; url: sec-sharedarraybuffer-objects
     type: exception; for: ECMAScript
         text: Error; url: sec-error-objects
         text: NativeError; url: sec-nativeerror-constructors
         text: TypeError; url: sec-native-error-types-used-in-this-standard-typeerror
         text: RangeError; url: sec-native-error-types-used-in-this-standard-rangeerror
     type: dfn
+        text: agent cluster; url: sec-agent-clusters
+        text: agent; url: agent
+        url: sec-data-blocks
+            text: data block
+            text: shared data block
         url: sec-returnifabrupt-shorthands
             text: !
             text: ?
@@ -587,6 +593,7 @@ Note: The use of this synchronous API is discouraged, as some implementations so
 dictionary MemoryDescriptor {
   required [EnforceRange] unsigned long initial;
   [EnforceRange] unsigned long maximum;
+  boolean shared = false;
 };
 
 [LegacyNamespace=WebAssembly, Exposed=*]
@@ -608,8 +615,12 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
     To <dfn>create a memory buffer</dfn> from a [=memory address=] |memaddr|, perform the following steps:
 
     1. Let |block| be a [=Data Block=] which is [=identified with=] the underlying memory of |memaddr|.
-    1. Let |buffer| be a new {{ArrayBuffer}} whose \[[ArrayBufferData]] is |block| and \[[ArrayBufferByteLength]] is set to the length of |block|.
-    1. Set |buffer|.\[[ArrayBufferDetachKey]] to "WebAssembly.Memory".
+    1. If |block| is a [=Shared Data Block=],
+        1. Let |buffer| be a new {{SharedArrayBuffer}} whose \[[ArrayBufferData]] is |block| and \[[ArrayBufferByteLength]] is set to the length of |block|.
+        1. Perform ! [=SetIntegrityLevel=](|buffer|, `"frozen"`).
+    1. Otherwise,
+        1. Let |buffer| be a new {{ArrayBuffer}} whose \[[ArrayBufferData]] is |block| and \[[ArrayBufferByteLength]] is set to the length of |block|.
+        1. Set |buffer|.\[[ArrayBufferDetachKey]] to "WebAssembly.Memory".
     1. Return |buffer|.
 </div>
 
@@ -639,7 +650,9 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
     1. Let |initial| be |descriptor|["initial"].
     1. If |descriptor|["maximum"] [=map/exists=], let |maximum| be |descriptor|["maximum"]; otherwise, let |maximum| be empty.
     1. If |maximum| is not empty and |maximum| &lt; |initial|, throw a {{RangeError}} exception.
-    1. Let |memtype| be { min |initial|, max |maximum| }.
+    1. Let |shared| be |descriptor|["shared"].
+    1. If |shared| is true and |maximum| is empty, throw a {{TypeError}} exception.
+    1. Let |memtype| be { min |initial|, max |maximum|, shared |shared| }.
     1. Let |store| be the [=surrounding agent=]'s [=associated store=].
     1. Let (|store|, |memaddr|) be [=mem_alloc=](|store|, |memtype|). If allocation fails, throw a {{RangeError}} exception.
     1. Set the [=surrounding agent=]'s [=associated store=] to |store|.
@@ -652,7 +665,8 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
     1. Let |map| be the [=surrounding agent=]'s associated [=Memory object cache=].
     1. Assert: |map|[|memaddr|] [=map/exists=].
     1. Let |memory| be |map|[|memaddr|].
-    1. Perform [=!=] [$DetachArrayBuffer$](|memory|.\[[BufferObject]], "WebAssembly.Memory").
+    1. If |memory|.\[[BufferObject]] is an {{ArrayBuffer}},
+       1. Perform [=!=] [$DetachArrayBuffer$](|memory|.\[[BufferObject]], "WebAssembly.Memory").
     1. Let |buffer| be the result of [=create a memory buffer|creating a memory buffer=] from |memaddr|.
     1. Set |memory|.\[[BufferObject]] to |buffer|.
 </div>
@@ -680,7 +694,19 @@ Immediately after a WebAssembly [=memory.grow=] instruction executes, perform th
 </div>
 
 <div algorithm>
-    The getter of the <dfn attribute for="Memory">buffer</dfn> attribute of {{Memory}} returns **this**.\[[BufferObject]].
+    The getter of the <dfn attribute for="Memory">buffer</dfn> attribute of {{Memory}} perfoms the following steps:
+
+    1. Let |memaddr| be **this**.\[[Memory]].
+    1. Let |block| be a [=Data Block=] which is [=identified with=] the underlying memory of |memaddr|.
+    1. If |block| is a [=Shared Data Block=],
+        1. Let |map| be the [=surrounding agent=]'s associated [=Memory object cache=].
+        1. Assert: |map|[|memaddr|] [=map/exists=].
+        1. Let |newMemory| be |map|[|memaddr|].
+        1. Let |newBufferObject| be |newMemory|.\[[BufferObject]].
+        1. Set **this**.\[[BufferObject]] to |newBufferObject|.
+        1. Return |newBufferObject|.
+    1. Otherwise,
+        1. Return **this**.\[[BufferObject]].
 </div>
 
 <h3 id="tables">Tables</h3>

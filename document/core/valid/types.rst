@@ -142,7 +142,7 @@ Memory Types
    \frac{
      \vdashlimits \limits : 2^{16}
    }{
-     \vdashmemtype \limits \ok
+     \vdashmemtype \limits~\share \ok
    }
 
 
