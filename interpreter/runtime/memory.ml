@@ -20,9 +20,6 @@ exception OutOfMemory
 
 let page_size = 0x10000L (* 64 KiB *)
 
-let same m1 m2 =
-  m1.content == m2.content
-
 let is_aligned a t sz =
   let align =
     match sz with

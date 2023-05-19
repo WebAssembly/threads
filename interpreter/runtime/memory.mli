@@ -16,8 +16,6 @@ exception OutOfMemory
 
 val page_size : int64
 
-val same : memory -> memory -> bool
-
 val is_aligned : address -> value_type -> pack_size option -> bool
 
 val alloc : memory_type -> memory (* raises SizeOverflow, OutOfMemory *)

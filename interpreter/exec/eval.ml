@@ -63,8 +63,6 @@ and admin_instr' =
 
 type action =
   | NoAction
-    (* memory, cell index, target timestamp *)
-  | WaitAction of memory_inst * Memory.address * float
     (* memory, cell index, number of threads to wake *)
   | NotifyAction of memory_inst * Memory.address * I32.t
 
@@ -341,7 +339,7 @@ let rec step_thread (t : thread) : thread * action =
               I32 2l :: vs', [], NoAction (* Treat as though wait timed out immediately *)
             else
               (* TODO: meaningful timestamp handling *)
-              vs', [Suspend (mem, addr, 0.) @@ e.at], (WaitAction (mem, addr, 0.))
+              vs', [Suspend (mem, addr, 0.) @@ e.at], NoAction
           else
             I32 1l :: vs', [], NoAction  (* Not equal *)
         with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], NoAction)
@@ -487,7 +485,7 @@ let rec try_unsuspend (c : code) (m : memory_inst) (addr : Memory.address) : cod
   | {it = Frame (n, f, c'); at} :: es' ->
     Lib.Option.map (fun c'' -> vs, {it = Frame (n, f, c''); at} :: es') (try_unsuspend c' m addr)
   | {it = Suspend (m', addr', timeout); at} :: es' ->
-    if Memory.same m m' && addr = addr' then
+    if m == m' && addr = addr' then
       Some (I32 0l :: vs, es')
     else
       None
