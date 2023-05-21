@@ -3344,8 +3344,55 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 :math:`\MEMORYATOMICNOTIFY~\memarg`
 ....................................
 
-.. todo:: add text
 .. todo:: bounds edge-case, memory length?
+
+9. Let :math:`N` be 32.
+
+1. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+
+2. Pop the value :math:`\I32.\CONST~k` from the stack.
+
+6. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+
+7. Pop the value :math:`\I32.\CONST~i` from the stack.
+
+8. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+
+9. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
+
+   a. Trap.
+
+10. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+11. Assert: due to :ref:`validation <valid-atomic.rmwn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+12. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+13. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
+
+14. If :math:`\X{mem}.\MITYPE` is :math:`\limits~\UNSHARED`, then:
+
+    a. If :math:`\X{ea} + N/8` is larger than the length of :math:`\X{mem}.\MIDATA`, then:
+
+       i. Trap.
+
+    b. Else:
+
+       i. Push the value :math:`t.\CONST~0` to the stack.
+
+15. Else:
+
+    a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+
+    b. If :math:`\X{ea} + N/8` is larger than :math:`n`, then:
+
+       i. Trap.
+
+    c. Else:
+
+       i. Perform the :ref:`action <syntax-act>` :math:`(\ANOTIFY~a.\LDATA[\X{ea}]~n~k)` to notify :math:`n` threads (up to :math:`k`) waiting at data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+
+       ii. Push the value :math:`t.\CONST~n` to the stack.
 
 .. math::
    \begin{array}{l}
@@ -3357,8 +3404,8 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & \X{mem}.\MITYPE = \limits~\UNSHARED \\
-     \wedge & \X{ea} \leq |\X{mem}.\MIDATA| \\
-     \wedge & \X{ea} \mod 4 = 0) \\[1ex]
+     \wedge & \X{ea} + N/8 \leq |\X{mem}.\MIDATA| \\
+     \wedge & \X{ea} \mod N/8 = 0) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -3369,22 +3416,22 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & \X{mem}.\MITYPE = \limits~\UNSHARED \\
-     \wedge & \X{ea} > |\X{mem}.\MIDATA| \vee \X{ea} \mod 4 \neq 0) \\
+     \wedge & \X{ea} + N/8 > |\X{mem}.\MIDATA| \vee \X{ea} \mod N/8 \neq 0) \\
      \end{array}
    \\
    %
    ~\\
    \begin{array}{lcl@{\qquad}l}
    F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY~\memarg
-     &\stepto^{(\ARD~a.\LLEN~n)~(\K{wake}~a.\LDATA[\X{ea}]~j~k)}&
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ANOTIFY~a.\LDATA[\X{ea}]~j~k)}&
      F; (\I32.\CONST~j)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
-     \wedge & \X{ea} \leq n \\
+     (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\ord
+     \wedge & \X{ea} + N/8 \leq n \\
      \wedge & j \leq k \\
-     \wedge & \X{ea} \mod 4 = 0) \\[1ex]
+     \wedge & \X{ea} \mod N/8 = 0) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -3395,7 +3442,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
-     \wedge & \X{ea} > n \vee \X{ea} \mod 4 \neq 0) \\
+     \wedge & \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
      \end{array}
    \\
    %
@@ -3403,7 +3450,8 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \begin{array}[t]{@{}r@{~}l@{}}
    (\where & a = F.\AMODULE.\MIMEMS[0] \\
    \wedge & \X{mem} = S.\SMEMS[a] \\
-   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET \\
+   \wedge & N = 32) \\
    \end{array}
    \end{array}
 
@@ -3413,7 +3461,55 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 :math:`\MEMORYATOMICWAIT{N}~\memarg`
 .....................................
 
-.. todo:: add text
+1. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I64| is on the top of the stack.
+
+2. Pop the value :math:`\I64.\CONST~k` from the stack.
+
+1. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` :math:`\iN` is on the top of the stack.
+
+5. Pop the value :math:`\iN.\CONST~c` from the stack.
+
+6. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
+
+7. Pop the value :math:`\I32.\CONST~i` from the stack.
+
+8. Let :math:`\X{ea}` be :math:`i + \memarg.\OFFSET`.
+
+9. If :math:`\X{ea}` modulo :math:`N/8` is not equal to :math:`0`, then:
+
+   a. Trap.
+
+10. Let :math:`F` be the :ref:`current <exec-notation-textual>` :ref:`frame <syntax-frame>`.
+
+11. Assert: due to :ref:`validation <valid-atomic.rmwn>`, :math:`F.\AMODULE.\MIMEMS[0]` exists.
+
+12. Let :math:`a` be the :ref:`memory address <syntax-memaddr>` :math:`F.\AMODULE.\MIMEMS[0]`.
+
+13. Let :math:`\X{mem}` be the :ref:`memory instance <syntax-meminst>` :math:`S.\SMEMS[a]`.
+
+14. If :math:`\X{mem}.\MITYPE` is :math:`\limits~\UNSHARED`, then:
+
+    a. Trap.
+
+15. Else:
+
+    a. Perform the :ref:`action <syntax-act>` :math:`(\ARD~a.\LLEN~n)` to read the length :math:`n` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+
+    b. If :math:`\X{ea} + N/8` is larger than :math:`n`, then:
+
+       i. Trap.
+
+    c. Perform the :ref:`action <syntax-act>` :math:`(\ARD_{\SEQCST}~a.\LDATA[\X{ea}]~b^\ast)` to read :math:`N/8` bytes :math:`b^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+
+    d. If :math:`\bytes_{\iN}(c)` is equal to :math:`b^\ast` then:
+
+       i. Perform the :ref:`action <syntax-act>` :math:`(\AWAIT~a.\LDATA[\X{ea}])` to register the current thread as waiting for a signal at data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+
+       ii. Execute the instruction :math:`\WAITX~a.\LDATA[\X{ea}]~k`.
+
+    e. Else:
+
+       i. Push the value :math:`t.\CONST~1` to the stack.
 
 .. math::
    \begin{array}{l}
@@ -3431,12 +3527,13 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    ~\\
    \begin{array}{lcl@{\qquad}l}
    F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD~a.\LDATA[\X{ea}]~b^\ast)}&
-     F; (\WAITX~a.\LDATA[\X{ea}])
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\SEQCST}~a.\LDATA[\X{ea}]~b^\ast)~(\AWAIT~a.\LDATA[\X{ea}])}&
+     F; (\WAITX~a.\LDATA[\X{ea}]~k)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} + N/8 \leq n \\
+     (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
+     \wedge & \X{ea} + N/8 \leq n \\
      \wedge & \X{ea} \mod N/8 = 0 \\
      \wedge & b^\ast = \bytes_{\iN}(c)) \\[1ex]
      \end{array}
@@ -3448,7 +3545,8 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{ea} + N/8 \leq n \\
+     (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
+     \wedge & \X{ea} + N/8 \leq n \\
      \wedge & \X{ea} \mod N/8 = 0 \\
      \wedge & b^\ast \neq \bytes_{\iN}(c)) \\[1ex]
      \end{array}
@@ -3460,7 +3558,8 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
+     (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
+      \wedge & (\X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0)) \\
      \end{array}
    \\
    %
@@ -3472,17 +3571,18 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \end{array}
    \end{array}
 
+
 .. _exec-memory.atomic.fence:
 
 :math:`\MEMORYATOMICFENCE`
 .....................................
 
-.. todo:: add text
+1. Perform the :ref:`action <syntax-act>` :math:`(\AFENCE_{\SEQCST})`.
 
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   \MEMORYATOMICFENCE &\stepto& \epsilon
+   \MEMORYATOMICFENCE &\stepto^{(\AFENCE)}& \epsilon
    \end{array}
    \end{array}
 

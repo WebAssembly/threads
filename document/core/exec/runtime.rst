@@ -685,6 +685,10 @@ Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely ide
      \ARD_{\ord}~\loc~\storeval \\&&|&
      \AWR_{\ord}~\loc~\storeval \\&&|&
      \ARMW~\loc~\storeval~\storeval \\&&|&
+     \AWAIT~\loc \\&&|&
+     \AWAKE~\loc \\&&|&
+     \ANOTIFY~\loc~\u32~\u32 \\&&|&
+     \AFENCE_{\ord} \\&&|&
      \hostact \\
    \production{(ordering)} & \ord &::=&
      \UNORD ~|~
@@ -699,6 +703,8 @@ Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely ide
      \val ~|~
      b^\ast \\
    \end{array}
+
+.. todo:: ensure identity of wait + wake operations is preserved
 
 The access of *mutable* shared state is performed through the |ARD|, |AWR|, and |ARMW| actions.
 Each action accesses an abstract *location*, which consists of an :ref:`address <syntax-addr>` of a :ref:`shared <syntax-shared>` :ref:`memory <syntax-meminst>` instance and a symbolic *field* name in the respective object.

@@ -1074,6 +1074,12 @@
 .. |AWR| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wr}}
 .. |ARMW| mathdef:: \xref{exec/runtime}{syntax-act}{\K{rmw}}
 
+.. |AWAIT| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wait}}
+.. |AWAKE| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wake}}
+.. |ANOTIFY| mathdef:: \xref{exec/runtime}{syntax-act}{\K{notify}}
+
+.. |AFENCE| mathdef:: \xref{exec/runtime}{syntax-act}{\K{fence}}
+
 .. |UNORD| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{unord}}
 .. |SEQCST| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{seqcst}}
 .. |INIT| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{init}}
