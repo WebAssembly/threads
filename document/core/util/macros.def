@@ -1075,7 +1075,8 @@
 .. |ARMW| mathdef:: \xref{exec/runtime}{syntax-act}{\K{rmw}}
 
 .. |AWAIT| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wait}}
-.. |AWAKE| mathdef:: \xref{exec/runtime}{syntax-act}{\K{wake}}
+.. |AWOKEN| mathdef:: \xref{exec/runtime}{syntax-act}{\K{woken}}
+.. |ATIMEOUT| mathdef:: \xref{exec/runtime}{syntax-act}{\K{timeout}}
 .. |ANOTIFY| mathdef:: \xref{exec/runtime}{syntax-act}{\K{notify}}
 
 .. |AFENCE| mathdef:: \xref{exec/runtime}{syntax-act}{\K{fence}}

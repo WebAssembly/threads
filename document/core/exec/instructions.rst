@@ -3503,9 +3503,11 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 
     d. If :math:`\bytes_{\iN}(c)` is equal to :math:`b^\ast` then:
 
-       i. Perform the :ref:`action <syntax-act>` :math:`(\AWAIT~a.\LDATA[\X{ea}])` to register the current thread as waiting for a signal at data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+       i. Let :math:`t` be :math:`\signed_{N}(k)`.
 
-       ii. Execute the instruction :math:`\WAITX~a.\LDATA[\X{ea}]~k`.
+       ii. Perform the :ref:`action <syntax-act>` :math:`(\AWAIT~a.\LDATA[\X{ea}]~t)` to register the current thread as waiting for a signal at data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+
+       iii. Execute the instruction :math:`\WAITX~a.\LDATA[\X{ea}]~k`.
 
     e. Else:
 
@@ -3527,7 +3529,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    ~\\
    \begin{array}{lcl@{\qquad}l}
    F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\SEQCST}~a.\LDATA[\X{ea}]~b^\ast)~(\AWAIT~a.\LDATA[\X{ea}])}&
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\SEQCST}~a.\LDATA[\X{ea}]~b^\ast)~(\AWAIT~a.\LDATA[\X{ea}]~t)}&
      F; (\WAITX~a.\LDATA[\X{ea}]~k)
    \end{array}
    \\ \qquad
@@ -3535,7 +3537,8 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
      (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
      \wedge & \X{ea} + N/8 \leq n \\
      \wedge & \X{ea} \mod N/8 = 0 \\
-     \wedge & b^\ast = \bytes_{\iN}(c)) \\[1ex]
+     \wedge & b^\ast = \bytes_{\iN}(c))\\
+     \wedge & t = \signed_{N}(k) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -3572,6 +3575,53 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \end{array}
 
 
+.. _exec-memory.atomic.waitx:
+
+:math:`\WAITX~\loc~n`
+.....................................
+
+1. Either the thread has been notified by an :math:`(\ANOTIFY~\loc)` action performed in another thread:
+
+   a. Perform the action :math:`(\AWOKEN~\loc)`.
+
+   b. Push the value :math:`t.\CONST~0` to the stack.
+
+2. Or:
+
+   a. If :math:`n` is less than :math:`0`:
+
+      i. Either the thread's suspension times out:
+
+         a. Perform the action :math:`(\ATIMEOUT~\loc)`.
+
+         b. Push the value :math:`t.\CONST~2` to the stack.
+
+      ii. Or the thread remains suspended.
+
+   b. Else:
+
+      i. The thread remains suspended.
+
+.. math::
+   \begin{array}{l}
+   \begin{array}{lcl@{\qquad}l}
+   \WAITX~\loc~n &\stepto^{(\AWOKEN~\loc)}& (\I32.\CONST~0)
+   \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   \WAITX~\loc~n &\stepto^{(\ATIMEOUT~\loc)}& (\I32.\CONST~2)
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & n < 0) \\
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   \WAITX~\loc~n &\stepto& \WAITX~\loc~n
+   \end{array}
+   \end{array}
+
+
 .. _exec-memory.atomic.fence:
 
 :math:`\MEMORYATOMICFENCE`
@@ -3582,7 +3632,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   \MEMORYATOMICFENCE &\stepto^{(\AFENCE)}& \epsilon
+   \MEMORYATOMICFENCE &\stepto^{(\AFENCE_{\SEQCST})}& \epsilon
    \end{array}
    \end{array}
 

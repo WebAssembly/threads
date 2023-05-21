@@ -685,8 +685,9 @@ Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely ide
      \ARD_{\ord}~\loc~\storeval \\&&|&
      \AWR_{\ord}~\loc~\storeval \\&&|&
      \ARMW~\loc~\storeval~\storeval \\&&|&
-     \AWAIT~\loc \\&&|&
-     \AWAKE~\loc \\&&|&
+     \AWAIT~\loc~\s64 \\&&|&
+     \AWOKEN~\loc~ \\&&|&
+     \ATIMEOUT~\loc~ \\&&|&
      \ANOTIFY~\loc~\u32~\u32 \\&&|&
      \AFENCE_{\ord} \\&&|&
      \hostact \\
