@@ -744,22 +744,93 @@ Convention
 Configurations
 ..............
 
-A *configuration* consists of the current :ref:`store <syntax-store>` and an executing *thread*.
+A thread is a computation over :ref:`instructions <syntax-instr>` that operates relative to a current :ref:`frame <syntax-frame>` referring to the  :ref:`module instance <syntax-moduleinst>` in which the current computation runs. The thread is :ref:`annotated <notation-attime>` with the :ref:`time <syntax-time>` it was last active.
 
-A thread is a computation over :ref:`instructions <syntax-instr>`
-that operates relative to a current :ref:`frame <syntax-frame>` referring to the :ref:`module instance <syntax-moduleinst>` in which the computation runs, i.e., where the current function originates from.
+A *global configuration* consists of the current :ref:`store <syntax-store>` and a list of executing *threads*.
+
+A *local configuration* describes the state of a single executing thread.
 
 .. math::
    \begin{array}{llcl}
-   \production{configuration} & \config &::=&
+   \production{(thread)} & \thread &::=&
+     \frame; \instr^\ast~\AT~\time \\
+   \production{(configuration)} & \config &::=&
+     \store; \thread^\ast \\
+   \production{(local configuration)} & \lconfig &::=&
      \store; \thread \\
-   \production{thread} & \thread &::=&
-     \frame; \instr^\ast \\
+   \end{array}
+
+A thread has *terminated* when its instruction sequence has been reduced to a :ref:`result <syntax-result>`,
+that is, either a sequence of :ref:`values <syntax-val>` or to a |TRAP|.
+
+
+Convention
+..........
+
+* The meta variable :math:`P` ranges over threads where clear from context.
+
+
+.. index:: ! reduction, configuration, ! termination
+
+Reduction
+~~~~~~~~~
+
+Formally, WebAssembly computation is defined by two *small-step reduction* relations on global and local :ref:`configurations <syntax-config>`
+that define how a single step of execution modifies these configurations, respectively.
+
+
+Global Reduction
+................
+
+*Global reduction* is concerned with allocation in the global store and synchronization between multiple :ref:`threads <syntax-thread>`.
+It emits a (possibly empty) set of events that are produced by the corresponding step of computation. [#cite-oopsla2019]_
+
+Formally, global reduction is a relation
+
+.. math::
+   \config \stepto^{\evt^\ast} \config
+
+defined by inductive rewrite rules on global configurations.
+
+The following structural rule for global reduction delegates to local reduction for single thread execution:
+
+.. math::
+   \begin{array}{@{}c@{}}
+   S; P_1^\ast~(F; \instr^\ast \AT h)~P_2^\ast
+     \qquad \stepto^{\act^\ast~\AT~h'} \qquad
+     S'; P_1^\ast~(F'; {\instr'}^\ast \AT h')~P_2^\ast \\
+     \qquad (
+       \begin{array}[t]{@{}r@{~}l@{}}
+       \iff & S; F; \instr^\ast \stepto^{\act^\ast} S'; F'; {\instr'}^\ast) \\
+       \wedge & h \prechb h' \\
+       \end{array}
    \end{array}
 
 .. note::
-   The current version of WebAssembly is single-threaded,
-   but configurations with multiple threads may be supported in the future.
+   The :ref:`time stamp <syntax-time>` :math:`h'` indicates the point in time at which the computation step takes place,
+   marking both the emitted atomic event and the updated time of the thread.
+   This time stamp is chosen non-deterministically in the rule.
+   However, the second side condition ensures that the time :math:`h` of the last activity of the thread *happened before* :math:`h'`, thereby imposing *program order* for any events originating from the same thread.
+
+.. todo:: check init ordering
+
+
+Local Reduction
+...............
+
+*Local reduction* defines the execution of individual :ref:`instructions <syntax-instr>`.
+Each execution step can perform a (possibly empty) set of :ref:`actions <syntax-act>`.
+
+Formally, this is described by a labelled relation
+
+.. math::
+   \lconfig \stepto^{\act^\ast} \lconfig
+
+To avoid unnecessary clutter, the following conventions are employed in the notation for local reduction rules:
+
+* The configuration's store :math:`S` is omitted from rules that do not touch it.
+
+* The configuration's frame :math:`F` is omitted from rules that do not touch it.
 
 
 .. index:: ! evaluation context, instruction, trap, label, frame, value
@@ -806,3 +877,7 @@ that is, either a sequence of :ref:`values <syntax-val>` or to a |TRAP|.
       E = (\F64.\CONST~x_1)~[\_]~(\F64.\CONST~x_3)~\F64.\ADD~\F64.\MUL
 
    Moreover, this is the *only* possible choice of evaluation context where the contents of the hole matches the left-hand side of a reduction rule.
+
+.. [#cite-oopsla2019]
+   The semantics of global configurations is derived from the following article:
+   Conrad Watt, Andreas Rossberg, Jean Pichon-Pharabod. |OOPSLA2019|_. Proceedings of the ACM on Programming Languages (OOPSLA 2019). ACM 2019.

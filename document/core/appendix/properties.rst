@@ -420,10 +420,10 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
 Configuration Validity
 ~~~~~~~~~~~~~~~~~~~~~~
 
-To relate the WebAssembly :ref:`type system <valid>` to its :ref:`execution semantics <exec>`, the :ref:`typing rules for instructions <valid-instr>` must be extended to :ref:`configurations <syntax-config>` :math:`S;T`,
+To relate the WebAssembly :ref:`type system <valid>` to its :ref:`execution semantics <exec>`, the :ref:`typing rules for instructions <valid-instr>` must be extended to :ref:`configurations <syntax-config>` :math:`S;P^\ast`,
 which relates the :ref:`store <syntax-store>` to execution :ref:`threads <syntax-thread>`.
 
-Configurations and threads are classified by their :ref:`result type <syntax-resulttype>`.
+Threads are classified by their :ref:`result type <syntax-resulttype>`, and configurations are classified by a list of their threads' result types.
 In addition to the store :math:`S`, threads are typed under a *return type* :math:`\resulttype^?`, which controls whether and with which type a |return| instruction is allowed.
 This type is absent (:math:`\epsilon`) except for instruction sequences inside an administrative |FRAME| instruction.
 
@@ -432,13 +432,14 @@ Finally, :ref:`frames <syntax-frame>` are classified with *frame contexts*, whic
 
 .. index:: result type, thread
 
-:ref:`Configurations <syntax-config>` :math:`S;T`
-.................................................
+:ref:`Configurations <syntax-config>` :math:`S;P^\ast`
+.......................................................
 
 * The :ref:`store <syntax-store>` :math:`S` must be :ref:`valid <valid-store>`.
 
-* Under no allowed return type,
-  the :ref:`thread <syntax-thread>` :math:`T` must be :ref:`valid <valid-thread>` with some :ref:`result type <syntax-resulttype>` :math:`[t^\ast]`.
+* Each :ref:`thread <syntax-thread>` :math:`P_i` in :math:`P^\ast`, under no allowed return type, must be :ref:`valid <valid-thread>` with some :ref:`result type <syntax-resulttype>` :math:`[t_i^\ast]`.
+
+* Let :math:`[t^\ast]^\ast` be the concatenation of all :math:`[t_i^\ast]` in order.
 
 * Then the configuration is valid with the :ref:`result type <syntax-resulttype>` :math:`[t^\ast]`.
 
@@ -446,9 +447,9 @@ Finally, :ref:`frames <syntax-frame>` are classified with *frame contexts*, whic
    \frac{
      \vdashstore S \ok
      \qquad
-     S; \epsilon \vdashthread T : [t^\ast]
+     (S; \epsilon \vdashthread P : [t^\ast])^\ast
    }{
-     \vdashconfig S; T : [t^\ast]
+     \vdashconfig S; P^\ast : [t^\ast]^\ast
    }
 
 
@@ -810,24 +811,24 @@ Given the definition of :ref:`valid configurations <valid-config>`,
 the standard soundness theorems hold. [#cite-cpp2018]_ [#cite-fm2021]_
 
 **Theorem (Preservation).**
-If a :ref:`configuration <syntax-config>` :math:`S;T` is :ref:`valid <valid-config>` with :ref:`result type <syntax-resulttype>` :math:`[t^\ast]` (i.e., :math:`\vdashconfig S;T : [t^\ast]`),
-and steps to :math:`S';T'` (i.e., :math:`S;T \stepto S';T'`),
-then :math:`S';T'` is a valid configuration with the same result type (i.e., :math:`\vdashconfig S';T' : [t^\ast]`).
+If a :ref:`configuration <syntax-config>` :math:`S;P^\ast` is :ref:`valid <valid-config>` with :ref:`result type <syntax-resulttype>` :math:`[t^\ast]^\ast` (i.e., :math:`\vdashconfig S;P^\ast : [t^\ast]^\ast`),
+and steps to :math:`S';P'^\ast` (i.e., :math:`S;P^\ast \stepto S';P'^\ast`),
+then :math:`S';P'^\ast` is a valid configuration with the same result type (i.e., :math:`\vdashconfig S';P'^\ast : [t^\ast]^\ast`).
 Furthermore, :math:`S'` is an :ref:`extension <extend-store>` of :math:`S` (i.e., :math:`\vdashstoreextends S \extendsto S'`).
 
 A *terminal* :ref:`thread <syntax-thread>` is one whose sequence of :ref:`instructions <syntax-instr>` is a :ref:`result <syntax-result>`.
-A terminal configuration is a configuration whose thread is terminal.
+A terminal configuration is a configuration whose threads are all terminal.
 
 **Theorem (Progress).**
-If a :ref:`configuration <syntax-config>` :math:`S;T` is :ref:`valid <valid-config>` (i.e., :math:`\vdashconfig S;T : [t^\ast]` for some :ref:`result type <syntax-resulttype>` :math:`[t^\ast]`),
+If a :ref:`configuration <syntax-config>` :math:`S;P^\ast` is :ref:`valid <valid-config>` (i.e., :math:`\vdashconfig S;P^\ast : [t^\ast]^\ast` for some :ref:`result type <syntax-resulttype>` :math:`[t^\ast]^\ast`),
 then either it is terminal,
-or it can step to some configuration :math:`S';T'` (i.e., :math:`S;T \stepto S';T'`).
+or it can step to some configuration :math:`S';P'^\ast` (i.e., :math:`S;P^\ast \stepto S';P'^\ast`).
 
 From Preservation and Progress the soundness of the WebAssembly type system follows directly.
 
 **Corollary (Soundness).**
-If a :ref:`configuration <syntax-config>` :math:`S;T` is :ref:`valid <valid-config>` (i.e., :math:`\vdashconfig S;T : [t^\ast]` for some :ref:`result type <syntax-resulttype>` :math:`[t^\ast]`),
-then it either diverges or takes a finite number of steps to reach a terminal configuration :math:`S';T'` (i.e., :math:`S;T \stepto^\ast S';T'`) that is valid with the same result type (i.e., :math:`\vdashconfig S';T' : [t^\ast]`)
+If a :ref:`configuration <syntax-config>` :math:`S;P^\ast` is :ref:`valid <valid-config>` (i.e., :math:`\vdashconfig S;P^\ast : [t^\ast]^\ast` for some :ref:`result type <syntax-resulttype>` :math:`[t^\ast]^\ast`),
+then it either diverges or takes a finite number of steps to reach a terminal configuration :math:`S';P'^\ast` (i.e., :math:`S;P^\ast \stepto^\ast S';P'^\ast`) that is valid with the same result type (i.e., :math:`\vdashconfig S';P'^\ast : [t^\ast]^\ast`)
 and where :math:`S'` is an :ref:`extension <extend-store>` of :math:`S` (i.e., :math:`\vdashstoreextends S \extendsto S'`).
 
 In other words, every thread in a valid configuration either runs forever, traps, or terminates with a result that has the expected type.
