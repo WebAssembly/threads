@@ -1759,7 +1759,9 @@ Memory Instructions
 
        i. Trap.
 
-    c. Perform the :ref:`action <syntax-act>` :math:`(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast)` to read :math:`N/8` bytes :math:`b^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+    c. Let :math:`\notears^?` be :math:`\tearing(t, N, \X{ea})`.
+
+    d. Perform the :ref:`action <syntax-act>` :math:`(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast~\notears^?)` to read :math:`N/8` bytes :math:`b^\ast` from data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
 14. Let :math:`c_{N}` be the integer for which :math:`\bytes_{\iN}(n) = b^\ast`.
 
@@ -1790,7 +1792,7 @@ Memory Instructions
    ~\\
    \begin{array}{lcl@{\qquad}l}
    S; F; (\I32.\CONST~i)~(t.\LOAD({N}\K{\_}\sx)?~\memarg)
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast)}&
+     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\ord}~a.\LDATA[\X{ea}]~b^\ast~\notears^?)}&
      S; F; (t.\CONST~c)
    \end{array}
    \\ \qquad
@@ -1820,7 +1822,8 @@ Memory Instructions
    \wedge & \X{sx} = \K{u} \iff \X{sx}~\mbox{not present} \\
    \wedge & a = F.\AMODULE.\MIMEMS[0] \\
    \wedge & \X{mem} = S.\SMEMS[a] \\
-   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET \\
+   \wedge & \notears^? = \tearing(t, N, \X{ea})) \\
    \end{array}
    \end{array}
 
@@ -2308,7 +2311,9 @@ Memory Instructions
 
        i. Trap.
 
-    c. Perform the :ref:`action <syntax-act>` :math:`(\AWR_{\ord}~a.\LDATA[\X{ea}]~b^\ast)` to write the bytes :math:`b^\ast` to data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
+    c. Let :math:`\notears^?` be :math:`\tearing(t, N, \X{ea})`.
+
+    d. Perform the :ref:`action <syntax-act>` :math:`(\AWR_{\ord}~a.\LDATA[\X{ea}]~b^\ast~\notears^?)` to write the bytes :math:`b^\ast` to data offset :math:`\X{ea}` of the shared :ref:`memory instance <syntax-meminst>` at :ref:`memory address <syntax-memaddr>` :math:`a`.
 
 .. math::
    ~\\[-1ex]
@@ -2333,7 +2338,7 @@ Memory Instructions
    ~\\
    \begin{array}{lcl@{\qquad}l}
    S; F; (\I32.\CONST~i)~(t.\CONST~c)~(t.\STORE N^?~\memarg)
-     &\stepto^{(\ARD~a.\LLEN~n)~(\AWR_{\ord}~a.\LDATA[\X{ea}]~b^\ast)}&
+     &\stepto^{(\ARD~a.\LLEN~n)~(\AWR_{\ord}~a.\LDATA[\X{ea}]~b^\ast)~\notears}&
      S; F; \epsilon
    \end{array}
    \\ \qquad
@@ -2362,7 +2367,8 @@ Memory Instructions
    \wedge & N = |t| \iff N~\mbox{not present} \\
    \wedge & a = F.\AMODULE.\MIMEMS[0] \\
    \wedge & \X{mem} = S.\SMEMS[a] \\
-   \wedge & \X{ea} = i + \memarg.\OFFSET) \\
+   \wedge & \X{ea} = i + \memarg.\OFFSET \\
+   \wedge & \notears^? = \tearing(t, N, \X{ea})) \\
    \end{array}
    \end{array}
 

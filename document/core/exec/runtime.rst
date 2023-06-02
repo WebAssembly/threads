@@ -600,8 +600,6 @@ That way, the end of the inner instruction sequence is known when part of an out
 
 .. todo:: add host instruction
 
-.. todo:: correctly capture tearing (floats, SIMD)
-
 .. note::
    For example, the :ref:`reduction rule <exec-block>` for |BLOCK| is:
 
@@ -682,14 +680,14 @@ Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely ide
    \production{(event)} & \evt &::=&
      \act^\ast~\AT~\time \\
    \production{(action)} & \act &::=&
-     \ARD_{\ord}~\loc~\storeval \\&&|&
-     \AWR_{\ord}~\loc~\storeval \\&&|&
+     \ARD_{\ord}~\loc~\storeval~\NOTEARS^? \\&&|&
+     \AWR_{\ord}~\loc~\storeval~\NOTEARS^? \\&&|&
      \ARMW~\loc~\storeval~\storeval \\&&|&
      \AWAIT~\loc~\s64 \\&&|&
      \AWOKEN~\loc~ \\&&|&
      \ATIMEOUT~\loc~ \\&&|&
      \ANOTIFY~\loc~\u32~\u32 \\&&|&
-     \AFENCE_{\ord} \\&&|&
+     \AFENCE \\&&|&
      \hostact \\
    \production{(ordering)} & \ord &::=&
      \UNORD ~|~
@@ -734,6 +732,17 @@ Convention
 
 * The actions :math:`\ARD_{\ord}` and :math:`\AWR_{\ord}` are abbreviated to just :math:`\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
 
+The following auxiliary definition is used to classify whether an access will *tear*.
+
+.. math::
+   \begin{array}{lcl@{\qquad}l}
+   \tearing(\iN', N, \u32)  &=& \NOTEARS & (\iff \u32 \mod N/8 = 0 \wedge N \leq 32) \\
+   \tearing(\iN', N, \u32)  &=& \epsilon &(otherwise) \\
+   \tearing(\fN', N, \u32)  &=& \epsilon \\
+   \end{array}
+
+
+.. todo:: better description of tearing
 .. todo:: define notational shorthands over actions and events (or better put that in relaxed.rst?)
 
 
