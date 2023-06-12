@@ -218,6 +218,9 @@ let inline_type_explicit (c : context) x ft at =
 %token TABLE_SIZE TABLE_GROW TABLE_FILL TABLE_COPY TABLE_INIT ELEM_DROP
 %token MEMORY_SIZE MEMORY_GROW MEMORY_FILL MEMORY_COPY MEMORY_INIT DATA_DROP
 %token<int option -> Memory.offset -> Ast.instr'> LOAD STORE
+%token<int option -> Memory.offset -> Ast.instr'> MEMORY_ATOMIC_WAIT MEMORY_ATOMIC_NOTIFY
+%token<int option -> Memory.offset -> Ast.instr'> ATOMIC_LOAD ATOMIC_STORE ATOMIC_RMW ATOMIC_RMW_CMPXCHG
+%token ATOMIC_FENCE
 %token<string> OFFSET_EQ_NAT ALIGN_EQ_NAT
 %token<string Source.phrase -> Ast.instr' * Values.num> CONST
 %token<Ast.instr'> UNARY BINARY TEST COMPARE CONVERT
@@ -444,6 +447,13 @@ plain_instr :
   | VEC_SPLAT { fun c -> $1 }
   | VEC_EXTRACT NAT { let at = at () in fun c -> $1 (vec_lane_index $2 at) }
   | VEC_REPLACE NAT { let at = at () in fun c -> $1 (vec_lane_index $2 at) }
+  | MEMORY_ATOMIC_WAIT offset_opt align_opt { fun c -> $1 $3 $2 }
+  | MEMORY_ATOMIC_NOTIFY offset_opt align_opt { fun c -> $1 $3 $2 }
+  | ATOMIC_FENCE { fun c -> atomic_fence }
+  | ATOMIC_LOAD offset_opt align_opt { fun c -> $1 $3 $2 }
+  | ATOMIC_STORE offset_opt align_opt { fun c -> $1 $3 $2 }
+  | ATOMIC_RMW offset_opt align_opt { fun c -> $1 $3 $2 }
+  | ATOMIC_RMW_CMPXCHG offset_opt align_opt { fun c -> $1 $3 $2 }
 
 
 select_instr_instr_list :

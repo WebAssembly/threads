@@ -389,6 +389,20 @@ let vec_splatop = vec_shape_oper (V128Op.splatop, V128Op.splatop, V128Op.splatop
 let vec_extractop = vec_shape_oper (V128Op.pextractop, V128Op.extractop, V128Op.extractop)
 let vec_replaceop = vec_shape_oper (V128Op.replaceop, V128Op.replaceop, V128Op.replaceop)
 
+let rmwop = function
+  | I32 I32Op.RmwAdd | I64 I64Op.RmwAdd -> "add"
+  | I32 I32Op.RmwSub | I64 I64Op.RmwSub -> "sub"
+  | I32 I32Op.RmwAnd | I64 I64Op.RmwAnd -> "and"
+  | I32 I32Op.RmwOr | I64 I64Op.RmwOr -> "or"
+  | I32 I32Op.RmwXor | I64 I64Op.RmwXor -> "xor"
+  | I32 I32Op.RmwXchg | I64 I64Op.RmwXchg -> "xchg"
+  | _ -> assert false
+
+let memop_without_type name {align; offset; _} sz =
+  name ^
+  (if offset = 0l then "" else " offset=" ^ nat32 offset) ^
+  (if 1 lsl align = sz then "" else " align=" ^ nat (1 lsl align))
+
 let memop name typ {ty; align; offset; _} sz =
   typ ty ^ "." ^ name ^
   (if offset = 0l then "" else " offset=" ^ nat32 offset) ^
@@ -418,6 +432,42 @@ let vec_laneop instr (op, i) =
   memop (instr ^ pack_size op.pack ^ "_lane") vec_type op
     (packed_size op.pack) ^ " " ^ nat i
 
+let memoryatomicwaitop op =
+  match op.pack with
+  | None ->
+    let sz = string_of_int (8 * num_size op.ty) in
+    memop_without_type ("memory.atomic.wait" ^ sz) op (num_size op.ty)
+  | Some sz -> assert false
+
+let memoryatomicnotifyop op =
+  match op.pack with
+  | None -> memop_without_type "memory.atomic.notify" op (num_size op.ty)
+  | Some sz -> assert false
+
+let atomicloadop op =
+  match op.pack with
+  | None -> memop "atomic.load" num_type  op (num_size op.ty)
+  | Some sz ->
+    memop ("atomic.load" ^ pack_size sz ^ "_u") num_type op (packed_size sz)
+
+let atomicstoreop op =
+  match op.pack with
+  | None -> memop "atomic.store" num_type op (num_size op.ty)
+  | Some sz ->
+    memop ("atomic.store" ^ pack_size sz) num_type op (packed_size sz)
+
+let atomicrmwop op rmw_op =
+  match op.pack with
+  | None -> memop ("atomic.rmw." ^ rmwop rmw_op) num_type op (num_size op.ty)
+  | Some sz ->
+    memop ("atomic.rmw" ^ pack_size sz ^ "." ^ rmwop rmw_op ^ "_u") num_type op
+      (packed_size sz)
+
+let atomicrmwcmpxchgop op =
+  match op.pack with
+  | None -> memop "atomic.rmw.cmpxchg" num_type op (num_size op.ty)
+  | Some sz ->
+    memop ("atomic.rmw" ^ pack_size sz ^ ".cmpxchg_u") num_type op (packed_size sz)
 
 (* Expressions *)
 
@@ -502,6 +552,13 @@ let rec instr e =
     | VecSplat op -> vec_splatop op, []
     | VecExtract op -> vec_extractop op, []
     | VecReplace op -> vec_replaceop op, []
+    | MemoryAtomicWait op -> memoryatomicwaitop op, []
+    | MemoryAtomicNotify op -> memoryatomicnotifyop op, []
+    | AtomicFence -> "atomic.fence", []
+    | AtomicLoad op -> atomicloadop op, []
+    | AtomicStore op -> atomicstoreop op, []
+    | AtomicRmw (rmwop, op) -> atomicrmwop op rmwop, []
+    | AtomicRmwCmpXchg op -> atomicrmwcmpxchgop op, []
   in Node (head, inner)
 
 let const head c =

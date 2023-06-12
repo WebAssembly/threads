@@ -2,6 +2,7 @@
 open Parser
 open Operators
 open Source
+open Ast
 
 let convert_pos pos =
   { file = pos.Lexing.pos_fname;
@@ -253,6 +254,205 @@ rule token = parse
         VEC_STORE_LANE (fun a o i -> v128_store32_lane (opt a 2) o i)
       | "v128.store64_lane" ->
         VEC_STORE_LANE (fun a o i -> v128_store64_lane (opt a 3) o i)
+      
+      | "memory.atomic.notify" ->
+        MEMORY_ATOMIC_NOTIFY (fun a o -> (memory_atomic_notify (opt a 2)) o)
+      | "memory.atomic.wait32" ->
+        MEMORY_ATOMIC_WAIT (fun a o ->
+              (memory_atomic_wait32 (opt a 2)) o)
+      | "memory.atomic.wait64" ->
+        MEMORY_ATOMIC_WAIT (fun a o ->
+              (memory_atomic_wait64 (opt a 3)) o)
+      | "atomic.fence" -> ATOMIC_FENCE
+      | "i32.atomic.load" ->
+        ATOMIC_LOAD (fun a o ->
+            (i32_atomic_load (opt a 2)) o)
+      | "i64.atomic.load" ->
+        ATOMIC_LOAD (fun a o ->
+            (i64_atomic_load (opt a 3)) o)
+      | "i32.atomic.store" ->
+        ATOMIC_STORE (fun a o ->
+            (i32_atomic_store (opt a 2)) o)
+      | "i64.atomic.store" ->
+        ATOMIC_STORE (fun a o ->
+            (i64_atomic_store (opt a 3)) o)
+      | "i32.atomic.load8_u" ->
+        ATOMIC_STORE (fun a o ->
+            (i32_atomic_load8_u (opt a 0)) o)
+      | "i32.atomic.load16_u" ->
+        ATOMIC_STORE (fun a o ->
+            (i32_atomic_load16_u (opt a 1)) o)
+      | "i64.atomic.load8_u" ->
+        ATOMIC_STORE (fun a o ->
+            (i64_atomic_load8_u (opt a 0)) o)
+      | "i64.atomic.load16_u" ->
+        ATOMIC_STORE (fun a o ->
+            (i64_atomic_load16_u (opt a 1)) o)
+      | "i64.atomic.load32_u" ->
+        ATOMIC_STORE (fun a o ->
+            (i64_atomic_load32_u (opt a 2)) o)
+      | "i32.atomic.store8" ->
+        ATOMIC_STORE (fun a o ->
+            (i32_atomic_store8 (opt a 0)) o)
+      | "i32.atomic.store16" ->
+        ATOMIC_STORE (fun a o ->
+            (i32_atomic_store16 (opt a 1)) o)
+      | "i64.atomic.store8" ->
+        ATOMIC_STORE (fun a o ->
+            (i64_atomic_store8 (opt a 0)) o)
+      | "i64.atomic.store16" ->
+        ATOMIC_STORE (fun a o ->
+            (i64_atomic_store16 (opt a 1)) o)
+      | "i64.atomic.store32" ->
+        ATOMIC_STORE (fun a o ->
+            (i64_atomic_store32 (opt a 2)) o)
+      | "i32.atomic.rmw.add" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw (Values.I32 I32Op.RmwAdd) (opt a 2)) o)
+      | "i32.atomic.rmw.sub" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw (Values.I32 I32Op.RmwSub) (opt a 2)) o)
+      | "i32.atomic.rmw.and" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw (Values.I32 I32Op.RmwAnd) (opt a 2)) o)
+      | "i32.atomic.rmw.or" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw (Values.I32 I32Op.RmwOr) (opt a 2)) o)
+      | "i32.atomic.rmw.xor" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw (Values.I32 I32Op.RmwXor) (opt a 2)) o)
+      | "i32.atomic.rmw.xchg" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw (Values.I32 I32Op.RmwXchg) (opt a 2)) o)
+      | "i64.atomic.rmw.add" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw (Values.I64 I64Op.RmwAdd) (opt a 3)) o)
+      | "i64.atomic.rmw.sub" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw (Values.I64 I64Op.RmwSub) (opt a 3)) o)
+      | "i64.atomic.rmw.and" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw (Values.I64 I64Op.RmwAnd) (opt a 3)) o)
+      | "i64.atomic.rmw.or" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw (Values.I64 I64Op.RmwOr) (opt a 3)) o)
+      | "i64.atomic.rmw.xor" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw (Values.I64 I64Op.RmwXor) (opt a 3)) o)
+      | "i64.atomic.rmw.xchg" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw (Values.I64 I64Op.RmwXchg) (opt a 3)) o)
+      | "i32.atomic.rmw8.add_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw8_u (Values.I32 I32Op.RmwAdd) (opt a 0)) o)
+      | "i32.atomic.rmw8.sub_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw8_u (Values.I32 I32Op.RmwSub) (opt a 0)) o)
+      | "i32.atomic.rmw8.and_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw8_u (Values.I32 I32Op.RmwAnd) (opt a 0)) o)
+      | "i32.atomic.rmw8.or_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw8_u (Values.I32 I32Op.RmwOr) (opt a 0)) o)
+      | "i32.atomic.rmw8.xor_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw8_u (Values.I32 I32Op.RmwXor) (opt a 0)) o)
+      | "i32.atomic.rmw8.xchg_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw8_u (Values.I32 I32Op.RmwXchg) (opt a 0)) o)
+      | "i64.atomic.rmw8.add_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw8_u (Values.I64 I64Op.RmwAdd) (opt a 0)) o)
+      | "i64.atomic.rmw8.sub_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw8_u (Values.I64 I64Op.RmwSub) (opt a 0)) o)
+      | "i64.atomic.rmw8.and_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw8_u (Values.I64 I64Op.RmwAnd) (opt a 0)) o)
+      | "i64.atomic.rmw8.or_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw8_u (Values.I64 I64Op.RmwOr) (opt a 0)) o)
+      | "i64.atomic.rmw8.xor_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw8_u (Values.I64 I64Op.RmwXor) (opt a 0)) o)
+      | "i64.atomic.rmw8.xchg_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw8_u (Values.I64 I64Op.RmwXchg) (opt a 0)) o)
+      | "i32.atomic.rmw16.add_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw16_u (Values.I32 I32Op.RmwAdd) (opt a 1)) o)
+      | "i32.atomic.rmw16.sub_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw16_u (Values.I32 I32Op.RmwSub) (opt a 1)) o)
+      | "i32.atomic.rmw16.and_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw16_u (Values.I32 I32Op.RmwAnd) (opt a 1)) o)
+      | "i32.atomic.rmw16.or_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw16_u (Values.I32 I32Op.RmwOr) (opt a 1)) o)
+      | "i32.atomic.rmw16.xor_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw16_u (Values.I32 I32Op.RmwXor) (opt a 1)) o)
+      | "i32.atomic.rmw16.xchg_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i32_atomic_rmw16_u (Values.I32 I32Op.RmwXchg) (opt a 1)) o)
+      | "i64.atomic.rmw16.add_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw16_u (Values.I64 I64Op.RmwAdd) (opt a 1)) o)
+      | "i64.atomic.rmw16.sub_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw16_u (Values.I64 I64Op.RmwSub) (opt a 1)) o)
+      | "i64.atomic.rmw16.and_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw16_u (Values.I64 I64Op.RmwAnd) (opt a 1)) o)
+      | "i64.atomic.rmw16.or_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw16_u (Values.I64 I64Op.RmwOr) (opt a 1)) o)
+      | "i64.atomic.rmw16.xor_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw16_u (Values.I64 I64Op.RmwXor) (opt a 1)) o)
+      | "i64.atomic.rmw16.xchg_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw16_u (Values.I64 I64Op.RmwXchg) (opt a 1)) o)
+      | "i64.atomic.rmw32.add_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw32_u (Values.I64 I64Op.RmwAdd) (opt a 2)) o)
+      | "i64.atomic.rmw32.sub_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw32_u (Values.I64 I64Op.RmwSub) (opt a 2)) o)
+      | "i64.atomic.rmw32.and_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw32_u (Values.I64 I64Op.RmwAnd) (opt a 2)) o)
+      | "i64.atomic.rmw32.or_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw32_u (Values.I64 I64Op.RmwOr) (opt a 2)) o)
+      | "i64.atomic.rmw32.xor_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw32_u (Values.I64 I64Op.RmwXor) (opt a 2)) o)
+      | "i64.atomic.rmw32.xchg_u" ->
+        ATOMIC_RMW (fun a o ->
+            (i64_atomic_rmw32_u (Values.I64 I64Op.RmwXchg) (opt a 2)) o)
+      | "i32.atomic.rmw.cmpxchg" ->
+        ATOMIC_RMW_CMPXCHG (fun a o ->
+            (i32_atomic_rmw_cmpxchg (opt a 2)) o)
+      | "i64.atomic.rmw.cmpxchg" ->
+        ATOMIC_RMW_CMPXCHG (fun a o ->
+            (i64_atomic_rmw_cmpxchg (opt a 3)) o)
+      | "i32.atomic.rmw8.cmpxchg_u" ->
+          ATOMIC_RMW_CMPXCHG (fun a o ->
+              (i32_atomic_rmw8_u_cmpxchg (opt a 0)) o)
+      | "i64.atomic.rmw8.cmpxchg_u" ->
+          ATOMIC_RMW_CMPXCHG (fun a o ->
+              (i64_atomic_rmw8_u_cmpxchg (opt a 0)) o)
+      | "i32.atomic.rmw16.cmpxchg_u" ->
+          ATOMIC_RMW_CMPXCHG (fun a o ->
+              (i32_atomic_rmw16_u_cmpxchg (opt a 1)) o)
+      | "i64.atomic.rmw16.cmpxchg_u" ->
+          ATOMIC_RMW_CMPXCHG (fun a o ->
+              (i64_atomic_rmw16_u_cmpxchg (opt a 1)) o)
+      | "i64.atomic.rmw32.cmpxchg_u" ->
+          ATOMIC_RMW_CMPXCHG (fun a o ->
+              (i64_atomic_rmw32_u_cmpxchg (opt a 2)) o)
 
       | "i32.const" ->
         CONST (fun s ->
