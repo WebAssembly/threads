@@ -1155,6 +1155,7 @@
 .. |TRAP| mathdef:: \xref{exec/runtime}{syntax-trap}{\K{trap}}
 .. |INVOKE| mathdef:: \xref{exec/runtime}{syntax-invoke}{\K{invoke}}
 .. |WAITX| mathdef:: \xref{exec/runtime}{syntax-waitx}{\K{wait'}}
+.. |PERFORM| mathdef:: \xref{exec/runtime}{syntax-perform}{\K{perform}}
 
 
 .. Values & Results, non-terminals

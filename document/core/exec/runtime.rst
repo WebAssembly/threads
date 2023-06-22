@@ -579,7 +579,8 @@ In order to express the reduction of :ref:`traps <trap>`, :ref:`calls <syntax-ca
      \INVOKE~\funcaddr \\ &&|&
      \LABEL_n\{\instr^\ast\}~\instr^\ast~\END \\ &&|&
      \FRAME_n\{\frame\}~\instr^\ast~\END \\ &&|&
-     \WAITX~\loc~n \\
+     \WAITX~\loc~n \\ &&|&
+     \PERFORM~\act^\ast \\
    \end{array}
 
 The |TRAP| instruction represents the occurrence of a trap.
@@ -594,7 +595,7 @@ The |LABEL| and |FRAME| instructions model :ref:`labels <syntax-label>` and :ref
 Moreover, the administrative syntax maintains the nesting structure of the original :ref:`structured control instruction <syntax-instr-control>` or :ref:`function body <syntax-func>` and their :ref:`instruction sequences <syntax-instr-seq>` with an |END| marker.
 That way, the end of the inner instruction sequence is known when part of an outer sequence.
 
-.. todo:: describe |WAITX|
+.. todo:: describe |WAITX| and |PERFORM|
 
 .. todo:: add allocation instructions
 

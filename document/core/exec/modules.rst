@@ -59,13 +59,36 @@ The following auxiliary typing rules specify this typing relation relative to a 
 
 * The store entry :math:`S.\SMEMS[a]` must exist.
 
-* Then :math:`\EVMEM~a` is valid with :ref:`external type <syntax-externtype>` :math:`\ETMEM~S.\SMEMS[a].\MITYPE`.
+* If :math:`S.\SMEMS[a].\MITYPE` is :math:`\limits~\UNSHARED`, then:
+
+  * :math:`\EVMEM~a` is valid with :ref:`external type <syntax-externtype>` :math:`\ETMEM~(\limits~\UNSHARED)`.
+
+* Else:
+
+  * Assert: :math:`S.\SMEMS[a].\MITYPE` is :math:`\limits~\SHARED`.
+
+  * Let :math:`\{ \LMIN~x, \LMAX~y^? \}~\SHARED` be the :ref:`memory type <syntax-memtype>` :math:`S.\SMEMS[a].\MITYPE`.
+
+  * Assert: the current length of :math:`S.\SMEMS[a]` in bytes, :math:`l`, is given by the :ref:`action <syntax-act>` :math:`(\ARD_{\SEQCST}~a.\LLEN~l)`.
+
+  * :math:`\EVMEM~a` is valid with :ref:`external type <syntax-externtype>` :math:`\ETMEM~(\{ \LMIN~l, \LMAX~y^? \}~\SHARED)`.
 
 .. math::
    \frac{
+     S.\SMEMS[a].\MITYPE = \limits~\UNSHARED
    }{
-     S \vdashexternval \EVMEM~a : \ETMEM~S.\SMEMS[a].\MITYPE
+     S \vdashexternval \EVMEM~a : \ETMEM~(\limits~\UNSHARED)
    }
+
+.. math::
+   \frac{
+     S.\SMEMS[a].\MITYPE = \{ \LMIN~x, \LMAX~y^? \}~\SHARED
+   }{
+     S; (\ARD_{\SEQCST}~a.\LLEN~l) \vdashexternval \EVMEM~a : \ETMEM~(\{ \LMIN~l, \LMAX~y^? \}~\SHARED)
+   }
+
+.. todo::
+   flag up the connection with the relaxed memory model
 
 
 .. index:: global type, global address, value type, mutability
@@ -256,24 +279,47 @@ New instances of :ref:`functions <syntax-funcinst>`, :ref:`tables <syntax-tablei
 
 1. Let :math:`\memtype` be the :ref:`memory type <syntax-memtype>` to allocate.
 
-2. Let :math:`\{\LMIN~n, \LMAX~m^?\}` be the structure of :ref:`memory type <syntax-memtype>` :math:`\memtype`.
+2. Let :math:`\{\LMIN~n, \LMAX~m^?\}~\share` be the structure of :ref:`memory type <syntax-memtype>` :math:`\memtype`.
 
 3. Let :math:`a` be the first free :ref:`memory address <syntax-memaddr>` in :math:`S`.
 
-4. Let :math:`\meminst` be the :ref:`memory instance <syntax-meminst>` :math:`\{ \MITYPE~\memtype, \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}} \}` that contains :math:`n` pages of zeroed :ref:`bytes <syntax-byte>`.
+4. If :math:`\share` is :math:`\UNSHARED`:
+
+   a. Let :math:`\meminst` be the :ref:`memory instance <syntax-meminst>` :math:`\{ \MITYPE~\memtype, \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}} \}` that contains :math:`n` pages of zeroed :ref:`bytes <syntax-byte>`.
+
+   b. Let :math:`\X{act}^\ast` be :math:`\epsilon`.
+
+5. Else:
+
+   a. Let :math:`\meminst` be the :ref:`memory instance <syntax-meminst>` :math:`\{ \MITYPE~\memtype \}`.
+
+   b. Let :math:`\X{act}^\ast` be :math:`(\AWR_{\SEQCST}~a.\LLEN~n)(\AWR_{\INIT}~a.\LDATA[0]~(0)^{n \cdot 64})`.
 
 5. Append :math:`\meminst` to the |SMEMS| of :math:`S`.
 
-6. Return :math:`a`.
+6. Return :math:`a, \X{act}^\ast`.
 
 .. math::
+   \begin{array}{l}
    \begin{array}{rlll}
-   \allocmem(S, \memtype) &=& S', \memaddr \\[1ex]
-   \mbox{where:} \hfill \\
-   \memtype &=& \{\LMIN~n, \LMAX~m^?\} \\
+   \allocmem(S, \memtype) &=& S', \memaddr, \epsilon \\[1ex]
+   \iff \hfill \\
+   \memtype &=& \{\LMIN~n, \LMAX~m^?\}~\UNSHARED \\
    \memaddr &=& |S.\SMEMS| \\
    \meminst &=& \{ \MITYPE~\memtype, \MIDATA~(\hex{00})^{n \cdot 64\,\F{Ki}} \} \\
    S' &=& S \compose \{\SMEMS~\meminst\} \\
+   \end{array}
+   \\
+   %
+   \\
+   \begin{array}{rlll}
+   \allocmem(S, \memtype) &=& S', a, (\AWR_{\SEQCST}~a.\LLEN~n)(\AWR_{\INIT}~a.\LDATA[0]~(0)^{n \cdot 64}) \\[1ex]
+   \iff \hfill \\
+   \memtype &=& \{\LMIN~n, \LMAX~m^?\}~\SHARED \\
+   a &=& |S.\SMEMS| \\
+   \meminst &=& \{ \MITYPE~\memtype \} \\
+   S' &=& S \compose \{\SMEMS~\meminst\} \\
+   \end{array}
    \end{array}
 
 
@@ -453,7 +499,7 @@ and list of :ref:`reference <syntax-ref>` vectors for the module's :ref:`element
 
 4. For each :ref:`memory <syntax-mem>` :math:`\mem_i` in :math:`\module.\MMEMS`, do:
 
-   a. Let :math:`\memaddr_i` be the :ref:`memory address <syntax-memaddr>` resulting from :ref:`allocating <alloc-mem>` :math:`\mem_i.\MTYPE`.
+   a. Let :math:`\memaddr_i, \act_i^\ast` be the :ref:`memory address <syntax-memaddr>` resulting from :ref:`allocating <alloc-mem>` :math:`\mem_i.\MTYPE`.
 
 5. For each :ref:`global <syntax-global>` :math:`\global_i` in :math:`\module.\MGLOBALS`, do:
 
@@ -472,6 +518,8 @@ and list of :ref:`reference <syntax-ref>` vectors for the module's :ref:`element
 9. Let :math:`\tableaddr^\ast` be the concatenation of the :ref:`table addresses <syntax-tableaddr>` :math:`\tableaddr_i` in index order.
 
 10. Let :math:`\memaddr^\ast` be the concatenation of the :ref:`memory addresses <syntax-memaddr>` :math:`\memaddr_i` in index order.
+
+11. Let :math:`\act^\ast` be the concatenation of the :ref:`actions <syntax-act>` :math:`\act_i^\ast` in index order.
 
 11. Let :math:`\globaladdr^\ast` be the concatenation of the :ref:`global addresses <syntax-globaladdr>` :math:`\globaladdr_i` in index order.
 
@@ -503,13 +551,13 @@ and list of :ref:`reference <syntax-ref>` vectors for the module's :ref:`element
 
 20. Let :math:`\moduleinst` be the :ref:`module instance <syntax-moduleinst>` :math:`\{\MITYPES~(\module.\MTYPES),` :math:`\MIFUNCS~\funcaddr_{\F{mod}}^\ast,` :math:`\MITABLES~\tableaddr_{\F{mod}}^\ast,` :math:`\MIMEMS~\memaddr_{\F{mod}}^\ast,` :math:`\MIGLOBALS~\globaladdr_{\F{mod}}^\ast,` :math:`\MIEXPORTS~\exportinst^\ast\}`.
 
-21. Return :math:`\moduleinst`.
+21. Return :math:`\moduleinst, \act^\ast`.
 
 
 .. math::
    ~\\
    \begin{array}{rlll}
-   \allocmodule(S, \module, \externval_{\F{im}}^\ast, \val^\ast, (\reff^\ast)^\ast) &=& S', \moduleinst
+   \allocmodule(S, \module, \externval_{\F{im}}^\ast, \val^\ast, (\reff^\ast)^\ast) &=& S', \moduleinst, \act^\ast
    \end{array}
 
 where:
@@ -538,7 +586,7 @@ where:
    S_2, \tableaddr^\ast &=&
      \alloctable^\ast(S_1, (\table.\TTYPE)^\ast, (\REFNULL~t)^\ast)
      \quad (\where (\table.\TTYPE)^\ast = (\limits~t)^\ast) \\
-   S_3, \memaddr^\ast &=&
+   S_3, \memaddr^\ast, \act^\ast &=&
      \allocmem^\ast(S_2, (\mem.\MTYPE)^\ast) \\
    S_4, \globaladdr^\ast &=&
      \allocglobal^\ast(S_3, (\global.\GTYPE)^\ast, \val^\ast) \\
@@ -704,13 +752,15 @@ It is up to the :ref:`embedder <embedder>` to define how such conditions are rep
    \begin{array}{@{}rcll}
    \instantiate(S, \module, \externval^k) &=& S'; F;
      \begin{array}[t]{@{}l@{}}
+     (\PERFORM~(\X{act}^?)^k) \\
+     (\PERFORM~\X{act_{\F{m}}}^\ast) \\
      \F{runelem}_0(\elem^n[0])~\dots~\F{runelem}_{n-1}(\elem^n[n-1]) \\
      \F{rundata}_0(\data^m[0])~\dots~\F{rundata}_{m-1}(\data^m[m-1]) \\
      (\CALL~\start.\SFUNC)^? \\
      \end{array} \\
    &(\iff
      & \vdashmodule \module : \externtype_{\F{im}}^k \to \externtype_{\F{ex}}^\ast \\
-     &\wedge& (S \vdashexternval \externval : \externtype)^k \\
+     &\wedge& (S; \X{act}^? \vdashexternval \externval : \externtype)^k \\
      &\wedge& (\vdashexterntypematch \externtype \matchesexterntype \externtype_{\F{im}})^k \\[1ex]
      &\wedge& \module.\MGLOBALS = \global^\ast \\
      &\wedge& \module.\MELEMS = \elem^n \\
@@ -718,10 +768,18 @@ It is up to the :ref:`embedder <embedder>` to define how such conditions are rep
      &\wedge& \module.\MSTART = \start^? \\
      &\wedge& (\expr_{\F{g}} = \global.\GINIT)^\ast \\
      &\wedge& (\expr_{\F{e}}^\ast = \elem.\EINIT)^n \\[1ex]
-     &\wedge& S', \moduleinst = \allocmodule(S, \module, \externval^k, \val^\ast, (\reff^\ast)^n) \\
+     &\wedge& S', \moduleinst, \X{act_{\F{m}}}^\ast = \allocmodule(S, \module, \externval^k, \val^\ast, (\reff^\ast)^n) \\
      &\wedge& F = \{ \AMODULE~\moduleinst, \ALOCALS~\epsilon \} \\[1ex]
      &\wedge& (S'; F; \expr_{\F{g}} \stepto^\ast S'; F; \val~\END)^\ast \\
      &\wedge& ((S'; F; \expr_{\F{e}} \stepto^\ast S'; F; \reff~\END)^\ast)^n) \\
+   \end{array}
+
+.. math::
+   ~\\[-1ex]
+   \begin{array}{l}
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\PERFORM~\X{act}^\ast) &\stepto^{\X{act}^\ast}& S; F; \epsilon
+   \end{array}
    \end{array}
 
 where:

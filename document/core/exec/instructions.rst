@@ -3596,6 +3596,10 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 
    a. If :math:`n` is less than :math:`0`:
 
+      i. The thread remains suspended.
+
+   b. Else:
+
       i. Either the thread's suspension times out:
 
          a. Perform the action :math:`(\ATIMEOUT~\loc)`.
@@ -3603,10 +3607,6 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
          b. Push the value :math:`t.\CONST~2` to the stack.
 
       ii. Or the thread remains suspended.
-
-   b. Else:
-
-      i. The thread remains suspended.
 
 .. math::
    \begin{array}{l}

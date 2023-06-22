@@ -234,22 +234,36 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
 .. index:: memory type, memory instance, limits, byte
 .. _valid-meminst:
 
-:ref:`Memory Instances <syntax-meminst>` :math:`\{ \MITYPE~\limits, \MIDATA~b^\ast \}`
-......................................................................................
+:ref:`Memory Instances <syntax-meminst>` :math:`\{ \MITYPE~\limits~\UNSHARED, \MIDATA~b^\ast \}`
+.................................................................................................
 
-* The :ref:`memory type <syntax-memtype>` :math:`\limits` must be :ref:`valid <valid-memtype>`.
+* The :ref:`memory type <syntax-memtype>` :math:`\limits~\UNSHARED` must be :ref:`valid <valid-memtype>`.
 
 * The length of :math:`b^\ast` must equal :math:`\limits.\LMIN` multiplied by the :ref:`page size <page-size>` :math:`64\,\F{Ki}`.
 
-* Then the memory instance is valid with :ref:`memory type <syntax-memtype>` :math:`\limits`.
+* Then the memory instance is valid with :ref:`memory type <syntax-memtype>` :math:`\limits~\UNSHARED`.
 
 .. math::
    \frac{
-     \vdashmemtype \limits \ok
+     \vdashmemtype \limits~\UNSHARED \ok
      \qquad
      n = \limits.\LMIN \cdot 64\,\F{Ki}
    }{
-     S \vdashmeminst \{ \MITYPE~\limits, \MIDATA~b^n \} : \limits
+     S \vdashmeminst \{ \MITYPE~\limits~\UNSHARED, \MIDATA~b^n \} : \limits~\UNSHARED
+   }
+
+:ref:`Memory Instances <syntax-meminst>` :math:`\{ \MITYPE~\limits~\SHARED \}`
+......................................................................................
+
+* The :ref:`memory type <syntax-memtype>` :math:`\limits~\SHARED` must be :ref:`valid <valid-memtype>`.
+
+* Then the memory instance is valid with :ref:`memory type <syntax-memtype>` :math:`\limits~\SHARED`.
+
+.. math::
+   \frac{
+     \vdashmemtype \limits~\SHARED \ok
+   }{
+     S \vdashmeminst \{ \MITYPE~\limits~\SHARED \} : \limits~\SHARED
    }
 
 
@@ -377,7 +391,7 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
      \qquad
      (S \vdashexternval \EVTABLE~\tableaddr : \ETTABLE~\tabletype)^\ast
      \\
-     (S \vdashexternval \EVMEM~\memaddr : \ETMEM~\memtype)^\ast
+     (S; \X{act}^? \vdashexternval \EVMEM~\memaddr : \ETMEM~\memtype)^\ast
      \qquad
      (S \vdashexternval \EVGLOBAL~\globaladdr : \ETGLOBAL~\globaltype)^\ast
      \\
@@ -441,7 +455,7 @@ Finally, :ref:`frames <syntax-frame>` are classified with *frame contexts*, whic
 
 * Let :math:`[t^\ast]^\ast` be the concatenation of all :math:`[t_i^\ast]` in order.
 
-* Then the configuration is valid with the :ref:`result type <syntax-resulttype>` :math:`[t^\ast]`.
+* Then the configuration is valid with the :ref:`result type <syntax-resulttype>` :math:`[t^\ast]^\ast`.
 
 .. math::
    \frac{
@@ -621,6 +635,40 @@ To that end, all previous typing judgements :math:`C \vdash \X{prop}` are genera
    }
 
 
+.. index:: waitx
+
+:math:`\WAITX~\memaddr.\IDATA[k]~n`
+...................................
+
+* The :ref:`external memory value <syntax-externval>` :math:`\EVMEM~\memaddr` must be :ref:`valid <valid-externval-mem>` with :ref:`external memory type <syntax-externtype>` :math:`\ETMEM~(\limits~\SHARED)`.
+
+* Then the instruction is valid with type :math:`[] \to []`.
+
+.. math::
+   \frac{
+     S; \X{act}^? \vdashexternval \EVMEM~\memaddr : \ETMEM~(\limits~\SHARED)
+   }{
+     S; C \vdashadmininstr \WAITX~\memaddr.\IDATA[k]~n : [] \to []
+   }
+
+
+.. index:: perform
+
+:math:`\PERFORM~\act^\ast`
+............................
+
+* The instruction is valid with type :math:`[] \to []`.
+
+.. math::
+   \frac{
+   }{
+     S; C \vdashadmininstr \PERFORM~\act^\ast : [] \to []
+   }
+
+.. todo::
+   add wf action condition if defined
+
+
 .. index:: ! store extension, store
 .. _extend:
 
@@ -746,6 +794,9 @@ a store state :math:`S'` extends state :math:`S`, written :math:`S \extendsto S'
    }{
      \vdashmeminstextends \{\MITYPE~\X{mt}, \MIDATA~b_1^{n_1}\} \extendsto \{\MITYPE~\X{mt}, \MIDATA~b_2^{n_2}\}
    }
+
+.. todo::
+   fixme: memory type can change since min limit is updated with growth; add shared case
 
 
 .. index:: global instance, value, mutability
