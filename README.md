@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/WebAssembly/threads.svg?branch=master)](https://travis-ci.org/WebAssembly/threads)
-
 # Threads Proposal for WebAssembly
 
 This repository is a clone of github.com/WebAssembly/spec/. It is meant for
