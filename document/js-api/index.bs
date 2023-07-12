@@ -612,6 +612,7 @@ dictionary MemoryDescriptor {
   required [EnforceRange] unsigned long initial;
   [EnforceRange] unsigned long maximum;
   boolean shared = false;
+  boolean memory64 = false;
 };
 
 [LegacyNamespace=WebAssembly, Exposed=(Window,Worker,Worklet)]
@@ -670,7 +671,8 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
     1. If |maximum| is not empty and |maximum| &lt; |initial|, throw a {{RangeError}} exception.
     1. Let |shared| be |descriptor|["shared"].
     1. If |shared| is true and |maximum| is empty, throw a {{TypeError}} exception.
-    1. Let |memtype| be { min |initial|, max |maximum|, shared |shared| }.
+    1. Let |memory64| be |descriptor|["memory64"].
+    1. Let |memtype| be { min |initial|, max |maximum|, shared |shared|, memory64 |memory64| }.
     1. Let |store| be the [=surrounding agent=]'s [=associated store=].
     1. Let (|store|, |memaddr|) be [=mem_alloc=](|store|, |memtype|). If allocation fails, throw a {{RangeError}} exception.
     1. Set the [=surrounding agent=]'s [=associated store=] to |store|.
