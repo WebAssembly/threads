@@ -10,7 +10,7 @@ type action = action' Source.phrase
 and action' =
   | Invoke of var option * Ast.name * Ast.literal list
   | Get of var option * Ast.name
-  | Join of var
+  | Eval
 
 type nanop = nanop' Source.phrase
 and nanop' = (unit, unit, nan, nan) Values.op
@@ -20,6 +20,7 @@ type result = result' Source.phrase
 and result' =
   | LitResult of Ast.literal
   | NanResult of nanop
+  | EitherResult of result list
 
 type assertion = assertion' Source.phrase
 and assertion' =
@@ -37,14 +38,20 @@ and command' =
   | Register of Ast.name * var option
   | Action of action
   | Assertion of assertion
-  | Thread of var option * action
+  | Thread of var option * var list * command list
+  | Wait of var option
   | Meta of meta
 
 and meta = meta' Source.phrase
 and meta' =
   | Input of var option * string
   | Output of var option * string option
-  | Script of var option * script
+  | Script of var option * (* s1 : *) script * (* s2 : *) script * (* q : *) script
+    (* s1 @ s2 is remaining script to run
+     * q is script quote of original commands with inputs expanded (reversed)
+     * s1 contains reduced commands that must not be quoted
+     * s2 contains original commands that still need quoting
+     *)
 
 and script = command list
 

@@ -31,6 +31,8 @@ let argspec = Arg.align
   "-h", Arg.Clear Flags.harness, " exclude harness for JS conversion";
   "-d", Arg.Set Flags.dry, " dry, do not run program";
   "-t", Arg.Set Flags.trace, " trace execution";
+  "-r", Arg.Int Random.init, " set non-determinism random seed";
+  "-rr", Arg.Unit Random.self_init, " randomize non-determinism random seed";
   "-v", Arg.Unit banner, " show version"
 ]
 
@@ -40,12 +42,13 @@ let () =
     configure ();
     Arg.parse argspec
       (fun file -> add_arg ("(input " ^ quote file ^ ")")) usage;
-    List.iter (fun arg -> if not (Run.run_string arg) then exit 1) !args;
+    let context = Run.context () in
+    List.iter (fun arg -> if not (Run.run_string context arg) then exit 1) !args;
     if !args = [] then Flags.interactive := true;
     if !Flags.interactive then begin
       Flags.print_sig := true;
       banner ();
-      Run.run_stdin ()
+      Run.run_stdin context
     end
   with exn ->
     flush_all ();

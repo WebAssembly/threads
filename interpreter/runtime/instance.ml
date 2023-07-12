@@ -39,3 +39,10 @@ let extern_type_of = function
 
 let export inst name =
   try Some (List.assoc name inst.exports) with Not_found -> None
+
+let shared_export (_, ex) = shared_extern_type (extern_type_of ex)
+let shared_module inst =
+  if List.for_all (fun ex -> shared_export ex = Shared) inst.exports then
+    Shared
+  else
+    Unshared

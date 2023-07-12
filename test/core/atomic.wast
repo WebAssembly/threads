@@ -323,7 +323,15 @@
 (assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
 
 (invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw8.cmpxchg_u" (i32.const 0) (i32.const 0x11111111) (i32.const 0xcdcdcdcd)) (i32.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
 (assert_return (invoke "i32.atomic.rmw16.cmpxchg_u" (i32.const 0) (i32.const 0) (i32.const 0xcafecafe)) (i32.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i32.atomic.rmw16.cmpxchg_u" (i32.const 0) (i32.const 0x11111111) (i32.const 0xcafecafe)) (i32.const 0x1111))
 (assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
 
 (invoke "init" (i64.const 0x1111111111111111))
@@ -331,11 +339,23 @@
 (assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
 
 (invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw8.cmpxchg_u" (i32.const 0) (i64.const 0x1111111111111111) (i64.const 0x4242424242424242)) (i64.const 0x11))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
 (assert_return (invoke "i64.atomic.rmw16.cmpxchg_u" (i32.const 0) (i64.const 0) (i64.const 0xbeefbeefbeefbeef)) (i64.const 0x1111))
 (assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
 
 (invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw16.cmpxchg_u" (i32.const 0) (i64.const 0x1111111111111111) (i64.const 0xbeefbeefbeefbeef)) (i64.const 0x1111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
 (assert_return (invoke "i64.atomic.rmw32.cmpxchg_u" (i32.const 0) (i64.const 0) (i64.const 0xcabba6e5cabba6e5)) (i64.const 0x11111111))
+(assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
+
+(invoke "init" (i64.const 0x1111111111111111))
+(assert_return (invoke "i64.atomic.rmw32.cmpxchg_u" (i32.const 0) (i64.const 0x1111111111111111) (i64.const 0xcabba6e5cabba6e5)) (i64.const 0x11111111))
 (assert_return (invoke "i64.atomic.load" (i32.const 0)) (i64.const 0x1111111111111111))
 
 ;; *.atomic.rmw*.cmpxchg (compare true)
@@ -417,24 +437,6 @@
 (assert_trap (invoke "i64.atomic.rmw16.cmpxchg_u" (i32.const 1) (i64.const 0) (i64.const 0)) "unaligned atomic")
 (assert_trap (invoke "i64.atomic.rmw32.cmpxchg_u" (i32.const 1) (i64.const 0) (i64.const 0)) "unaligned atomic")
 
-(module
-  (memory 1 1 shared)
-
-  (func (export "init") (param $value i64) (i64.store (i32.const 0) (local.get $value)))
-
-  (func (export "memory.atomic.notify") (param $addr i32) (param $count i32) (result i32)
-      (memory.atomic.notify (local.get 0) (local.get 1)))
-  (func (export "memory.atomic.wait32") (param $addr i32) (param $expected i32) (param $timeout i64) (result i32)
-      (memory.atomic.wait32 (local.get 0) (local.get 1) (local.get 2)))
-  (func (export "memory.atomic.wait64") (param $addr i32) (param $expected i64) (param $timeout i64) (result i32)
-      (memory.atomic.wait64 (local.get 0) (local.get 1) (local.get 2)))
-)
-
-(invoke "init" (i64.const 0xffffffffffff))
-(assert_return (invoke "memory.atomic.wait32" (i32.const 0) (i32.const 0) (i64.const 0)) (i32.const 1))
-(assert_return (invoke "memory.atomic.wait64" (i32.const 0) (i64.const 0) (i64.const 0)) (i32.const 1))
-(assert_return (invoke "memory.atomic.notify" (i32.const 0) (i32.const 0)) (i32.const 0))
-
 ;; unshared memory is OK
 (module
   (memory 1 1)
@@ -487,6 +489,13 @@
   (func (drop (i64.atomic.rmw16.cmpxchg_u (i32.const 0) (i64.const 0) (i64.const 0))))
   (func (drop (i64.atomic.rmw32.cmpxchg_u (i32.const 0) (i64.const 0) (i64.const 0))))
 )
+
+;; atomic.fence: no memory is ok
+(module
+  (func (export "fence") (atomic.fence))
+)
+
+(assert_return (invoke "fence"))
 
 ;; Fails with no memory
 (assert_invalid (module (func (drop (memory.atomic.notify (i32.const 0) (i32.const 0))))) "unknown memory")

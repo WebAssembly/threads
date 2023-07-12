@@ -78,6 +78,9 @@ let memory_atomic_wait32 align offset =
 let memory_atomic_wait64 align offset =
   MemoryAtomicWait {ty = I64Type; align; offset; sz = None}
 
+let atomic_fence =
+  AtomicFence
+
 let i32_atomic_load align offset =
   AtomicLoad {ty = I32Type; align; offset; sz = None}
 let i64_atomic_load align offset =

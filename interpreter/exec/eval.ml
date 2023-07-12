@@ -34,6 +34,9 @@ let numeric_error at = function
        string_of_int i ^ ", got " ^ Types.string_of_value_type (type_of v))
   | exn -> raise exn
 
+(* Must be positive and non-zero *)
+let timeout_epsilon = 1000000L
+
 
 (* Administrative Expressions & Configurations *)
 
@@ -56,16 +59,41 @@ and admin_instr' =
   | Breaking of int32 * value stack
   | Label of int32 * instr list * code
   | Frame of int32 * frame * code
+  | Suspend of memory_inst * Memory.address * float
 
-type config =
+type action =
+  | NoAction
+    (* memory, cell index, number of threads to wake *)
+  | NotifyAction of memory_inst * Memory.address * I32.t
+
+type thread =
 {
   frame : frame;
   code : code;
   budget : int;  (* to model stack overflow *)
 }
 
+type config = thread list
+type thread_id = int
+type status = Running | Result of value list | Trap of exn
+
 let frame inst locals = {inst; locals}
-let config inst vs es = {frame = frame inst []; code = vs, es; budget = 300}
+let thread inst vs es = {frame = frame inst []; code = vs, es; budget = 300}
+let empty_thread = thread empty_module_inst [] []
+let empty_config = []
+let spawn (c : config) = List.length c, c @ [empty_thread]
+
+let status (c : config) (n : thread_id) : status =
+  let t = List.nth c n in
+  match t.code with
+  | vs, [] -> Result (List.rev vs)
+  | [], {it = Trapping msg; at} :: _ -> Trap (Trap.Error (at, msg))
+  | _ -> Running
+
+let clear (c : config) (n : thread_id) : config =
+  let ts1, t, ts2 = Lib.List.extract n c in
+  ts1 @ [{t with code = [], []}] @ ts2
+
 
 let plain e = Plain e.it @@ e.at
 
@@ -113,6 +141,10 @@ let check_align addr ty sz at =
   if not (Memory.is_aligned addr ty sz) then
     Trap.error at "unaligned atomic memory access"
 
+let check_shared mem at =
+  if shared_memory_type (Memory.type_of mem) <> Shared then
+    Trap.error at "expected shared memory"
+
 
 (* Evaluation *)
 
@@ -122,94 +154,95 @@ let check_align addr ty sz at =
  *   v  : value
  *   es : instr list
  *   vs : value stack
+ *   t : thread
  *   c : config
  *)
 
-let rec step (c : config) : config =
-  let {frame; code = vs, es; _} = c in
+let rec step_thread (t : thread) : thread * action =
+  let {frame; code = vs, es; _} = t in
   let e = List.hd es in
-  let vs', es' =
+  let vs', es', act =
     match e.it, vs with
     | Plain e', vs ->
       (match e', vs with
       | Unreachable, vs ->
-        vs, [Trapping "unreachable executed" @@ e.at]
+        vs, [Trapping "unreachable executed" @@ e.at], NoAction
 
       | Nop, vs ->
-        vs, []
+        vs, [], NoAction
 
       | Block (bt, es'), vs ->
         let FuncType (ts1, ts2) = block_type frame.inst bt in
         let n1 = Lib.List32.length ts1 in
         let n2 = Lib.List32.length ts2 in
         let args, vs' = take n1 vs e.at, drop n1 vs e.at in
-        vs', [Label (n2, [], (args, List.map plain es')) @@ e.at]
+        vs', [Label (n2, [], (args, List.map plain es')) @@ e.at], NoAction
 
       | Loop (bt, es'), vs ->
         let FuncType (ts1, ts2) = block_type frame.inst bt in
         let n1 = Lib.List32.length ts1 in
         let args, vs' = take n1 vs e.at, drop n1 vs e.at in
-        vs', [Label (n1, [e' @@ e.at], (args, List.map plain es')) @@ e.at]
+        vs', [Label (n1, [e' @@ e.at], (args, List.map plain es')) @@ e.at], NoAction
 
       | If (bt, es1, es2), I32 0l :: vs' ->
-        vs', [Plain (Block (bt, es2)) @@ e.at]
+        vs', [Plain (Block (bt, es2)) @@ e.at], NoAction
 
       | If (bt, es1, es2), I32 i :: vs' ->
-        vs', [Plain (Block (bt, es1)) @@ e.at]
+        vs', [Plain (Block (bt, es1)) @@ e.at], NoAction
 
       | Br x, vs ->
-        [], [Breaking (x.it, vs) @@ e.at]
+        [], [Breaking (x.it, vs) @@ e.at], NoAction
 
       | BrIf x, I32 0l :: vs' ->
-        vs', []
+        vs', [], NoAction
 
       | BrIf x, I32 i :: vs' ->
-        vs', [Plain (Br x) @@ e.at]
+        vs', [Plain (Br x) @@ e.at], NoAction
 
       | BrTable (xs, x), I32 i :: vs' when I32.ge_u i (Lib.List32.length xs) ->
-        vs', [Plain (Br x) @@ e.at]
+        vs', [Plain (Br x) @@ e.at], NoAction
 
       | BrTable (xs, x), I32 i :: vs' ->
-        vs', [Plain (Br (Lib.List32.nth xs i)) @@ e.at]
+        vs', [Plain (Br (Lib.List32.nth xs i)) @@ e.at], NoAction
 
       | Return, vs ->
-        [], [Returning vs @@ e.at]
+        [], [Returning vs @@ e.at], NoAction
 
       | Call x, vs ->
-        vs, [Invoke (func frame.inst x) @@ e.at]
+        vs, [Invoke (func frame.inst x) @@ e.at], NoAction
 
       | CallIndirect x, I32 i :: vs ->
         let func = func_elem frame.inst (0l @@ e.at) i e.at in
         if type_ frame.inst x <> Func.type_of func then
-          vs, [Trapping "indirect call type mismatch" @@ e.at]
+          vs, [Trapping "indirect call type mismatch" @@ e.at], NoAction
         else
-          vs, [Invoke func @@ e.at]
+          vs, [Invoke func @@ e.at], NoAction
 
       | Drop, v :: vs' ->
-        vs', []
+        vs', [], NoAction
 
       | Select, I32 0l :: v2 :: v1 :: vs' ->
-        v2 :: vs', []
+        v2 :: vs', [], NoAction
 
       | Select, I32 i :: v2 :: v1 :: vs' ->
-        v1 :: vs', []
+        v1 :: vs', [], NoAction
 
       | LocalGet x, vs ->
-        !(local frame x) :: vs, []
+        !(local frame x) :: vs, [], NoAction
 
       | LocalSet x, v :: vs' ->
         local frame x := v;
-        vs', []
+        vs', [], NoAction
 
       | LocalTee x, v :: vs' ->
         local frame x := v;
-        v :: vs', []
+        v :: vs', [], NoAction
 
       | GlobalGet x, vs ->
-        Global.load (global frame.inst x) :: vs, []
+        Global.load (global frame.inst x) :: vs, [], NoAction
 
       | GlobalSet x, v :: vs' ->
-        (try Global.store (global frame.inst x) v; vs', []
+        (try Global.store (global frame.inst x) v; vs', [], NoAction
         with Global.NotMutable -> Crash.error e.at "write to immutable global"
            | Global.Type -> Crash.error e.at "type mismatch at global write")
 
@@ -221,8 +254,8 @@ let rec step (c : config) : config =
             match sz with
             | None -> Memory.load_value mem addr offset ty
             | Some (sz, ext) -> Memory.load_packed sz ext mem addr offset ty
-          in v :: vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+          in v :: vs', [], NoAction
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], NoAction)
 
       | Store {offset; sz; _}, v :: I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
@@ -232,8 +265,8 @@ let rec step (c : config) : config =
           | None -> Memory.store_value mem addr offset v
           | Some sz -> Memory.store_packed sz mem addr offset v
           );
-          vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
+          vs', [], NoAction
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], NoAction);
 
       | AtomicLoad {offset; ty; sz; _}, I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
@@ -244,8 +277,8 @@ let rec step (c : config) : config =
             match sz with
             | None -> Memory.load_value mem addr offset ty
             | Some sz -> Memory.load_packed sz ZX mem addr offset ty
-          in v :: vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+          in v :: vs', [], NoAction
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], NoAction)
 
       | AtomicStore {offset; ty; sz; _}, v :: I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
@@ -256,8 +289,8 @@ let rec step (c : config) : config =
           | None -> Memory.store_value mem addr offset v
           | Some sz -> Memory.store_packed sz mem addr offset v
           );
-          vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
+          vs', [], NoAction
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], NoAction);
 
       | AtomicRmw (rmwop, {offset; ty; sz; _}), v :: I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
@@ -273,8 +306,8 @@ let rec step (c : config) : config =
           | None -> Memory.store_value mem addr offset v2
           | Some sz -> Memory.store_packed sz mem addr offset v2
           );
-          v1 :: vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+          v1 :: vs', [], NoAction
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], NoAction)
 
       | AtomicRmwCmpXchg {offset; ty; sz; _}, vn :: ve :: I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
@@ -290,8 +323,8 @@ let rec step (c : config) : config =
                 | None -> Memory.store_value mem addr offset vn
                 | Some sz -> Memory.store_packed sz mem addr offset vn
           );
-          v1 :: vs', []
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at]);
+          v1 :: vs', [], NoAction
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], NoAction);
 
       | MemoryAtomicWait {offset; ty; sz; _}, I64 timeout :: ve :: I32 i :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
@@ -299,22 +332,36 @@ let rec step (c : config) : config =
         (try
           assert (sz = None);
           check_align addr ty sz e.at;
+          check_shared mem e.at;
           let v = Memory.load_value mem addr offset ty in
           if v = ve then
-            assert false  (* TODO *)
+            if timeout >= 0L && timeout < timeout_epsilon then
+              I32 2l :: vs', [], NoAction (* Treat as though wait timed out immediately *)
+            else
+              (* TODO: meaningful timestamp handling *)
+              vs', [Suspend (mem, addr, 0.) @@ e.at], NoAction
           else
-            I32 1l :: vs', []  (* Not equal *)
-        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at])
+            I32 1l :: vs', [], NoAction  (* Not equal *)
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], NoAction)
 
-      | MemoryAtomicNotify x, I32 count :: I32 i :: vs' ->
+      | MemoryAtomicNotify {offset; ty; sz; _}, I32 count :: I32 i :: vs' ->
+        let mem = memory frame.inst (0l @@ e.at) in
+        let addr = I64_convert.extend_i32_u i in
+        (try
+          check_align addr ty sz e.at;
+          let _ = Memory.load_value mem addr offset ty in
           if count = 0l then
-            I32 0l :: vs', []  (* Trivial case waking 0 waiters *)
+            I32 0l :: vs', [], NoAction  (* Trivial case waking 0 waiters *)
           else
-            assert false  (* TODO *)
+            vs', [], NotifyAction (mem, addr, count)
+        with exn -> vs', [Trapping (memory_error e.at exn) @@ e.at], NoAction)
+
+      | AtomicFence, vs ->
+        vs, [], NoAction
 
       | MemorySize, vs ->
         let mem = memory frame.inst (0l @@ e.at) in
-        I32 (Memory.size mem) :: vs, []
+        I32 (Memory.size mem) :: vs, [], NoAction
 
       | MemoryGrow, I32 delta :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
@@ -322,30 +369,30 @@ let rec step (c : config) : config =
         let result =
           try Memory.grow mem delta; old_size
           with Memory.SizeOverflow | Memory.SizeLimit | Memory.OutOfMemory -> -1l
-        in I32 result :: vs', []
+        in I32 result :: vs', [], NoAction
 
       | Const v, vs ->
-        v.it :: vs, []
+        v.it :: vs, [], NoAction
 
       | Test testop, v :: vs' ->
-        (try value_of_bool (Eval_numeric.eval_testop testop v) :: vs', []
-        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at])
+        (try value_of_bool (Eval_numeric.eval_testop testop v) :: vs', [], NoAction
+        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at], NoAction)
 
       | Compare relop, v2 :: v1 :: vs' ->
-        (try value_of_bool (Eval_numeric.eval_relop relop v1 v2) :: vs', []
-        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at])
+        (try value_of_bool (Eval_numeric.eval_relop relop v1 v2) :: vs', [], NoAction
+        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at], NoAction)
 
       | Unary unop, v :: vs' ->
-        (try Eval_numeric.eval_unop unop v :: vs', []
-        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at])
+        (try Eval_numeric.eval_unop unop v :: vs', [], NoAction
+        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at], NoAction)
 
       | Binary binop, v2 :: v1 :: vs' ->
-        (try Eval_numeric.eval_binop binop v1 v2 :: vs', []
-        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at])
+        (try Eval_numeric.eval_binop binop v1 v2 :: vs', [], NoAction
+        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at], NoAction)
 
       | Convert cvtop, v :: vs' ->
-        (try Eval_numeric.eval_cvtop cvtop v :: vs', []
-        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at])
+        (try Eval_numeric.eval_cvtop cvtop v :: vs', [], NoAction
+        with exn -> vs', [Trapping (numeric_error e.at exn) @@ e.at], NoAction)
 
       | _ ->
         let s1 = string_of_values (List.rev vs) in
@@ -355,7 +402,7 @@ let rec step (c : config) : config =
       )
 
     | Trapping msg, vs ->
-      assert false
+      [], [Trapping msg @@ e.at], NoAction
 
     | Returning vs', vs ->
       Crash.error e.at "undefined frame"
@@ -364,38 +411,38 @@ let rec step (c : config) : config =
       Crash.error e.at "undefined label"
 
     | Label (n, es0, (vs', [])), vs ->
-      vs' @ vs, []
+      vs' @ vs, [], NoAction
 
     | Label (n, es0, (vs', {it = Trapping msg; at} :: es')), vs ->
-      vs, [Trapping msg @@ at]
+      vs, [Trapping msg @@ at], NoAction
 
     | Label (n, es0, (vs', {it = Returning vs0; at} :: es')), vs ->
-      vs, [Returning vs0 @@ at]
+      vs, [Returning vs0 @@ at], NoAction
 
     | Label (n, es0, (vs', {it = Breaking (0l, vs0); at} :: es')), vs ->
-      take n vs0 e.at @ vs, List.map plain es0
+      take n vs0 e.at @ vs, List.map plain es0, NoAction
 
     | Label (n, es0, (vs', {it = Breaking (k, vs0); at} :: es')), vs ->
-      vs, [Breaking (Int32.sub k 1l, vs0) @@ at]
+      vs, [Breaking (Int32.sub k 1l, vs0) @@ at], NoAction
 
     | Label (n, es0, code'), vs ->
-      let c' = step {c with code = code'} in
-      vs, [Label (n, es0, c'.code) @@ e.at]
+      let t', act = step_thread {t with code = code'} in
+      vs, [Label (n, es0, t'.code) @@ e.at], act
 
     | Frame (n, frame', (vs', [])), vs ->
-      vs' @ vs, []
+      vs' @ vs, [], NoAction
 
     | Frame (n, frame', (vs', {it = Trapping msg; at} :: es')), vs ->
-      vs, [Trapping msg @@ at]
+      vs, [Trapping msg @@ at], NoAction
 
     | Frame (n, frame', (vs', {it = Returning vs0; at} :: es')), vs ->
-      take n vs0 e.at @ vs, []
+      take n vs0 e.at @ vs, [], NoAction
 
     | Frame (n, frame', code'), vs ->
-      let c' = step {frame = frame'; code = code'; budget = c.budget - 1} in
-      vs, [Frame (n, c'.frame, c'.code) @@ e.at]
+      let t', act = step_thread {frame = frame'; code = code'; budget = t.budget - 1} in
+      vs, [Frame (n, t'.frame, t'.code) @@ e.at], act
 
-    | Invoke func, vs when c.budget = 0 ->
+    | Invoke func, vs when t.budget = 0 ->
       Exhaustion.error e.at "call stack exhausted"
 
     | Invoke func, vs ->
@@ -407,43 +454,97 @@ let rec step (c : config) : config =
         let locals' = List.rev args @ List.map default_value f.it.locals in
         let frame' = {inst = !inst'; locals = List.map ref locals'} in
         let instr' = [Label (n2, [], ([], List.map plain f.it.body)) @@ f.at] in
-        vs', [Frame (n2, frame', ([], instr')) @@ e.at]
+        vs', [Frame (n2, frame', ([], instr')) @@ e.at], NoAction
 
       | Func.HostFunc (t, f) ->
-        try List.rev (f (List.rev args)) @ vs', []
+        try List.rev (f (List.rev args)) @ vs', [], NoAction
         with Crash (_, msg) -> Crash.error e.at msg
       )
-  in {c with code = vs', es' @ List.tl es}
 
+    | Suspend _, vs ->
+      (* TODO: meaningful timestamp handling *)
+      vs, [e], NoAction
 
-let rec eval (c : config) : value stack =
-  match c.code with
-  | vs, [] ->
-    vs
+  in {t with code = vs', es' @ List.tl es}, act
 
-  | vs, {it = Trapping msg; at} :: _ ->
-    Trap.error at msg
+let rec plug_value (c : code) (v : value) : code =
+  let vs, es = c in
+  match es with
+  | {it = Label (n, es0, c'); at} :: es' ->
+    vs, {it = Label (n, es0, plug_value c' v); at} :: es'
+  | {it = Frame (n, f, c'); at} :: es' ->
+    vs, {it = Frame (n, f, plug_value c' v); at} :: es'
+  | _ ->
+    v :: vs, es
 
-  | vs, es ->
-    eval (step c)
+let rec try_unsuspend (c : code) (m : memory_inst) (addr : Memory.address) : code option =
+  let vs, es = c in
+  match es with
+  | {it = Label (n, es0, c'); at} :: es' ->
+    Lib.Option.map (fun c'' -> vs, {it = Label (n, es0, c''); at} :: es') (try_unsuspend c' m addr)
+  | {it = Frame (n, f, c'); at} :: es' ->
+    Lib.Option.map (fun c'' -> vs, {it = Frame (n, f, c''); at} :: es') (try_unsuspend c' m addr)
+  | {it = Suspend (m', addr', timeout); at} :: es' ->
+    if m == m' && addr = addr' then
+      Some (I32 0l :: vs, es')
+    else
+      None
+  | _ ->
+    None
+
+let rec wake (c : config) (m : memory_inst) (addr : Memory.address) (count : int32) : config * int32 =
+  if count = 0l then
+    c, 0l
+  else
+    match c with
+    | [] ->
+      c, 0l
+    | t :: ts ->
+      let t', count' = match (try_unsuspend t.code m addr) with | None -> t, 0l | Some c' -> {t with code = c'}, 1l in
+      let ts', count'' = wake ts m addr (Int32.sub count count') in
+      t' :: ts', Int32.add count' count''
+
+let rec step (c : config) (n : thread_id) : config =
+  let ts1, t, ts2 = Lib.List.extract n c in
+  if snd t.code = [] then
+    step c n
+  else
+    let t', act = try step_thread t with Stack_overflow ->
+      Exhaustion.error (List.hd (snd t.code)).at "call stack exhausted"
+    in
+    match act with
+    | NotifyAction (m, addr, count) ->
+      let ts1', count1 = wake ts1 m addr count in
+      let ts2', count2 = wake ts2 m addr (Int32.sub count count1) in
+      ts1' @ [{t' with code = plug_value t'.code (I32 (Int32.add count1 count2))}] @ ts2'
+    | _ -> ts1 @ [t'] @ ts2
+
+let rec eval (c : config ref) (n : thread_id) : value list =
+  match status !c n with
+  | Result vs -> vs
+  | Trap e -> raise e
+  | Running ->
+    let c' = step !c n in
+    c := c'; eval c n
 
 
 (* Functions & Constants *)
 
-let invoke (func : func_inst) (vs : value list) : value list =
+let invoke c n (func : func_inst) (vs : value list) : config =
   let at = match func with Func.AstFunc (_,_, f) -> f.at | _ -> no_region in
   let FuncType (ins, out) = Func.type_of func in
   if List.map Values.type_of vs <> ins then
     Crash.error at "wrong number or types of arguments";
-  let c = config empty_module_inst (List.rev vs) [Invoke func @@ at] in
-  try List.rev (eval c) with Stack_overflow ->
-    Exhaustion.error at "call stack exhausted"
+  let ts1, t, ts2 = Lib.List.extract n c in
+  let vs', es' = t.code in
+  let code = List.rev vs @ vs', (Invoke func @@ at) :: es' in
+  ts1 @ [{t with code}] @ ts2
 
 let eval_const (inst : module_inst) (const : const) : value =
-  let c = config inst [] (List.map plain const.it) in
-  match eval c with
+  let t = thread inst [] (List.map plain const.it) in
+  match eval (ref [t]) 0 with
   | [v] -> v
-  | vs -> Crash.error const.at "wrong number of results on stack"
+  | _ -> Crash.error const.at "wrong number of results on stack"
 
 let i32 (v : value) at =
   match v with
@@ -518,7 +619,7 @@ let add_import (m : module_) (ext : extern) (im : import) (inst : module_inst)
   | ExternMemory mem -> {inst with memories = mem :: inst.memories}
   | ExternGlobal glob -> {inst with globals = glob :: inst.globals}
 
-let init (m : module_) (exts : extern list) : module_inst =
+let init c n (m : module_) (exts : extern list) : module_inst * config =
   let
     { imports; tables; memories; globals; funcs; types;
       exports; elems; data; start
@@ -545,5 +646,5 @@ let init (m : module_) (exts : extern list) : module_inst =
   let init_datas = List.map (init_memory inst) data in
   List.iter (fun f -> f ()) init_elems;
   List.iter (fun f -> f ()) init_datas;
-  Lib.Option.app (fun x -> ignore (invoke (func inst x) [])) start;
-  inst
+  let c' = Lib.Option.fold c (fun x -> invoke c n (func inst x) []) start in
+  inst, c'

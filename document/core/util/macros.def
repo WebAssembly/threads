@@ -173,8 +173,8 @@
 
 .. |to| mathdef:: \xref{syntax/types}{syntax-functype}{\rightarrow}
 
-.. |I8| mathdef:: \xref{exec/runtime}{syntax-storagetype}{\K{i8}}
-.. |I16| mathdef:: \xref{exec/runtime}{syntax-storagetype}{\K{i16}}
+.. |I8| mathdef:: \xref{exec/numeric}{syntax-storagetype}{\K{i8}}
+.. |I16| mathdef:: \xref{exec/numeric}{syntax-storagetype}{\K{i16}}
 .. |I32| mathdef:: \xref{syntax/types}{syntax-valtype}{\K{i32}}
 .. |I64| mathdef:: \xref{syntax/types}{syntax-valtype}{\K{i64}}
 .. |F32| mathdef:: \xref{syntax/types}{syntax-valtype}{\K{f32}}
@@ -383,18 +383,19 @@
 .. |REINTERPRET| mathdef:: \xref{syntax/instructions}{syntax-instr-numeric}{\K{reinterpret}}
 
 .. |ATOMIC| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic}}
-.. |MEMORYATOMICWAIT| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.wait}}
-.. |MEMORYATOMICNOTIFY| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.notify}}
-.. |ATOMICADD| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{add}}
-.. |ATOMICSUB| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{sub}}
-.. |ATOMICAND| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{and}}
-.. |ATOMICOR| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{or}}
-.. |ATOMICXOR| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{xor}}
-.. |ATOMICXCHG| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{xchg}}
-.. |ATOMICCMPXCHG| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{cmpxchg}}
+.. |ATADD| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{add}}
+.. |ATSUB| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{sub}}
+.. |ATAND| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{and}}
+.. |ATOR| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{or}}
+.. |ATXOR| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{xor}}
+.. |ATXCHG| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{xchg}}
+.. |ATCMPXCHG| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{cmpxchg}}
 .. |ATOMICLOAD| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.load}}
 .. |ATOMICSTORE| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.store}}
 .. |ATOMICRMW| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{atomic.rmw}}
+.. |MEMORYATOMICWAIT| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.wait}}
+.. |MEMORYATOMICNOTIFY| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.notify}}
+.. |MEMORYATOMICFENCE| mathdef:: \xref{syntax/instructions}{syntax-instr-atomic-memory}{\K{memory.atomic.fence}}
 
 
 .. Instructions, non-terminals
@@ -423,7 +424,7 @@
 .. |instr| mathdef:: \xref{syntax/instructions}{syntax-instr}{\X{instr}}
 .. |expr| mathdef:: \xref{syntax/instructions}{syntax-expr}{\X{expr}}
 
-.. |atomicop| mathdef:: \xref{syntax/instructions}{syntax-atomicop}{\X{atomicop}}
+.. |atop| mathdef:: \xref{syntax/instructions}{syntax-atop}{\X{atop}}
 
 
 .. Binary Format
@@ -888,7 +889,7 @@
 
 .. Events, terminals
 
-.. |AT| mathdef:: \xref{exec/runtime}{syntax-time}{\K{at}}
+.. |AT| mathdef:: \xref{exec/runtime}{syntax-time}{\mathbin{\K{at}}}
 .. |ATTIME| mathdef:: \xref{exec/runtime}{syntax-time}{\K{time}}
 .. |ATVAL| mathdef:: \xref{exec/runtime}{syntax-time}{\K{val}}
 
@@ -1029,7 +1030,12 @@
 .. |extend| mathdef:: \xref{exec/numerics}{op-extend_u}{\F{extend}}
 .. |extendu| mathdef:: \xref{exec/numerics}{op-extend_u}{\F{extend}^{\K{u}}}
 .. |extends| mathdef:: \xref{exec/numerics}{op-extend_s}{\F{extend}^{\K{s}}}
+.. |extendsx| mathdef:: \xref{exec/numerics}{op-extend_u}{\F{extend}^{\sx}}
+.. |extendtu| mathdef:: \xref{exec/numerics}{op-extendt}{\F{extend}^{\K{u}^?}}
+.. |extendts| mathdef:: \xref{exec/numerics}{op-extendt}{\F{extend}^{\K{s}^?}}
+.. |extendtsx| mathdef:: \xref{exec/numerics}{op-extendt}{\F{extend}^{\sx^?}}
 .. |wrap| mathdef:: \xref{exec/numerics}{op-wrap}{\F{wrap}}
+.. |wrapt| mathdef:: \xref{exec/numerics}{op-wrapt}{\F{wrap}}
 .. |truncu| mathdef:: \xref{exec/numerics}{op-trunc_u}{\F{trunc}^{\K{u}}}
 .. |truncs| mathdef:: \xref{exec/numerics}{op-trunc_s}{\F{trunc}^{\K{s}}}
 .. |truncsatu| mathdef:: \xref{exec/numerics}{op-trunc_sat_u}{\F{trunc\_sat\_u}}

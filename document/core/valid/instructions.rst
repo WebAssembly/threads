@@ -431,7 +431,171 @@ Memory Instructions
 Atomic Memory Instructions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _valid-atomic-notify:
+.. _valid-atomic.load:
+
+:math:`t\K{.}\ATOMICLOAD~\memarg`
+.................................
+
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
+
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
+
+* Then the instruction is valid with type :math:`[\I32] \to [t]`.
+
+.. math::
+   \frac{
+     C.\CMEMS[0] = \memtype
+     \qquad
+     2^{\memarg.\ALIGN} = |t|/8
+   }{
+     C \vdash t\K{.}\ATOMICLOAD~\memarg : [\I32] \to [t]
+   }
+
+
+.. _valid-atomic.loadn:
+
+:math:`t\K{.}\ATOMICLOAD{N}\K{\_u}~\memarg`
+...........................................
+
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
+
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
+
+* Then the instruction is valid with type :math:`[\I32] \to [t]`.
+
+.. math::
+   \frac{
+     C.\CMEMS[0] = \memtype
+     \qquad
+     2^{\memarg.\ALIGN} = N/8
+   }{
+     C \vdash t\K{.}\ATOMICLOAD{N}\K{\_u}~\memarg : [\I32] \to [t]
+   }
+
+
+.. _valid-atomic.store:
+
+:math:`t\K{.}\ATOMICSTORE~\memarg`
+..................................
+
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
+
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
+
+* Then the instruction is valid with type :math:`[\I32~t] \to []`.
+
+.. math::
+   \frac{
+     C.\CMEMS[0] = \memtype
+     \qquad
+     2^{\memarg.\ALIGN} = |t|/8
+   }{
+     C \vdash t\K{.}\ATOMICSTORE~\memarg : [\I32~t] \to []
+   }
+
+
+.. _valid-atomic.storen:
+
+:math:`t\K{.}\ATOMICSTORE{N}~\memarg`
+............................................
+
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
+
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
+
+* Then the instruction is valid with type :math:`[\I32~t] \to []`.
+
+.. math::
+   \frac{
+     C.\CMEMS[0] = \memtype
+     \qquad
+     2^{\memarg.\ALIGN} = N/8
+   }{
+     C \vdash t\K{.}\ATOMICSTORE{N}~\memarg : [\I32~t] \to []
+   }
+
+
+.. _valid-atomic.rmw:
+
+:math:`t\K{.}\ATOMICRMW\K{.}\atop~\memarg`
+..........................................
+
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
+
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
+
+* Then the instruction is valid with type :math:`[\I32~t] \to [t]`.
+
+.. math::
+   \frac{
+     C.\CMEMS[0] = \memtype
+     \qquad
+     2^{\memarg.\ALIGN} = |t|/8
+   }{
+     C \vdash t\K{.}\ATOMICRMW\K{.}\atop~\memarg : [\I32~t] \to [t]
+   }
+
+.. _valid-atomic.rmwn:
+
+:math:`t\K{.}\ATOMICRMW{N}\K{.}\atop\K{\_u}~\memarg`
+....................................................
+
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
+
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
+
+* Then the instruction is valid with type :math:`[\I32~t] \to [t]`.
+
+.. math::
+   \frac{
+     C.\CMEMS[0] = \memtype
+     \qquad
+     2^{\memarg.\ALIGN} = N/8
+   }{
+     C \vdash t\K{.}\ATOMICRMW{N}\K{.}\atop\K{\_u}~\memarg : [\I32~t] \to [t]
+   }
+
+.. _valid-atomic.rmw.cmpxchg:
+
+:math:`t\K{.}\ATOMICRMW\K{.}\ATCMPXCHG~\memarg`
+...............................................
+
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
+
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
+
+* Then the instruction is valid with type :math:`[\I32~t~t] \to [t]`.
+
+.. math::
+   \frac{
+     C.\CMEMS[0] = \memtype
+     \qquad
+     2^{\memarg.\ALIGN} = |t|/8
+   }{
+     C \vdash t\K{.}\ATOMICRMW\K{.}\ATCMPXCHG~\memarg : [\I32~t~t] \to [t]
+   }
+
+.. _valid-atomic.rmwn.cmpxchg:
+
+:math:`t\K{.}\ATOMICRMW{N}\K{.}\ATCMPXCHG\K{\_u}~\memarg`
+.........................................................
+
+* The memory :math:`C.\CMEMS[0]` must be defined in the context.
+
+* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
+
+* Then the instruction is valid with type :math:`[\I32~t~t] \to [t]`.
+
+.. math::
+   \frac{
+     C.\CMEMS[0] = \memtype
+     \qquad
+     2^{\memarg.\ALIGN} = N/8
+   }{
+     C \vdash t\K{.}\ATOMICRMW{N}\K{.}\ATCMPXCHG\K{\_u}~\memarg : [\I32~t~t] \to [t]
+   }
+
+.. _valid-memory.atomic.notify:
 
 :math:`\MEMORYATOMICNOTIFY~\memarg`
 ...................................
@@ -442,7 +606,7 @@ Atomic Memory Instructions
 
 * The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`4`.
 
-* Then the instruction is valid with type :math:`[\I32~\I64] \to [\I64]`.
+* Then the instruction is valid with type :math:`[\I32~\I32] \to [\I32]`.
 
 .. math::
    \frac{
@@ -450,10 +614,10 @@ Atomic Memory Instructions
      \qquad
      2^{\memarg.\ALIGN} = 4
    }{
-     C \vdash \MEMORYATOMICNOTIFY~\memarg : [\I32~\I64] \to [\I64]
+     C \vdash \MEMORYATOMICNOTIFY~\memarg : [\I32~\I32] \to [\I32]
    }
 
-.. _valid-atomic-wait:
+.. _valid-memory.atomic.waitn:
 
 :math:`\MEMORYATOMICWAIT{N}~\memarg`
 ....................................
@@ -475,186 +639,21 @@ Atomic Memory Instructions
      C \vdash \MEMORYATOMICWAIT{N}~\memarg : [\I32~\K{i}{N}~\I64] \to [\I32]
    }
 
-.. _valid-atomic-load:
+.. _valid-memory.atomic.fence:
 
-:math:`t\K{.}\ATOMICLOAD~\memarg`
-.................................
+:math:`\MEMORYATOMICFENCE`
+..........................
 
-* The memory :math:`C.\CMEMS[0]` must be defined in the context.
-
-* Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
-
-* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
-
-* Then the instruction is valid with type :math:`[\I32] \to [t]`.
+* The instruction is valid with type :math:`[] \to []`.
 
 .. math::
    \frac{
-     C.\CMEMS[0] = \memtype
-     \qquad
-     2^{\memarg.\ALIGN} = |t|/8
    }{
-     C \vdash t\K{.}\ATOMICLOAD~\memarg : [\I32] \to [t]
+     C \vdashinstr \MEMORYATOMICFENCE : [] \to []
    }
 
-
-.. _valid-atomic-loadn:
-
-:math:`t\K{.}\ATOMICLOAD{N}\K{\_u}~\memarg`
-...........................................
-
-* The memory :math:`C.\CMEMS[0]` must be defined in the context.
-
-* Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
-
-* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
-
-* Then the instruction is valid with type :math:`[\I32] \to [t]`.
-
-.. math::
-   \frac{
-     C.\CMEMS[0] = \memtype
-     \qquad
-     2^{\memarg.\ALIGN} = N/8
-   }{
-     C \vdash t\K{.}\ATOMICLOAD{N}\K{\_u}~\memarg : [\I32] \to [t]
-   }
-
-
-.. _valid-atomic-store:
-
-:math:`t\K{.}\ATOMICSTORE~\memarg`
-..................................
-
-* The memory :math:`C.\CMEMS[0]` must be defined in the context.
-
-* Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
-
-* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
-
-* Then the instruction is valid with type :math:`[\I32~t] \to []`.
-
-.. math::
-   \frac{
-     C.\CMEMS[0] = \memtype
-     \qquad
-     2^{\memarg.\ALIGN} = |t|/8
-   }{
-     C \vdash t\K{.}\ATOMICSTORE~\memarg : [\I32~t] \to []
-   }
-
-
-.. _valid-atomic-storen:
-
-:math:`t\K{.}\ATOMICSTORE{N}~\memarg`
-............................................
-
-* The memory :math:`C.\CMEMS[0]` must be defined in the context.
-
-* Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
-
-* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
-
-* Then the instruction is valid with type :math:`[\I32~t] \to []`.
-
-.. math::
-   \frac{
-     C.\CMEMS[0] = \memtype
-     \qquad
-     2^{\memarg.\ALIGN} = N/8
-   }{
-     C \vdash t\K{.}\ATOMICSTORE{N}~\memarg : [\I32~t] \to []
-   }
-
-
-.. _valid-atomic-rmw:
-
-:math:`t\K{.}\ATOMICRMW\K{.}\atomicop~\memarg`
-..............................................
-
-* The memory :math:`C.\CMEMS[0]` must be defined in the context.
-
-* Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
-
-* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
-
-* Then the instruction is valid with type :math:`[\I32~t] \to [t]`.
-
-.. math::
-   \frac{
-     C.\CMEMS[0] = \memtype
-     \qquad
-     2^{\memarg.\ALIGN} = |t|/8
-   }{
-     C \vdash t\K{.}\ATOMICRMW\K{.}\atomicop~\memarg : [\I32~t] \to [t]
-   }
-
-.. _valid-atomic-rmwn:
-
-:math:`t\K{.}\ATOMICRMW{N}\K{.}\atomicop\K{\_u}~\memarg`
-........................................................
-
-* The memory :math:`C.\CMEMS[0]` must be defined in the context.
-
-* Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
-
-* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
-
-* Then the instruction is valid with type :math:`[\I32~t] \to [t]`.
-
-.. math::
-   \frac{
-     C.\CMEMS[0] = \memtype
-     \qquad
-     2^{\memarg.\ALIGN} = N/8
-   }{
-     C \vdash t\K{.}\ATOMICRMW{N}\K{.}\atomicop\K{\_u}~\memarg : [\I32~t] \to [t]
-   }
-
-.. _valid-atomic-rmw-cmpxchg:
-
-:math:`t\K{.}\ATOMICRMW\K{.}\ATOMICCMPXCHG~\memarg`
-...................................................
-
-* The memory :math:`C.\CMEMS[0]` must be defined in the context.
-
-* Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
-
-* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to the :ref:`width <syntax-valtype>` of :math:`t` divided by :math:`8`.
-
-* Then the instruction is valid with type :math:`[\I32~t~t] \to [t]`.
-
-.. math::
-   \frac{
-     C.\CMEMS[0] = \memtype
-     \qquad
-     2^{\memarg.\ALIGN} = |t|/8
-   }{
-     C \vdash t\K{.}\ATOMICRMW\K{.}\ATOMICCMPXCHG~\memarg : [\I32~t~t] \to [t]
-   }
-
-.. _valid-atomic-rmwn-cmpxchg:
-
-:math:`t\K{.}\ATOMICRMW{N}\K{.}\ATOMICCMPXCHG\K{\_u}~\memarg`
-.............................................................
-
-* The memory :math:`C.\CMEMS[0]` must be defined in the context.
-
-* Let :math:`\limits~\share` be the :ref:`memory type <syntax-memtype>` :math:`C.\CMEMS[0]`.
-
-* The alignment :math:`2^{\memarg.\ALIGN}` must be equal to :math:`N/8`.
-
-* Then the instruction is valid with type :math:`[\I32~t~t] \to [t]`.
-
-.. math::
-   \frac{
-     C.\CMEMS[0] = \memtype
-     \qquad
-     2^{\memarg.\ALIGN} = N/8
-   }{
-     C \vdash t\K{.}\ATOMICRMW{N}\K{.}\ATOMICCMPXCHG\K{\_u}~\memarg : [\I32~t~t] \to [t]
-   }
-
+.. note::
+   The |MEMORYATOMICFENCE| instruction may occur in modules which declare no memory without causing a validation error.
 
 .. index:: control instructions, structured control, label, block, branch, block type, result type, label index, function index, type index, vector, polymorphism, context
    pair: validation; instruction

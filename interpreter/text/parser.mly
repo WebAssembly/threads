@@ -169,17 +169,17 @@ let inline_type_explicit (c : context) x ft at =
 %token CALL CALL_INDIRECT RETURN
 %token LOCAL_GET LOCAL_SET LOCAL_TEE GLOBAL_GET GLOBAL_SET
 %token LOAD STORE OFFSET_EQ_NAT ALIGN_EQ_NAT
-%token MEMORY_ATOMIC_WAIT MEMORY_ATOMIC_NOTIFY
+%token MEMORY_ATOMIC_WAIT MEMORY_ATOMIC_NOTIFY ATOMIC_FENCE
 %token ATOMIC_LOAD ATOMIC_STORE ATOMIC_RMW ATOMIC_RMW_CMPXCHG
 %token CONST UNARY BINARY TEST COMPARE CONVERT
 %token UNREACHABLE MEMORY_SIZE MEMORY_GROW
 %token FUNC START TYPE PARAM RESULT LOCAL GLOBAL
 %token TABLE ELEM MEMORY DATA OFFSET IMPORT EXPORT TABLE
 %token MODULE BIN QUOTE
-%token SCRIPT REGISTER THREAD JOIN INVOKE GET
+%token SCRIPT REGISTER THREAD WAIT INVOKE GET
 %token ASSERT_MALFORMED ASSERT_INVALID ASSERT_SOFT_INVALID ASSERT_UNLINKABLE
 %token ASSERT_RETURN ASSERT_TRAP ASSERT_EXHAUSTION
-%token NAN
+%token NAN EITHER
 %token INPUT OUTPUT
 %token EOF
 
@@ -358,6 +358,7 @@ plain_instr :
   | CONVERT { fun c -> $1 }
   | MEMORY_ATOMIC_WAIT offset_opt align_opt { fun c -> $1 $3 $2 }
   | MEMORY_ATOMIC_NOTIFY offset_opt align_opt { fun c -> $1 $3 $2 }
+  | ATOMIC_FENCE { fun c -> atomic_fence }
   | ATOMIC_LOAD offset_opt align_opt { fun c -> $1 $3 $2 }
   | ATOMIC_STORE offset_opt align_opt { fun c -> $1 $3 $2 }
   | ATOMIC_RMW offset_opt align_opt { fun c -> $1 $3 $2 }
@@ -854,10 +855,7 @@ inline_module1 :  /* Sugar */
 
 thread_var_opt :
   | /* empty */ { None }
-  | thread_var { Some $1 }
-
-thread_var :
-  | VAR { $1 @@ at () }
+  | VAR { Some ($1 @@ at ()) }
 
 script_var_opt :
   | /* empty */ { None }
@@ -875,8 +873,6 @@ action :
     { Invoke ($3, $4, $5) @@ at () }
   | LPAR GET module_var_opt name RPAR
     { Get ($3, $4) @@ at() }
-  | LPAR JOIN thread_var RPAR
-    { Join $3 @@ at () }
 
 assertion :
   | LPAR ASSERT_MALFORMED script_module STRING RPAR
@@ -891,24 +887,27 @@ assertion :
   | LPAR ASSERT_TRAP action STRING RPAR { AssertTrap ($3, $4) @@ at () }
   | LPAR ASSERT_EXHAUSTION action STRING RPAR { AssertExhaustion ($3, $4) @@ at () }
 
-assertion_list :
-  | /* empty */ { [] }
-  | assertion assertion_list { $1 :: $2 }
-
 cmd :
   | action { Action $1 @@ at () }
   | assertion { Assertion $1 @@ at () }
   | script_module { Module (fst $1, snd $1) @@ at () }
   | LPAR REGISTER name module_var_opt RPAR { Register ($3, $4) @@ at () }
-  | LPAR THREAD thread_var_opt action RPAR { Thread ($3, $4) @@ at () }
+  | LPAR THREAD thread_var_opt shared_cmd_list RPAR
+    { let xs, cs = $4 in Thread ($3, xs, cs) @@ at () }
+  | LPAR WAIT thread_var_opt RPAR { Wait $3 @@ at () }
   | meta { Meta $1 @@ at () }
 
 cmd_list :
   | /* empty */ { [] }
   | cmd cmd_list { $1 :: $2 }
 
+shared_cmd_list :
+  | cmd_list { [], $1 }
+  | LPAR SHARED LPAR MODULE VAR RPAR RPAR shared_cmd_list
+    { let xs, cs = $8 in ($5 @@ ati 5) :: xs, cs }
+
 meta :
-  | LPAR SCRIPT script_var_opt cmd_list RPAR { Script ($3, $4) @@ at () }
+  | LPAR SCRIPT script_var_opt cmd_list RPAR { Script ($3, [], $4, []) @@ at () }
   | LPAR INPUT script_var_opt STRING RPAR { Input ($3, $4) @@ at () }
   | LPAR OUTPUT script_var_opt STRING RPAR { Output ($3, Some $4) @@ at () }
   | LPAR OUTPUT script_var_opt RPAR { Output ($3, None) @@ at () }
@@ -923,6 +922,7 @@ const_list :
 result :
   | const { LitResult $1 @@ at () }
   | LPAR CONST NAN RPAR { NanResult (nanop $2 ($3 @@ ati 3)) @@ at () }
+  | LPAR EITHER result result_list RPAR { EitherResult ($3 :: $4) @@ at () }
 
 result_list :
   | /* empty */ { [] }

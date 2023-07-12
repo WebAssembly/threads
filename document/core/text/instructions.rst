@@ -241,6 +241,7 @@ Lexically, an |Toffset| or |Talign| phrase is considered a single :ref:`keyword 
 Atomic Memory Instructions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. _text-atomic-fence:
 .. _text-atomic-wait:
 .. _text-atomic-notify:
 .. _text-atomic-load:
@@ -258,7 +259,8 @@ The offset immediate to atomic memory instructions is optional, and defaults to
    \production{instruction} & \Tplaininstr_I &::=& \dots \phantom{thisshouldbeenoughnowitissee} && \phantom{thisshouldbeenough} \\ &&|&
      \text{memory.atomic.notify}~~m{:}\Tmemarg_4 &\Rightarrow& \MEMORYATOMICNOTIFY~m \\ &&|&
      \text{memory.atomic.wait32}~~m{:}\Tmemarg_4 &\Rightarrow& \MEMORYATOMICWAIT\K{32}~m \\ &&|&
-     \text{memory.atomic.wait64}~~m{:}\Tmemarg_8 &\Rightarrow& \MEMORYATOMICWAIT\K{64}~m \\
+     \text{memory.atomic.wait64}~~m{:}\Tmemarg_8 &\Rightarrow& \MEMORYATOMICWAIT\K{64}~m \\ &&|&
+     \text{memory.atomic.fence} &\Rightarrow& \MEMORYATOMICFENCE \\
    \end{array}
 
 .. math::
@@ -288,85 +290,85 @@ The offset immediate to atomic memory instructions is optional, and defaults to
 .. math::
    \begin{array}{llclll}
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
-     \text{i32.atomic{.}rmw{.}add}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICADD~m \\ &&|&
-     \text{i64.atomic{.}rmw{.}add}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICADD~m \\ &&|&
-     \text{i32.atomic{.}rmw8{.}add\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICADD\K{\_u}~m \\ &&|&
-     \text{i32.atomic{.}rmw16{.}add\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICADD\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw8{.}add\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICADD\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw16{.}add\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICADD\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw32{.}add\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICADD\K{\_u}~m \\
+     \text{i32.atomic{.}rmw{.}add}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATADD~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}add}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATADD~m \\ &&|&
+     \text{i32.atomic{.}rmw8{.}add\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATADD\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}add\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATADD\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}add\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATADD\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}add\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATADD\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}add\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATADD\K{\_u}~m \\
    \end{array}
 
 .. math::
    \begin{array}{llclll}
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
-     \text{i32.atomic{.}rmw{.}sub}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICSUB~m \\ &&|&
-     \text{i64.atomic{.}rmw{.}sub}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICSUB~m \\ &&|&
-     \text{i32.atomic{.}rmw8{.}sub\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICSUB\K{\_u}~m \\ &&|&
-     \text{i32.atomic{.}rmw16{.}sub\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICSUB\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw8{.}sub\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICSUB\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw16{.}sub\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICSUB\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw32{.}sub\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICSUB\K{\_u}~m \\
+     \text{i32.atomic{.}rmw{.}sub}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATSUB~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}sub}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATSUB~m \\ &&|&
+     \text{i32.atomic{.}rmw8{.}sub\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATSUB\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}sub\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATSUB\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}sub\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATSUB\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}sub\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATSUB\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}sub\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATSUB\K{\_u}~m \\
    \end{array}
 
 .. math::
    \begin{array}{llclll}
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
-     \text{i32.atomic{.}rmw{.}and}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICAND~m \\ &&|&
-     \text{i64.atomic{.}rmw{.}and}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICAND~m \\ &&|&
-     \text{i32.atomic{.}rmw8{.}and\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICAND\K{\_u}~m \\ &&|&
-     \text{i32.atomic{.}rmw16{.}and\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICAND\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw8{.}and\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICAND\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw16{.}and\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICAND\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw32{.}and\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICAND\K{\_u}~m \\
+     \text{i32.atomic{.}rmw{.}and}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATAND~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}and}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATAND~m \\ &&|&
+     \text{i32.atomic{.}rmw8{.}and\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATAND\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}and\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATAND\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}and\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATAND\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}and\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATAND\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}and\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATAND\K{\_u}~m \\
    \end{array}
 
 .. math::
    \begin{array}{llclll}
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
-     \text{i32.atomic{.}rmw{.}or}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICOR~m \\ &&|&
-     \text{i64.atomic{.}rmw{.}or}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICOR~m \\ &&|&
-     \text{i32.atomic{.}rmw8{.}or\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICOR\K{\_u}~m \\ &&|&
-     \text{i32.atomic{.}rmw16{.}or\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICOR\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw8{.}or\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICOR\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw16{.}or\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICOR\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw32{.}or\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICOR\K{\_u}~m \\
+     \text{i32.atomic{.}rmw{.}or}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOR~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}or}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOR~m \\ &&|&
+     \text{i32.atomic{.}rmw8{.}or\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOR\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}or\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}or\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}or\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}or\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOR\K{\_u}~m \\
    \end{array}
 
 .. math::
    \begin{array}{llclll}
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
-     \text{i32.atomic{.}rmw{.}xor}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICXOR~m \\ &&|&
-     \text{i64.atomic{.}rmw{.}xor}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICXOR~m \\ &&|&
-     \text{i32.atomic{.}rmw8{.}xor\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICXOR\K{\_u}~m \\ &&|&
-     \text{i32.atomic{.}rmw16{.}xor\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICXOR\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw8{.}xor\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICXOR\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw16{.}xor\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICXOR\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw32{.}xor\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICXOR\K{\_u}~m \\
+     \text{i32.atomic{.}rmw{.}xor}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATXOR~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}xor}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATXOR~m \\ &&|&
+     \text{i32.atomic{.}rmw8{.}xor\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATXOR\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}xor\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATXOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}xor\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATXOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}xor\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATXOR\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}xor\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATXOR\K{\_u}~m \\
    \end{array}
 
 .. math::
    \begin{array}{llclll}
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
-     \text{i32.atomic{.}rmw{.}xchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICXCHG~m \\ &&|&
-     \text{i64.atomic{.}rmw{.}xchg}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICXCHG~m \\ &&|&
-     \text{i32.atomic{.}rmw8{.}xchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICXCHG\K{\_u}~m \\ &&|&
-     \text{i32.atomic{.}rmw16{.}xchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICXCHG\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw8{.}xchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICXCHG\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw16{.}xchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICXCHG\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw32{.}xchg\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICXCHG\K{\_u}~m \\
+     \text{i32.atomic{.}rmw{.}xchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATXCHG~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}xchg}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATXCHG~m \\ &&|&
+     \text{i32.atomic{.}rmw8{.}xchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATXCHG\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}xchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}xchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}xchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}xchg\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATXCHG\K{\_u}~m \\
    \end{array}
 
 .. math::
    \begin{array}{llclll}
    \phantom{\production{instruction}} & \phantom{\Tplaininstr_I} &\phantom{::=}& \phantom{thisisenough} && \phantom{thisshouldbeenough} \\[-2ex] &&|&
-     \text{i32.atomic{.}rmw{.}cmpxchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATOMICCMPXCHG~m \\ &&|&
-     \text{i64.atomic{.}rmw{.}cmpxchg}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATOMICCMPXCHG~m \\ &&|&
-     \text{i32.atomic{.}rmw8{.}cmpxchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
-     \text{i32.atomic{.}rmw16{.}cmpxchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw8{.}cmpxchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw16{.}cmpxchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATOMICCMPXCHG\K{\_u}~m \\ &&|&
-     \text{i64.atomic{.}rmw32{.}cmpxchg\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATOMICCMPXCHG\K{\_u}~m \\
+     \text{i32.atomic{.}rmw{.}cmpxchg}~~m{:}\Tmemarg_4 &\Rightarrow& \I32.\ATOMICRMW.\ATCMPXCHG~m \\ &&|&
+     \text{i64.atomic{.}rmw{.}cmpxchg}~~m{:}\Tmemarg_8 &\Rightarrow& \I64.\ATOMICRMW.\ATCMPXCHG~m \\ &&|&
+     \text{i32.atomic{.}rmw8{.}cmpxchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I32.\ATOMICRMW\K{8}.\ATCMPXCHG\K{\_u}~m \\ &&|&
+     \text{i32.atomic{.}rmw16{.}cmpxchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I32.\ATOMICRMW\K{16}.\ATCMPXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw8{.}cmpxchg\_u}~~m{:}\Tmemarg_1 &\Rightarrow& \I64.\ATOMICRMW\K{8}.\ATCMPXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw16{.}cmpxchg\_u}~~m{:}\Tmemarg_2 &\Rightarrow& \I64.\ATOMICRMW\K{16}.\ATCMPXCHG\K{\_u}~m \\ &&|&
+     \text{i64.atomic{.}rmw32{.}cmpxchg\_u}~~m{:}\Tmemarg_4 &\Rightarrow& \I64.\ATOMICRMW\K{32}.\ATCMPXCHG\K{\_u}~m \\
    \end{array}
 
 

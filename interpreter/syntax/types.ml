@@ -32,6 +32,17 @@ let packed_size = function
   | Pack16 -> 2
   | Pack32 -> 4
 
+let shared_func_type (FuncType _) = Unshared
+let shared_table_type (TableType _) = Unshared
+let shared_memory_type (MemoryType (_, shared)) = shared
+let shared_global_type (GlobalType _) = Unshared
+
+let shared_extern_type = function
+  | ExternFuncType ft -> shared_func_type ft
+  | ExternTableType tt -> shared_table_type tt
+  | ExternMemoryType mt -> shared_memory_type mt
+  | ExternGlobalType gt -> shared_global_type gt
+
 
 (* Subtyping *)
 

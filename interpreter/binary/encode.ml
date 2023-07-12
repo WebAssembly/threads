@@ -221,6 +221,9 @@ let encode m =
           assert false
       | MemoryAtomicWait {ty = F32Type | F64Type; _} -> assert false
 
+      | AtomicFence ->
+        op 0xfe; op 0x03; op 0x00
+
       | AtomicLoad ({ty = I32Type; sz = None; _} as mo) ->
         op 0xfe; op 0x10; memop mo
       | AtomicLoad ({ty = I64Type; sz = None; _} as mo) ->

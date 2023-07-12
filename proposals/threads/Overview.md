@@ -400,23 +400,14 @@ For the web embedding, `memory.atomic.wait32` is equivalent in behavior to execu
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
 
-`memory.atomic.wait64` has no equivalent in ECMAScript as it is currently specified, as there is
-no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of a
-64-bit integer. That said, the behavior can be approximated as follows:
+Similarly, `memory.atomic.wait64` is equivalent in behavior to executing the following:
 
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
-1. Let `int64array` be `Int64Array`[](`buffer`), where `Int64Array` is a
-   typed-array constructor that allows 64-bit integer views with an element size
-   of `8`.
+1. Let `int64array` be `BigInt64Array`[](`buffer`)
 1. Let `result` be [`Atomics.wait`][](`int64array`, `address`, `expected`, `timeout` / 1e6),
    where `address`, `expected`, and `timeout` are the operands to the `wait` operator
-   as described above. The [`Atomics.wait`][] operation is modified:
-   1. `ValidateSharedIntegerTypedArray` will fail if the typed-array type is not an
-      `Int64Array`.
-   1. `value` is not converted to an `Int32`, but kept in a 64-bit integer
-      representation.
-   1. `indexedPosition` is (`i` x 8) + `offset`
+   as described above.
 1. Return an `i32` value as described in the above table:
    ("ok" -> `0`, "not-equal" -> `1`, "timed-out" -> `2`).
 
@@ -425,9 +416,10 @@ no `Int64Array` type, and an ECMAScript `Number` cannot represent all values of 
 The notify operator takes two operands: an address operand and a count as an
 unsigned `i32`. The operation will notify as many waiters as are waiting on the
 same effective address, up to the maximum as specified by `count`. The operator
-returns the number of waiters that were woken as an unsigned `i32`. Note that if
-the notify operator is used with an unshared linear memory, the number of
-waiters will always be zero.
+returns the number of waiters that were woken as an unsigned `i32`. Note that
+there is no way to create a waiter on unshared linear memory from within Wasm,
+so if the notify operator is used with an unshared linear memory, the number of
+waiters will always be zero unless the host has created such a waiter.
 
   * `memory.atomic.notify`: notify `count` threads waiting on the given address via `memory.atomic.wait32` or `memory.atomic.wait64`
 
@@ -436,8 +428,7 @@ For the web embedding, `memory.atomic.notify` is equivalent in behavior to execu
 1. Let `memory` be a `WebAssembly.Memory` object for this module.
 1. Let `buffer` be `memory`([`Get`][](`memory`, `"buffer"`)).
 1. Let `int32array` be [`Int32Array`][](`buffer`).
-1. Let `fcount` be `count` if `count` is >= 0, otherwise `∞`.
-1. Let `result` be [`Atomics.notify`][](`int32array`, `address`, `fcount`).
+1. Let `result` be [`Atomics.notify`][](`int32array`, `address`, `count`).
 1. Return `result` converted to an `i32`.
 
 ## Fence operator

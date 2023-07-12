@@ -58,8 +58,9 @@ Conventions:
      \end{array}
 
 
-.. index:: bit, integer, floating-point
+.. index:: bit, integer, floating-point, value type, ! storage type
 .. _aux-bits:
+.. _syntax-storagetype:
 
 Representations
 ~~~~~~~~~~~~~~~
@@ -71,6 +72,9 @@ Numbers have an underlying binary representation as a sequence of bits:
    \bits_{\K{i}N}(i) &=& \ibits_N(i) \\
    \bits_{\K{f}N}(z) &=& \fbits_N(z) \\
    \end{array}
+
+Per convention, the type index of these functions range over *storage types*,
+which are a pro forma extension of :ref:`value types <syntax-valtype>` that includes the additional integer sizes |I8| and |I16|.
 
 Each of these functions is a bijection, hence they are invertible.
 
@@ -126,10 +130,12 @@ When a number is stored into :ref:`memory <syntax-mem>`, it is converted into a 
 
 .. math::
    \begin{array}{lll@{\qquad}l}
-   \bytes_t(i) &=& \littleendian(\bits_t(i)) \\[1ex]
+   \bytes_{\X{st}}(i) &=& \littleendian(\bits_{\X{st}}(i)) \\[1ex]
    \littleendian(\epsilon) &=& \epsilon \\
    \littleendian(d^8~{d'}^\ast~) &=& \littleendian({d'}^\ast)~\ibits_8^{-1}(d^8) \\
    \end{array}
+
+The type index of the :math:`\bytes` function ranges over :ref:`storage types <syntax-storagetype>`.
 
 Again these functions are invertable bijections.
 
@@ -1427,6 +1433,20 @@ Conversions
    \end{array}
 
 
+.. _op-extendt:
+
+:math:`\extendtsx_{\X{st},t}(c)`
+................................
+
+* Assert: Either :math:`\X{st} = t`, or :math:`t` is an an integer type and :math:`\sx` is present.
+
+* If :math:`\X{st} = t`, return :math:`c`.
+
+* Else, return :math:`\extendsx_{|\X{st}|,|t|}(c)`.
+
+The source type :math:`\X{st}` of this function ranges over :ref:`storage types <syntax-storagetype>`.
+
+
 .. _op-wrap:
 
 :math:`\wrap_{M,N}(i)`
@@ -1438,6 +1458,20 @@ Conversions
    \begin{array}{lll@{\qquad}l}
    \wrap_{M,N}(i) &=& i \mod 2^N \\
    \end{array}
+
+
+.. _op-wrapt:
+
+:math:`\wrapt_{t,\X{st}}(c)`
+............................
+
+* Assert: Either :math:`\X{st} = t`, or :math:`t` is an an integer type.
+
+* If :math:`\X{st} = t`, return :math:`c`.
+
+* Else, return :math:`\wrap_{|t|,|\X{st}|}(c)`.
+
+The target type :math:`\X{st}` of this function ranges over :ref:`storage types <syntax-storagetype>`.
 
 
 .. _op-trunc_u:
