@@ -35,11 +35,6 @@ urlPrefix: https://tc39.github.io/ecma262/; spec: ECMASCRIPT
         text: TypeError; url: sec-native-error-types-used-in-this-standard-typeerror
         text: RangeError; url: sec-native-error-types-used-in-this-standard-rangeerror
     type: dfn
-        text: agent cluster; url: sec-agent-clusters
-        text: agent; url: agent
-        url: sec-data-blocks
-            text: data block
-            text: shared data block
         url: sec-returnifabrupt-shorthands
             text: !
             text: ?
@@ -160,6 +155,8 @@ spec:ecma-262; type:exception; for:ECMAScript; text:Error
 spec:ecmascript; type:exception; for:ECMAScript; text:TypeError
 spec:ecmascript; type:exception; for:ECMAScript; text:RangeError
 spec:ecmascript; type:interface; for:ECMAScript; text:ArrayBuffer
+spec:ecmascript; type:interface; for:ECMAScript; text:SharedArrayBuffer
+spec:ecmascript; type:dfn; text:agent
 spec:webidl; type:dfn; text:resolve
 </pre>
 
@@ -216,9 +213,7 @@ are treated as values of the other transparently.
 
 Note: WebAssembly semantics are defined in terms of an abstract [=store=], representing the state of the WebAssembly abstract machine. WebAssembly operations take a store and return an updated store.
 
-Each [=agent=] has an <dfn>associated store</dfn>. When a new agent is created, its associated store is set to the result of [=store_init=]().
-
-Note: In this specification, no WebAssembly-related objects, memory or addresses can be shared among agents in an [=agent cluster=]. In a future version of WebAssembly, this may change.
+Each [=agent cluster=] has an <dfn>associated store</dfn>. When a new agent cluster is created, its associated store is set to the result of [=store_init=](). The associated store of an [=agent=] is defined to be the associated store of the [=agent cluster=] that it belongs to.
 
 Elements of the WebAssembly store may be <dfn>identified with</dfn> JavaScript values. In particular, each WebAssembly [=memory instance=] with a corresponding {{Memory}} object is identified with a JavaScript [=Data Block=]; modifications to this Data Block are identified to updating the agent's store to a store which reflects those changes, and vice versa.
 
@@ -600,7 +595,7 @@ dictionary MemoryDescriptor {
 interface Memory {
   constructor(MemoryDescriptor descriptor);
   unsigned long grow([EnforceRange] unsigned long delta);
-  readonly attribute ArrayBuffer buffer;
+  readonly attribute (ArrayBuffer or SharedArrayBuffer) buffer;
 };
 </pre>
 
@@ -617,7 +612,7 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
     1. Let |block| be a [=Data Block=] which is [=identified with=] the underlying memory of |memaddr|.
     1. If |block| is a [=Shared Data Block=],
         1. Let |buffer| be a new {{SharedArrayBuffer}} whose \[[ArrayBufferData]] is |block| and \[[ArrayBufferByteLength]] is set to the length of |block|.
-        1. Perform ! [=SetIntegrityLevel=](|buffer|, `"frozen"`).
+        1. Perform ! [$SetIntegrityLevel$](|buffer|, `"frozen"`).
     1. Otherwise,
         1. Let |buffer| be a new {{ArrayBuffer}} whose \[[ArrayBufferData]] is |block| and \[[ArrayBufferByteLength]] is set to the length of |block|.
         1. Set |buffer|.\[[ArrayBufferDetachKey]] to "WebAssembly.Memory".
