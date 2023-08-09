@@ -580,7 +580,8 @@ In order to express the reduction of :ref:`traps <trap>`, :ref:`calls <syntax-ca
      \LABEL_n\{\instr^\ast\}~\instr^\ast~\END \\ &&|&
      \FRAME_n\{\frame\}~\instr^\ast~\END \\ &&|&
      \WAITX~\loc~n \\ &&|&
-     \PERFORM~\act^\ast \\
+     \PERFORM~\act^\ast \\ &&|&
+     \HOSTE~\resulttype \\
    \end{array}
 
 The |TRAP| instruction represents the occurrence of a trap.
@@ -595,11 +596,9 @@ The |LABEL| and |FRAME| instructions model :ref:`labels <syntax-label>` and :ref
 Moreover, the administrative syntax maintains the nesting structure of the original :ref:`structured control instruction <syntax-instr-control>` or :ref:`function body <syntax-func>` and their :ref:`instruction sequences <syntax-instr-seq>` with an |END| marker.
 That way, the end of the inner instruction sequence is known when part of an outer sequence.
 
-.. todo:: describe |WAITX| and |PERFORM|
+.. todo:: describe |WAITX| and |PERFORM| and |HOSTE|
 
 .. todo:: add allocation instructions
-
-.. todo:: add host instruction
 
 .. note::
    For example, the :ref:`reduction rule <exec-block>` for |BLOCK| is:
@@ -689,6 +688,7 @@ Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely ide
      \ATIMEOUT~\loc~ \\&&|&
      \ANOTIFY~\loc~\u32~\u32 \\&&|&
      \AFENCE \\&&|&
+     \ASPAWN \\&&|&
      \hostact \\
    \production{(ordering)} & \ord &::=&
      \UNORD ~|~
@@ -705,6 +705,7 @@ Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely ide
    \end{array}
 
 .. todo:: ensure identity of wait + wake operations is preserved
+.. todo:: remove spawn from events in a typed way?
 
 The access of *mutable* shared state is performed through the |ARD|, |AWR|, and |ARMW| actions.
 Each action accesses an abstract *location*, which consists of an :ref:`address <syntax-addr>` of a :ref:`shared <syntax-shared>` :ref:`memory <syntax-meminst>` instance and a symbolic *field* name in the respective object.
@@ -809,10 +810,26 @@ The following structural rule for global reduction delegates to local reduction 
    S; P_1^\ast~(F; \instr^\ast \AT h)~P_2^\ast
      \qquad \stepto^{\act^\ast~\AT~h'} \qquad
      S'; P_1^\ast~(F'; {\instr'}^\ast \AT h')~P_2^\ast \\
-     \qquad (
+     \qquad
        \begin{array}[t]{@{}r@{~}l@{}}
-       \iff & S; F; \instr^\ast \stepto^{\act^\ast} S'; F'; {\instr'}^\ast) \\
+       (\iff & S; F; \instr^\ast \stepto^{\act^\ast} S'; F'; {\instr'}^\ast \\
        \wedge & h \prechb h' \\
+       \wedge & \ASPAWN \notin \act^\ast) \\
+       \end{array}
+   \end{array}
+
+The following rule for global reduction describes the creation of a new thread by the host:
+
+.. math::
+   \begin{array}{@{}c@{}}
+   S; P_1^\ast~(F; \instr^\ast \AT h)~P_2^\ast
+     \qquad \stepto \qquad
+     S'; P_1^\ast~(F'; {\instr'}^\ast \AT h')~P_2^\ast~(\epsilon; (\HOSTE~[\epsilon]) \AT h'') \\
+     \qquad
+       \begin{array}[t]{@{}r@{~}l@{}}
+       (\iff & S; F; \instr^\ast \stepto^{\ASPAWN} S'; F'; {\instr'}^\ast \\
+       \wedge & h \prechb h' \\
+       \wedge & h \prechb h'' \\
        \end{array}
    \end{array}
 

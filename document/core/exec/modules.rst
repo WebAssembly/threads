@@ -749,6 +749,7 @@ It is up to the :ref:`embedder <embedder>` to define how such conditions are rep
 
 .. math::
    ~\\
+   \begin{array}{l}
    \begin{array}{@{}rcll}
    \instantiate(S, \module, \externval^k) &=& S'; F;
      \begin{array}[t]{@{}l@{}}
@@ -771,7 +772,12 @@ It is up to the :ref:`embedder <embedder>` to define how such conditions are rep
      &\wedge& S', \moduleinst, \X{act_{\F{m}}}^\ast = \allocmodule(S, \module, \externval^k, \val^\ast, (\reff^\ast)^n) \\
      &\wedge& F = \{ \AMODULE~\moduleinst, \ALOCALS~\epsilon \} \\[1ex]
      &\wedge& (S'; F; \expr_{\F{g}} \stepto^\ast S'; F; \val~\END)^\ast \\
-     &\wedge& ((S'; F; \expr_{\F{e}} \stepto^\ast S'; F; \reff~\END)^\ast)^n) \\
+     &\wedge& ((S'; F; \expr_{\F{e}} \stepto^\ast S'; F; \reff~\END)^\ast)^n)
+   \end{array}
+   \\[1ex]
+   \begin{array}{@{}rcll}
+   \instantiate(S, \module, \externval^k) &=& S; \epsilon; \TRAP & (\otherwise)
+   \end{array}
    \end{array}
 
 .. math::

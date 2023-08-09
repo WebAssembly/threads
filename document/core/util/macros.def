@@ -1084,6 +1084,8 @@
 
 .. |AFENCE| mathdef:: \xref{exec/runtime}{syntax-act}{\K{fence}}
 
+.. |ASPAWN| mathdef:: \xref{exec/runtime}{syntax-act}{\K{spawn}}
+
 .. |UNORD| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{unord}}
 .. |SEQCST| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{seqcst}}
 .. |INIT| mathdef:: \xref{exec/runtime}{syntax-ord}{\K{init}}
@@ -1156,6 +1158,7 @@
 .. |INVOKE| mathdef:: \xref{exec/runtime}{syntax-invoke}{\K{invoke}}
 .. |WAITX| mathdef:: \xref{exec/runtime}{syntax-waitx}{\K{wait'}}
 .. |PERFORM| mathdef:: \xref{exec/runtime}{syntax-perform}{\K{perform}}
+.. |HOSTE| mathdef:: \xref{exec/runtime}{syntax-hoste}{\K{host}}
 
 
 .. Values & Results, non-terminals

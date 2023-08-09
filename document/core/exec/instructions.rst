@@ -4133,22 +4133,54 @@ Furthermore, the resulting store must be :ref:`valid <valid-store>`, i.e., all d
    ~\\[-1ex]
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; \val^n~(\INVOKE~a) &\stepto& S'; \result
+   S; \val^n~(\INVOKE~a) &\stepto& S; \HOSTE~[t_2^m]
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & S.\SFUNCS[a] = \{ \FITYPE~[t_1^n] \to [t_2^m], \FIHOSTCODE~\X{hf} \} \\
-     \wedge & (S'; \result) \in \X{hf}(S; \val^n)) \\
      \end{array} \\
+   \end{array}
+
+.. todo:: prose for host execution
+.. todo:: reconcile with old-style host function formulation
+
+.. math::
+   ~\\[-1ex]
+   \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   S; \val^n~(\INVOKE~a) &\stepto& S; \val^n~(\INVOKE~a)
+   S; F; (\HOSTE~[t^\ast]) &\stepto& S'; F; (\FRAME_0\{F_0\}~e^\ast~\END)~(\HOSTE~[t^\ast])
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & S.\SFUNCS[a] = \{ \FITYPE~[t_1^n] \to [t_2^m], \FIHOSTCODE~\X{hf} \} \\
-     \wedge & \bot \in \X{hf}(S; \val^n)) \\
-     \end{array} \\
+     (\iff & \instantiate(S, \module, \externval^k) = S'; F_0; e^\ast) \\[1ex]
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\HOSTE~[t^\ast]) &\stepto& S'; F; (\HOSTE~[t^\ast])
    \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & \allochostfunc(S, \functype, \hostfunc) = S', \funcaddr) \\[1ex]
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\HOSTE~[t^\ast]) &\stepto^{\ASPAWN^?}& S; F; (\HOSTE~[t^\ast])
+   \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\HOSTE~[t^\ast]) &\stepto& S; F; \val^\ast
+   \end{array}
+   \\ \qquad
+     \begin{array}[t]{@{}r@{~}l@{}}
+     (\iff & S \vdashresult \val^\ast : [t^\ast]) \\[1ex]
+     \end{array}
+   \\[1ex]
+   \begin{array}{lcl@{\qquad}l}
+   S; F; (\HOSTE~[t^\ast]) &\stepto& S; F; \TRAP
+   \end{array}
+   \end{array}
+
+.. todo:: reconcile with old-style host function formulation
 
 Here, :math:`\X{hf}(S; \val^n)` denotes the implementation-defined execution of host function :math:`\X{hf}` in current store :math:`S` with arguments :math:`\val^n`.
 It yields a set of possible outcomes, where each element is either a pair of a modified store :math:`S'` and a :ref:`result <syntax-result>`
