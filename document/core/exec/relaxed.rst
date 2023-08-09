@@ -15,7 +15,18 @@ Relaxed Memory Model
 Traces
 ~~~~~~
 
-.. todo:: define, explain
+.. todo:: novel notation here?
+
+A trace is a coinductive set of :ref:`events <syntax-evt>`. A trace is considered to be a *pre-execution* of a given :ref:`global configuration <syntax-config>` if it can be derived from the events emitted by the coinductive closure of the :ref:`global reduction relation <syntax-reduction>` on that configuration, and all the :ref:`time stamps <syntax-time>` of its constituent events are distinct.
+
+.. math::
+   \frac{
+     \config \stepto^{\evt} \config' \qquad \vdash \config' : \X{tr} \qquad \F{time}(\evt) \notin \F{time}(\X{tr})
+   }{
+     \vdash \config : \evt~\X{tr}
+   }
+
+When a WebAssembly program is executed, all behaviours observed during that execution must correspond to a single :ref:`consistent <relaxed-consistent>` pre-execution of that execution's starting :ref:`configuration <syntax-config>`.
 
 
 .. _relaxed-consistent:

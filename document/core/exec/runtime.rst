@@ -782,6 +782,7 @@ Convention
 
 
 .. index:: ! reduction, configuration, ! termination
+.. _syntax-reduction:
 
 Reduction
 ~~~~~~~~~
@@ -799,7 +800,7 @@ It emits a (possibly empty) set of events that are produced by the corresponding
 Formally, global reduction is a relation
 
 .. math::
-   \config \stepto^{\evt^\ast} \config
+   \config \stepto^{\evt} \config
 
 defined by inductive rewrite rules on global configurations.
 
@@ -823,7 +824,7 @@ The following rule for global reduction describes the creation of a new thread b
 .. math::
    \begin{array}{@{}c@{}}
    S; P_1^\ast~(F; \instr^\ast \AT h)~P_2^\ast
-     \qquad \stepto \qquad
+     \qquad \stepto^{\epsilon~\AT~h'} \qquad
      S'; P_1^\ast~(F'; {\instr'}^\ast \AT h')~P_2^\ast~(\epsilon; (\HOSTE~[\epsilon]) \AT h'') \\
      \qquad
        \begin{array}[t]{@{}r@{~}l@{}}
