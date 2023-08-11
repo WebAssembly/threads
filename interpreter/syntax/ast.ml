@@ -34,6 +34,7 @@ struct
              | TruncSF32 | TruncUF32 | TruncSF64 | TruncUF64
              | TruncSatSF32 | TruncSatUF32 | TruncSatSF64 | TruncSatUF64
              | ReinterpretFloat
+  type rmwop = RmwAdd | RmwSub | RmwAnd | RmwOr | RmwXor | RmwXchg
 end
 
 module FloatOp =
@@ -45,6 +46,7 @@ struct
   type cvtop = ConvertSI32 | ConvertUI32 | ConvertSI64 | ConvertUI64
              | PromoteF32 | DemoteF64
              | ReinterpretInt
+  type rmwop
 end
 
 module I32Op = IntOp
@@ -100,6 +102,7 @@ type unop = (I32Op.unop, I64Op.unop, F32Op.unop, F64Op.unop) Values.op
 type binop = (I32Op.binop, I64Op.binop, F32Op.binop, F64Op.binop) Values.op
 type relop = (I32Op.relop, I64Op.relop, F32Op.relop, F64Op.relop) Values.op
 type cvtop = (I32Op.cvtop, I64Op.cvtop, F32Op.cvtop, F64Op.cvtop) Values.op
+type rmwop = (I32Op.rmwop, I64Op.rmwop, F32Op.rmwop, F64Op.rmwop) Values.op
 
 type vec_testop = (V128Op.testop) Values.vecop
 type vec_relop = (V128Op.relop) Values.vecop
@@ -119,6 +122,7 @@ type vec_replaceop = (V128Op.replaceop) Values.vecop
 type ('t, 'p) memop = {ty : 't; align : int; offset : int32; pack : 'p}
 type loadop = (num_type, (pack_size * extension) option) memop
 type storeop = (num_type, pack_size option) memop
+type atomicop = (num_type, pack_size option) memop
 
 type vec_loadop = (vec_type, (pack_size * vec_extension) option) memop
 type vec_storeop = (vec_type, unit) memop
@@ -198,6 +202,13 @@ and instr' =
   | VecSplat of vec_splatop           (* number to vector conversion *)
   | VecExtract of vec_extractop       (* extract lane from vector *)
   | VecReplace of vec_replaceop       (* replace lane in vector *)
+  | MemoryAtomicWait of atomicop      (* atomically wait for notification at address *)
+  | MemoryAtomicNotify of atomicop    (* atomically notify all waiters at address *)
+  | AtomicFence                       (* perform an atomic fence *)
+  | AtomicLoad of atomicop            (* atomically read memory at address *)
+  | AtomicStore of atomicop           (* atomically write memory at address *)
+  | AtomicRmw of rmwop * atomicop     (* atomically read, modify, write memory at address *)
+  | AtomicRmwCmpXchg of atomicop      (* atomically compare and exchange memory at address *)
 
 
 (* Globals & Functions *)

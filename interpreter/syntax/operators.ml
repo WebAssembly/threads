@@ -83,6 +83,77 @@ let i64_store16 align offset =
 let i64_store32 align offset =
   Store {ty = I64Type; align; offset; pack = Some Pack32}
 
+let memory_atomic_notify align offset =
+  MemoryAtomicNotify {ty = I32Type; align; offset; pack = None}
+
+let memory_atomic_wait32 align offset =
+  MemoryAtomicWait {ty = I32Type; align; offset; pack = None}
+let memory_atomic_wait64 align offset =
+  MemoryAtomicWait {ty = I64Type; align; offset; pack = None}
+
+let atomic_fence =
+  AtomicFence
+
+let i32_atomic_load align offset =
+  AtomicLoad {ty = I32Type; align; offset; pack = None}
+let i64_atomic_load align offset =
+  AtomicLoad {ty = I64Type; align; offset; pack = None}
+let i32_atomic_load8_u align offset =
+  AtomicLoad {ty = I32Type; align; offset; pack = Some Pack8}
+let i32_atomic_load16_u align offset =
+  AtomicLoad {ty = I32Type; align; offset; pack = Some Pack16}
+let i64_atomic_load8_u align offset =
+  AtomicLoad {ty = I64Type; align; offset; pack = Some Pack8}
+let i64_atomic_load16_u align offset =
+  AtomicLoad {ty = I64Type; align; offset; pack = Some Pack16}
+let i64_atomic_load32_u align offset =
+  AtomicLoad {ty = I64Type; align; offset; pack = Some Pack32}
+
+let i32_atomic_store align offset =
+  AtomicStore {ty = I32Type; align; offset; pack = None}
+let i64_atomic_store align offset =
+  AtomicStore {ty = I64Type; align; offset; pack = None}
+let i32_atomic_store8 align offset =
+  AtomicStore {ty = I32Type; align; offset; pack = Some Pack8}
+let i32_atomic_store16 align offset =
+  AtomicStore {ty = I32Type; align; offset; pack = Some Pack16}
+let i64_atomic_store8 align offset =
+  AtomicStore {ty = I64Type; align; offset; pack = Some Pack8}
+let i64_atomic_store16 align offset =
+  AtomicStore {ty = I64Type; align; offset; pack = Some Pack16}
+let i64_atomic_store32 align offset =
+  AtomicStore {ty = I64Type; align; offset; pack = Some Pack32}
+
+let i32_atomic_rmw rmwop align offset =
+  AtomicRmw (rmwop, {ty = I32Type; align; offset; pack = None})
+let i64_atomic_rmw rmwop align offset =
+  AtomicRmw (rmwop, {ty = I64Type; align; offset; pack = None})
+let i32_atomic_rmw8_u rmwop align offset =
+  AtomicRmw (rmwop, {ty = I32Type; align; offset; pack = Some Pack8})
+let i32_atomic_rmw16_u rmwop align offset =
+  AtomicRmw (rmwop, {ty = I32Type; align; offset; pack = Some Pack16})
+let i64_atomic_rmw8_u rmwop align offset =
+  AtomicRmw (rmwop, {ty = I64Type; align; offset; pack = Some Pack8})
+let i64_atomic_rmw16_u rmwop align offset =
+  AtomicRmw (rmwop, {ty = I64Type; align; offset; pack = Some Pack16})
+let i64_atomic_rmw32_u rmwop align offset =
+  AtomicRmw (rmwop, {ty = I64Type; align; offset; pack = Some Pack32})
+
+let i32_atomic_rmw_cmpxchg align offset =
+  AtomicRmwCmpXchg {ty = I32Type; align; offset; pack = None}
+let i64_atomic_rmw_cmpxchg align offset =
+  AtomicRmwCmpXchg {ty = I64Type; align; offset; pack = None}
+let i32_atomic_rmw8_u_cmpxchg align offset =
+  AtomicRmwCmpXchg {ty = I32Type; align; offset; pack = Some Pack8}
+let i32_atomic_rmw16_u_cmpxchg align offset =
+  AtomicRmwCmpXchg {ty = I32Type; align; offset; pack = Some Pack16}
+let i64_atomic_rmw8_u_cmpxchg align offset =
+  AtomicRmwCmpXchg {ty = I64Type; align; offset; pack = Some Pack8}
+let i64_atomic_rmw16_u_cmpxchg align offset =
+  AtomicRmwCmpXchg {ty = I64Type; align; offset; pack = Some Pack16}
+let i64_atomic_rmw32_u_cmpxchg align offset =
+  AtomicRmwCmpXchg {ty = I64Type; align; offset; pack = Some Pack32}
+
 let memory_size = MemorySize
 let memory_grow = MemoryGrow
 let memory_fill = MemoryFill
