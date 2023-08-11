@@ -513,20 +513,20 @@ let rec check_instr (c : context) (e : instr) (s : infer_result_type) : op_type 
     require (lane_replaceop replaceop < num_lanes replaceop) e.at
       "invalid lane index";
     [t; NumType t2] --> [t]
-  | MemoryAtomicWait atomicop      -> 
+  | MemoryAtomicWait atomicop -> 
     check_memop c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type; NumType atomicop.ty; NumType I64Type] --> [NumType I32Type]
-  | MemoryAtomicNotify atomicop    ->
+  | MemoryAtomicNotify atomicop ->
     check_memop c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type; NumType I32Type] --> [NumType I32Type]
-  | AtomicFence                       -> [] --> []
-  | AtomicLoad atomicop            -> 
+  | AtomicFence -> [] --> []
+  | AtomicLoad atomicop -> 
     check_memop c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type] --> [NumType atomicop.ty]
-  | AtomicStore atomicop           ->
+  | AtomicStore atomicop ->
     check_memop c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type; NumType atomicop.ty] --> []
-  | AtomicRmw (rmwop, atomicop)     -> 
+  | AtomicRmw (rmwop, atomicop) -> 
     check_memop c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type; NumType atomicop.ty] --> [NumType atomicop.ty]
   | AtomicRmwCmpXchg atomicop ->
