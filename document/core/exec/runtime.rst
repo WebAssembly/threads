@@ -193,6 +193,7 @@ even where this identity is not observable from within WebAssembly code itself
 .. index:: ! time stamp, ! happens-before, thread, event
 .. _syntax-time:
 .. _relaxed-prechb:
+.. _relaxed-prectot:
 
 Time Stamps
 ~~~~~~~~~~~
@@ -208,8 +209,12 @@ the semantics uses a notion of abstract *time stamps*.
 
 Each time stamp denotes a discrete point in time, and is drawn from an infinite set.
 The shape of time stamps is not specified or observable.
-However, time stamps form a partially ordered set:
-a time stamp :math:`\time_1` *happens before* :math:`\time_2`, written :math:`\time_1 \prechb \time_2`, if it is known to have occurred earlier in time.
+
+Time stamps are associated with a total order -- if a time stamp :math:`\time_1` is *totally ordered before* time stamp :math:`\time_2`, this is written as :math:`\time_1 \prectot \time_2`.
+
+Time stamps are also associated with a *happens before* partial order -- if a time stamp :math:`\time_1` *happens before* :math:`\time_2`, this is written as :math:`\time_1 \prechb \time_2`.
+
+During the execution of WebAssembly code, time stamped :ref:`events <syntax-evt>` may be emitted which are related by one or both of these orderings, thus constraining the code's observable behaviours according to WebAssembly's :ref:`relaxed memory model <relaxed>`.
 
 .. note:
 
@@ -217,9 +222,6 @@ a time stamp :math:`\time_1` *happens before* :math:`\time_2`, written :math:`\t
    it includes conditions that enforce some ordering constraints on the chosen values, thereby imposing an ordering on execeution and events that guarantees well-defined causalities.
 
    The ordering is partial because some events have an unspecified relative order -- in particular, when they occur in separate threads without intervening synchronisation.
-
-.. _relaxed-prectot:
-.. todo:: define prectot here as well?
 
 
 .. _notation-attime:
@@ -729,8 +731,8 @@ Its form and meaning is outside the scope of this specification.
    An :ref:`embedder <embedder>` may define a custom set of host actions and respective ordering constraints to model other forms of interactions that are not expressible within WebAssembly, but whose ordering relative to WebAssembly events is relevant for the combined semantics.
 
 
-Convention
-..........
+Conventions
+...........
 
 * The actions :math:`\ARD_{\ord}` and :math:`\AWR_{\ord}` are abbreviated to just :math:`\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
 
@@ -745,6 +747,15 @@ The following auxiliary definition is used to classify whether an access will *t
 
 
 .. todo:: better description of tearing
+
+Relations between time stamps are lifted to relations between events.
+
+.. math::
+   \begin{array}{lclclcl}
+   \act_1^\ast~\AT~\time_1 & \prectot & \act_2^\ast~\AT~\time_2  &=& \time_1 & \prectot & \time_2 \\
+   \act_1^\ast~\AT~\time_1 & \prechb & \act_2^\ast~\AT~\time_2  &=& \time_1 & \prechb & \time_2 \\
+   \end{array}
+
 .. todo:: define notational shorthands over actions and events (or better put that in relaxed.rst?)
 
 

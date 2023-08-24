@@ -1113,6 +1113,24 @@
 .. Events, meta functions
 .. |tearing| mathdef:: \xref{exec/runtime}{syntax-ord}{\F{tearing}}
 
+.. |timeevt| mathdef:: \xref{exec/runtime}{relaxed-aux}{\F{time}}
+
+.. |readingact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{reading}}
+.. |ordact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{ord}}
+.. |overlapact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{overlap}}
+
+.. |readact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{read}}
+
+.. |writingact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{writing}}
+
+.. |writeact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{write}}
+.. |offsetact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{offset}}
+
+.. |syncact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{sync}}
+.. |rangeact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{range}}
+
+.. |tearfreeact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{tearfree}}
+
 
 .. Relaxed Memory Model Judgements
 
@@ -1125,9 +1143,8 @@
 .. |hbconsistent| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{hb-consistent}}}
 .. |valueconsistent| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{value-consistent}}}
 
-.. |prechb| mathdef:: \xref{exec/relaxed}{relaxed-prechb}{\mathrel{\prec_{\K{hb}}}}
-.. |prectot| mathdef:: \xref{exec/relaxed}{relaxed-prectot}{\mathrel{\prec_{\K{tot}}}}
-
+.. |prechb| mathdef:: \xref{exec/runtime}{relaxed-prechb}{\mathrel{\prec_{\K{hb}}}}
+.. |prectot| mathdef:: \xref{exec/runtime}{relaxed-prectot}{\mathrel{\prec_{\K{tot}}}}
 
 
 .. Stack, terminals
