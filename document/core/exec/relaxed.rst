@@ -38,6 +38,9 @@ Preliminary Definitions
    \rangeact \ldots    & = & \ldots \\
    \\
    \tearfreeact \ldots & = & \ldots \\
+   \sameact \ldots & = & \ldots \\
+   \\
+   \X{func}_{\loc}(\evt) \ldots & = & \X{func}(\act) \ldots \\
    \end{array}
 
 .. todo:: need to refactor len+data in actions
@@ -161,7 +164,7 @@ Consistency
 
 .. math::
    \frac{
-     \tearfreeact_{\loc}(\evt_R) \Rightarrow |\{\evt_W \in \evt_W^\ast ~|~ \F{same}_r(\evt_R, \evt_W) \wedge \tearfreeact_{\loc}(\evt_W)\}| \leq 1
+     \tearfreeact_{\loc}(\evt_R) \Rightarrow |\{\evt_W \in \evt_W^\ast ~|~ \sameact_{\loc}(\evt_R, \evt_W) \wedge \tearfreeact_{\loc}(\evt_W)\}| \leq 1
    }{
      \vdash_{\loc} \evt_R \notear \evt_W^\ast
    }

@@ -1130,6 +1130,7 @@
 .. |rangeact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{range}}
 
 .. |tearfreeact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{tearfree}}
+.. |sameact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{same}}
 
 
 .. Relaxed Memory Model Judgements
