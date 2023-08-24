@@ -4141,7 +4141,16 @@ Furthermore, the resulting store must be :ref:`valid <valid-store>`, i.e., all d
      \end{array} \\
    \end{array}
 
-.. todo:: prose for host execution
+During its execution, a host function call may do any of the following.
+
+- Instantiate an arbitrary WebAssembly module.
+- Allocate a new host function.
+- Continue execution, possibly spawning a new thread, with no other observable effects.
+- Terminate with a list of values that respects the host function's type annotation.
+- Terminate with a trap.
+
+.. todo:: better prose
+
 .. todo:: reconcile with old-style host function formulation
 
 .. math::
