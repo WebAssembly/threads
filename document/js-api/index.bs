@@ -604,7 +604,7 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
 {{Memory}} object has the following internal slots:
 
     * \[[Memory]] : a [=memory address=]
-    * \[[BufferObject]] : an {{ArrayBuffer}} whose [=Data Block=] is [=identified with=] the above memory address
+    * \[[BufferObject]] : an {{ArrayBuffer}} or {{SharedArrayBuffer}} whose [=Data Block=] is [=identified with=] the above memory address
 
 <div algorithm>
     To <dfn>create a memory buffer</dfn> from a [=memory address=] |memaddr|, perform the following steps:
