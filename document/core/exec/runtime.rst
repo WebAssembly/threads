@@ -666,6 +666,7 @@ This definition allows to index active labels surrounding a :ref:`branch <syntax
 .. _syntax-act:
 .. _syntax-ord:
 .. _syntax-loc:
+.. _syntax-reg:
 .. _syntax-fld:
 .. _syntax-storeval:
 
@@ -697,10 +698,12 @@ Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely ide
      \SEQCST ~|~
      \INIT \\
    \production{(location)} & \loc &::=&
+     \reg[\u32] \\
+   \production{(region)} & \reg &::=&
      \addr.\fld \\
    \production{(field)} & \fld &::=&
      \LLEN ~|~
-     \LDATA[\u32] \\
+     \LDATA \\
    \production{(store value)} & \storeval &::=&
      \val ~|~
      b^\ast \\
@@ -710,8 +713,7 @@ Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely ide
 .. todo:: remove spawn from events in a typed way?
 
 The access of *mutable* shared state is performed through the |ARD|, |AWR|, and |ARMW| actions.
-Each action accesses an abstract *location*, which consists of an :ref:`address <syntax-addr>` of a :ref:`shared <syntax-shared>` :ref:`memory <syntax-meminst>` instance and a symbolic *field* name in the respective object.
-This is either |LLEN| for the size or |LDATA| for the vector of bytes.
+Each action accesses an abstract *location*, which consists of an :ref:`address <syntax-addr>` of a :ref:`shared <syntax-shared>` :ref:`memory <syntax-meminst>` instance, a symbolic *field* name in the respective object (either |LLEN| for the size or |LDATA| for the vector of bytes), and an offset index into the field.
 
 In each case, read and write actions record the *store value* that has been read or written, which is either a regular :ref:`value <syntax-val>` or a sequence of :ref:`bytes <syntax-byte>`, depending on the location accessed.
 An |ARMW| event, performing an atomic read-modify-write access, records both the store values read (first) and written (second);
@@ -735,6 +737,8 @@ Conventions
 ...........
 
 * The actions :math:`\ARD_{\ord}` and :math:`\AWR_{\ord}` are abbreviated to just :math:`\ARD` and :math:`\AWR` when :math:`\ord` is :math:`\UNORD`.
+
+* A location may syntactically elide its :math:`[\u32]` offset in the case that it is 0.
 
 The following auxiliary definition is used to classify whether an access will *tear*.
 

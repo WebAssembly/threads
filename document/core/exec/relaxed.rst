@@ -40,10 +40,8 @@ Preliminary Definitions
    \tearfreeact \ldots & = & \ldots \\
    \sameact \ldots & = & \ldots \\
    \\
-   \X{func}_{\loc}(\evt) \ldots & = & \X{func}(\act) \ldots \\
+   \X{func}_{\reg}(\evt) \ldots & = & \X{func}(\act) \ldots \\
    \end{array}
-
-.. todo:: need to refactor len+data in actions
 
 
 .. _relaxed-trace:
@@ -76,7 +74,7 @@ Consistency
 
 .. math::
    \frac{
-     \forall \loc, \, \vdash_{\loc} \X{tr} \consistentwith
+     \forall \reg, \, \vdash_{\reg} \X{tr} \consistentwith
    }{
      \vdash \X{tr} \consistent
    }
@@ -84,89 +82,89 @@ Consistency
 .. math::
    \frac{
      \begin{array}[b]{@{}l@{}}
-       \forall \evt_R \in \readingact_{\loc}(\X{tr}), \exists \evt_W^\ast,
-         \X{tr} \vdash_{\loc} \evt_R \readseachfrom \evt_W^\ast \\
+       \forall \evt_R \in \readingact_{\reg}(\X{tr}), \exists \evt_W^\ast,
+         \X{tr} \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast \\
        \forall \evt_I, \evt \in \X{tr}, \,
-         \ordact_{\loc}(\evt_I) = \INIT \wedge
+         \ordact_{\reg}(\evt_I) = \INIT \wedge
          \evt_I \neq \evt \wedge
          \overlapact(\evt_I, \evt) \Rightarrow \evt_I \prechb \evt
      \end{array}
    }{
-     \vdash_{\loc} \X{tr} \consistentwith
+     \vdash_{\reg} \X{tr} \consistentwith
    }
 
 .. math::
    \frac{
      \begin{array}[b]{@{}c@{}}
-       \left|\evt_W^\ast\right| = |\readact_{\loc}(\evt_R)| \\
+       \left|\evt_W^\ast\right| = |\readact_{\reg}(\evt_R)| \\
        \forall i < |\evt_W^\ast|,
-         \X{tr} \vdash_{\loc}^i \evt_R \readsfrom \left(\evt_W^\ast[i]\right)
+         \X{tr} \vdash_{\reg}^i \evt_R \readsfrom \left(\evt_W^\ast[i]\right)
        \\
-       \vdash_{\loc} \evt_R \notear \evt_W^\ast
+       \vdash_{\reg} \evt_R \notear \evt_W^\ast
      \end{array}
    }{
-     \X{tr} \vdash_{\loc} \evt_R \readseachfrom \evt_W^\ast
+     \X{tr} \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast
    }
 
 .. math::
    \frac{
      \begin{array}[b]{@{}l@{}}
        \evt_R \neq \evt_W \\
-       \evt_W \in \writingact_{\loc}(\X{tr})
+       \evt_W \in \writingact_{\reg}(\X{tr})
      \end{array}
      \qquad
      \begin{array}[b]{@{}r@{}}
-       \X{tr} \vdash_{\loc}^{i,k} \evt_R \valueconsistent \evt_W \\
-       \X{tr} \vdash_{\loc}^k \evt_R \hbconsistent \evt_W
+       \X{tr} \vdash_{\reg}^{i,k} \evt_R \valueconsistent \evt_W \\
+       \X{tr} \vdash_{\reg}^k \evt_R \hbconsistent \evt_W
      \end{array}
      \qquad
-     \X{tr} \vdash_{\loc} \evt_R \sclastvisible \evt^\ast_W
+     \X{tr} \vdash_{\reg} \evt_R \sclastvisible \evt^\ast_W
    }{
-     \X{tr} \vdash_{\loc}^i \evt_R \readsfrom \evt_W
+     \X{tr} \vdash_{\reg}^i \evt_R \readsfrom \evt_W
    }
 
 .. math::
    \frac{
      \begin{array}[b]{@{}r@{~}c@{~}l@{}}
-       \readact_{\loc}(\evt_R)[i] &=& \writeact_{\loc}(\evt_W)[j] \\
-       k = \offsetact_{\loc}(\evt_R) + i &=& \offsetact_{\loc}(\evt_W) + j
+       \readact_{\reg}(\evt_R)[i] &=& \writeact_{\reg}(\evt_W)[j] \\
+       k = \offsetact_{\reg}(\evt_R) + i &=& \offsetact_{\reg}(\evt_W) + j
      \end{array}
   }{
-     \X{tr} \vdash_{\loc}^{i,k} \evt_R \valueconsistent \evt_W
+     \X{tr} \vdash_{\reg}^{i,k} \evt_R \valueconsistent \evt_W
   }
 
 .. math::
    \frac{
      \begin{array}[b]{@{}c}
        \neg (\evt_R \prechb \evt_W) \\
-       \syncact_{\loc}(\evt_W, \evt_R) \Rightarrow \evt_W \prechb \evt_R
+       \syncact_{\reg}(\evt_W, \evt_R) \Rightarrow \evt_W \prechb \evt_R
      \end{array}
     \qquad
     \begin{array}[b]{@{}l@{}}
-      \forall \evt'_W \in \writingact_{\loc}(\X{tr}),\\
-      \quad \evt_W \prechb \evt'_W \prechb \evt_R \Rightarrow k \notin \rangeact_{\loc}(\evt'_W)
+      \forall \evt'_W \in \writingact_{\reg}(\X{tr}),\\
+      \quad \evt_W \prechb \evt'_W \prechb \evt_R \Rightarrow k \notin \rangeact_{\reg}(\evt'_W)
     \end{array}
    }{
-    \X{tr} \vdash_{\loc}^k \evt_R \hbconsistent \evt_W
+    \X{tr} \vdash_{\reg}^k \evt_R \hbconsistent \evt_W
    }
 
 .. math::
    \frac{
      \begin{array}[b]{@{}l@{\qquad}l@{}}
-       \forall \evt'_W \in \writingact_{\loc}(\X{tr}), \evt_W \prechb \evt_R \Rightarrow \\
-       \quad \evt_W \prectot \evt'_W \prectot \evt_R \wedge \syncact_{\loc}(\evt_W, \evt_R) \Rightarrow \neg \syncact_{\loc}(\evt'_W, \evt_R) \\
-       \quad \evt_W \prechb \evt'_W \prectot \evt_R  \Rightarrow \neg\syncact_{\loc}(\evt'_W, \evt_R) \\
-       \quad \evt_W \prectot \evt'_W \prechb \evt_R \Rightarrow \neg\syncact_{\loc}(\evt_W, \evt'_W)
+       \forall \evt'_W \in \writingact_{\reg}(\X{tr}), \evt_W \prechb \evt_R \Rightarrow \\
+       \quad \evt_W \prectot \evt'_W \prectot \evt_R \wedge \syncact_{\reg}(\evt_W, \evt_R) \Rightarrow \neg \syncact_{\reg}(\evt'_W, \evt_R) \\
+       \quad \evt_W \prechb \evt'_W \prectot \evt_R  \Rightarrow \neg\syncact_{\reg}(\evt'_W, \evt_R) \\
+       \quad \evt_W \prectot \evt'_W \prechb \evt_R \Rightarrow \neg\syncact_{\reg}(\evt_W, \evt'_W)
      \end{array}
    }{
-     \X{tr} \vdash_{\loc} \evt_R \sclastvisible \evt_W
+     \X{tr} \vdash_{\reg} \evt_R \sclastvisible \evt_W
    }
 
 .. math::
    \frac{
-     \tearfreeact_{\loc}(\evt_R) \Rightarrow |\{\evt_W \in \evt_W^\ast ~|~ \sameact_{\loc}(\evt_R, \evt_W) \wedge \tearfreeact_{\loc}(\evt_W)\}| \leq 1
+     \tearfreeact_{\reg}(\evt_R) \Rightarrow |\{\evt_W \in \evt_W^\ast ~|~ \sameact_{\reg}(\evt_R, \evt_W) \wedge \tearfreeact_{\reg}(\evt_W)\}| \leq 1
    }{
-     \vdash_{\loc} \evt_R \notear \evt_W^\ast
+     \vdash_{\reg} \evt_R \notear \evt_W^\ast
    }
 
 

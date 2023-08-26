@@ -1106,6 +1106,7 @@
 .. |hostact| mathdef:: \xref{exec/runtime}{syntax-act}{\X{hostact}}
 .. |ord| mathdef:: \xref{exec/runtime}{syntax-ord}{\X{ord}}
 .. |loc| mathdef:: \xref{exec/runtime}{syntax-loc}{\X{loc}}
+.. |reg| mathdef:: \xref{exec/runtime}{syntax-reg}{\X{reg}}
 .. |fld| mathdef:: \xref{exec/runtime}{syntax-fld}{\X{fld}}
 .. |storeval| mathdef:: \xref{exec/runtime}{syntax-storeval}{\X{storeval}}
 .. |notears| mathdef:: \xref{exec/runtime}{syntax-ord}{\X{notears}}

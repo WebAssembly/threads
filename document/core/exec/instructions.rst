@@ -4149,9 +4149,7 @@ During its execution, a host function call may do any of the following.
 - Terminate with a list of values that respects the host function's type annotation.
 - Terminate with a trap.
 
-.. todo:: better prose
-
-.. todo:: reconcile with old-style host function formulation
+.. todo:: better prose, evaluate alternative approach where host may directly emit shared memory events
 
 .. math::
    ~\\[-1ex]
@@ -4188,20 +4186,6 @@ During its execution, a host function call may do any of the following.
    S; F; (\HOSTE~[t^\ast]) &\stepto& S; F; \TRAP
    \end{array}
    \end{array}
-
-.. todo:: reconcile with old-style host function formulation
-
-Here, :math:`\X{hf}(S; \val^n)` denotes the implementation-defined execution of host function :math:`\X{hf}` in current store :math:`S` with arguments :math:`\val^n`.
-It yields a set of possible outcomes, where each element is either a pair of a modified store :math:`S'` and a :ref:`result <syntax-result>`
-or the special value :math:`\bot` indicating divergence.
-A host function is non-deterministic if there is at least one argument for which the set of outcomes is not singular.
-
-For a WebAssembly implementation to be :ref:`sound <soundness>` in the presence of host functions,
-every :ref:`host function instance <syntax-funcinst>` must be :ref:`valid <valid-hostfuncinst>`,
-which means that it adheres to suitable pre- and post-conditions:
-under a :ref:`valid store <valid-store>` :math:`S`, and given arguments :math:`\val^n` matching the ascribed parameter types :math:`t_1^n`,
-executing the host function must yield a non-empty set of possible outcomes each of which is either divergence or consists of a valid store :math:`S'` that is an :ref:`extension <extend-store>` of :math:`S` and a result matching the ascribed return types :math:`t_2^m`.
-All these notions are made precise in the :ref:`Appendix <soundness>`.
 
 .. note::
    A host function can call back into WebAssembly by :ref:`invoking <exec-invocation>` a function :ref:`exported <syntax-export>` from a :ref:`module <syntax-module>`.

@@ -156,18 +156,6 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
 
 * The :ref:`function type <syntax-functype>` :math:`\functype` must be :ref:`valid <valid-functype>`.
 
-* Let :math:`[t_1^\ast] \to [t_2^\ast]` be the :ref:`function type <syntax-functype>` :math:`\functype`.
-
-* For every :ref:`valid <valid-store>` :ref:`store <syntax-store>` :math:`S_1` :ref:`extending <extend-store>` :math:`S` and every sequence :math:`\val^\ast` of :ref:`values <syntax-val>` whose :ref:`types <valid-val>` coincide with :math:`t_1^\ast`:
-
-  * :ref:`Executing <exec-invoke-host>` :math:`\X{hf}` in store :math:`S_1` with arguments :math:`\val^\ast` has a non-empty set of possible outcomes.
-
-  * For every element :math:`R` of this set:
-
-    * Either :math:`R` must be :math:`\bot` (i.e., divergence).
-
-    * Or :math:`R` consists of a :ref:`valid <valid-store>` :ref:`store <syntax-store>` :math:`S_2` :ref:`extending <extend-store>` :math:`S_1` and a :ref:`result <syntax-result>` :math:`\result` whose :ref:`type <valid-result>` coincides with :math:`[t_2^\ast]`.
-
 * Then the function instance is valid with :ref:`function type <syntax-functype>` :math:`\functype`.
 
 .. math::
@@ -175,32 +163,9 @@ Module instances are classified by *module contexts*, which are regular :ref:`co
      \begin{array}[b]{@{}l@{}}
      \vdashfunctype [t_1^\ast] \to [t_2^\ast] \ok \\
      \end{array}
-     \quad
-     \begin{array}[b]{@{}l@{}}
-     \forall S_1, \val^\ast,~
-       {\vdashstore S_1 \ok} \wedge
-       {\vdashstoreextends S \extendsto S_1} \wedge
-       {S_1 \vdashresult \val^\ast : [t_1^\ast]}
-       \Longrightarrow {} \\ \qquad
-       \X{hf}(S_1; \val^\ast) \supset \emptyset \wedge {} \\ \qquad
-     \forall R \in \X{hf}(S_1; \val^\ast),~
-       R = \bot \vee {} \\ \qquad\qquad
-       \exists S_2, \result,~
-       {\vdashstore S_2 \ok} \wedge
-       {\vdashstoreextends S_1 \extendsto S_2} \wedge
-       {S_2 \vdashresult \result : [t_2^\ast]} \wedge
-       R = (S_2; \result)
-     \end{array}
    }{
      S \vdashfuncinst \{\FITYPE~[t_1^\ast] \to [t_2^\ast], \FIHOSTCODE~\X{hf}\} : [t_1^\ast] \to [t_2^\ast]
    }
-
-.. note::
-   This rule states that, if appropriate pre-conditions about store and arguments are satisfied, then executing the host function must satisfy appropriate post-conditions about store and results.
-   The post-conditions match the ones in the :ref:`execution rule <exec-invoke-host>` for invoking host functions.
-
-   Any store under which the function is invoked is assumed to be an extension of the current store.
-   That way, the function itself is able to make sufficient assumptions about future stores.
 
 
 .. index:: table type, table instance, limits, function address
