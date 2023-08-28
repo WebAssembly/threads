@@ -21,7 +21,9 @@ let global (GlobalType (t, _) as gt) =
 let table =
   Table.alloc (TableType ({min = 10l; max = Some 20l}, FuncRefType))
     (NullRef FuncRefType)
-let memory = Memory.alloc (MemoryType {min = 1l; max = Some 2l})
+let memory = Memory.alloc (MemoryType ({min = 1l; max = Some 2l}, Unshared))
+let shared_memory =
+  Memory.alloc (MemoryType ({min = 1l; max = Some 2l}, Shared))
 let func f t = Func.alloc_host t (f t)
 
 let print_value v =

@@ -20,6 +20,13 @@ exception OutOfMemory
 
 let page_size = 0x10000L (* 64 KiB *)
 
+let is_aligned a t sz =
+  let align =
+    match sz with
+    | None -> Types.num_size t
+    | Some s -> Types.packed_size s
+  in Int64.(logand a (of_int (align - 1))) = 0L
+
 let valid_limits {min; max} =
   match max with
   | None -> true
@@ -34,7 +41,7 @@ let create n =
     mem
   with Out_of_memory -> raise OutOfMemory
 
-let alloc (MemoryType lim as ty) =
+let alloc (MemoryType (lim, sh) as ty) =
   if not (valid_limits lim) then raise Type;
   {ty; content = create lim.min}
 
@@ -48,7 +55,7 @@ let type_of mem =
   mem.ty
 
 let grow mem delta =
-  let MemoryType lim = mem.ty in
+  let MemoryType (lim, sh) = mem.ty in
   assert (lim.min = size mem);
   let old_size = lim.min in
   let new_size = Int32.add old_size delta in
@@ -58,7 +65,7 @@ let grow mem delta =
   let after = create new_size in
   let dim = Array1_64.dim mem.content in
   Array1.blit (Array1_64.sub mem.content 0L dim) (Array1_64.sub after 0L dim);
-  mem.ty <- MemoryType lim';
+  mem.ty <- MemoryType (lim', sh);
   mem.content <- after
 
 let load_byte mem a =

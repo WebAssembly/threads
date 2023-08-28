@@ -234,6 +234,7 @@ let inline_type_explicit (c : context) x ft at =
 %token<int -> Ast.instr'> VEC_EXTRACT VEC_REPLACE
 %token FUNC START TYPE PARAM RESULT LOCAL GLOBAL
 %token TABLE ELEM MEMORY DATA DECLARE OFFSET ITEM IMPORT EXPORT
+%token SHARED UNSHARED
 %token MODULE BIN QUOTE
 %token SCRIPT REGISTER INVOKE GET
 %token ASSERT_MALFORMED ASSERT_INVALID ASSERT_UNLINKABLE
@@ -303,7 +304,8 @@ table_type :
   | limits ref_type { TableType ($1, $2) }
 
 memory_type :
-  | limits { MemoryType $1 }
+  | limits SHARED { MemoryType ($1, Shared) }
+  | limits UNSHARED { MemoryType ($1, Unshared) }
 
 limits :
   | NAT { {min = nat32 $1 (ati 1); max = None} }
@@ -854,7 +856,7 @@ memory_fields :
     { fun c x at ->
       let offset = [i32_const (0l @@ at) @@ at] @@ at in
       let size = Int32.(div (add (of_int (String.length $3)) 65535l) 65536l) in
-      [{mtype = MemoryType {min = size; max = Some size}} @@ at],
+      [{mtype = MemoryType ({min = size; max = Some size}, Unshared)} @@ at],
       [{dinit = $3; dmode = Active {index = x; offset} @@ at} @@ at],
       [], [] }
 

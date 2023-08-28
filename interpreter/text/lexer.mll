@@ -862,6 +862,8 @@ rule token = parse
       | "global" -> GLOBAL
       | "table" -> TABLE
       | "memory" -> MEMORY
+      | "shared" -> SHARED
+      | "unshared" -> UNSHARED
       | "elem" -> ELEM
       | "data" -> DATA
       | "declare" -> DECLARE

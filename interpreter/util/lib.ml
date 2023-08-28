@@ -78,6 +78,17 @@ struct
     | 0, _ -> xs
     | n, _::xs' when n > 0 -> drop (n - 1) xs'
     | _ -> failwith "drop"
+  
+  let rec split n xs =
+    match n, xs with
+    | 0, _ -> [], xs
+    | n, x::xs' when n > 0 -> let ys, zs = split (n - 1) xs' in x::ys, zs
+    | _ -> failwith "split"
+
+  let extract n xs =
+    match split n xs with
+    | ys, z::zs -> ys, z, zs
+    | _ -> failwith "extract"
 
   let rec last = function
     | x::[] -> x
@@ -213,4 +224,8 @@ struct
   let app f = function
     | Some x -> f x
     | None -> ()
+  
+  let fold x f = function
+    | Some y -> f y
+    | None -> x
 end

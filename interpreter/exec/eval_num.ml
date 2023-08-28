@@ -54,6 +54,16 @@ struct
       | GeS -> IXX.ge_s
       | GeU -> IXX.ge_u
     in fun v1 v2 -> f (of_num 1 v1) (of_num 2 v2)
+  
+  let rmwop op =
+    let f = match op with
+      | RmwAdd -> IXX.add
+      | RmwSub -> IXX.sub
+      | RmwAnd -> IXX.and_
+      | RmwOr -> IXX.or_
+      | RmwXor -> IXX.xor
+      | RmwXchg -> fun x y -> y (* Return the "new" value, y *)
+    in fun v1 v2 -> to_num (f (of_num 1 v1) (of_num 2 v2))
 end
 
 module I32Op = IntOp (I32) (I32Num)
@@ -100,6 +110,8 @@ struct
       | Gt -> FXX.gt
       | Ge -> FXX.ge
     in fun v1 v2 -> f (of_num 1 v1) (of_num 2 v2)
+  
+  let rmwop op = assert false
 end
 
 module F32Op = FloatOp (F32) (F32Num)
@@ -195,4 +207,5 @@ let eval_binop = op I32Op.binop I64Op.binop F32Op.binop F64Op.binop
 let eval_testop = op I32Op.testop I64Op.testop F32Op.testop F64Op.testop
 let eval_relop = op I32Op.relop I64Op.relop F32Op.relop F64Op.relop
 let eval_cvtop = op I32CvtOp.cvtop I64CvtOp.cvtop F32CvtOp.cvtop F64CvtOp.cvtop
+let eval_rmwop = op I32Op.rmwop I64Op.rmwop F32Op.rmwop F64Op.rmwop
 
