@@ -591,9 +591,11 @@ let check_table_type (tt : table_type) at =
   check_ref_type t at
 
 let check_memory_type (mt : memory_type) at =
-  let MemoryType lim = mt in
+  let MemoryType (lim, shared) = mt in
   check_limits lim 0x1_0000l at
-    "memory size must be at most 65536 pages (4GiB)"
+    "memory size must be at most 65536 pages (4GiB)";
+  require (shared = Unshared || lim.max <> None) at
+    "shared memory must have maximum"
 
 let check_global_type (gt : global_type) at =
   let GlobalType (t, mut) = gt in

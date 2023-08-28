@@ -73,7 +73,6 @@ struct
       Code.error Source.no_region "length out of bounds";
     u32 (Int32.of_int i)
 
-  let bool b = u1 (if b then 1 else 0)
   let string bs = len (String.length bs); put_string s bs
   let name n = string (Utf8.encode n)
   let list f xs = List.iter f xs
@@ -118,14 +117,16 @@ struct
       s7 (-0x20); vec value_type ts1; vec value_type ts2
 
 
-  let limits vu {min; max} =
-    bool (max <> None); vu min; opt vu max
+  let limits vu {min; max} shared =
+    let int_of_bool b = if b then 1 else 0 in
+    let flags = int_of_bool shared lsl 1 lor int_of_bool (max <> None) in
+    byte flags; vu min; opt vu max
 
   let table_type = function
-    | TableType (lim, t) -> ref_type t; limits u32 lim
+    | TableType (lim, t) -> ref_type t; limits u32 lim false
 
   let memory_type = function
-    | MemoryType lim -> limits u32 lim
+    | MemoryType (lim, shared) -> limits u32 lim (shared = Shared)
 
   let mutability = function
     | Immutable -> byte 0

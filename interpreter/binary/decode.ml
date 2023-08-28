@@ -114,7 +114,6 @@ let len32 s =
   if I32.le_u n (Int32.of_int (len s - pos)) then Int32.to_int n else
     error s pos "length out of bounds"
 
-let bool s = (u1 s = 1)
 let string s = let n = len32 s in get_string n s
 let rec list f n s = if n = 0 then [] else let x = f s in x :: list f (n - 1) s
 let opt f b s = if b then Some (f s) else None
@@ -180,20 +179,23 @@ let func_type s =
     FuncType (ts1, ts2)
   | _ -> error s (pos s - 1) "malformed function type"
 
-let limits uN s =
-  let has_max = bool s in
-  let min = uN s in
-  let max = opt uN has_max s in
-  {min; max}
+let limits vu s =
+  let flags = byte s in
+  require (flags land 0xfc = 0) s (pos s - 1) "malformed limits flags";
+  let has_max = (flags land 1 = 1) in
+  let shared = (flags land 2 = 2) in
+  let min = vu s in
+  let max = opt vu has_max s in
+  {min; max}, shared
 
 let table_type s =
   let t = ref_type s in
-  let lim = limits u32 s in
+  let lim, _ = limits u32 s in
   TableType (lim, t)
 
 let memory_type s =
-  let lim = limits u32 s in
-  MemoryType lim
+  let lim, shared = limits u32 s in
+  MemoryType (lim, if shared then Shared else Unshared)
 
 let mutability s =
   match byte s with
