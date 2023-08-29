@@ -20,8 +20,9 @@ The mapping of numeric instructions to their underlying operators is expressed b
 
 .. math::
    \begin{array}{lll@{\qquad}l}
-   \X{op}_{\K{i}N}(n_1,\dots,n_k) &=& \F{i}\X{op}_N(n_1,\dots,n_k) \\
-   \X{op}_{\K{f}N}(z_1,\dots,z_k) &=& \F{f}\X{op}_N(z_1,\dots,z_k) \\
+   \X{op}_{\IN}(i_1,\dots,i_k) &=& \F{i}\X{op}_N(i_1,\dots,i_k) \\
+   \X{op}_{\FN}(z_1,\dots,z_k) &=& \F{f}\X{op}_N(z_1,\dots,z_k) \\
+   \X{op}_{\VN}(i_1,\dots,i_k) &=& \F{i}\X{op}_N(i_1,\dots,i_k) \\
    \end{array}
 
 And for :ref:`conversion operators <exec-cvtop>`:
@@ -292,14 +293,14 @@ Most vector instructions are defined in terms of generic numeric operators appli
 
 2. Pop the value :math:`\V128.\VCONST~c_1` from the stack.
 
-3. Let :math:`c` be the result of computing :math:`\vvunop_{\I128}(c_1)`.
+3. Let :math:`c` be the result of computing :math:`\vvunop_{\V128}(c_1)`.
 
 4. Push the value :math:`\V128.\VCONST~c` to the stack.
 
 .. math::
    \begin{array}{lcl@{\qquad}l}
    (\V128\K{.}\VCONST~c_1)~\V128\K{.}\vvunop &\stepto& (\V128\K{.}\VCONST~c)
-     & (\iff c = \vvunop_{\I128}(c_1)) \\
+     & (\iff c = \vvunop_{\V128}(c_1)) \\
    \end{array}
 
 
@@ -314,14 +315,14 @@ Most vector instructions are defined in terms of generic numeric operators appli
 
 3. Pop the value :math:`\V128.\VCONST~c_1` from the stack.
 
-4. Let :math:`c` be the result of computing :math:`\vvbinop_{\I128}(c_1, c_2)`.
+4. Let :math:`c` be the result of computing :math:`\vvbinop_{\V128}(c_1, c_2)`.
 
 5. Push the value :math:`\V128.\VCONST~c` to the stack.
 
 .. math::
    \begin{array}{lcl@{\qquad}l}
    (\V128\K{.}\VCONST~c_1)~(\V128\K{.}\VCONST~c_2)~\V128\K{.}\vvbinop &\stepto& (\V128\K{.}\VCONST~c)
-     & (\iff c = \vvbinop_{\I128}(c_1, c_2)) \\
+     & (\iff c = \vvbinop_{\V128}(c_1, c_2)) \\
    \end{array}
 
 
@@ -338,14 +339,14 @@ Most vector instructions are defined in terms of generic numeric operators appli
 
 4. Pop the value :math:`\V128.\VCONST~c_1` from the stack.
 
-5. Let :math:`c` be the result of computing :math:`\vvternop_{\I128}(c_1, c_2, c_3)`.
+5. Let :math:`c` be the result of computing :math:`\vvternop_{\V128}(c_1, c_2, c_3)`.
 
 6. Push the value :math:`\V128.\VCONST~c` to the stack.
 
 .. math::
    \begin{array}{lcl@{\qquad}l}
    (\V128\K{.}\VCONST~c_1)~(\V128\K{.}\VCONST~c_2)~(\V128\K{.}\VCONST~c_3)~\V128\K{.}\vvternop &\stepto& (\V128\K{.}\VCONST~c)
-     & (\iff c = \vvternop_{\I128}(c_1, c_2, c_3)) \\
+     & (\iff c = \vvternop_{\V128}(c_1, c_2, c_3)) \\
    \end{array}
 
 
@@ -379,15 +380,15 @@ Most vector instructions are defined in terms of generic numeric operators appli
 
 2. Pop the value :math:`\V128.\VCONST~c_2` from the stack.
 
-3. Let :math:`i^\ast` be the result of computing :math:`\lanes_{i8x16}(c_2)`.
+3. Let :math:`i^\ast` be the result of computing :math:`\lanes_{\I8X16}(c_2)`.
 
 4. Pop the value :math:`\V128.\VCONST~c_1` from the stack.
 
-5. Let :math:`j^\ast` be the result of computing :math:`\lanes_{i8x16}(c_1)`.
+5. Let :math:`j^\ast` be the result of computing :math:`\lanes_{\I8X16}(c_1)`.
 
 6. Let :math:`c^\ast` be the concatenation of the two sequences :math:`j^\ast` and :math:`0^{240}`.
 
-7. Let :math:`c'` be the result of computing :math:`\lanes^{-1}_{i8x16}(c^\ast[ i^\ast[0] ] \dots c^\ast[ i^\ast[15] ])`.
+7. Let :math:`c'` be the result of computing :math:`\lanes^{-1}_{\I8X16}(c^\ast[ i^\ast[0] ] \dots c^\ast[ i^\ast[15] ])`.
 
 8. Push the value :math:`\V128.\VCONST~c'` onto the stack.
 
@@ -398,9 +399,9 @@ Most vector instructions are defined in terms of generic numeric operators appli
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-      (\iff & i^\ast = \lanes_{i8x16}(c_2) \\
-      \wedge & c^\ast = \lanes_{i8x16}(c_1)~0^{240} \\
-      \wedge & c' = \lanes^{-1}_{i8x16}(c^\ast[ i^\ast[0] ] \dots c^\ast[ i^\ast[15] ]))
+      (\iff & i^\ast = \lanes_{\I8X16}(c_2) \\
+      \wedge & c^\ast = \lanes_{\I8X16}(c_1)~0^{240} \\
+      \wedge & c' = \lanes^{-1}_{\I8X16}(c^\ast[ i^\ast[0] ] \dots c^\ast[ i^\ast[15] ]))
      \end{array}
    \end{array}
 
@@ -416,15 +417,15 @@ Most vector instructions are defined in terms of generic numeric operators appli
 
 3. Pop the value :math:`\V128.\VCONST~c_2` from the stack.
 
-4. Let :math:`i_2^\ast` be the result of computing :math:`\lanes_{i8x16}(c_2)`.
+4. Let :math:`i_2^\ast` be the result of computing :math:`\lanes_{\I8X16}(c_2)`.
 
 5. Pop the value :math:`\V128.\VCONST~c_1` from the stack.
 
-6. Let :math:`i_1^\ast` be the result of computing :math:`\lanes_{i8x16}(c_1)`.
+6. Let :math:`i_1^\ast` be the result of computing :math:`\lanes_{\I8X16}(c_1)`.
 
 7. Let :math:`i^\ast` be the concatenation of the two sequences :math:`i_1^\ast` and :math:`i_2^\ast`.
 
-8. Let :math:`c` be the result of computing :math:`\lanes^{-1}_{i8x16}(i^\ast[x^\ast[0]] \dots i^\ast[x^\ast[15]])`.
+8. Let :math:`c` be the result of computing :math:`\lanes^{-1}_{\I8X16}(i^\ast[x^\ast[0]] \dots i^\ast[x^\ast[15]])`.
 
 9. Push the value :math:`\V128.\VCONST~c` onto the stack.
 
@@ -435,8 +436,8 @@ Most vector instructions are defined in terms of generic numeric operators appli
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-      (\iff & i^\ast = \lanes_{i8x16}(c_1)~\lanes_{i8x16}(c_2) \\
-      \wedge & c = \lanes^{-1}_{i8x16}(i^\ast[x^\ast[0]] \dots i^\ast[x^\ast[15]]))
+      (\iff & i^\ast = \lanes_{\I8X16}(c_1)~\lanes_{\I8X16}(c_2) \\
+      \wedge & c = \lanes^{-1}_{\I8X16}(i^\ast[x^\ast[0]] \dots i^\ast[x^\ast[15]]))
      \end{array}
    \end{array}
 
@@ -1681,7 +1682,7 @@ Table Instructions
 
 4. Assert: due to :ref:`validation <valid-elem.drop>`, :math:`S.\SELEMS[a]` exists.
 
-5. Replace :math:`S.\SELEMS[a]` with the :ref:`element instance <syntax-eleminst>` :math:`\{\EIELEM~\epsilon\}`.
+5. Replace :math:`S.\SELEMS[a].\EIELEM` with :math:`\epsilon`.
 
 .. math::
    ~\\[-1ex]
@@ -1690,7 +1691,7 @@ Table Instructions
    S; F; (\ELEMDROP~x) &\stepto& S'; F; \epsilon
    \end{array}
    \\ \qquad
-     (\iff S' = S \with \SELEMS[F.\AMODULE.\MIELEMS[x]] = \{ \EIELEM~\epsilon \}) \\
+     (\iff S' = S \with \SELEMS[F.\AMODULE.\MIELEMS[x]].\EIELEM = \epsilon) \\
    \end{array}
 
 
@@ -1875,7 +1876,7 @@ Memory Instructions
 
 14. Let :math:`n_k` be the result of computing :math:`\extend^{\sx}_{M,W}(m_k)`.
 
-15. Let :math:`c` be the result of computing :math:`\lanes^{-1}_{\X{i}W\K{x}N}(n_0 \dots n_{N-1})`.
+15. Let :math:`c` be the result of computing :math:`\lanes^{-1}_{\K{i}W\K{x}N}(n_0 \dots n_{N-1})`.
 
 16. Push the value :math:`\V128.\CONST~c` to the stack.
 
@@ -1891,7 +1892,7 @@ Memory Instructions
      (\iff & \X{mem}.\MITYPE = \limits~\UNSHARED \\
      \wedge & \X{ea} + M \cdot N / 8 \leq |\X{mem}.\MIDATA| \\
      \wedge & \bytes_{\iM}(m_k) = \X{mem}.\MIDATA[\X{ea} + k \cdot M/8 \slice M/8] \\
-     \wedge & c = \lanes^{-1}_{\X{i}W\K{x}N}(\extend^{\sx}_{M,W}(m_0) \dots \extend^{\sx}_{M,W}(m_{N-1}))) \\[1ex]
+     \wedge & c = \lanes^{-1}_{\K{i}W\K{x}N}(\extend^{\sx}_{M,W}(m_0) \dots \extend^{\sx}_{M,W}(m_{N-1}))) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -1910,7 +1911,7 @@ Memory Instructions
      (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
      \wedge & \X{ea} + M \cdot N / 8 \leq n \\
      \wedge & \bytes_{\iM}(m_k) = b^\ast[k \cdot M/8 \slice M/8] \\
-     \wedge & c = \lanes^{-1}_{\X{i}W\K{x}N}(\extend^{\sx}_{M,W}(m_0) \dots \extend^{\sx}_{M,W}(m_{N-1}))) \\[1ex]
+     \wedge & c = \lanes^{-1}_{\K{i}W\K{x}N}(\extend^{\sx}_{M,W}(m_0) \dots \extend^{\sx}_{M,W}(m_{N-1}))) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -1980,7 +1981,7 @@ Memory Instructions
 
 13. Let :math:`L` be the integer :math:`128 / N`.
 
-14. Let :math:`c` be the result of computing :math:`\lanes^{-1}_{\iN\K{x}L}(n^L)`.
+14. Let :math:`c` be the result of computing :math:`\lanes^{-1}_{\IN\K{x}L}(n^L)`.
 
 15. Push the value :math:`\V128.\CONST~c` to the stack.
 
@@ -1995,7 +1996,7 @@ Memory Instructions
      (\iff & \X{mem}.\MITYPE = \limits~\UNSHARED \\
      \wedge & \X{ea} + N/8 \leq |\X{mem}.\MIDATA| \\
      \wedge & \bytes_{\iN}(n) = \X{mem}.\MIDATA[\X{ea} \slice N/8] \\
-     \wedge & c = \lanes^{-1}_{\iN\K{x}L}(n^L)) \\[1ex]
+     \wedge & c = \lanes^{-1}_{\IN\K{x}L}(n^L)) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -2015,7 +2016,7 @@ Memory Instructions
      (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
      \wedge & \X{ea} + N/8 \leq n \\
      \wedge & \bytes_{\iN}(n) = b^\ast \\
-     \wedge & c = \lanes^{-1}_{\iN\K{x}L}(n^L)) \\[1ex]
+     \wedge & c = \lanes^{-1}_{\IN\K{x}L}(n^L)) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -2193,9 +2194,9 @@ Memory Instructions
 
 15. Let :math:`L` be :math:`128 / N`.
 
-16. Let :math:`j^\ast` be the result of computing :math:`\lanes_{\K{i}N\K{x}L}(v)`.
+16. Let :math:`j^\ast` be the result of computing :math:`\lanes_{\IN\K{x}L}(v)`.
 
-17. Let :math:`c` be the result of computing :math:`\lanes^{-1}_{\K{i}N\K{x}L}(j^\ast \with [x] = r)`.
+17. Let :math:`c` be the result of computing :math:`\lanes_{\IN\K{x}L}(j^\ast \with [x] = r)`.
 
 18. Push the value :math:`\V128.\CONST~c` to the stack.
 
@@ -2210,7 +2211,7 @@ Memory Instructions
      (\iff & \X{mem}.\MITYPE = \limits~\UNSHARED \\
      \wedge & \X{ea} + N/8 \leq |\X{mem}.\MIDATA| \\
      \wedge & \bytes_{\iN}(n) = \X{mem}.\MIDATA[\X{ea} \slice N/8] \\
-     \wedge & c = \lanes^{-1}_{\K{i}N\K{x}L}(\lanes_{\K{i}N\K{x}L}(v) \with [x] = r)) \\[1ex]
+     \wedge & c = \lanes^{-1}_{\IN\K{x}L}(\lanes_{\IN\K{x}L}(v) \with [x] = r)) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -2230,7 +2231,7 @@ Memory Instructions
      (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
      \wedge & \X{ea} + N/8 \leq n \\
      \wedge & \bytes_{\iN}(n) = b^\ast \\
-     \wedge & c = \lanes^{-1}_{\K{i}N\K{x}L}(\lanes_{\K{i}N\K{x}L}(v) \with [x] = r)) \\[1ex]
+     \wedge & c = \lanes^{-1}_{\IN\K{x}L}(\lanes_{\IN\K{x}L}(v) \with [x] = r)) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -2402,7 +2403,7 @@ Memory Instructions
 
 12. Let :math:`L` be :math:`128/N`.
 
-13. Let :math:`j^\ast` be the result of computing :math:`\lanes_{\K{i}N\K{x}L}(c)`.
+13. Let :math:`j^\ast` be the result of computing :math:`\lanes_{\IN\K{x}L}(c)`.
 
 14. Let :math:`b^\ast` be the result of computing :math:`\bytes_{\iN}(j^\ast[x])`.
 
@@ -2434,7 +2435,7 @@ Memory Instructions
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & \X{mem}.\MITYPE = \limits~\UNSHARED \\
      \wedge & \X{ea} + N/8 \leq |\X{mem}.\MIDATA| \\
-     \wedge & S' = S \with \SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice N/8] = \bytes_{\iN}(\lanes_{\K{i}N\K{x}L}(c)[x])) \\[1ex]
+     \wedge & S' = S \with \SMEMS[F.\AMODULE.\MIMEMS[0]].\MIDATA[\X{ea} \slice N/8] = \bytes_{\iN}(\lanes_{\IN\K{x}L}(c)[x])) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
@@ -2453,7 +2454,7 @@ Memory Instructions
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
      \wedge & \X{ea} + N/8 \leq n \\
-     \wedge & b^\ast = \bytes_{\iN}(\lanes_{\K{i}N\K{x}L}(c)[x])) \\[1ex]
+     \wedge & b^\ast = \bytes_{\iN}(\lanes_{\IN\K{x}L}(c)[x])) \\[1ex]
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
