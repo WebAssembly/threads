@@ -706,7 +706,7 @@ Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely ide
      \LDATA \\
    \production{(store value)} & \storeval &::=&
      \val ~|~
-     b^\ast \\
+     \byte^\ast \\
    \end{array}
 
 .. todo:: ensure identity of wait + wake operations is preserved
