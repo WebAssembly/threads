@@ -1162,6 +1162,10 @@
 .. |prechb| mathdef:: \xref{exec/runtime}{relaxed-prechb}{\mathrel{\prec_{\K{hb}}}}
 .. |prectot| mathdef:: \xref{exec/runtime}{relaxed-prectot}{\mathrel{\prec_{\K{tot}}}}
 
+.. Relaxed Memory Model, non-terminals
+
+.. |trace| mathdef:: \xref{exec/relaxed}{relaxed-trace}{\X{tr}}
+
 
 .. Stack, terminals
 
