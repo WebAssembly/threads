@@ -70,6 +70,42 @@ Consistency
 
 .. todo:: define auxiliary functions (either here or in Runtime Structure)
 
+.. math::
+   \begin{array}{lcl}
+   \ordaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
+   \ordaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
+   \ordaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \SEQCST \\
+   &&\\
+   \locaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
+   \locaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
+   \locaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \loc \\
+   &&\\
+   \sizeaux(\ARD_{\ord}~\loc~\byte^n~\NOTEARS^?)       & = & n \\
+   \sizeaux(\AWR_{\ord}~\loc~\byte^n~\NOTEARS^?)       & = & n \\
+   \sizeaux(\ARMW~\loc~{\byte_1}^n~{\byte_2}^n)        & = & n \\
+   &&\\
+   \readaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
+   \readaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \epsilon \\
+   \readaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
+   &&\\
+   \writeaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \epsilon \\
+   \writeaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \byte^\ast \\
+   \writeaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast) & = & {\byte_2}^\ast \\
+   &&\\
+   \addraux(\act)       & = & \addraux(\regionaux(\act) \\
+   \addraux(\loc)       & = & \addraux(\regionaux(\reg) \\
+   \addraux(\addr.\fld) & = & \addr \\
+   &&\\
+   \regionaux(\act)     & = & \regionaux(\locaux(\act) \\
+   \regionaux(\reg)     & = & \reg \\
+   \regionaux(\reg[i])  & = & \reg \\
+   &&\\
+   \offsetaux(\act)    & = & \offsetact(\locaux(\act)) \\
+   \offsetaux(\reg)    & = & 0 \\
+   \offsetaux(\reg[i]) & = & i \\
+   \end{array}
+
+.. todo:: Add more auxiliary functions
 .. todo:: add prose intuition
 
 .. math::
