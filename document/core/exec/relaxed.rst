@@ -19,7 +19,50 @@ The execution of a WebAssembly program gives rise to a :ref:`trace <relaxed-trac
 Preliminary Definitions
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Bla bla
+.. math::
+   \begin{array}{rcl}
+   \timeevt(\act^\ast~\AT~\time)     & = & \time \\
+   \\
+   \locact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
+   \locact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
+   \locact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \loc \\
+   \\
+   \ordact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
+   \ordact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
+   \ordact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \SEQCST \\
+   \\
+   \overlapact(\act_1, \act_2)  & = & \rangeact(\act_1) \cup \rangeact(\act_2) \neq \epsilon  \\
+   \sameact(\act_1, \act_2) & = & \rangeact(\act_1) = \rangeact(\act_2) \\
+   \\
+   \readingact(\act)     & = & \readact(\act) \neq \epsilon \\
+   \writingact(\act)     & = & \writeact(\act) \neq \epsilon \\
+   \\
+   \readact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
+   \readact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
+   \readact(\act)  & = & \epsilon \qquad \otherwise \\
+   &&\\
+   \writeact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \byte^\ast \\
+   \writeact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast) & = & {\byte_2}^\ast \\
+   \writeact(\act)  & = & \epsilon \qquad \otherwise \\
+   &&\\
+   \offsetact(\act)   & = & \u32  \qquad \iff \locact(\act) = \reg[\u32] \ \\
+   \\
+   \syncact(\act_1,\act_2)     & = & \sameact(\act_1,\act_2) \wedge \ordact(\act_1) = \ordact(\act_2) = \SEQCST \\
+   \rangeact(\act)    & = & [\u32 \ldots \u32 + n - 1] \qquad \iff \locact(\act) = \reg[\u32] \qquad n = \F{max}(|\readact(\act)|,|\writeact(\act)|) \\
+   \\
+   \tearfreeact(\ARD_{\ord}~\loc~\byte^\ast)    & = & \bot \qquad \iff \ord = \UNORD \vee \ord = \INIT \\
+   \tearfreeact(\AWR_{\ord}~\loc~\byte^\ast)    & = & \bot \qquad \iff \ord = \UNORD \vee \ord = \INIT \\
+   \tearfreeact(\act)    & = & \top \qquad \otherwise \\
+   \\
+   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time) & = & \X{func}(\act) \qquad \iff \locact(\act) = \reg[\u32]  \\
+   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time, \act_3^\ast~\act'~\act_4^\ast~\AT~\time') & = & \X{func}(\act.\act') \qquad \iff \locact(\act) = \locact(\act') = \reg[\u32]  \\
+   \end{array}
+
+.. todo:: Double check notears
+
+.. todo:: Tidy up range
+
+.. todo:: add prose intuition?
 
 
 .. _relaxed-trace:
@@ -45,78 +88,6 @@ When a WebAssembly program is executed, all behaviours observed during that exec
 
 Consistency
 ~~~~~~~~~~~
-
-.. todo:: define auxiliary functions (either here or in Runtime Structure)
-
-.. math::
-   \begin{array}{lcl}
-   \ordaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
-   \ordaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
-   \ordaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \SEQCST \\
-   &&\\
-   \locaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
-   \locaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
-   \locaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \loc \\
-   &&\\
-   \sizeaux(\ARD_{\ord}~\loc~\byte^n~\NOTEARS^?)       & = & n \\
-   \sizeaux(\AWR_{\ord}~\loc~\byte^n~\NOTEARS^?)       & = & n \\
-   \sizeaux(\ARMW~\loc~{\byte_1}^n~{\byte_2}^n)        & = & n \\
-   &&\\
-   \readaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
-   \readaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
-   \readaux(\act)  & = & \epsilon \qquad \otherwise \\
-   &&\\
-   \writeaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \epsilon \\
-   \writeaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast) & = & {\byte_2}^\ast \\
-   \writeaux(\act)  & = & \epsilon \qquad \otherwise \\
-   &&\\
-   \addraux(\act)       & = & \addraux(\regionaux(\act) \\
-   \addraux(\loc)       & = & \addraux(\regionaux(\reg) \\
-   \addraux(\addr.\fld) & = & \addr \\
-   &&\\
-   \regionaux(\act)     & = & \regionaux(\locaux(\act) \\
-   \regionaux(\reg)     & = & \reg \\
-   \regionaux(\reg[i])  & = & \reg \\
-   &&\\
-   \offsetaux(\act)    & = & \offsetact(\locaux(\act)) \\
-   \offsetaux(\reg)    & = & 0 \\
-   \offsetaux(\reg[i]) & = & i \\
-   \end{array}
-
-.. math::
-   \begin{array}{rcl}
-   \timeevt(\act^\ast~\AT~\time)     & = & \time \\
-   \\
-   \ordact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
-   \ordact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
-   \ordact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \SEQCST \\
-   \\
-   \overlapact(\act_1, \act_2) \ldots  & = & \rangeact(\act_1) \cup \rangeact(\act_2) \neq \epsilon  \\
-   \sameact \ldots & = & \rangeact(\act_1) = \rangeact(\act_2) \\
-   \\
-   \readingact(\act)     & = & \readact(\act) \neq \epsilon \\
-   \writingact(\act)     & = & \writeact(\act) \neq \epsilon \\
-   \\
-   \readact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
-   \readact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
-   \readact(\act)  & = & \epsilon \qquad \otherwise \\
-   &&\\
-   \writeact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \epsilon \\
-   \writeact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast) & = & {\byte_2}^\ast \\
-   \writeact(\act)  & = & \epsilon \qquad \otherwise \\
-   &&\\
-   \offsetact(\act)   & = & \u32  \qquad \iff \locaux(\act) = \reg[\u32] \ \\
-   \\
-   \syncact \ldots     & = & \ldots \\
-   \rangeact \ldots    & = & \ldots \\
-   \\
-   \tearfreeact \ldots & = & \ldots \\
-   \\
-   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time) & = & \X{func}(\act) \qquad \iff \locaux(\act) = \reg[\u32]  \\
-   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time, \act_3^\ast~\act'~\act_4^\ast~\AT~\time') & = & \X{func}(\act.\act') \qquad \iff \locaux(\act) = \locaux(\act') = \reg[\u32]  \\
-   \end{array}
-
-.. todo:: Add more auxiliary functions
 
 .. todo:: add prose intuition
 
