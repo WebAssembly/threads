@@ -1113,6 +1113,18 @@
 .. |storeval| mathdef:: \xref{exec/runtime}{syntax-storeval}{\X{storeval}}
 .. |notears| mathdef:: \xref{exec/runtime}{syntax-ord}{\X{notears}}
 
+.. Events, auxiliary functions
+
+.. |ordaux| mathdef:: \xref{exec/relaxed}{exec-ordaux}{\F{ord}}
+.. |locaux| mathdef:: \xref{exec/relaxed}{exec-locaux}{\F{loc}}
+.. |sizeaux| mathdef:: \xref{exec/relaxed}{exec-sizeaux}{\F{size}}
+.. |readaux| mathdef:: \xref{exec/relaxed}{exec-readaux}{\F{read}}
+.. |writeaux| mathdef:: \xref{exec/relaxed}{exec-writeaux}{\F{write}}
+.. |addraux| mathdef:: \xref{exec/relaxed}{exec-addraux}{\F{addr}}
+.. |regionaux| mathdef:: \xref{exec/relaxed}{exec-regionaux}{\F{region}}
+.. |offsetaux| mathdef:: \xref{exec/relaxed}{exec-offsetaux}{\F{offset}}
+
+
 .. Events, meta functions
 .. |tearing| mathdef:: \xref{exec/runtime}{syntax-ord}{\F{tearing}}
 
@@ -1149,6 +1161,10 @@
 
 .. |prechb| mathdef:: \xref{exec/runtime}{relaxed-prechb}{\mathrel{\prec_{\K{hb}}}}
 .. |prectot| mathdef:: \xref{exec/runtime}{relaxed-prectot}{\mathrel{\prec_{\K{tot}}}}
+
+.. Relaxed Memory Model, non-terminals
+
+.. |trace| mathdef:: \xref{exec/relaxed}{relaxed-trace}{\X{tr}}
 
 
 .. Stack, terminals

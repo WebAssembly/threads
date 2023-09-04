@@ -55,9 +55,9 @@ A trace is a coinductive set of :ref:`events <syntax-evt>`. A trace is considere
 
 .. math::
    \frac{
-     \config \stepto^{\evt} \config' \qquad \vdash \config' : \X{tr} \qquad \timeevt(\evt) \notin \timeevt^\ast(\X{tr})
+     \config \stepto^{\evt} \config' \qquad \vdash \config' : \trace \qquad \timeevt(\evt) \notin \timeevt^\ast(\trace)
    }{
-     \vdash \config : \evt~\X{tr}
+     \vdash \config : \evt~\trace
    }
 
 When a WebAssembly program is executed, all behaviours observed during that execution must correspond to a single :ref:`consistent <relaxed-consistent>` pre-execution of that execution's starting :ref:`configuration <syntax-config>`.
@@ -70,27 +70,64 @@ Consistency
 
 .. todo:: define auxiliary functions (either here or in Runtime Structure)
 
+.. math::
+   \begin{array}{lcl}
+   \ordaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
+   \ordaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
+   \ordaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \SEQCST \\
+   &&\\
+   \locaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
+   \locaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
+   \locaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \loc \\
+   &&\\
+   \sizeaux(\ARD_{\ord}~\loc~\byte^n~\NOTEARS^?)       & = & n \\
+   \sizeaux(\AWR_{\ord}~\loc~\byte^n~\NOTEARS^?)       & = & n \\
+   \sizeaux(\ARMW~\loc~{\byte_1}^n~{\byte_2}^n)        & = & n \\
+   &&\\
+   \readaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
+   \readaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \epsilon \\
+   \readaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
+   &&\\
+   \writeaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \epsilon \\
+   \writeaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \byte^\ast \\
+   \writeaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast) & = & {\byte_2}^\ast \\
+   &&\\
+   \addraux(\act)       & = & \addraux(\regionaux(\act) \\
+   \addraux(\loc)       & = & \addraux(\regionaux(\reg) \\
+   \addraux(\addr.\fld) & = & \addr \\
+   &&\\
+   \regionaux(\act)     & = & \regionaux(\locaux(\act) \\
+   \regionaux(\reg)     & = & \reg \\
+   \regionaux(\reg[i])  & = & \reg \\
+   &&\\
+   \offsetaux(\act)    & = & \offsetact(\locaux(\act)) \\
+   \offsetaux(\reg)    & = & 0 \\
+   \offsetaux(\reg[i]) & = & i \\
+   \end{array}
+
+.. todo:: Add more auxiliary functions
+
 .. todo:: add prose intuition
 
 .. math::
    \frac{
-     \forall \reg, \, \vdash_{\reg} \X{tr} \consistentwith
+     \forall \reg, \, \vdash_{\reg} \trace \consistentwith
    }{
-     \vdash \X{tr} \consistent
+     \vdash \trace \consistent
    }
 
 .. math::
    \frac{
      \begin{array}[b]{@{}l@{}}
-       \forall \evt_R \in \readingact_{\reg}(\X{tr}), \exists \evt_W^\ast,
-         \X{tr} \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast \\
-       \forall \evt_I, \evt \in \X{tr}, \,
-         \ordact_{\reg}(\evt_I) = \INIT \wedge
+       \forall \evt_R \in \readingact_{\reg}(\trace), \exists \evt_W^\ast,
+         \trace \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast \\
+       \forall \evt_I, \evt \in \trace, \,
+         \F{ord}_r(\evt_I) = \INIT \wedge
          \evt_I \neq \evt \wedge
          \overlapact(\evt_I, \evt) \Rightarrow \evt_I \prechb \evt
      \end{array}
    }{
-     \vdash_{\reg} \X{tr} \consistentwith
+     \vdash_{\reg} \trace \consistentwith
    }
 
 .. math::
@@ -98,29 +135,29 @@ Consistency
      \begin{array}[b]{@{}c@{}}
        \left|\evt_W^\ast\right| = |\readact_{\reg}(\evt_R)| \\
        \forall i < |\evt_W^\ast|,
-         \X{tr} \vdash_{\reg}^i \evt_R \readsfrom \left(\evt_W^\ast[i]\right)
+         \trace \vdash_{\reg}^i \evt_R \readsfrom \left(\evt_W^\ast[i]\right)
        \\
        \vdash_{\reg} \evt_R \notear \evt_W^\ast
      \end{array}
    }{
-     \X{tr} \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast
+     \trace \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast
    }
 
 .. math::
    \frac{
      \begin{array}[b]{@{}l@{}}
        \evt_R \neq \evt_W \\
-       \evt_W \in \writingact_{\reg}(\X{tr})
+       \evt_W \in \writingact_{\reg}(\trace)
      \end{array}
      \qquad
      \begin{array}[b]{@{}r@{}}
-       \X{tr} \vdash_{\reg}^{i,k} \evt_R \valueconsistent \evt_W \\
-       \X{tr} \vdash_{\reg}^k \evt_R \hbconsistent \evt_W
+       \trace \vdash_{\reg}^{i,k} \evt_R \valueconsistent \evt_W \\
+       \trace \vdash_{\reg}^k \evt_R \hbconsistent \evt_W
      \end{array}
      \qquad
-     \X{tr} \vdash_{\reg} \evt_R \sclastvisible \evt^\ast_W
+     \trace \vdash_{\reg} \evt_R \sclastvisible \evt^\ast_W
    }{
-     \X{tr} \vdash_{\reg}^i \evt_R \readsfrom \evt_W
+     \trace \vdash_{\reg}^i \evt_R \readsfrom \evt_W
    }
 
 .. math::
@@ -130,7 +167,7 @@ Consistency
        k = \offsetact_{\reg}(\evt_R) + i &=& \offsetact_{\reg}(\evt_W) + j
      \end{array}
   }{
-     \X{tr} \vdash_{\reg}^{i,k} \evt_R \valueconsistent \evt_W
+     \trace \vdash_{\reg}^{i,k} \evt_R \valueconsistent \evt_W
   }
 
 .. math::
@@ -141,23 +178,23 @@ Consistency
      \end{array}
     \qquad
     \begin{array}[b]{@{}l@{}}
-      \forall \evt'_W \in \writingact_{\reg}(\X{tr}),\\
+      \forall \evt'_W \in \writingact_{\reg}(\trace),\\
       \quad \evt_W \prechb \evt'_W \prechb \evt_R \Rightarrow k \notin \rangeact_{\reg}(\evt'_W)
     \end{array}
    }{
-    \X{tr} \vdash_{\reg}^k \evt_R \hbconsistent \evt_W
+    \trace \vdash_{\reg}^k \evt_R \hbconsistent \evt_W
    }
 
 .. math::
    \frac{
      \begin{array}[b]{@{}l@{\qquad}l@{}}
-       \forall \evt'_W \in \writingact_{\reg}(\X{tr}), \evt_W \prechb \evt_R \Rightarrow \\
+       \forall \evt'_W \in \writingact_{\reg}(\trace), \evt_W \prechb \evt_R \Rightarrow \\
        \quad \evt_W \prectot \evt'_W \prectot \evt_R \wedge \syncact_{\reg}(\evt_W, \evt_R) \Rightarrow \neg \syncact_{\reg}(\evt'_W, \evt_R) \\
        \quad \evt_W \prechb \evt'_W \prectot \evt_R  \Rightarrow \neg\syncact_{\reg}(\evt'_W, \evt_R) \\
        \quad \evt_W \prectot \evt'_W \prechb \evt_R \Rightarrow \neg\syncact_{\reg}(\evt_W, \evt'_W)
      \end{array}
    }{
-     \X{tr} \vdash_{\reg} \evt_R \sclastvisible \evt_W
+     \trace \vdash_{\reg} \evt_R \sclastvisible \evt_W
    }
 
 .. math::
