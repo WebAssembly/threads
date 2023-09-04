@@ -100,7 +100,7 @@ Consistency
 
 .. math::
    \frac{
-     \begin{array}[b]{@{}l@{}}
+     \begin{array}[b]{@{}c@{}}
        \vdash_{\reg} \trace \suspensionsconsistentwith \\
        \forall \evt_R \in \readingact_{\reg}(\trace), \exists \evt_W^\ast,
          \trace \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast \\
