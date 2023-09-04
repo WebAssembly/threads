@@ -19,29 +19,7 @@ The execution of a WebAssembly program gives rise to a :ref:`trace <relaxed-trac
 Preliminary Definitions
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. math::
-   \begin{array}{lcl}
-   \timeevt \ldots     & = & \ldots \\
-   \\
-   \readingact \ldots  & = & \ldots \\
-   \ordact \ldots      & = & \ldots \\
-   \overlapact \ldots  & = & \ldots \\
-   \\
-   \readact \ldots     & = & \ldots \\
-   \\
-   \writingact \ldots  & = & \ldots \\
-   \\
-   \writeact \ldots    & = & \ldots \\
-   \offsetact \ldots   & = & \ldots \\
-   \\
-   \syncact \ldots     & = & \ldots \\
-   \rangeact \ldots    & = & \ldots \\
-   \\
-   \tearfreeact \ldots & = & \ldots \\
-   \sameact \ldots & = & \ldots \\
-   \\
-   \X{func}_{\reg}(\evt) \ldots & = & \X{func}(\act) \ldots \\
-   \end{array}
+Bla bla
 
 
 .. _relaxed-trace:
@@ -85,12 +63,12 @@ Consistency
    \sizeaux(\ARMW~\loc~{\byte_1}^n~{\byte_2}^n)        & = & n \\
    &&\\
    \readaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
-   \readaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \epsilon \\
    \readaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
+   \readaux(\act)  & = & \epsilon \qquad \otherwise \\
    &&\\
    \writeaux(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \epsilon \\
-   \writeaux(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \byte^\ast \\
    \writeaux(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast) & = & {\byte_2}^\ast \\
+   \writeaux(\act)  & = & \epsilon \qquad \otherwise \\
    &&\\
    \addraux(\act)       & = & \addraux(\regionaux(\act) \\
    \addraux(\loc)       & = & \addraux(\regionaux(\reg) \\
@@ -103,6 +81,39 @@ Consistency
    \offsetaux(\act)    & = & \offsetact(\locaux(\act)) \\
    \offsetaux(\reg)    & = & 0 \\
    \offsetaux(\reg[i]) & = & i \\
+   \end{array}
+
+.. math::
+   \begin{array}{rcl}
+   \timeevt(\act^\ast~\AT~\time)     & = & \time \\
+   \\
+   \ordact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
+   \ordact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
+   \ordact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \SEQCST \\
+   \\
+   \overlapact(\act_1, \act_2) \ldots  & = & \rangeact(\act_1) \cup \rangeact(\act_2) \neq \epsilon  \\
+   \sameact \ldots & = & \rangeact(\act_1) = \rangeact(\act_2) \\
+   \\
+   \readingact(\act)     & = & \readact(\act) \neq \epsilon \\
+   \writingact(\act)     & = & \writeact(\act) \neq \epsilon \\
+   \\
+   \readact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
+   \readact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
+   \readact(\act)  & = & \epsilon \qquad \otherwise \\
+   &&\\
+   \writeact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \epsilon \\
+   \writeact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast) & = & {\byte_2}^\ast \\
+   \writeact(\act)  & = & \epsilon \qquad \otherwise \\
+   &&\\
+   \offsetact(\act)   & = & \u32  \qquad \iff \locaux(\act) = \reg[\u32] \ \\
+   \\
+   \syncact \ldots     & = & \ldots \\
+   \rangeact \ldots    & = & \ldots \\
+   \\
+   \tearfreeact \ldots & = & \ldots \\
+   \\
+   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time) & = & \X{func}(\act) \qquad \iff \locaux(\act) = \reg[\u32]  \\
+   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time, \act_3^\ast~\act'~\act_4^\ast~\AT~\time') & = & \X{func}(\act.\act') \qquad \iff \locaux(\act) = \locaux(\act') = \reg[\u32]  \\
    \end{array}
 
 .. todo:: Add more auxiliary functions
@@ -122,7 +133,7 @@ Consistency
        \forall \evt_R \in \readingact_{\reg}(\trace), \exists \evt_W^\ast,
          \trace \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast \\
        \forall \evt_I, \evt \in \trace, \,
-         \F{ord}_r(\evt_I) = \INIT \wedge
+         \ordact_{\reg}(\evt_I) = \INIT \wedge
          \evt_I \neq \evt \wedge
          \overlapact(\evt_I, \evt) \Rightarrow \evt_I \prechb \evt
      \end{array}
