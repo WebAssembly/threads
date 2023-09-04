@@ -191,7 +191,7 @@ Consistency
    \frac{
      TODO
    }{
-     \vdash_{\reg} \trace \suspensionsconsistentwith \\
+     \vdash_{\reg} \trace \suspensionsconsistentwith
    }
 
 .. todo:: pull out the trace events which denote wait/wake actions as a timestamped list, check queue behaviour
