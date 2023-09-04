@@ -58,6 +58,8 @@ Preliminary Definitions
    \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time, \act_3^\ast~\act'~\act_4^\ast~\AT~\time') & = & \X{func}(\act.\act') \qquad \iff \locact(\act) = \locact(\act') = \reg[\u32]  \\
    \end{array}
 
+.. todo:: add loc for wait/woken/timeout/notify
+
 .. todo:: Double check notears
 
 .. todo:: Tidy up range
