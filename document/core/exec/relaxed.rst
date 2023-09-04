@@ -101,6 +101,7 @@ Consistency
 .. math::
    \frac{
      \begin{array}[b]{@{}l@{}}
+       \vdash_{\reg} \trace \suspensionsconsistentwith \\
        \forall \evt_R \in \readingact_{\reg}(\trace), \exists \evt_W^\ast,
          \trace \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast \\
        \forall \evt_I, \evt \in \trace, \,
@@ -185,6 +186,15 @@ Consistency
    }{
      \vdash_{\reg} \evt_R \notear \evt_W^\ast
    }
+
+.. math::
+   \frac{
+     TODO
+   }{
+     \vdash_{\reg} \trace \suspensionsconsistentwith \\
+   }
+
+.. todo:: pull out the trace events which denote wait/wake actions as a timestamped list, check queue behaviour
 
 
 .. [#cite-oopsla2019]

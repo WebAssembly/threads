@@ -1143,6 +1143,7 @@
 
 .. |consistent| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{consistent}}}
 .. |consistentwith| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{consistent-with}}}
+.. |suspensionsconsistentwith| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{suspensions-consistent-with}}}
 .. |readseachfrom| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{reads-each-from}}}
 .. |readsfrom| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{reads-from}}}
 .. |notear| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{no-tear}}}
