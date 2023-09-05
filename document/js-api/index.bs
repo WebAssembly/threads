@@ -401,8 +401,6 @@ The verification of WebAssembly type requirements is deferred to the
     1. Return |exportsObject|.
 </div>
 
-Note: (TODO) Check whether only SharedArrayBuffers need integrity level "frozen" (see the Threads Proposal Overview).
-
 <div algorithm>
   To <dfn>initialize an instance object</dfn> |instanceObject| from a WebAssembly module |module| and instance |instance|, perform the following steps:
 
@@ -633,6 +631,8 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
         1. Set |buffer|.\[[ArrayBufferDetachKey]] to "WebAssembly.Memory".
     1. Return |buffer|.
 </div>
+
+Note: (TODO) Check whether only SharedArrayBuffers need integrity level "frozen" (see the Threads Proposal Overview).
 
 To create a resizable memory buffer we perform the same steps as above, but also setting the buffer's maximum size.
 
