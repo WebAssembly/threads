@@ -401,6 +401,8 @@ The verification of WebAssembly type requirements is deferred to the
     1. Return |exportsObject|.
 </div>
 
+Note: (TODO) Check whether only SharedArrayBuffers need integrity level "frozen" (see the Threads Proposal Overview).
+
 <div algorithm>
   To <dfn>initialize an instance object</dfn> |instanceObject| from a WebAssembly module |module| and instance |instance|, perform the following steps:
 
@@ -808,15 +810,17 @@ Immediately after a WebAssembly [=memory.grow=] instruction executes, perform th
                 1. Throw a {{RangeError}} exception.
             1. Let |delta| be |lengthDelta| &div; 65536.
             1. [=grow the memory buffer|Grow the memory buffer=] associated with |memaddr| by |delta|.
-    1. If |newLength| &lt; |buffer|.\[[ArrayBufferByteLength] or |newLength| &gt; |buffer|.\[[ArrayBufferMaxByteLength]], throw a {{RangeError}} exception.
-    1. Let |isLittleEndian| be the value of the [[LittleEndian]] field of the surrounding agent's Agent Record.
-    1. Let |event| be a {{ReadModifyWriteSharedMemory}} event whose [[Order]] is SeqCst, [[Payload]] is {{NumericToRawBytes}}(BigUint64, |newLength|, |isLittleEndian|), [[Block]] is |buffer|.\[[ArrayBufferByteLengthData]], \[[ByteIndex]] is 0, and \[[ElementSize]] is 8.
-    1. Add |event| to the surrounding agent's candidate execution.
+    1. If |newLength| &lt; |buffer|.\[[ArrayBufferByteLength]] or |newLength| &gt; |buffer|.\[[ArrayBufferMaxByteLength]], throw a {{RangeError}} exception.
+    1. Let |agentRecord| be the surrounding agent's [=Agent Record=].
+    1. Let |isLittleEndian| be |agentRecord|.\[[LittleEndian]] .
+    1. Let |event| be an implementation defined [=ReadModifyWriteSharedMemory=] event, whose \[[Order]] is "SeqCst", \[[Payload]] is  [§NumericToRawBytes$](Bigint, |newLength|, |isLittleEndian|), \[[Block]] is |buffer|.\[[ArrayBufferByteLengthData]], \[[ByteIndex]] is 0, and \[[ElementSize]] is 8.
+    1. Let |eventsRecord| be the [=Agent Events Record|EventsRecord=] in |agentRecord|.\[[CandidateExecution]].\[[EventsRecords]] that corresponds to the surrounding agent's signifier |agentRecord|.\[[Signifier]].
+    1. Append |event| to |eventsRecord|.\[[EventsList]].
     1. Return handled.
 </div>
 
-.. todo::
-   Fix the names and links in the last three steps above.
+Note: (TODO) Check the error case of memory.grow on the Wasm side.
+
 <div algorithm>
     The getter of the <dfn attribute for="Memory">buffer</dfn> attribute of {{Memory}} perfoms the following steps:
 
