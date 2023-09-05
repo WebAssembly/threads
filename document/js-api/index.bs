@@ -620,13 +620,19 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
 
     1. Let |block| be a [=Data Block=] which is [=identified with=] the underlying memory of |memaddr|.
     1. If |block| is a [=Shared Data Block=],
-        1. Let |buffer| be a new {{SharedArrayBuffer}} whose \[[ArrayBufferData]] is |block| and \[[ArrayBufferByteLength]] is set to the length of |block|.
+        1. Let |buffer| be a new {{SharedArrayBuffer}} with the internal slots \[[ArrayBufferData]] and \[[ArrayBufferByteLength]].
+        1. Set |buffer|.\[[ArrayBufferData]] to |block|.
+        1. Set |buffer|.\[[ArrayBufferByteLength]] to the length of |block|.
         1. Perform ! [$SetIntegrityLevel$](|buffer|, `"frozen"`).
     1. Otherwise,
-        1. Let |buffer| be a new {{ArrayBuffer}} whose \[[ArrayBufferData]] is |block| and \[[ArrayBufferByteLength]] is set to the length of |block|.
+        1. Let |buffer| be a new {{ArrayBuffer}} with the internal slots \[[ArrayBufferData]], \[[ArrayBufferByteLength]], and \[[ArrayBufferDetachKey]].
+        1. Set |buffer|.\[[ArrayBufferData]] to |block|.
+        1. Set |buffer|.\[[ArrayBufferByteLength]] to the length of |block|.
         1. Set |buffer|.\[[ArrayBufferDetachKey]] to "WebAssembly.Memory".
     1. Return |buffer|.
 </div>
+
+To create a resizable memory buffer we perform the same steps as above, but also setting the buffer's maximum size.
 
 <div algorithm>
     To <dfn>create a resizable memory buffer</dfn> from a [=memory address=] |memaddr| and a |maxsize|, perform the following steps:
@@ -636,13 +642,16 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
     1. If |maxsize| &gt; (65536 &times; 65536),
         1. Throw a {{RangeError}} exception.
     1. If |block| is a [=Shared Data Block=],
-        1. Let |buffer| be a new {{SharedArrayBuffer}} whose \[[ArrayBufferData]] is |block|, \[[ArrayBufferByteLength]] is set to |length|, and \[[ArrayBufferMaxByteLength]] is set to |maxsize|.
+        1. Let |buffer| be a new {{SharedArrayBuffer}} with the internal slots \[[ArrayBufferData]], \[[ArrayBufferByteLength]], and \[[ArrayBufferMaxByteLength]].
+        1. Set |buffer|.\[[ArrayBufferData]] to |block|.
+        1. Set |buffer|.\[[ArrayBufferByteLength]] to the length of |block|.
+        1. Set |buffer|.\[[ArrayBufferMaxByteLength]] to |maxsize|.
         1. Perform ! [$SetIntegrityLevel$](|buffer|, `"frozen"`).
     1. Otherwise,
         1. Let |buffer| be a new {{ArrayBuffer}} with the internal slots \[[ArrayBufferData]], \[[ArrayBufferByteLength]], \[[ArrayBufferMaxByteLength]], and \[[ArrayBufferDetachKey]].
         1. Set |buffer|.\[[ArrayBufferData]] to |block|.
         1. Set |buffer|.\[[ArrayBufferByteLength]] to |length|.
-        1. Set |buffer|.\[[ArrayBufferMaxByteLength]] is |maxsize|.
+        1. Set |buffer|.\[[ArrayBufferMaxByteLength]] to |maxsize|.
         1. Set |buffer|.\[[ArrayBufferDetachKey]] to "WebAssembly.Memory".
     1. Return |buffer|.
 </div>
@@ -731,13 +740,21 @@ Immediately after a WebAssembly [=memory.grow=] instruction executes, perform th
 <div algorithm=dom-Memory-toFixedLengthBuffer>
     The <dfn method for="Memory">toFixedLengthBuffer()</dfn> method, when invoked, performs the following steps:
     1. Let |buffer| be **this**.\[[BufferObject]].
-    1. If [=IsFixedLengthArrayBuffer=](|buffer|) is true, return |buffer|.
     1. Let |memaddr| be **this**.\[[Memory]].
-    1. Let |fixedBuffer| be the result of [=create a fixed length memory buffer|creating a fixed length memory buffer=] from |memaddr|.
     1. If |buffer| is an {{ArrayBuffer}},
-        1. Perform [=!=] [$DetachArrayBuffer$](|buffer|, "WebAssembly.Memory").
-    1. Set **this**.\[[BufferObject]] to |fixedBuffer|.
-    1. Return |fixedBuffer|.
+        1. If [=IsFixedLengthArrayBuffer=](|buffer|) is true, return |buffer|.
+        1. Otherwise,
+            1. Let |fixedBuffer| be the result of [=create a fixed length memory buffer|creating a fixed length memory buffer=] from |memaddr|.
+            1. Perform [=!=] [$DetachArrayBuffer$](|buffer|, "WebAssembly.Memory").
+            1. Set **this**.\[[BufferObject]] to |fixedBuffer|.
+            1. Return |fixedBuffer|.
+    1. Otherwise,
+        1. Let |map| be the [=surrounding agent=]'s associated [=Memory object cache=].
+        1. Assert: |map|[|memaddr|] [=map/exists=].
+        1. Let |newMemory| be |map|[|memaddr|].
+        1. Let |newBufferObject| be |newMemory|.\[[BufferObject]].
+        1. Set **this**.\[[BufferObject]] to |newBufferObject|.
+        1. Return |newBufferObject|.
 </div>
 
 <div algorithm=dom-Memory-toResizableBuffer>
@@ -781,9 +798,25 @@ Immediately after a WebAssembly [=memory.grow=] instruction executes, perform th
 <div algorithm>
     The <dfn>abstract operation [=HostGrowSharedArrayBuffer=]</dfn> takes arguments a {{SharedArrayBuffer}} |buffer| and |newLength|. It performs the following steps when called.
 
-    1. TODO: add steps.
+    1. Let |map| be the [=surrounding agent=]'s associated [=Memory object cache=].
+    1. Assert: |buffer| is the \[[BufferObject]] of exactly one value in |map|.
+    1. [=map/iterate|For each=] |memaddr| &rarr; |mem| in |map|,
+        1. If [=SameValue=](mem.\[[BufferObject]], |buffer|) is true,
+            1. Assert: |buffer|.\[[ArrayBufferByteLength]] modulo 65536 is 0.
+            1. Let |lengthDelta| be |newLength| - |buffer|.\[[ArrayBufferByteLength]].
+            1. If |lengthDelta| &lt; 0 or |lengthDelta| modulo 65536 is not 0,
+                1. Throw a {{RangeError}} exception.
+            1. Let |delta| be |lengthDelta| &div; 65536.
+            1. [=grow the memory buffer|Grow the memory buffer=] associated with |memaddr| by |delta|.
+    1. If |newLength| &lt; |buffer|.\[[ArrayBufferByteLength] or |newLength| &gt; |buffer|.\[[ArrayBufferMaxByteLength]], throw a {{RangeError}} exception.
+    1. Let |isLittleEndian| be the value of the [[LittleEndian]] field of the surrounding agent's Agent Record.
+    1. Let |event| be a {{ReadModifyWriteSharedMemory}} event whose [[Order]] is SeqCst, [[Payload]] is {{NumericToRawBytes}}(BigUint64, |newLength|, |isLittleEndian|), [[Block]] is |buffer|.\[[ArrayBufferByteLengthData]], \[[ByteIndex]] is 0, and \[[ElementSize]] is 8.
+    1. Add |event| to the surrounding agent's candidate execution.
+    1. Return handled.
 </div>
 
+.. todo::
+   Fix the names and links in the last three steps above.
 <div algorithm>
     The getter of the <dfn attribute for="Memory">buffer</dfn> attribute of {{Memory}} perfoms the following steps:
 
