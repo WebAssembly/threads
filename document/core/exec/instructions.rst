@@ -3620,7 +3620,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & n < 0) \\
+     (\iff & n \geq 0) \\
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
