@@ -676,12 +676,12 @@ Events
 The interaction of a computation with the :ref:`store <syntax-store>` is described through *events*.
 An event is a (possibly empty) set of *actions*, such as reads and writes,
 that are atomically performed by the execution of an individual :ref:`instruction <syntax-instr>`.
-Each event is annotated with a :ref:`time stamp <syntax-time>` that uniquely identifies it.
+Each event is annotated with two :ref:`time stamps <syntax-time>`: the first records the time stamp of the event's immediate predecessor while the second uniquely identifies the event.
 
 .. math::
    \begin{array}{llcl}
    \production{(event)} & \evt &::=&
-     \act^\ast~\AT~\time \\
+     \act^\ast~\AT~\time~\time \\
    \production{(action)} & \act &::=&
      \ARD_{\ord}~\loc~\storeval~\NOTEARS^? \\&&|&
      \AWR_{\ord}~\loc~\storeval~\NOTEARS^? \\&&|&
@@ -756,8 +756,8 @@ Relations between time stamps are lifted to relations between events.
 
 .. math::
    \begin{array}{lclclcl}
-   \act_1^\ast~\AT~\time_1 & \prectot & \act_2^\ast~\AT~\time_2  &=& \time_1 & \prectot & \time_2 \\
-   \act_1^\ast~\AT~\time_1 & \prechb & \act_2^\ast~\AT~\time_2  &=& \time_1 & \prechb & \time_2 \\
+   \act_1^\ast~\AT~\time_p~\time_1 & \prectot & \act_2^\ast~\AT~\time'_p~\time_2  &=& \time_1 & \prectot & \time_2 \\
+   \act_1^\ast~\AT~\time_p~\time_1 & \prechb & \act_2^\ast~\AT~\time'_p~\time_2  &=& \time_1 & \prechb & \time_2 \\
    \end{array}
 
 .. todo:: define notational shorthands over actions and events (or better put that in relaxed.rst?)
@@ -824,7 +824,7 @@ The following structural rule for global reduction delegates to local reduction 
 .. math::
    \begin{array}{@{}c@{}}
    S; P_1^\ast~(F; \instr^\ast \AT h)~P_2^\ast
-     \qquad \stepto^{\act^\ast~\AT~h'} \qquad
+     \qquad \stepto^{\act^\ast~\AT~h~h'} \qquad
      S'; P_1^\ast~(F'; {\instr'}^\ast \AT h')~P_2^\ast \\
      \qquad
        \begin{array}[t]{@{}r@{~}l@{}}
@@ -839,7 +839,7 @@ The following rule for global reduction describes the creation of a new thread b
 .. math::
    \begin{array}{@{}c@{}}
    S; P_1^\ast~(F; \instr^\ast \AT h)~P_2^\ast
-     \qquad \stepto^{\epsilon~\AT~h'} \qquad
+     \qquad \stepto^{\epsilon~\AT~h~h'} \qquad
      S'; P_1^\ast~(F'; {\instr'}^\ast \AT h')~P_2^\ast~(\epsilon; (\HOSTE~[\epsilon]) \AT h'') \\
      \qquad
        \begin{array}[t]{@{}r@{~}l@{}}
