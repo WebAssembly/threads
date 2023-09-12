@@ -21,7 +21,7 @@ Preliminary Definitions
 
 .. math::
    \begin{array}{rcl}
-   \timeevt(\act^\ast~\AT~\time)     & = & \time \\
+   \timeevt(\act^\ast~\AT~\time_p~\time)     & = & \time \\
    \\
    \locact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
    \locact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
@@ -54,8 +54,8 @@ Preliminary Definitions
    \tearfreeact(\AWR_{\ord}~\loc~\byte^\ast)    & = & \bot \qquad \iff \ord = \UNORD \vee \ord = \INIT \\
    \tearfreeact(\act)    & = & \top \qquad \otherwise \\
    \\
-   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time) & = & \X{func}(\act) \qquad \iff \locact(\act) = \reg[\u32]  \\
-   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time, \act_3^\ast~\act'~\act_4^\ast~\AT~\time') & = & \X{func}(\act.\act') \qquad \iff \locact(\act) = \locact(\act') = \reg[\u32]  \\
+   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time_p~\time) & = & \X{func}(\act) \qquad \iff \locact(\act) = \reg[\u32]  \\
+   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time_p~\time, \act_3^\ast~\act'~\act_4^\ast~\AT~\time'_p~\time') & = & \X{func}(\act.\act') \qquad \iff \locact(\act) = \locact(\act') = \reg[\u32]  \\
    \end{array}
 
 .. todo:: add loc for wait/woken/timeout/notify
