@@ -22,40 +22,46 @@ Preliminary Definitions
 .. math::
    \begin{array}{rcl}
    \timeevt(\act^\ast~\AT~\time_p~\time)     & = & \time \\
-   \\
+   &&\\
    \locact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
    \locact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
    \locact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \loc \\
-   \\
+   &&\\
    \ordact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
    \ordact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
    \ordact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \SEQCST \\
-   \\
-   \overlapact(\act_1, \act_2)  & = & \rangeact(\act_1) \cup \rangeact(\act_2) \neq \epsilon  \\
-   \sameact(\act_1, \act_2) & = & \rangeact(\act_1) = \rangeact(\act_2) \\
-   \\
-   \readingact(\act)     & = & \readact(\act) \neq \epsilon \\
-   \writingact(\act)     & = & \writeact(\act) \neq \epsilon \\
-   \\
+   &&\\
+   \overlapact(\act_1, \act_2)  & = & (\rangeact(\act_1) \cup \rangeact(\act_2) \neq \epsilon)  \\
+   \sameact(\act_1, \act_2) & = & (\rangeact(\act_1) = \rangeact(\act_2)) \\
+   &&\\
+   \readingact(\act)     & = & (\readact(\act) \neq \epsilon) \\
+   \writingact(\act)     & = & (\writeact(\act) \neq \epsilon) \\
+   &&\\
    \readact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
    \readact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
-   \readact(\act)  & = & \epsilon \qquad \otherwise \\
+   \readact(\act)  & = & \epsilon \qquad (\otherwise) \\
    &&\\
    \writeact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \byte^\ast \\
    \writeact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast) & = & {\byte_2}^\ast \\
-   \writeact(\act)  & = & \epsilon \qquad \otherwise \\
+   \writeact(\act)  & = & \epsilon \qquad (\otherwise) \\
    &&\\
-   \offsetact(\act)   & = & \u32  \qquad \iff \locact(\act) = \reg[\u32] \ \\
-   \\
-   \syncact(\act_1,\act_2)     & = & \sameact(\act_1,\act_2) \wedge \ordact(\act_1) = \ordact(\act_2) = \SEQCST \\
-   \rangeact(\act)    & = & [\u32 \ldots \u32 + n - 1] \qquad \iff \locact(\act) = \reg[\u32] \qquad n = \F{max}(|\readact(\act)|,|\writeact(\act)|) \\
-   \\
-   \tearfreeact(\ARD_{\ord}~\loc~\byte^\ast)    & = & \bot \qquad \iff \ord = \UNORD \vee \ord = \INIT \\
-   \tearfreeact(\AWR_{\ord}~\loc~\byte^\ast)    & = & \bot \qquad \iff \ord = \UNORD \vee \ord = \INIT \\
-   \tearfreeact(\act)    & = & \top \qquad \otherwise \\
-   \\
-   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time_p~\time) & = & \X{func}(\act) \qquad \iff \locact(\act) = \reg[\u32]  \\
-   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time_p~\time, \act_3^\ast~\act'~\act_4^\ast~\AT~\time'_p~\time') & = & \X{func}(\act.\act') \qquad \iff \locact(\act) = \locact(\act') = \reg[\u32]  \\
+   \offsetact(\act)   & = & \u32  \qquad (\iff~\locact(\act) = \reg[\u32]) \\
+   &&\\
+   \syncact(\act_1,\act_2)     & = & (\sameact(\act_1,\act_2) \wedge \\
+   && \qquad \ordact(\act_1) = \ordact(\act_2) = \SEQCST) \\
+   \rangeact(\act)    & = & [\u32 \ldots \u32 + n - 1] \\
+    &&  (\iff~\locact(\act) = \reg[\u32] \wedge \\
+    && \quad n = \F{max}(|\readact(\act)|,|\writeact(\act)|)) \\
+   &&\\
+   \tearfreeact(\ARD_{\ord}~\loc~\byte^\ast)    & = & \bot \qquad (\iff~\ord = \UNORD \vee \ord = \INIT) \\
+   \tearfreeact(\AWR_{\ord}~\loc~\byte^\ast)    & = & \bot \qquad (\iff~\ord = \UNORD \vee \ord = \INIT) \\
+   \tearfreeact(\act)    & = & \top \qquad (\otherwise) \\
+   &&\\
+   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time_p~\time) & = & \X{func}(\act) \\
+     &&  (\iff~\locact(\act) = \reg[\u32])  \\
+   \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time_p~\time,  \quad &&\\
+   \qquad \act_3^\ast~\act'~\act_4^\ast~\AT~\time'_p~\time') & = & \X{func}(\act,\act') \\
+     && (\iff~\locact(\act) = \locact(\act') = \reg[\u32])  \\
    \end{array}
 
 .. todo:: add loc for wait/woken/timeout/notify
@@ -96,24 +102,24 @@ Consistency
 
 .. math::
    \frac{
-     \forall \reg, \, \vdash_{\reg} \trace \consistentwith
+     \forall \reg,~ \vdash_{\reg} \trace~\consistentwith
    }{
-     \vdash \trace \consistent
+     \vdash \trace~\consistent
    }
 
 .. math::
    \frac{
      \begin{array}[b]{@{}c@{}}
-       \vdash_{\reg} \trace \suspensionsconsistentwith \\
+       \vdash_{\reg} \trace~\suspensionsconsistentwith \\
        \forall \evt_R \in \readingact_{\reg}(\trace), \exists \evt_W^\ast,
-         \trace \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast \\
+         \trace \vdash_{\reg} \evt_R~\readseachfrom~\evt_W^\ast \\
        \forall \evt_I, \evt \in \trace, \,
          \ordact_{\reg}(\evt_I) = \INIT \wedge
          \evt_I \neq \evt \wedge
          \overlapact(\evt_I, \evt) \Rightarrow \evt_I \prechb \evt
      \end{array}
    }{
-     \vdash_{\reg} \trace \consistentwith
+     \vdash_{\reg} \trace~\consistentwith
    }
 
 .. math::
@@ -121,29 +127,25 @@ Consistency
      \begin{array}[b]{@{}c@{}}
        \left|\evt_W^\ast\right| = |\readact_{\reg}(\evt_R)| \\
        \forall i < |\evt_W^\ast|,
-         \trace \vdash_{\reg}^i \evt_R \readsfrom \left(\evt_W^\ast[i]\right)
+         \trace \vdash_{\reg}^i \evt_R~\readsfrom~\left(\evt_W^\ast[i]\right)
        \\
-       \vdash_{\reg} \evt_R \notear \evt_W^\ast
+       \vdash_{\reg} \evt_R~\notear~\evt_W^\ast
      \end{array}
    }{
-     \trace \vdash_{\reg} \evt_R \readseachfrom \evt_W^\ast
+     \trace \vdash_{\reg} \evt_R~\readseachfrom~\evt_W^\ast
    }
 
 .. math::
    \frac{
-     \begin{array}[b]{@{}l@{}}
-       \evt_R \neq \evt_W \\
-       \evt_W \in \writingact_{\reg}(\trace)
+     \begin{array}[b]{@{}c}
+       \evt_R \neq \evt_W  \\
+       \evt_W \in \writingact_{\reg}(\trace) \\
+       \trace \vdash_{\reg}^{i,k} \evt_R~\valueconsistent~\evt_W \\
+       \trace \vdash_{\reg}^k \evt_R~\hbconsistent~\evt_W \\
+       \trace \vdash_{\reg} \evt_R~\sclastvisible~\evt^\ast_W
      \end{array}
-     \qquad
-     \begin{array}[b]{@{}r@{}}
-       \trace \vdash_{\reg}^{i,k} \evt_R \valueconsistent \evt_W \\
-       \trace \vdash_{\reg}^k \evt_R \hbconsistent \evt_W
-     \end{array}
-     \qquad
-     \trace \vdash_{\reg} \evt_R \sclastvisible \evt^\ast_W
    }{
-     \trace \vdash_{\reg}^i \evt_R \readsfrom \evt_W
+     \trace \vdash_{\reg}^i \evt_R~\readsfrom~\evt_W
    }
 
 .. math::
@@ -153,22 +155,18 @@ Consistency
        k = \offsetact_{\reg}(\evt_R) + i &=& \offsetact_{\reg}(\evt_W) + j
      \end{array}
   }{
-     \trace \vdash_{\reg}^{i,k} \evt_R \valueconsistent \evt_W
+     \trace \vdash_{\reg}^{i,k} \evt_R~\valueconsistent~\evt_W
   }
 
 .. math::
    \frac{
      \begin{array}[b]{@{}c}
        \neg (\evt_R \prechb \evt_W) \\
-       \syncact_{\reg}(\evt_W, \evt_R) \Rightarrow \evt_W \prechb \evt_R
-     \end{array}
-    \qquad
-    \begin{array}[b]{@{}l@{}}
-      \forall \evt'_W \in \writingact_{\reg}(\trace),\\
-      \quad \evt_W \prechb \evt'_W \prechb \evt_R \Rightarrow k \notin \rangeact_{\reg}(\evt'_W)
+       \syncact_{\reg}(\evt_W, \evt_R) \Rightarrow \evt_W \prechb \evt_R \\
+       \forall \evt'_W \in \writingact_{\reg}(\trace), \evt_W \prechb \evt'_W \prechb \evt_R \Rightarrow k \notin \rangeact_{\reg}(\evt'_W)
     \end{array}
    }{
-    \trace \vdash_{\reg}^k \evt_R \hbconsistent \evt_W
+    \trace \vdash_{\reg}^k \evt_R~\hbconsistent~\evt_W
    }
 
 .. math::
@@ -180,22 +178,26 @@ Consistency
        \quad \evt_W \prectot \evt'_W \prechb \evt_R \Rightarrow \neg\syncact_{\reg}(\evt_W, \evt'_W)
      \end{array}
    }{
-     \trace \vdash_{\reg} \evt_R \sclastvisible \evt_W
+     \trace \vdash_{\reg} \evt_R~\sclastvisible~\evt_W
    }
 
 .. math::
    \frac{
-     \tearfreeact_{\reg}(\evt_R) \Rightarrow |\{\evt_W \in \evt_W^\ast ~|~ \sameact_{\reg}(\evt_R, \evt_W) \wedge \tearfreeact_{\reg}(\evt_W)\}| \leq 1
+     \begin{array}[b]{l@{}}
+       \tearfreeact_{\reg}(\evt_R) \Rightarrow \\
+        \quad  |\{\evt_W \in \evt_W^\ast ~|~ \sameact_{\reg}(\evt_R, \evt_W) \wedge \tearfreeact_{\reg}(\evt_W)\}| \leq 1
+     \end{array}
    }{
-     \vdash_{\reg} \evt_R \notear \evt_W^\ast
+     \vdash_{\reg} \evt_R~\notear~\evt_W^\ast
    }
 
 .. math::
    \frac{
      TODO
    }{
-     \vdash_{\reg} \trace \suspensionsconsistentwith
+     \vdash_{\reg} \trace~\suspensionsconsistentwith
    }
+
 
 .. todo:: pull out the trace events which denote wait/wake actions as a timestamped list, check queue behaviour
 

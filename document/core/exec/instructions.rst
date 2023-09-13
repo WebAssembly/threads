@@ -3435,7 +3435,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
-     (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\ord
+     (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
      \wedge & \X{ea} + N/8 \leq n \\
      \wedge & j \leq k \\
      \wedge & \X{ea} \mod N/8 = 0) \\[1ex]
@@ -3534,10 +3534,10 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \\
    %
    ~\\
-   \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg
-     &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\SEQCST}~a.\LDATA[\X{ea}]~b^\ast)~(\AWAIT~a.\LDATA[\X{ea}]~t)}&
-     F; (\WAITX~a.\LDATA[\X{ea}]~k)
+   \begin{array}{rcl@{\qquad}l}
+   F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg &&\\
+    \qquad \stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\SEQCST}~a.\LDATA[\X{ea}]~b^\ast)~(\AWAIT~a.\LDATA[\X{ea}]~t)}&
+     F; (\WAITX~a.\LDATA[\X{ea}]~k) &
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
