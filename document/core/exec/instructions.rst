@@ -3423,7 +3423,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & \X{mem}.\MITYPE = \limits~\UNSHARED \\
-     \wedge & \X{ea} + N/8 > |\X{mem}.\MIDATA| \vee \X{ea} \mod N/8 \neq 0) \\
+     \wedge & (\X{ea} + N/8 > |\X{mem}.\MIDATA| ~\vee~ \X{ea} \mod~N/8 \neq 0)) \\
      \end{array}
    \\
    %
@@ -3449,7 +3449,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
-     \wedge & \X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0) \\
+     \wedge & (\X{ea} + N/8 > n ~\vee~ \X{ea} \mod N/8 \neq 0)) \\
      \end{array}
    \\
    %
@@ -3569,7 +3569,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
      (\iff & \X{mem}.\MITYPE = \limits~\SHARED \\
-      \wedge & (\X{ea} + N/8 > n \vee \X{ea} \mod N/8 \neq 0)) \\
+      \wedge & (\X{ea} + N/8 > n ~\vee~ \X{ea} \mod N/8 \neq 0)) \\
      \end{array}
    \\
    %
