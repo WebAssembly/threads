@@ -84,9 +84,9 @@ A trace is a coinductive set of :ref:`events <syntax-evt>`. A trace is considere
 
 .. math::
      \begin{array}{c}
-       \config \stepto^{\evt} \config' \qquad \vdash \config' : \trace \qquad \timeevt(\evt) \notin \timeevt^\ast(\trace) \\[0.2\normalbaselineskip]
-       \hline \\[-0.8\normalbaselineskip]
-       \hline \\[-0.8\normalbaselineskip]
+       \config \stepto^{\evt} \config' \qquad \vdash \config' : \trace \qquad \timeevt(\evt) \notin \timeevt^\ast(\trace) \\[0.2ex]
+       \hline \\[-0.8ex]
+       \hline \\[-0.8ex]
        \vdash \config : \evt~\trace
      \end{array}
 
