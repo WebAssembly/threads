@@ -3296,7 +3296,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \begin{array}{lcl@{\qquad}l}
    S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATCMPXCHG~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)~(\ARMW~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast~b_{\F{w}}^\ast)}&
-     F; (t.\CONST~c)
+     S; F; (t.\CONST~c)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -3312,7 +3312,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \begin{array}{lcl@{\qquad}l}
    S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATCMPXCHG~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\SEQCST}~a.\LDATA[\X{ea}]~b_{\F{r}}^\ast)}&
-     F; (t.\CONST~c)
+     S; F; (t.\CONST~c)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -3327,7 +3327,7 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    \begin{array}{lcl@{\qquad}l}
    S; F; (\I32.\CONST~i)~(t.\CONST~c_2)~(t.\CONST~c_3)~(t.\ATOMICRMW({N}\K{\_u})^?.\ATCMPXCHG~\memarg)
      &\stepto^{(\ARD~a.\LLEN~n)}&
-     F; \TRAP
+     S; F; \TRAP
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -3404,9 +3404,9 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY~\memarg
+   S; F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY~\memarg
      &\stepto&
-     F; (\I32.\CONST~0)
+     S; F; (\I32.\CONST~0)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -3416,9 +3416,9 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY~\memarg
+   S; F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY~\memarg
      &\stepto&
-     F; \TRAP
+     S; F; \TRAP
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -3429,9 +3429,9 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    %
    ~\\
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY~\memarg && \\
+   S; F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY~\memarg && \\
    \qquad\qquad \stepto^{(\ARD~a.\LLEN~n)~(\ANOTIFY~a.\LDATA[\X{ea}]~j~k)}
-     \quad F; (\I32.\CONST~j) &&
+     \quad S; F; (\I32.\CONST~j) &&
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -3442,9 +3442,9 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY~\memarg
+   S; F; (\I32.\CONST~i)~(\I32.\CONST~k)~\MEMORYATOMICNOTIFY~\memarg
      &\stepto^{(\ARD~a.\LLEN~n)}&
-     F; \TRAP
+     S; F; \TRAP
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -3523,8 +3523,8 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 .. math::
    \begin{array}{l}
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg && \\
-   \qquad\qquad \stepto \quad F; \TRAP &&
+   S; F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg && \\
+   \qquad\qquad \stepto \quad S; F; \TRAP &&
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -3534,9 +3534,9 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
    %
    ~\\
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg &&\\
+   S; F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg &&\\
    \qquad\qquad \stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\SEQCST}~a.\LDATA[\X{ea}]~b^\ast)~(\AWAIT~a.\LDATA[\X{ea}]~t)}
-     \quad F; (\WAITX~a.\LDATA[\X{ea}]~k) && \\
+     \quad S; F; (\WAITX~a.\LDATA[\X{ea}]~k) && \\
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -3548,9 +3548,9 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg &&\\
+   S; F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg &&\\
    \qquad\qquad \stepto^{(\ARD~a.\LLEN~n)~(\ARD_{\SEQCST}~a.\LDATA[\X{ea}]~b^\ast)}
-     \quad F; (\I32.\CONST~1)
+     \quad S; F; (\I32.\CONST~1)
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
@@ -3561,9 +3561,9 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
      \end{array}
    \\[1ex]
    \begin{array}{lcl@{\qquad}l}
-   F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg &&\\
+   S; F; (\I32.\CONST~i)~(\iN.\CONST~c)~(\I64.\CONST~k)~\MEMORYATOMICWAIT{N}~\memarg &&\\
    \qquad\qquad \stepto^{(\ARD~a.\LLEN~n)}
-     \quad F; \TRAP
+     \quad S; F; \TRAP
    \end{array}
    \\ \qquad
      \begin{array}[t]{@{}r@{~}l@{}}
