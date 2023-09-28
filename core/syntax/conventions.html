@@ -1,19 +1,20 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Conventions &#8212; WebAssembly 1.1</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Conventions &#8212; WebAssembly 2.0 (Draft 2023-09-28)</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"MAXBUFFER": 30720}})</script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>window.MathJax = {"tex": {"maxBuffer": 30720}}</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Values" href="values.html" />
@@ -82,18 +83,18 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="conventions">
+  <section id="conventions">
 <span id="index-0"></span><h1>Conventions<a class="headerlink" href="#conventions" title="Permalink to this headline">¶</a></h1>
 <p>WebAssembly is a programming language that has multiple concrete representations
 (its <a class="reference internal" href="../binary/index.html#binary"><span class="std std-ref">binary format</span></a> and the <a class="reference internal" href="../text/index.html#text"><span class="std std-ref">text format</span></a>).
 Both map to a common structure.
 For conciseness, this structure is described in the form of an <em>abstract syntax</em>.
 All parts of this specification are defined in terms of this abstract syntax.</p>
-<div class="section" id="grammar-notation">
+<section id="grammar-notation">
 <span id="grammar"></span><span id="index-1"></span><h2>Grammar Notation<a class="headerlink" href="#grammar-notation" title="Permalink to this headline">¶</a></h2>
 <p>The following conventions are adopted in defining grammar rules for abstract syntax.</p>
 <ul class="simple">
-<li><p>Terminal symbols (atoms) are written in sans-serif font: <span class="math notranslate nohighlight">\(\mathsf{i32}, \mathsf{end}\)</span>.</p></li>
+<li><p>Terminal symbols (atoms) are written in sans-serif font or in symbolic form: <span class="math notranslate nohighlight">\(\mathsf{i32}, \mathsf{end}, {\href{../syntax/types.html#syntax-functype}{\rightarrow}}, [, ]\)</span>.</p></li>
 <li><p>Nonterminal symbols are written in italic font: <span class="math notranslate nohighlight">\(\mathit{valtype}, \mathit{instr}\)</span>.</p></li>
 <li><p><span class="math notranslate nohighlight">\(A^n\)</span> is a sequence of <span class="math notranslate nohighlight">\(n\geq 0\)</span> iterations  of <span class="math notranslate nohighlight">\(A\)</span>.</p></li>
 <li><p><span class="math notranslate nohighlight">\(A^\ast\)</span> is a possibly empty sequence of iterations of <span class="math notranslate nohighlight">\(A\)</span>.
@@ -105,10 +106,12 @@ All parts of this specification are defined in terms of this abstract syntax.</p
 <li><p>Productions are written <span class="math notranslate nohighlight">\(\mathit{sym} ::= A_1 ~|~ \dots ~|~ A_n\)</span>.</p></li>
 <li><p>Large productions may be split into multiple definitions, indicated by ending the first one with explicit ellipses, <span class="math notranslate nohighlight">\(\mathit{sym} ::= A_1 ~|~ \dots\)</span>, and starting continuations with ellipses, <span class="math notranslate nohighlight">\(\mathit{sym} ::= \dots ~|~ A_2\)</span>.</p></li>
 <li><p>Some productions are augmented with side conditions in parentheses, “<span class="math notranslate nohighlight">\((\mathrel{\mbox{if}} \mathit{condition})\)</span>”, that provide a shorthand for a combinatorial expansion of the production into many separate cases.</p></li>
+<li><p>If the same meta variable or non-terminal symbol appears multiple times in a production, then all those occurrences must have the same instantiation.
+(This is a shorthand for a side condition requiring multiple different variables to be equal.)</p></li>
 </ul>
-</div>
-<div class="section" id="auxiliary-notation">
-<span id="notation-compose"></span><span id="notation-concat"></span><span id="notation-project"></span><span id="notation-record"></span><span id="notation-map"></span><span id="notation-replace"></span><span id="notation-slice"></span><span id="notation-index"></span><span id="notation-length"></span><span id="notation-epsilon"></span><h2>Auxiliary Notation<a class="headerlink" href="#auxiliary-notation" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="auxiliary-notation">
+<span id="notation-compose"></span><span id="notation-concat"></span><span id="notation-project"></span><span id="notation-record"></span><span id="notation-replace"></span><span id="notation-slice"></span><span id="notation-index"></span><span id="notation-length"></span><span id="notation-epsilon"></span><h2>Auxiliary Notation<a class="headerlink" href="#auxiliary-notation" title="Permalink to this headline">¶</a></h2>
 <p>When dealing with syntactic constructs the following notation is also used:</p>
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(\epsilon\)</span> denotes the empty sequence.</p></li>
@@ -129,16 +132,7 @@ then the occurrences of <span class="math notranslate nohighlight">\(x\)</span> 
 (similarly for <span class="math notranslate nohighlight">\(x^\ast\)</span>, <span class="math notranslate nohighlight">\(x^+\)</span>, <span class="math notranslate nohighlight">\(x^?\)</span>).
 This implicitly expresses a form of mapping syntactic constructions over a sequence.</p></li>
 </ul>
-<p>Sequences of the following form are interpreted as <em>maps</em> from a set of distinct “keys” <span class="math notranslate nohighlight">\(A_i\)</span> to “values” <span class="math notranslate nohighlight">\(B_i\)</span>, respectively:</p>
-<div class="math notranslate nohighlight">
-\[\mathit{m} ~::=~ (A \mapsto B)^\ast\]</div>
-<p>The following notation is adopted for manipulating such maps:</p>
-<ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(m(A)\)</span> denotes <span class="math notranslate nohighlight">\(B\)</span> if the mapping <span class="math notranslate nohighlight">\(A \mapsto B\)</span> is contained in <span class="math notranslate nohighlight">\(m\)</span>.</p></li>
-<li><p><span class="math notranslate nohighlight">\(m \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} (A) = B\)</span> denotes the same map as <span class="math notranslate nohighlight">\(m\)</span>,
-except that the mapping for <span class="math notranslate nohighlight">\(A\)</span> is replaced with <span class="math notranslate nohighlight">\(B\)</span>.</p></li>
-</ul>
-<p>Productions of the following form are interpreted as <em>records</em> that map a fixed set of distinct fields <span class="math notranslate nohighlight">\(\mathsf{field}_i\)</span> to “values” <span class="math notranslate nohighlight">\(A_i\)</span>, respectively:</p>
+<p>Productions of the following form are interpreted as <em>records</em> that map a fixed set of fields <span class="math notranslate nohighlight">\(\mathsf{field}_i\)</span> to “values” <span class="math notranslate nohighlight">\(A_i\)</span>, respectively:</p>
 <div class="math notranslate nohighlight">
 \[\mathit{r} ~::=~ \{ \mathsf{field}_1~A_1, \mathsf{field}_2~A_2, \dots \}\]</div>
 <p>The following notation is adopted for manipulating such records:</p>
@@ -154,24 +148,24 @@ except that the contents of the <span class="math notranslate nohighlight">\(\ma
 </ul>
 <p>The update notation for sequences and records generalizes recursively to nested components accessed by “paths” <span class="math notranslate nohighlight">\(\mathit{pth} ::= ([\dots] \;| \;.\mathsf{field})^+\)</span>:</p>
 <ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(s \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} [i]\,\mathit{pth} = A\)</span> is short for <span class="math notranslate nohighlight">\(s \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} [i] = (s[i] \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \mathit{pth} = A)\)</span>.</p></li>
-<li><p><span class="math notranslate nohighlight">\(r \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \mathsf{field}\,\mathit{pth} = A\)</span> is short for <span class="math notranslate nohighlight">\(r \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \mathsf{field} = (r.\mathsf{field} \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \mathit{pth} = A)\)</span>.</p></li>
+<li><p><span class="math notranslate nohighlight">\(s \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} [i]\,\mathit{pth} = A\)</span> is short for <span class="math notranslate nohighlight">\(s \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} [i] = (s[i] \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \mathit{pth} = A)\)</span>,</p></li>
+<li><p><span class="math notranslate nohighlight">\(r \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \mathsf{field}\,\mathit{pth} = A\)</span> is short for <span class="math notranslate nohighlight">\(r \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \mathsf{field} = (r.\mathsf{field} \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \mathit{pth} = A)\)</span>,</p></li>
 </ul>
 <p>where <span class="math notranslate nohighlight">\(r \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}}~.\mathsf{field} = A\)</span> is shortened to <span class="math notranslate nohighlight">\(r \href{../syntax/conventions.html#notation-replace}{\mathrel{\mbox{with}}} \mathsf{field} = A\)</span>.</p>
-</div>
-<div class="section" id="vectors">
+</section>
+<section id="vectors">
 <span id="syntax-vec"></span><span id="index-2"></span><h2>Vectors<a class="headerlink" href="#vectors" title="Permalink to this headline">¶</a></h2>
 <p><em>Vectors</em> are bounded sequences of the form <span class="math notranslate nohighlight">\(A^n\)</span> (or <span class="math notranslate nohighlight">\(A^\ast\)</span>),
 where the <span class="math notranslate nohighlight">\(A\)</span> can either be values or complex constructions.
 A vector can have at most <span class="math notranslate nohighlight">\(2^{32}-1\)</span> elements.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{lllll}
-\def\mathdef1733#1{{}}\mathdef1733{vector} &amp; \href{../syntax/conventions.html#syntax-vec}{\mathit{vec}}(A) &amp;::=&amp;
+\def\mathdef2548#1{{}}\mathdef2548{vector} &amp; \href{../syntax/conventions.html#syntax-vec}{\mathit{vec}}(A) &amp;::=&amp;
   A^n
   &amp; (\mathrel{\mbox{if}} n &lt; 2^{32})\\
 \end{array}\end{split}\]</div>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -181,7 +175,7 @@ A vector can have at most <span class="math notranslate nohighlight">\(2^{32}-1\
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2017, WebAssembly Community Group.
+      &copy;2022, WebAssembly Community Group.
       
     </div>
 

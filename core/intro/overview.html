@@ -1,19 +1,20 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Overview &#8212; WebAssembly 1.1</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Overview &#8212; WebAssembly 2.0 (Draft 2023-09-28)</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"MAXBUFFER": 30720}})</script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>window.MathJax = {"tex": {"maxBuffer": 30720}}</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Structure" href="../syntax/index.html" />
@@ -79,15 +80,15 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="overview">
+  <section id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="concepts">
+<section id="concepts">
 <span id="index-0"></span><span id="id1"></span><h2>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h2>
 <p>WebAssembly encodes a low-level, assembly-like programming language.
 This language is structured around the following concepts.</p>
-<dl class="simple" id="value">
-<dt><strong>Values</strong></dt><dd><p>WebAssembly provides only four basic <em>value types</em>.
-These are integers and <a class="reference external" href="https://ieeexplore.ieee.org/document/8766229">IEEE 754-2019</a> numbers,
+<dl id="value">
+<dt><strong>Values</strong></dt><dd><p>WebAssembly provides only four basic <em>number types</em>.
+These are integers and <a class="reference external" href="https://ieeexplore.ieee.org/document/8766229">IEEE 754</a> numbers,
 each in 32 and 64 bit width.
 32 bit integers also serve as Booleans and as memory addresses.
 The usual operations on these types are available,
@@ -95,6 +96,14 @@ including the full matrix of conversions between them.
 There is no distinction between signed and unsigned integer types.
 Instead, integers are interpreted by respective operations
 as either unsigned or signed in two’s complement representation.</p>
+<p>In addition to these basic number types, there is a single 128 bit wide
+vector type representing different types of packed data.
+The supported representations are 4 32-bit, or 2 64-bit
+<a class="reference external" href="https://ieeexplore.ieee.org/document/8766229">IEEE 754</a> numbers, or different widths of packed integer values,
+specifically 2 64-bit integers, 4 32-bit integers, 8
+16-bit integers, or 16 8-bit integers.</p>
+<p>Finally, values can consist of opaque <em>references</em> that represent pointers towards different sorts of entities.
+Unlike with other types, their size or representation is not observable.</p>
 </dd>
 </dl>
 <dl class="simple" id="instruction">
@@ -120,7 +129,7 @@ where they typically can be caught.</p>
 <dl class="simple" id="function">
 <dt><strong>Functions</strong></dt><dd><p>Code is organized into separate <em>functions</em>.
 Each function takes a sequence of values as parameters
-and returns a sequence of values as results. <a class="footnote-reference brackets" href="#arity" id="id3">2</a>
+and returns a sequence of values as results.
 Functions can call each other, including recursively,
 resulting in an implicit call stack that cannot be accessed directly.
 Functions may also declare mutable <em>local variables</em> that are usable as virtual registers.</p>
@@ -129,7 +138,7 @@ Functions may also declare mutable <em>local variables</em> that are usable as v
 <dl class="simple" id="table">
 <dt><strong>Tables</strong></dt><dd><p>A <em>table</em> is an array of opaque values of a particular <em>element type</em>.
 It allows programs to select such values indirectly through a dynamic index operand.
-Currently, the only available element type is an untyped function reference.
+Currently, the only available element type is an untyped function reference or a reference to an external host value.
 Thereby, a program can call functions indirectly through a dynamic index into a table.
 For example, this allows emulating function pointers by way of table indices.</p>
 </dd>
@@ -153,14 +162,6 @@ that takes the form of <em>segments</em> copied to given offsets.
 They can also define a <em>start function</em> that is automatically executed.</p>
 </dd>
 </dl>
-<dl class="simple" id="thread">
-<dt><strong>Threads</strong></dt><dd><p>WebAssembly code can run in multiple concurrent <em>threads</em> of computation.
-While threads are mostly isolated from one another,
-it is possible to <em>share</em> linear memory between multiple threads.
-Threads can hence communicate through memory
-and synchronize through <em>atomic</em> memory instructions.</p>
-</dd>
-</dl>
 <dl class="simple" id="embedder">
 <dt><strong>Embedder</strong></dt><dd><p>A WebAssembly implementation will typically be <em>embedded</em> into a <em>host</em> environment.
 This environment defines how loading of modules is initiated,
@@ -172,12 +173,9 @@ However, the details of any particular embedding are beyond the scope of this sp
 <dt class="label" id="stackmachine"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
 <dd><p>In practice, implementations need not maintain an actual operand stack. Instead, the stack can be viewed as a set of anonymous registers that are implicitly referenced by instructions. The <a class="reference internal" href="#validation"><span class="std std-ref">type system</span></a> ensures that the stack height, and thus any referenced register, is always known statically.</p>
 </dd>
-<dt class="label" id="arity"><span class="brackets"><a class="fn-backref" href="#id3">2</a></span></dt>
-<dd><p>In the current version of WebAssembly, there may be at most one result value.</p>
-</dd>
 </dl>
-</div>
-<div class="section" id="semantic-phases">
+</section>
+<section id="semantic-phases">
 <span id="index-1"></span><h2>Semantic Phases<a class="headerlink" href="#semantic-phases" title="Permalink to this headline">¶</a></h2>
 <p>Conceptually, the semantics of WebAssembly is divided into three phases.
 For each part of the language, the specification specifies each of them.</p>
@@ -208,8 +206,8 @@ Given the required arguments, that executes the respective function and returns 
 <p>Instantiation and invocation are operations within the embedding environment.</p>
 </dd>
 </dl>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -219,7 +217,7 @@ Given the required arguments, that executes the respective function and returns 
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2017, WebAssembly Community Group.
+      &copy;2022, WebAssembly Community Group.
       
     </div>
 
