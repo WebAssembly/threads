@@ -257,7 +257,7 @@ Each variant of :ref:`atomic memory instruction <syntax-instr-atomic-memory>` is
    \production{instruction} & \Binstr &::=& \dots && \phantom{thisshouldbeenough} \\ &&|&
      \hex{FE}~~00{:}\Bu32~~m{:}\Bmemarg &\Rightarrow& \MEMORYATOMICNOTIFY~m \\ &&|&
      \hex{FE}~~01{:}\Bu32~~m{:}\Bmemarg &\Rightarrow& \MEMORYATOMICWAIT\K{32}~m \\ &&|&
-     \hex{FE}~~02{:}\Bu32~~m{:}\Bmemarg &\Rightarrow& \MEMORYATOMICWAIT\K{64}~m \\
+     \hex{FE}~~02{:}\Bu32~~m{:}\Bmemarg &\Rightarrow& \MEMORYATOMICWAIT\K{64}~m \\ &&|&
      \hex{FE}~~03{:}\Bu32~~\hex{00} &\Rightarrow& \MEMORYATOMICFENCE \\
    \end{array}
 
