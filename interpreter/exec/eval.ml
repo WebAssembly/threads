@@ -420,11 +420,16 @@ let rec step_thread (t : thread) : thread * action =
         let addr = I64_convert.extend_i32_u i in
         (try
           check_align addr ty pack e.at;
-          let n1 =
+          let n1, expected =
             match pack with
-            | None -> Memory.load_num mem addr offset ty
-            | Some sz -> Memory.load_num_packed sz ZX mem addr offset ty
-          in (if n1 = ve then
+            | None -> Memory.load_num mem addr offset ty, ve
+            | Some sz -> Memory.load_num_packed sz ZX mem addr offset ty,
+                           (match ve with
+                            | I32 x -> I32 (I32.trunc_to x ((packed_size sz) * 8))
+                            | I64 x -> I64 (I64.trunc_to x ((packed_size sz) * 8))
+                            | _ -> Crash.error e.at "non-integer atomic comparison attempted")
+          in
+          (if n1 = expected then
                 match pack with
                 | None -> Memory.store_num mem addr offset vn
                 | Some sz -> Memory.store_num_packed sz mem addr offset vn
@@ -464,6 +469,7 @@ let rec step_thread (t : thread) : thread * action =
 
       | AtomicFence, vs ->
         vs, [], NoAction
+
       | VecLoad {offset; ty; pack; _}, Num (I32 i) :: vs' ->
         let mem = memory frame.inst (0l @@ e.at) in
         let addr = I64_convert.extend_i32_u i in

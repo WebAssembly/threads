@@ -84,6 +84,7 @@ sig
   val ge_u : t -> t -> bool
 
   val as_unsigned : t -> t
+  val trunc_to : t -> int -> t
 
   (* Saturating arithmetic, used for small ints. *)
   val saturate_s : t -> t
@@ -208,6 +209,13 @@ struct
 
   let shr_s x y =
     shift Rep.shift_right x y
+
+  (* truncate to n bit value *)
+  let trunc_to x n =
+    assert (Rep.bitwidth > n);
+    assert (n >= 8);
+    let mask = Rep.(shift_right_logical minus_one (bitwidth - n)) in
+    Rep.logand x mask
 
   (* Check if we are storing smaller ints. *)
   let needs_extend = shl one (Rep.of_int (Rep.bitwidth - 1)) <> Rep.min_int
