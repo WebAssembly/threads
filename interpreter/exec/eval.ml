@@ -988,6 +988,10 @@ let init c n (m : module_) (exts : extern list) : module_inst * config =
   let es_start = Lib.Option.get (Lib.Option.map run_start start) [] in
   let ts1, t, ts2 = Lib.List.extract n c in
   let vs', es' = t.code in
-  let code = vs', (List.map plain (es_elem @ es_data @ es_start)) @ es' in
-  let c' = ts1 @ [{t with code}] @ ts2 in
+  (* this function only supports top-level initialisation, and cannot
+     instantiate a module while code is already running in the current thread *)
+  assert (es' = []);
+  let frame = frame inst [] in
+  let code = [], (List.map plain (es_elem @ es_data @ es_start)) in
+  let c' = ts1 @ [{t with frame = frame; code = code}] @ ts2 in
   inst, c'
