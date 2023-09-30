@@ -33,6 +33,8 @@ let argspec = Arg.align
   "-j", Arg.Clear Flags.harness, " exclude harness for JS conversion";
   "-d", Arg.Set Flags.dry, " dry, do not run program";
   "-t", Arg.Set Flags.trace, " trace execution";
+  "-r", Arg.Int Random.init, " set non-determinism random seed";
+  "-rr", Arg.Unit Random.self_init, " randomize non-determinism random seed";
   "-v", Arg.Unit banner, " show version"
 ]
 
