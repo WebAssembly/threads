@@ -98,7 +98,6 @@ let rec sN n s =
   then (if b land 0x40 = 0 then x else Int64.(logor x (logxor (-1L) 0x7fL)))
   else Int64.(logor x (shift_left (sN (n - 7) s) 7))
 
-let u1 s = Int64.to_int (uN 1 s)
 let u32 s = Int64.to_int32 (uN 32 s)
 let s7 s = Int64.to_int (sN 7 s)
 let s32 s = Int64.to_int32 (sN 32 s)

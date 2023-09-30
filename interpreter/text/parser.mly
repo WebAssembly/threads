@@ -236,7 +236,7 @@ let inline_type_explicit (c : context) x ft at =
 %token TABLE ELEM MEMORY DATA DECLARE OFFSET ITEM IMPORT EXPORT
 %token SHARED UNSHARED
 %token MODULE BIN QUOTE
-%token SCRIPT REGISTER INVOKE GET
+%token SCRIPT REGISTER THREAD WAIT INVOKE GET
 %token ASSERT_MALFORMED ASSERT_INVALID ASSERT_UNLINKABLE
 %token ASSERT_RETURN ASSERT_TRAP ASSERT_EXHAUSTION
 %token<Script.nan> NAN
@@ -1015,6 +1015,12 @@ inline_module1 :  /* Sugar */
 
 /* Scripts */
 
+thread_var_opt :
+  | /* empty */ { None }
+
+thread_var :
+  | VAR { Some ($1 @@ at ()) }
+
 script_var_opt :
   | /* empty */ { None }
   | VAR { Some ($1 @@ at ()) }  /* Sugar */
@@ -1050,14 +1056,22 @@ cmd :
   | assertion { Assertion $1 @@ at () }
   | script_module { Module (fst $1, snd $1) @@ at () }
   | LPAR REGISTER name module_var_opt RPAR { Register ($3, $4) @@ at () }
+  | LPAR THREAD thread_var_opt shared_cmd_list RPAR
+    { let xs, cs = $4 in Thread ($3, xs, cs) @@ at () }
+  | LPAR WAIT thread_var_opt RPAR { Wait $3 @@ at () }
   | meta { Meta $1 @@ at () }
 
 cmd_list :
   | /* empty */ { [] }
   | cmd cmd_list { $1 :: $2 }
 
+shared_cmd_list :
+  | cmd_list { [], $1 }
+  | LPAR SHARED LPAR MODULE VAR RPAR RPAR shared_cmd_list
+    { let xs, cs = $8 in ($5 @@ ati 5) :: xs, cs }
+
 meta :
-  | LPAR SCRIPT script_var_opt cmd_list RPAR { Script ($3, $4) @@ at () }
+  | LPAR SCRIPT script_var_opt cmd_list RPAR { Script ($3, [], $4, []) @@ at () }
   | LPAR INPUT script_var_opt STRING RPAR { Input ($3, $4) @@ at () }
   | LPAR OUTPUT script_var_opt STRING RPAR { Output ($3, Some $4) @@ at () }
   | LPAR OUTPUT script_var_opt RPAR { Output ($3, None) @@ at () }

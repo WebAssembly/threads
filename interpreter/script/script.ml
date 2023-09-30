@@ -15,6 +15,7 @@ type action = action' Source.phrase
 and action' =
   | Invoke of var option * Ast.name * literal list
   | Get of var option * Ast.name
+  | Eval
 
 type nanop = nanop' Source.phrase
 and nanop' = (Lib.void, Lib.void, nan, nan) Values.op
@@ -53,13 +54,15 @@ and command' =
   | Register of Ast.name * var option
   | Action of action
   | Assertion of assertion
+  | Thread of var option * var list * command list
+  | Wait of var option
   | Meta of meta
 
 and meta = meta' Source.phrase
 and meta' =
   | Input of var option * string
   | Output of var option * string option
-  | Script of var option * script
+  | Script of var option * (* s1 : *) script * (* s2 : *) script * (* q : *) script
 
 and script = command list
 

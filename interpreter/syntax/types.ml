@@ -52,6 +52,12 @@ let shared_table_type (TableType _) = Unshared
 let shared_memory_type (MemoryType (_, shared)) = shared
 let shared_global_type (GlobalType _) = Unshared
 
+let shared_extern_type = function
+  | ExternFuncType ft -> shared_func_type ft
+  | ExternTableType tt -> shared_table_type tt
+  | ExternMemoryType mt -> shared_memory_type mt
+  | ExternGlobalType gt -> shared_global_type gt
+
 let is_num_type = function
   | NumType _ -> true
   | _ -> false

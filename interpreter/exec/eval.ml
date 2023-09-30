@@ -86,9 +86,10 @@ type thread_id = int
 type status = Running | Result of value list | Trap of exn
 
 let frame inst locals = {inst; locals}
-let thread inst vs es = {frame = frame inst []; code = vs, es; budget = 300}
-let config inst vs es =
-  {frame = frame inst []; code = vs, es; budget = !Flags.budget}
+let thread inst vs es = {frame = frame inst []; code = vs, es; budget = !Flags.budget}
+let empty_thread = thread empty_module_inst [] []
+let empty_config = []
+let spawn (c : config) = List.length c, c @ [empty_thread]
 
 let status (c : config) (n : thread_id) : status =
   let t = List.nth c n in
@@ -96,6 +97,10 @@ let status (c : config) (n : thread_id) : status =
   | vs, [] -> Result (List.rev vs)
   | [], {it = Trapping msg; at} :: _ -> Trap (Trap.Error (at, msg))
   | _ -> Running
+
+let clear (c : config) (n : thread_id) : config =
+  let ts1, t, ts2 = Lib.List.extract n c in
+  ts1 @ [{t with code = [], []}] @ ts2
   
 let plain e = Plain e.it @@ e.at
 
@@ -854,11 +859,6 @@ let eval_const (inst : module_inst) (const : const) : value =
   | [v] -> v
   | _ -> Crash.error const.at "wrong number of results on stack"
 
-let i32 (v : value) at =
-  match v with
-  | Num (I32 i) -> i
-  | _ -> Crash.error at "type error: i32 value expected"
-
 (* Modules *)
 
 let create_func (inst : module_inst) (f : func) : func_inst =
@@ -892,10 +892,9 @@ let create_elem (inst : module_inst) (seg : elem_segment) : elem_inst =
   let {etype; einit; _} = seg.it in
   Elem.alloc (List.map (fun c -> as_ref (eval_const inst c)) einit)
 
-let create_data (inst : module_inst) (seg : string segment) : data_inst =
-  let {init; _} = seg.it in
-  Data.alloc init
-
+let create_data (inst : module_inst) (seg : data_segment) : data_inst =
+  let {dinit; _} = seg.it in
+  Data.alloc dinit
 
 let add_import (m : module_) (ext : extern) (im : import) (inst : module_inst)
   : module_inst =
@@ -915,36 +914,6 @@ let init_func (inst : module_inst) (func : func_inst) =
   match func with
   | Func.AstFunc (_, inst_ref, _) -> inst_ref := inst
   | _ -> assert false
-
-let init_table (inst : module_inst) (seg : elem_segment) =
-  let {einit; emode; _} = seg.it in
-  match emode.it with
-  | Active {index; offset = const} ->
-    let tab = table inst index in
-    let offset = i32 (eval_const inst const) const.at in
-    let end_ = Int32.(add offset (of_int (List.length einit))) in
-    let bound = Table.size tab in
-    if I32.lt_u bound end_ || I32.lt_u end_ offset then
-      Link.error seg.at "elements segment does not fit table";
-    fun () ->
-      Table.blit tab offset (List.map (fun x -> let const = eval_const inst x in FuncRef (func inst (Source.at x.at (i32 const x.at)))) einit)
-  | Passive
-  | Declarative -> assert false
-
-let init_memory (inst : module_inst) (seg : data_segment) =
-  let {dmode; dinit} = seg.it in
-  match dmode.it with
-  | Active {index; offset = const} ->
-    let mem = memory inst index in
-    let offset' = i32 (eval_const inst const) const.at in
-    let offset = I64_convert.extend_i32_u offset' in
-    let end_ = Int64.(add offset (of_int (String.length dinit))) in
-    let bound = Memory.bound mem in
-    if I64.lt_u bound end_ || I64.lt_u end_ offset then
-      Link.error seg.at "data segment does not fit memory";
-    fun () -> Memory.store_bytes mem offset dinit
-  | Passive
-  | Declarative -> assert false
 
 let run_elem i elem =
   let at = elem.it.emode.at in
@@ -992,23 +961,27 @@ let init c n (m : module_) (exts : extern list) : module_inst * config =
       types = List.map (fun type_ -> type_.it) types }
   in
   let fs = List.map (create_func inst0) funcs in
-  let inst1 =
-    { inst0 with
-      funcs = inst0.funcs @ fs;
-      tables = inst0.tables @ List.map (create_table inst0) tables;
-      memories = inst0.memories @ List.map (create_memory inst0) memories;
-      globals = inst0.globals @ List.map (create_global inst0) globals;
+  let inst1 = {inst0 with funcs = inst0.funcs @ fs} in
+  let inst2 =
+    { inst1 with
+      tables = inst1.tables @ List.map (create_table inst1) tables;
+      memories = inst1.memories @ List.map (create_memory inst1) memories;
+      globals = inst1.globals @ List.map (create_global inst1) globals;
     }
   in
-  let inst = {inst1 with exports = List.map (create_export inst1) exports} in
-  List.iter (init_func inst) fs;
-  let init_elems = List.map (init_table inst) elems in
-  let init_datas = List.map (init_memory inst) datas in
-  List.iter (fun f -> f ()) init_elems;
-  List.iter (fun f -> f ()) init_datas;
-  let start = match start with
-  | Some s -> Some s.it.sfunc
-  | None -> None
+  let inst =
+    { inst2 with
+      exports = List.map (create_export inst2) exports;
+      elems = List.map (create_elem inst2) elems;
+      datas = List.map (create_data inst2) datas;
+    }
   in
-  let c' = Lib.Option.fold c (fun x -> invoke c n (func inst x) []) start in
+  List.iter (init_func inst) fs;
+  let es_elem = List.concat (Lib.List32.mapi run_elem elems) in
+  let es_data = List.concat (Lib.List32.mapi run_data datas) in
+  let es_start = Lib.Option.get (Lib.Option.map run_start start) [] in
+  let ts1, t, ts2 = Lib.List.extract n c in
+  let vs', es' = t.code in
+  let code = vs', (List.map plain (es_elem @ es_data @ es_start)) @ es' in
+  let c' = ts1 @ [{t with code}] @ ts2 in
   inst, c'

@@ -878,6 +878,8 @@ rule token = parse
 
       | "script" -> SCRIPT
       | "register" -> REGISTER
+      | "thread" -> THREAD
+      | "wait" -> WAIT
       | "invoke" -> INVOKE
       | "get" -> GET
       | "assert_malformed" -> ASSERT_MALFORMED

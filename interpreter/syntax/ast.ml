@@ -259,22 +259,12 @@ and elem_segment' =
   emode : segment_mode;
 }
 
-type 'data segment = 'data segment' Source.phrase
-and 'data segment' =
-{
-  index : var;
-  offset : const;
-  init : 'data;
-}
-
 type data_segment = data_segment' Source.phrase
 and data_segment' =
 {
   dinit : string;
   dmode : segment_mode;
 }
-
-type memory_segment = string segment
 
 
 (* Modules *)

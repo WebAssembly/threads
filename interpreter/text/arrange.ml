@@ -767,6 +767,8 @@ let action mode act =
     Node ("invoke" ^ access x_opt name, List.map (literal mode) lits)
   | Get (x_opt, name) ->
     Node ("get" ^ access x_opt name, [])
+  | Eval ->
+    Node ("eval", [])
 
 let nan = function
   | CanonicalNan -> "nan:canonical"
@@ -827,12 +829,28 @@ let assertion mode ass =
   | AssertExhaustion (act, re) ->
     [Node ("assert_exhaustion", [action mode act; Atom (string re)])]
 
-let command mode cmd =
+let rec command mode cmd =
   match cmd.it with
   | Module (x_opt, def) -> [definition mode x_opt def]
   | Register (n, x_opt) -> [Node ("register " ^ name n ^ var_opt x_opt, [])]
   | Action act -> [action mode act]
   | Assertion ass -> assertion mode ass
-  | Meta _ -> assert false
+  | Thread (x_opt, xs, cmds) ->
+    [Node ("thread" ^ var_opt x_opt,
+      List.map (fun x -> Node ("shared", [Node ("module " ^ x.it, [])])) xs @
+      Lib.List.concat_map (command mode) cmds)
+    ]
+  | Wait x_opt -> [Node ("wait" ^ var_opt x_opt, [])]
+  | Meta met -> [meta mode met]
+and meta mode met =
+  match met.it with
+  | Input (x_opt, file) ->
+    Node ("input" ^ var_opt x_opt, [Atom (" \"" ^ file ^ "\"")])
+  | Output (x_opt, Some file) ->
+    Node ("output" ^ var_opt x_opt, [Atom (" \"" ^ file ^ "\"")])
+  | Output (x_opt, None) ->
+    Node ("output" ^ var_opt x_opt, [])
+  | Script (x_opt, _, _, _) ->
+    Node ("script" ^ var_opt x_opt, [Atom "..."])
 
 let script mode scr = Lib.List.concat_map (command mode) scr
