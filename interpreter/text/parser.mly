@@ -1017,8 +1017,6 @@ inline_module1 :  /* Sugar */
 
 thread_var_opt :
   | /* empty */ { None }
-
-thread_var :
   | VAR { Some ($1 @@ at ()) }
 
 script_var_opt :
