@@ -234,7 +234,7 @@ let inline_type_explicit (c : context) x ft at =
 %token<int -> Ast.instr'> VEC_EXTRACT VEC_REPLACE
 %token FUNC START TYPE PARAM RESULT LOCAL GLOBAL
 %token TABLE ELEM MEMORY DATA DECLARE OFFSET ITEM IMPORT EXPORT
-%token SHARED UNSHARED
+%token SHARED
 %token MODULE BIN QUOTE
 %token SCRIPT REGISTER THREAD WAIT INVOKE GET
 %token ASSERT_MALFORMED ASSERT_INVALID ASSERT_UNLINKABLE
@@ -304,8 +304,8 @@ table_type :
   | limits ref_type { TableType ($1, $2) }
 
 memory_type :
+  | limits { MemoryType ($1, Unshared) }
   | limits SHARED { MemoryType ($1, Shared) }
-  | limits UNSHARED { MemoryType ($1, Unshared) }
 
 limits :
   | NAT { {min = nat32 $1 (ati 1); max = None} }

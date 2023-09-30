@@ -554,7 +554,7 @@ let of_action mods act =
       Some (of_wrapper mods x_opt name (get gt), [t])
     | _ -> None
     )
-  | Eval -> failwith "NYI"
+  | Eval -> assert false
 
 let of_assertion' mods act name args wrapper_opt =
   let act_js, act_wrapper_opt = of_action mods act in
@@ -606,8 +606,8 @@ let of_command mods cmd =
     of_assertion' mods act "run" [] None ^ "\n"
   | Assertion ass ->
     of_assertion mods ass ^ "\n"
-  | Thread _ -> failwith "NYI"
-  | Wait _ -> failwith "NYI"
+  | Thread _ -> failwith "JS translation of Thread is NYI"
+  | Wait _ -> failwith "JS translation of Wait is NYI"
   | Meta _ -> assert false
 
 let of_script scr =
