@@ -862,6 +862,7 @@ rule token = parse
       | "global" -> GLOBAL
       | "table" -> TABLE
       | "memory" -> MEMORY
+      | "shared" -> SHARED
       | "elem" -> ELEM
       | "data" -> DATA
       | "declare" -> DECLARE
@@ -876,6 +877,8 @@ rule token = parse
 
       | "script" -> SCRIPT
       | "register" -> REGISTER
+      | "thread" -> THREAD
+      | "wait" -> WAIT
       | "invoke" -> INVOKE
       | "get" -> GET
       | "assert_malformed" -> ASSERT_MALFORMED

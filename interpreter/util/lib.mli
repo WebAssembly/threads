@@ -17,6 +17,8 @@ sig
   val table : int -> (int -> 'a) -> 'a list
   val take : int -> 'a list -> 'a list (* raises Failure *)
   val drop : int -> 'a list -> 'a list (* raises Failure *)
+  val split : int -> 'a list -> 'a list * 'a list (* raises Failure *)
+  val extract : int -> 'a list -> 'a list * 'a * 'a list (* raises Failure *)
 
   val last : 'a list -> 'a (* raises Failure *)
   val split_last : 'a list -> 'a list * 'a (* raises Failure *)
@@ -67,6 +69,7 @@ sig
   val force : 'a option -> 'a (* raises Invalid_argument *)
   val map : ('a -> 'b) -> 'a option -> 'b option
   val app : ('a -> unit) -> 'a option -> unit
+  val fold : 'b -> ('a -> 'b) -> 'a option -> 'b
 end
 
 module Int :

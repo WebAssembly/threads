@@ -234,8 +234,9 @@ let inline_type_explicit (c : context) x ft at =
 %token<int -> Ast.instr'> VEC_EXTRACT VEC_REPLACE
 %token FUNC START TYPE PARAM RESULT LOCAL GLOBAL
 %token TABLE ELEM MEMORY DATA DECLARE OFFSET ITEM IMPORT EXPORT
+%token SHARED
 %token MODULE BIN QUOTE
-%token SCRIPT REGISTER INVOKE GET
+%token SCRIPT REGISTER THREAD WAIT INVOKE GET
 %token ASSERT_MALFORMED ASSERT_INVALID ASSERT_UNLINKABLE
 %token ASSERT_RETURN ASSERT_TRAP ASSERT_EXHAUSTION
 %token<Script.nan> NAN
@@ -303,7 +304,8 @@ table_type :
   | limits ref_type { TableType ($1, $2) }
 
 memory_type :
-  | limits { MemoryType $1 }
+  | limits { MemoryType ($1, Unshared) }
+  | limits SHARED { MemoryType ($1, Shared) }
 
 limits :
   | NAT { {min = nat32 $1 (ati 1); max = None} }
@@ -854,7 +856,7 @@ memory_fields :
     { fun c x at ->
       let offset = [i32_const (0l @@ at) @@ at] @@ at in
       let size = Int32.(div (add (of_int (String.length $3)) 65535l) 65536l) in
-      [{mtype = MemoryType {min = size; max = Some size}} @@ at],
+      [{mtype = MemoryType ({min = size; max = Some size}, Unshared)} @@ at],
       [{dinit = $3; dmode = Active {index = x; offset} @@ at} @@ at],
       [], [] }
 
@@ -1013,6 +1015,10 @@ inline_module1 :  /* Sugar */
 
 /* Scripts */
 
+thread_var_opt :
+  | /* empty */ { None }
+  | VAR { Some ($1 @@ at ()) }
+
 script_var_opt :
   | /* empty */ { None }
   | VAR { Some ($1 @@ at ()) }  /* Sugar */
@@ -1048,14 +1054,22 @@ cmd :
   | assertion { Assertion $1 @@ at () }
   | script_module { Module (fst $1, snd $1) @@ at () }
   | LPAR REGISTER name module_var_opt RPAR { Register ($3, $4) @@ at () }
+  | LPAR THREAD thread_var_opt shared_cmd_list RPAR
+    { let xs, cs = $4 in Thread ($3, xs, cs) @@ at () }
+  | LPAR WAIT thread_var_opt RPAR { Wait $3 @@ at () }
   | meta { Meta $1 @@ at () }
 
 cmd_list :
   | /* empty */ { [] }
   | cmd cmd_list { $1 :: $2 }
 
+shared_cmd_list :
+  | cmd_list { [], $1 }
+  | LPAR SHARED LPAR MODULE VAR RPAR RPAR shared_cmd_list
+    { let xs, cs = $8 in ($5 @@ ati 5) :: xs, cs }
+
 meta :
-  | LPAR SCRIPT script_var_opt cmd_list RPAR { Script ($3, $4) @@ at () }
+  | LPAR SCRIPT script_var_opt cmd_list RPAR { Script ($3, [], $4, []) @@ at () }
   | LPAR INPUT script_var_opt STRING RPAR { Input ($3, $4) @@ at () }
   | LPAR OUTPUT script_var_opt STRING RPAR { Output ($3, Some $4) @@ at () }
   | LPAR OUTPUT script_var_opt RPAR { Output ($3, None) @@ at () }
