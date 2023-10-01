@@ -189,7 +189,8 @@ let limits vu s =
 
 let table_type s =
   let t = ref_type s in
-  let lim, _ = limits u32 s in
+  let lim, shared = limits u32 s in
+  require (not shared) s (pos s - 1) "tables cannot be shared (yet)";
   TableType (lim, t)
 
 let memory_type s =
