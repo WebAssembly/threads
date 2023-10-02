@@ -126,6 +126,8 @@ Restrictions on the following dimensions may be imposed during :ref:`execution <
 * the number of allocated :ref:`global instances <syntax-globalinst>`
 * the size of a :ref:`table instance <syntax-tableinst>`
 * the size of a :ref:`memory instance <syntax-meminst>`
+* the number of threads in the :ref:`global configuration <syntax-config>`
+* the number of :ref:`suspended threads <exec-memory.atomic.waitx>` in the :ref:`global configuration <syntax-config>`
 * the number of :ref:`frames <syntax-frame>` on the :ref:`stack <stack>`
 * the number of :ref:`labels <syntax-label>` on the :ref:`stack <stack>`
 * the number of :ref:`values <syntax-val>` on the :ref:`stack <stack>`

@@ -21,6 +21,6 @@ Category                                  Constructor                           
 (reserved)                                                                             :math:`\hex{5F}` .. :math:`\hex{41}`
 :ref:`Result type <syntax-resulttype>`    :math:`[\epsilon]`                           :math:`\hex{40}` (-64 as |Bs7|)
 :ref:`Table type <syntax-tabletype>`      :math:`\limits~\reftype`                     (none)
-:ref:`Memory type <syntax-memtype>`       :math:`\limits`                              (none)
+:ref:`Memory type <syntax-memtype>`       :math:`\limits~\share`                       (none)
 :ref:`Global type <syntax-globaltype>`    :math:`\mut~\valtype`                        (none)
 ========================================  ===========================================  ===============================================================================

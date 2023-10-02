@@ -7,6 +7,22 @@ Change History
 Since the original release 1.0 of the WebAssembly specification, a number of proposals for extensions have been integrated.
 The following sections provide an overview of what has changed.
 
+Release XX
+~~~~~~~~~~
+
+Threads and Atomics
+....................
+
+Added a new concept of shared memory, denoting a memory which can be accessed by multiple host-created threads, and atomic instructions for synchronising shared memory concurrency [#proposal-threads]_.
+
+* New :ref:`memory type <syntax-memtype>`: |SHARED|
+
+* New :ref:`memory instructions <syntax-instr-memory>`: |ATOMICLOAD|, |ATOMICSTORE|, |ATOMICRMW|, |MEMORYATOMICNOTIFY|, |MEMORYATOMICWAIT|, |MEMORYATOMICFENCE|
+
+.. note::
+   The proposal does not add a mechanism for creating threads from within WebAssembly.
+   Thread creation must be handled by the host.
+
 Release 2.0
 ~~~~~~~~~~~
 
@@ -137,6 +153,9 @@ Added vector type and instructions that manipulate multiple numeric values in pa
 
 * New injection/projection :ref:`vector instructions <syntax-instr-vec>`: :math:`\K{i}\!N\!\K{x}\!M\!\K{.splat}`, :math:`\K{f}\!N\!\K{x}\!M\!\K{.splat}`, :math:`\K{i}\!N\!\K{x}\!M\!\K{.bitmask}`
 
+
+.. [#proposal-threads]
+   https://github.com/WebAssembly/spec/tree/main/proposals/threads/
 
 .. [#proposal-signext]
    https://github.com/WebAssembly/spec/tree/main/proposals/sign-extension-ops/
