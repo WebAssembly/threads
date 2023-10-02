@@ -69,7 +69,7 @@ logo = 'static/webassembly.png'
 repo = 'spec'
 
 # The name of the proposal it represents, if any
-proposal = ''
+proposal = 'Threads'
 
 # The draft version string (clear out for release cuts)
 draft = ' (Draft ' + date.today().strftime("%Y-%m-%d") + ')'
