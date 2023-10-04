@@ -22,6 +22,7 @@ Preliminary Definitions
 .. math::
    \begin{array}{rcl}
    \timeevt(\act^\ast~\AT~\time_p~\time)     & = & \time \\
+   \previoustimeevt(\act^\ast~\AT~\time_p~\time)     & = & \time_p \\
    &&\\
    \locact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
    \locact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
@@ -36,6 +37,9 @@ Preliminary Definitions
    &&\\
    \readingact(\act)     & = & (\readact(\act) \neq \epsilon) \\
    \writingact(\act)     & = & (\writeact(\act) \neq \epsilon) \\
+   \waitingact(\act)     & = & (\waitact(\act) \neq \epsilon) \\
+   \notifyingact(\act)   & = & (\notifyact(\act) \neq \epsilon) \\
+   \awakeningact(\act)   & = & (\wokenact(\act) \neq \epsilon) \\
    &&\\
    \readact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
    \readact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
@@ -44,6 +48,15 @@ Preliminary Definitions
    \writeact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)   & = & \byte^\ast \\
    \writeact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast) & = & {\byte_2}^\ast \\
    \writeact(\act)  & = & \epsilon \qquad (\otherwise) \\
+   &&\\
+   \waitact(\AWAIT~\loc~\s64) & = & \s64 \\
+   \waitact(\act)  & = & \epsilon \qquad (\otherwise) \\
+   &&\\
+   \notifyact(\ANOTIFY~\loc~\u32_1~\u32_2) & = & \u32_1 \\
+   \notifyact(\act)  & = & \epsilon \qquad (\otherwise) \\
+   &&\\
+   \wokenact(\AWOKEN~\loc) & = & ...todo \\
+   \wokenact(\act)  & = & \epsilon \qquad (\otherwise) \\
    &&\\
    \offsetact(\act)   & = & \u32  \qquad (\iff~\locact(\act) = \reg[\u32]) \\
    &&\\
@@ -92,6 +105,9 @@ A trace is a coinductive set of :ref:`events <syntax-evt>`. A trace is considere
 
 When a WebAssembly program is executed, all behaviours observed during that execution must correspond to a single :ref:`consistent <relaxed-consistent>` pre-execution of that execution's starting :ref:`configuration <syntax-config>`.
 
+.. todo:: Add uniqueness of the |previoustimeevt| of each event in the trace (maybe implicitly true anyway?)
+
+.. todo:: Define |happensnextact|
 
 .. _relaxed-consistent:
 
@@ -193,7 +209,27 @@ Consistency
 
 .. math::
    \frac{
-     TODO
+     \begin{array}[b]{r@{}@{\quad}l@{}}
+       \evt_{WT} \in \waitingact_{\reg}(\trace) & \evt_N \in \notifyingact_{\reg}(\trace) \\
+       \evt_{WT} \prectot \evt_N  &  \happensnextact(\trace,\evt_{WT}) \in \awakeningact_{\reg}(\trace) \\
+        m \leq \notifyact(\evt_N) & \\
+        \forall i < m \exists \evt_i\in\waitingact_{\reg}(\trace) & ( \evt_i \prectot \evt_{WT} \\
+         \wedge & \trace~\vdash_{\reg}~\collectsuspension(\evt_i,\evt_{N}, i)  \\
+         \wedge & \nexists m' \nexists \evt \in \notifyingact_{\reg}(\trace) ( \evt \prectot \evt_N  \\
+         \wedge & \trace~\vdash_{\reg} \collectsuspension(\evt_0, \evt_{N}, m') ))
+     \end{array}
+   }{
+     \trace~\vdash_{\reg}~\collectsuspension(\evt_{WT},\evt_{N}, m)
+   }
+
+.. math::
+   \frac{
+     \begin{array}[b]{l@{}}
+       \forall\evt_{WT}\in\waitingact_{\reg}(\trace) \\
+         \quad (\exists\evt_{WK}\in\awakeningact_{\reg}(\trace), \happensnextact(\trace,\evt_{WT}) = \evt_{WK} \Rightarrow \\
+         \quad \exists\evt_N\in\notifyingact_{\reg}(\trace) \exists m \leq \notifyact(\evt_N), \\
+         \qquad \trace~\vdash_{\reg}~\collectsuspension(\evt_{WT},\evt_{N},m))
+     \end{array}
    }{
      \vdash_{\reg} \trace~\suspensionsconsistentwith
    }

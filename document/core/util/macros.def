@@ -1118,6 +1118,7 @@
 .. |tearing| mathdef:: \xref{exec/relaxed}{syntax-ord}{\F{tearing}}
 
 .. |timeevt| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{time}}
+.. |previoustimeevt| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{\mbox{previous-time}}}
 
 .. |locact| mathdef:: \xref{exec/relaxed}{exec-locact}{\F{loc}}
 
@@ -1138,12 +1139,23 @@
 .. |tearfreeact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{tearfree}}
 .. |sameact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{same}}
 
+.. |waitact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{wait}}
+.. |waitingact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{waiting}}
+
+.. |notifyact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{notify}}
+.. |notifyingact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{notifying}}
+
+.. |wokenact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{woken}}
+.. |awakeningact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{awakening}}
+
+
 
 .. Relaxed Memory Model Judgements
 
 .. |consistent| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{consistent}}}
 .. |consistentwith| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{consistent-with}}}
 .. |suspensionsconsistentwith| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{suspensions-consistent-with}}}
+.. |collectsuspension| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{collect-suspension}}}
 .. |readseachfrom| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{reads-each-from}}}
 .. |readsfrom| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{reads-from}}}
 .. |notear| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{no-tear}}}
@@ -1158,6 +1170,11 @@
 .. Relaxed Memory Model, non-terminals
 
 .. |trace| mathdef:: \xref{exec/relaxed}{relaxed-trace}{\X{tr}}
+
+
+.. Relaxed Memory Model, meta functions
+
+.. |happensnextact| mathdef:: \xref{exec/relaxed}{relaxed-trace}{\F{\mbox{happens-next}}}
 
 
 .. Stack, terminals
