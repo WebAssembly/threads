@@ -630,9 +630,6 @@ To that end, all previous typing judgements :math:`C \vdash \X{prop}` are genera
      S; C \vdashadmininstr \PERFORM~\act^\ast : [] \to []
    }
 
-.. todo::
-   add wf action condition if defined
-
 
 .. index:: ! store extension, store
 .. _extend:
@@ -760,8 +757,11 @@ a store state :math:`S'` extends state :math:`S`, written :math:`S \extendsto S'
      \vdashmeminstextends \{\MITYPE~\X{mt}, \MIDATA~b_1^{n_1}\} \extendsto \{\MITYPE~\X{mt}, \MIDATA~b_2^{n_2}\}
    }
 
-.. todo::
-   fixme: memory type can change since min limit is updated with growth; add shared case
+.. math::
+   \frac{
+   }{
+     \vdashmeminstextends \{\MITYPE~\X{mt}\} \extendsto \{\MITYPE~\X{mt}\}
+   }
 
 
 .. index:: global instance, value, mutability

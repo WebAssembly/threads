@@ -3351,8 +3351,6 @@ The rules are identical to :ref:`non-atomic stores <exec-store>`, except that :m
 :math:`\MEMORYATOMICNOTIFY~\memarg`
 ....................................
 
-.. todo:: bounds edge-case, memory length?
-
 9. Let :math:`N` be 32.
 
 1. Assert: due to :ref:`validation <valid-atomic.rmwn>`, a value of :ref:`value type <syntax-valtype>` |I32| is on the top of the stack.
@@ -4148,8 +4146,6 @@ During its execution, a host function call may do any of the following.
 - Continue execution, possibly spawning a new thread, with no other observable effects.
 - Terminate with a list of values that respects the host function's type annotation.
 - Terminate with a trap.
-
-.. todo:: better prose, evaluate alternative approach where host may directly emit shared memory events
 
 .. math::
    ~\\[-1ex]

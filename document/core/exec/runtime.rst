@@ -324,8 +324,6 @@ It also is an invariant that the length of the element vector never exceeds the 
 Memory Instances
 ~~~~~~~~~~~~~~~~
 
-.. todo:: We used to update the memory type when a memory is grown. This does not work for shared memories. In fact, the "current" type of a shared memory is nondeterministic. We need to model that during instantiation somehow.
-
 A *memory instance* is the runtime representation of a linear :ref:`memory <syntax-mem>`.
 It records its original :ref:`memory type <syntax-memtype>`
 and takes one of two different shapes depending on whether that type is :ref:`shared <syntax-shared>` or not.
@@ -581,7 +579,7 @@ In order to express the reduction of :ref:`traps <trap>`, :ref:`calls <syntax-ca
      \INVOKE~\funcaddr \\ &&|&
      \LABEL_n\{\instr^\ast\}~\instr^\ast~\END \\ &&|&
      \FRAME_n\{\frame\}~\instr^\ast~\END \\ &&|&
-     \WAITX~\loc~n \\ &&|&
+     \WAITX~\loc~\s64 \\ &&|&
      \PERFORM~\act^\ast \\ &&|&
      \HOSTE~\resulttype \\
    \end{array}
@@ -598,9 +596,11 @@ The |LABEL| and |FRAME| instructions model :ref:`labels <syntax-label>` and :ref
 Moreover, the administrative syntax maintains the nesting structure of the original :ref:`structured control instruction <syntax-instr-control>` or :ref:`function body <syntax-func>` and their :ref:`instruction sequences <syntax-instr-seq>` with an |END| marker.
 That way, the end of the inner instruction sequence is known when part of an outer sequence.
 
-.. todo:: describe |WAITX| and |PERFORM| and |HOSTE|
+The |WAITX| instruction models a thread suspending further execution as the result of executing a |\MEMORYATOMICWAIT| instruction. If its :math:`\s64` argument is non-negative, execution may resume after at least :math:`\s64` nanoseconds. Otherwise, execution will only resume after :math:`\loc` is the target of a corresponding |\MEMORYATOMICNOTIFY| instruction.
 
-.. todo:: add allocation instructions
+The |PERFORM| instruction is used to perform an :ref:`action <syntax-act>` at a precise point in execution. These actions are used by the :ref:`Relaxed Memory Model <relaxed>` to determine the behaviours that are observable in a concurrent execution.
+
+The |HOSTE| instruction models the execution of the host environment.
 
 .. note::
    For example, the :ref:`reduction rule <exec-block>` for |BLOCK| is:
@@ -709,9 +709,6 @@ Each event is annotated with two :ref:`time stamps <syntax-time>`: the first rec
      \byte^\ast \\
    \end{array}
 
-.. todo:: ensure identity of wait + wake operations is preserved
-.. todo:: remove spawn from events in a typed way?
-
 The access of *mutable* shared state is performed through the |ARD|, |AWR|, and |ARMW| actions.
 Each action accesses an abstract *location*, which consists of an :ref:`address <syntax-addr>` of a :ref:`shared <syntax-shared>` :ref:`memory <syntax-meminst>` instance, a symbolic *field* name in the respective object (either |LLEN| for the size or |LDATA| for the vector of bytes), and an offset index into the field.
 
@@ -740,7 +737,7 @@ Conventions
 
 * A location may syntactically elide its :math:`[\u32]` offset in the case that it is 0.
 
-The following auxiliary definition is used to classify whether an access will *tear*.
+The following auxiliary definition is used to classify whether an access will *tear* - that is, whether it will observably decompose into bytewise accesses when it participates in a data race.
 
 .. math::
    \begin{array}{lcl@{\qquad}l}
@@ -749,9 +746,6 @@ The following auxiliary definition is used to classify whether an access will *t
    \tearing(\fN', N, \u32)  &=& \epsilon \\
    \end{array}
 
-
-.. todo:: better description of tearing
-
 Relations between time stamps are lifted to relations between events.
 
 .. math::
@@ -759,8 +753,6 @@ Relations between time stamps are lifted to relations between events.
    \act_1^\ast~\AT~\time_p~\time_1 & \prectot & \act_2^\ast~\AT~\time'_p~\time_2  &=& \time_1 & \prectot & \time_2 \\
    \act_1^\ast~\AT~\time_p~\time_1 & \prechb & \act_2^\ast~\AT~\time'_p~\time_2  &=& \time_1 & \prechb & \time_2 \\
    \end{array}
-
-.. todo:: define notational shorthands over actions and events (or better put that in relaxed.rst?)
 
 
 .. index:: ! configuration, ! thread, store, frame, instruction, module instruction
@@ -854,8 +846,6 @@ The following rule for global reduction describes the creation of a new thread b
    marking both the emitted atomic event and the updated time of the thread.
    This time stamp is chosen non-deterministically in the rule.
    However, the second side condition ensures that the time :math:`h` of the last activity of the thread *happened before* :math:`h'`, thereby imposing *program order* for any events originating from the same thread.
-
-.. todo:: check init ordering
 
 
 Local Reduction

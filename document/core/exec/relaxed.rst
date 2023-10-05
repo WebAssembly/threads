@@ -26,6 +26,10 @@ Preliminary Definitions
    \locact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
    \locact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
    \locact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)   & = & \loc \\
+   \locact(\AWAIT~\loc~\s64)     & = & \loc \\
+   \locact(\AWOKEN~\loc)     & = & \loc \\
+   \locact(\ATIMEOUT~\loc)   & = & \loc \\
+   \locact(\ANOTIFY~\loc~\u32~\u32)     & = & \loc \\
    &&\\
    \ordact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
    \ordact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \ord \\
@@ -64,13 +68,7 @@ Preliminary Definitions
      && (\iff~\locact(\act) = \locact(\act') = \reg[\u32])  \\
    \end{array}
 
-.. todo:: add loc for wait/woken/timeout/notify
-
-.. todo:: Double check notears
-
-.. todo:: Tidy up range
-
-.. todo:: add prose intuition?
+.. todo:: nicer formatting, add prose intuition?
 
 
 .. _relaxed-trace:

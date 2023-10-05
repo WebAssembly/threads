@@ -1186,9 +1186,9 @@
 .. |REFEXTERNADDR| mathdef:: \xref{exec/runtime}{syntax-ref.extern}{\K{ref{.}extern}}
 .. |TRAP| mathdef:: \xref{exec/runtime}{syntax-trap}{\K{trap}}
 .. |INVOKE| mathdef:: \xref{exec/runtime}{syntax-invoke}{\K{invoke}}
-.. |WAITX| mathdef:: \xref{exec/runtime}{syntax-waitx}{\K{wait'}}
-.. |PERFORM| mathdef:: \xref{exec/runtime}{syntax-perform}{\K{perform}}
-.. |HOSTE| mathdef:: \xref{exec/runtime}{syntax-hoste}{\K{host}}
+.. |WAITX| mathdef:: \xref{exec/runtime}{syntax-instr-admin}{\K{wait'}}
+.. |PERFORM| mathdef:: \xref{exec/runtime}{syntax-instr-admin}{\K{perform}}
+.. |HOSTE| mathdef:: \xref{exec/runtime}{syntax-instr-admin}{\K{host}}
 
 
 .. Values & Results, non-terminals

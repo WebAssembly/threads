@@ -87,8 +87,8 @@ The following auxiliary typing rules specify this typing relation relative to a 
      S; (\ARD_{\SEQCST}~a.\LLEN~l) \vdashexternval \EVMEM~a : \ETMEM~(\{ \LMIN~l, \LMAX~y^? \}~\SHARED)
    }
 
-.. todo::
-   flag up the connection with the relaxed memory model
+.. note::
+   In the |SHARED| case, the associated :ref:`action <syntax-act>` is performed as part of :ref:`instantiation <exec-instantiation>`, in order to record in the :ref:`Relaxed Memory Model <relaxed>` that a sequentially consistent bounds check on the shared memory has occurred.
 
 
 .. index:: global type, global address, value type, mutability
