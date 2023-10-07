@@ -828,7 +828,7 @@ the standard soundness theorems hold. [#cite-cpp2018]_ [#cite-fm2021]_
 
 **Theorem (Preservation).**
 If a :ref:`configuration <syntax-config>` :math:`S;P^\ast` is :ref:`valid <valid-config>` with :ref:`result type <syntax-resulttype>` :math:`[t^\ast]^\ast` (i.e., :math:`\vdashconfig S;P^\ast : [t^\ast]^\ast`),
-and steps to :math:`S';P'^\ast` (i.e., :math:`S;P^\ast \stepto S';P'^\ast`),
+and steps to :math:`S';P'^\ast` (i.e., :math:`S;P^\ast \stepto^{\evt} S';P'^\ast`),
 then :math:`S';P'^\ast` is a valid configuration with the same result type (i.e., :math:`\vdashconfig S';P'^\ast : [t^\ast]^\ast`).
 Furthermore, :math:`S'` is an :ref:`extension <extend-store>` of :math:`S` (i.e., :math:`\vdashstoreextends S \extendsto S'`).
 
@@ -838,13 +838,13 @@ A terminal configuration is a configuration whose threads are all terminal.
 **Theorem (Progress).**
 If a :ref:`configuration <syntax-config>` :math:`S;P^\ast` is :ref:`valid <valid-config>` (i.e., :math:`\vdashconfig S;P^\ast : [t^\ast]^\ast` for some :ref:`result type <syntax-resulttype>` :math:`[t^\ast]^\ast`),
 then either it is terminal,
-or it can step to some configuration :math:`S';P'^\ast` (i.e., :math:`S;P^\ast \stepto S';P'^\ast`).
+or it can step to some configuration :math:`S';P'^\ast` (i.e., :math:`S;P^\ast \stepto^{\evt} S';P'^\ast`).
 
 From Preservation and Progress the soundness of the WebAssembly type system follows directly.
 
 **Corollary (Soundness).**
 If a :ref:`configuration <syntax-config>` :math:`S;P^\ast` is :ref:`valid <valid-config>` (i.e., :math:`\vdashconfig S;P^\ast : [t^\ast]^\ast` for some :ref:`result type <syntax-resulttype>` :math:`[t^\ast]^\ast`),
-then it either diverges or takes a finite number of steps to reach a terminal configuration :math:`S';P'^\ast` (i.e., :math:`S;P^\ast \stepto^\ast S';P'^\ast`) that is valid with the same result type (i.e., :math:`\vdashconfig S';P'^\ast : [t^\ast]^\ast`)
+then it either diverges or takes a finite number of steps to reach a terminal configuration :math:`S';P'^\ast` (i.e., :math:`S;P^\ast \stepto^{\ast~(\evt^\ast)} S';P'^\ast`) that is valid with the same result type (i.e., :math:`\vdashconfig S';P'^\ast : [t^\ast]^\ast`)
 and where :math:`S'` is an :ref:`extension <extend-store>` of :math:`S` (i.e., :math:`\vdashstoreextends S \extendsto S'`).
 
 In other words, every thread in a valid configuration either runs forever, traps, or terminates with a result that has the expected type.
