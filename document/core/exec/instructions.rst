@@ -4210,8 +4210,8 @@ An :ref:`expression <syntax-expr>` is *evaluated* relative to a :ref:`current <e
 The value :math:`\val` is the result of the evaluation.
 
 .. math::
-   S; F; \instr^\ast \stepto S'; F'; \instr'^\ast
-   \qquad (\iff S; F; \instr^\ast~\END \stepto S'; F'; \instr'^\ast~\END)
+   S; F; \instr^\ast \stepto^{\act^\ast} S'; F'; \instr'^\ast
+   \qquad (\iff S; F; \instr^\ast~\END \stepto^{\act^\ast} S'; F'; \instr'^\ast~\END)
 
 .. note::
    Evaluation iterates this reduction rule until reaching a value.

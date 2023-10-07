@@ -110,6 +110,7 @@ Execution
 ===============================================  ===============================================================================
 Construct                                        Judgement
 ===============================================  ===============================================================================
-:ref:`Instruction <exec-instr>`                  :math:`S;F;\instr^\ast \stepto S';F';{\instr'}^\ast`
-:ref:`Expression <exec-expr>`                    :math:`S;F;\expr \stepto  S';F';\expr'`
+:ref:`Instruction <exec-instr>`                  :math:`S;F;\instr^\ast \stepto^{\act^\ast} S';F';{\instr'}^\ast`
+:ref:`Expression <exec-expr>`                    :math:`S;F;\expr \stepto^{\act^\ast}  S';F';\expr'`
+:ref:`Configuration <syntax-reduction>`          :math:`\config \stepto^{\evt}  \config'`
 ===============================================  ===============================================================================
