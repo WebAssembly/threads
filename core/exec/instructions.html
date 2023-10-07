@@ -3565,8 +3565,8 @@ However, the effects of any such call are subsumed by the non-deterministic beha
 </ol>
 <p>The value <span class="math notranslate nohighlight">\(\href{../exec/runtime.html#syntax-val}{\mathit{val}}\)</span> is the result of the evaluation.</p>
 <div class="math notranslate nohighlight">
-\[S; F; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast \href{../exec/conventions.html#formal-notation}{\hookrightarrow} S'; F'; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}'^\ast
-\qquad (\mathrel{\mbox{if}} S; F; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}} \href{../exec/conventions.html#formal-notation}{\hookrightarrow} S'; F'; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}'^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}})\]</div>
+\[S; F; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{\href{../exec/runtime.html#syntax-act}{\mathit{act}}^\ast} S'; F'; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}'^\ast
+\qquad (\mathrel{\mbox{if}} S; F; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}} \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{\href{../exec/runtime.html#syntax-act}{\mathit{act}}^\ast} S'; F'; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}'^\ast~\href{../syntax/instructions.html#syntax-instr-control}{\mathsf{end}})\]</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Evaluation iterates this reduction rule until reaching a value.

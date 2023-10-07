@@ -132,11 +132,12 @@ which defines the next instruction to execute.</p></li>
 For the interested reader, a more thorough introduction can be found in respective text books. <a class="footnote-reference brackets" href="#cite-tapl" id="id2">2</a></p>
 </div>
 <p>The formal execution rules use a standard approach for specifying operational semantics, rendering them into <em>reduction rules</em>.
-Every rule has the following general form:</p>
+Execution rules for each instruction have the following general form:</p>
 <div class="math notranslate nohighlight">
-\[\mathit{configuration} \quad\href{../exec/conventions.html#formal-notation}{\hookrightarrow}\quad \mathit{configuration}\]</div>
+\[\mathit{configuration} \quad\href{../exec/conventions.html#formal-notation}{\hookrightarrow}^{\href{../exec/runtime.html#syntax-act}{\mathit{act}}^\ast}\quad \mathit{configuration}\]</div>
 <p>A <em>configuration</em> is a syntactic description of a program state.
-Each rule specifies one <em>step</em> of execution.
+Each rule specifies one <em>step</em> of execution, resulting in an altered configuration.
+In addition, steps which involve operations related to <a class="reference internal" href="relaxed.html#relaxed"><span class="std std-ref">shared memory concurrency</span></a> may emit a number of <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">actions</span></a> which are used to specify relevant concurrent behaviours (for further details, see <a class="reference internal" href="runtime.html#syntax-evt"><span class="std std-ref">Events</span></a> and the <a class="reference internal" href="relaxed.html#relaxed"><span class="std std-ref">Relaxed Memory Model</span></a>).
 As long as there is at most one reduction rule applicable to a given configuration, reduction – and thereby execution – is <em>deterministic</em>.
 WebAssembly has only very few exceptions to this, which are noted explicitly in this specification.</p>
 <p>For WebAssembly, a configuration typically is a tuple <span class="math notranslate nohighlight">\((S; F; \href{../syntax/instructions.html#syntax-instr}{\mathit{instr}}^\ast)\)</span> consisting of the current <a class="reference internal" href="runtime.html#store"><span class="std std-ref">store</span></a> <span class="math notranslate nohighlight">\(S\)</span>, the <a class="reference internal" href="runtime.html#frame"><span class="std std-ref">call frame</span></a> <span class="math notranslate nohighlight">\(F\)</span> of the current function, and the sequence of <a class="reference internal" href="../syntax/instructions.html#syntax-instr"><span class="std std-ref">instructions</span></a> that is to be executed.
