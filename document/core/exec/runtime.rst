@@ -884,10 +884,10 @@ Finally, the following definition of *evaluation context* and associated structu
 
 .. math::
    \begin{array}{rcl}
-   S; F; E[\instr^\ast] &\stepto& S'; F'; E[{\instr'}^\ast] \\
-     && (\iff S; F; \instr^\ast \stepto S'; F'; {\instr'}^\ast) \\
-   S; F; \FRAME_n\{F'\}~\instr^\ast~\END &\stepto& S'; F; \FRAME_n\{F''\}~\instr'^\ast~\END \\
-     && (\iff S; F'; \instr^\ast \stepto S'; F''; {\instr'}^\ast) \\[1ex]
+   S; F; E[\instr^\ast] &\stepto^{\act^\ast}& S'; F'; E[{\instr'}^\ast] \\
+     && (\iff S; F; \instr^\ast \stepto^{\act^\ast} S'; F'; {\instr'}^\ast) \\
+   S; F; \FRAME_n\{F'\}~\instr^\ast~\END &\stepto^{\act^\ast}& S'; F; \FRAME_n\{F''\}~\instr'^\ast~\END \\
+     && (\iff S; F'; \instr^\ast \stepto^{\act^\ast} S'; F''; {\instr'}^\ast) \\[1ex]
    S; F; E[\TRAP] &\stepto& S; F; \TRAP
      \qquad (\iff E \neq [\_]) \\
    S; F; \FRAME_n\{F'\}~\TRAP~\END &\stepto& S; F; \TRAP \\

@@ -65,13 +65,14 @@ Formal Notation
    For the interested reader, a more thorough introduction can be found in respective text books. [#cite-tapl]_
 
 The formal execution rules use a standard approach for specifying operational semantics, rendering them into *reduction rules*.
-Every rule has the following general form:
+Execution rules for each instruction have the following general form:
 
 .. math::
-   \X{configuration} \quad\stepto\quad \X{configuration}
+   \X{configuration} \quad\stepto^{\act^\ast}\quad \X{configuration}
 
 A *configuration* is a syntactic description of a program state.
-Each rule specifies one *step* of execution.
+Each rule specifies one *step* of execution, resulting in an altered configuration.
+In addition, steps which involve operations related to :ref:`shared memory concurrency <relaxed>` may emit a number of :ref:`actions <syntax-act>` which are used to specify relevant concurrent behaviours (for further details, see :ref:`Events <syntax-evt>` and the :ref:`Relaxed Memory Model <relaxed>`).
 As long as there is at most one reduction rule applicable to a given configuration, reduction -- and thereby execution -- is *deterministic*.
 WebAssembly has only very few exceptions to this, which are noted explicitly in this specification.
 
