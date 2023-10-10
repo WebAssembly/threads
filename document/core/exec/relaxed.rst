@@ -1,5 +1,3 @@
-.. todo:: add index entries
-
 .. index:: ! relaxed memory, memory
 .. _relaxed:
 
