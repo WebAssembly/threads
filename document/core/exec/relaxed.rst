@@ -22,6 +22,7 @@ Preliminary Definitions
 .. math::
    \begin{array}{rcl}
    \timeevt(\act^\ast~\AT~\time_p~\time)     & = & \time \\
+   \timeevt_p(\act^\ast~\AT~\time_p~\time)     & = & \time_p \\
    &&\\
    \locact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
    \locact(\AWR_{\ord}~\loc~\byte^\ast~\NOTEARS^?)     & = & \loc \\
@@ -40,6 +41,11 @@ Preliminary Definitions
    &&\\
    \readingact(\act)     & = & (\readact(\act) \neq \epsilon) \\
    \writingact(\act)     & = & (\writeact(\act) \neq \epsilon) \\
+   \suspensionact(\u32, \AWAIT~\reg[\u32]~\s64)     & = & \AWAIT~\reg[\u32]~\s64 \\
+   \suspensionact(\u32, \AWOKEN~\reg[\u32])     & = & \AWOKEN~\reg[\u32] \\
+   \suspensionact(\u32, \ATIMEOUT~\reg[\u32])   & = & \ATIMEOUT~\reg[\u32] \\
+   \suspensionact(\u32, \ANOTIFY~\reg[\u32]~\u32'~\u32'')     & = & \ANOTIFY~\reg[\u32]~\u32'~\u32'' \\
+   \suspensionact(\u32, \act)     & = & \epsilon \qquad \otherwise \\
    &&\\
    \readact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
    \readact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
@@ -61,6 +67,7 @@ Preliminary Definitions
    \tearfreeact(\AWR_{\ord}~\loc~\byte^\ast)    & = & \bot \qquad (\iff~\ord = \UNORD \vee \ord = \INIT) \\
    \tearfreeact(\act)    & = & \top \qquad (\otherwise) \\
    &&\\
+   \idact(\act)     & = & \act \\
    \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time_p~\time) & = & \X{func}(\act) \\
      &&  (\iff~\locact(\act) = \reg[\u32])  \\
    \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time_p~\time,  \quad &&\\
@@ -78,11 +85,11 @@ Traces
 
 .. todo:: novel notation here?
 
-A trace is a coinductive set of :ref:`events <syntax-evt>`. A trace is considered to be a *pre-execution* of a given :ref:`global configuration <syntax-config>` if it can be derived from the events emitted by the coinductive closure of the :ref:`global reduction relation <syntax-reduction>` on that configuration, and all the :ref:`time stamps <syntax-time>` of its constituent events are distinct.
+A trace is a coinductive list of :ref:`events <syntax-evt>`. A trace is considered to be a *pre-execution* of a given :ref:`global configuration <syntax-config>` if it represents the events emitted by the coinductive closure of the :ref:`global reduction relation <syntax-reduction>` on that configuration, such that all of the trace's consituent events have unique :ref:`time stamps <syntax-time>` that are totally ordered according to the reduction order.
 
 .. math::
      \begin{array}{c}
-       \config \stepto^{\evt} \config' \qquad \vdash \config' : \trace \qquad \timeevt(\evt) \notin \timeevt^\ast(\trace) \\[0.2ex]
+       \begin{array}{c}\config \stepto^{\evt} \config' \qquad \vdash \config' : \trace \\ \forall \evt' \in \trace, \timeevt(\evt') \prectot \timeevt(\evt)\end{array} \qquad \begin{array}{l}\timeevt(\evt) \notin \timeevt^\ast(\trace) \\ \timeevt_p(\evt) \notin \timeevt_p^\ast(\trace)\end{array} \\[0.2ex]
        \hline \\[-0.8ex]
        \hline \\[-0.8ex]
        \vdash \config : \evt~\trace
@@ -108,7 +115,7 @@ Consistency
 .. math::
    \frac{
      \begin{array}[b]{@{}c@{}}
-       \vdash_{\reg} \trace~\suspensionsconsistentwith \\
+       \forall i, \vdash_{\reg}^i \trace~\suspensionsconsistent \\
        \forall \evt_R \in \readingact_{\reg}(\trace), \exists \evt_W^\ast,
          \trace \vdash_{\reg} \evt_R~\readseachfrom~\evt_W^\ast \\
        \forall \evt_I, \evt \in \trace, \,
@@ -191,13 +198,37 @@ Consistency
 
 .. math::
    \frac{
-     TODO
+     \begin{array}{c}\suspensionact_{\reg}^\ast(i, \trace) = \trace' \qquad \vdash_{\reg}^i \trace'~\suspensionsconsistentwith(\epsilon) \\ \forall \evt,\evt' \in \trace',~\evt \prectot \evt' \Longrightarrow \evt \prechb \evt'\end{array}
    }{
-     \vdash_{\reg} \trace~\suspensionsconsistentwith
+     \vdash_{\reg}^i \trace~\suspensionsconsistent
    }
 
+.. math::
+   \frac{
+   }{
+     \vdash_{\reg}^i \epsilon~\suspensionsconsistentwith(\time^\ast)
+   }
 
-.. todo:: pull out the trace events which denote wait/wake actions as a timestamped list, check queue behaviour
+.. math::
+   \frac{
+     \idact_{\reg}(\evt) = (\AWAIT~\reg[i]~\s64) \qquad \vdash_{\reg}^i \trace~\suspensionsconsistentwith(\timeevt(\evt)~\time^\ast)
+   }{
+     \vdash_{\reg}^i \evt~\trace~\suspensionsconsistentwith(\time^\ast)
+   }
+
+.. math::
+   \frac{
+     \idact_{\reg}(\evt) = (\ATIMEOUT~\reg[i]) \qquad \vdash_{\reg}^i \trace~\suspensionsconsistentwith(\time^\ast~\time'^\ast)
+   }{
+     \vdash_{\reg}^i \evt~\trace~\suspensionsconsistentwith(\time^\ast~\timeevt_p(\evt)~\time'^\ast)
+   }
+
+.. math::
+   \frac{
+     \begin{array}{c}\idact_{\reg}^n(\evt^n) = (\AWOKEN~\reg[i]) \qquad \idact_{\reg}(\evt_N) = (\ANOTIFY~\reg[i]~n~k) \\ n < k \Longrightarrow m = 0 \qquad \vdash_{\reg}^i \trace~\suspensionsconsistentwith(\time^m)\end{array}
+   }{
+     \vdash_{\reg}^i \evt^n~\evt_N~\trace~\suspensionsconsistentwith(\time^m~\timeevt_p^n(\evt^n))
+   }
 
 
 .. [#cite-oopsla2019]

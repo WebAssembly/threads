@@ -1119,7 +1119,8 @@
 
 .. |timeevt| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{time}}
 
-.. |locact| mathdef:: \xref{exec/relaxed}{exec-locact}{\F{loc}}
+.. |locact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{loc}}
+.. |idact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{id}}
 
 .. |readingact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{reading}}
 .. |ordact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{ord}}
@@ -1138,11 +1139,14 @@
 .. |tearfreeact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{tearfree}}
 .. |sameact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{same}}
 
+.. |suspensionact| mathdef:: \xref{exec/relaxed}{relaxed-aux}{\F{susp}}
+
 
 .. Relaxed Memory Model Judgements
 
 .. |consistent| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{consistent}}}
 .. |consistentwith| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{consistent-with}}}
+.. |suspensionsconsistent| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{suspensions-consistent}}}
 .. |suspensionsconsistentwith| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{suspensions-consistent-with}}}
 .. |readseachfrom| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{reads-each-from}}}
 .. |readsfrom| mathdef:: \xref{exec/relaxed}{relaxed-consistent}{\mathrel{\mbox{reads-from}}}
