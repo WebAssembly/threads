@@ -101,8 +101,6 @@ When a WebAssembly program is executed, all behaviours observed during that exec
 Consistency
 ~~~~~~~~~~~
 
-.. todo:: add prose intuition
-
 .. math::
    \frac{
      \forall \reg,~ \vdash_{\reg} \trace~\consistentwith
@@ -225,8 +223,27 @@ Consistency
    \frac{
      \begin{array}{c}\idact_{\reg}^n(\evt^n) = (\AWOKEN~\reg[i]) \qquad \idact_{\reg}(\evt_N) = (\ANOTIFY~\reg[i]~n~k) \\ n < k \Longrightarrow m = 0 \qquad \vdash_{\reg}^i \trace~\suspensionsconsistentwith(\time^m)\end{array}
    }{
-     \vdash_{\reg}^i \evt^n~\evt_N~\trace~\suspensionsconsistentwith(\time^m~\timeevt_p^n(\evt^n))
+     \vdash_{\reg}^i \evt_N~\evt^n~\trace~\suspensionsconsistentwith(\time^m~\timeevt_p^n(\evt^n))
    }
+
+.. note::
+   The following is a non-normative and non-exhaustive explanation of WebAssembly's relaxed memory model in plain English. Note that the definition of :ref:`Consistency <relaxed-consistent>` is the sole normative definition of the relaxed memory model.
+
+   When a WebAssembly operation reads from shared mutable state, the WebAssembly relaxed memory model determines the value that this read access *observes*, in terms of the write access to the same location(s) that have occurred in the execution.
+
+   The WebAssembly memory model is built around the concept of a *happens-before* transitive partial order between accesses of shared mutable state, :math:`\prechb`, which captures a strong notion of causality. All sequential accesses in the same thread are related by :math:`\prechb` according to execution order. Certain operations also establish a :math:`\prechb` relation between operations of different threads (see *atomic* accesses below). A read access may never take its value from a write access that comes later in :math:`\prechb`. Moreover, if two write accesses ordered by :math:`\prechb` come before a read access in :math:`\prechb`, the read access must take its value from the later of the two write accesses according to :math:`\prechb`. In the case that :math:`\prechb` does not uniquely determine a write access that a given read access *must* take its value from, the read access may non-deterministically take its value from any permitted write.
+
+   In the case that a read operation is a multi-byte memory access, the value of each byte may in certain circumstances be determined by a different write event. If this happens, we describe the read operation as *tearing*. In general, naturally aligned multi-byte reads are not allowed to tear, unless they race with a partially overlapping write or are greater than four bytes in width.
+
+   Most WebAssembly accesses of shared mutable state are classified as *non-atomic*. However a number of operations are classified as performing *atomic* accesses. Atomic accesses must always be naturally aligned. If an atomic read takes its value from an atomic write of the same width, the write access is fixed as coming before the read access in :math:`\prechb`. This is the main mechanism by which a :math:`\prechb` relation is established between threads.
+
+   WebAssembly's atomic operations are also required to be *sequentially consistent*. The relaxed memory model defines a toal order on all events of the execution, :math:`\prectot`, and sequentially consistent operations to identical ranges must respect this ordering - i.e. sequentially consistent reads cannot read from any sequentially consistent write of idential range other than the most recent preceding one according to :math:`\prectot`.
+
+   Some operations such as memory accesses must perform a bounds check in addition to accessing data. The relaxed memory model treats these accesses as additionally accessing a distinguished *length* location, with the observed value respecting the constraints of the relaxed memory model. Most bounds checks are non-atomic, but bounds checks peformed during :ref:`instantiation <exec-instantiation>` are atomic, and changes to the length (e.g. |MEMORYGROW|) are modelled as atomic read-modify-write accesses.
+
+   In some circumstances, two accesses to overlapping locations may occur in an execution without any relation in :math:`\prechb`. This situation is known as a *race*. If at least one of these accesses is a non-atomic write, we describe this situation as a *data race*. Unlike some other relaxed memory models, WebAssembly does not declare data races to be undefined behaviour. However, the allowed execution behaviours may still be highly non-deterministic as the lack of :math:`\prechb` relations means that reads participating in or overlapping with the location of the data race may non-deterministically observe a number of different values.
+
+   The relaxed memory model also describes the concurrent behaviour of WebAssembly's wait (|MEMORYATOMICWAIT|) and notify (|MEMORYATOMICNOTIFY|) operations. Each memory location is associated with a queue of waiting threads. A thread suspending as the result of a wait operation enters the queue, and a notify operation to that location will attempt to wake up as many threads as possible from the head of the associated queue, up to the maximum specified by the arguments of the notify operation. All operations on the same location which change the state of that location's wait queue are sequentially consistent and totally ordered by :math:`\prechb`.
 
 
 .. [#cite-oopsla2019]
