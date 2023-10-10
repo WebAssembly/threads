@@ -66,14 +66,18 @@ Preliminary Definitions
    \tearfreeact(\act)    & = & \top \qquad (\otherwise) \\
    &&\\
    \idact(\act)     & = & \act \\
+   \end{array}
+
+The above operations on :ref:`actions <syntax-act>` are raised to operations on :ref:`events <syntax-evt>`, indexed by :ref:`region <syntax-reg>`.
+
+.. math::
+   \begin{array}{rcl}
    \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time_p~\time) & = & \X{func}(\act) \\
      &&  (\iff~\locact(\act) = \reg[\u32])  \\
    \X{func}_{\reg}(\act_1^\ast~\act~\act_2^\ast~\AT~\time_p~\time,  \quad &&\\
    \qquad \act_3^\ast~\act'~\act_4^\ast~\AT~\time'_p~\time') & = & \X{func}(\act,\act') \\
      && (\iff~\locact(\act) = \locact(\act') = \reg[\u32])  \\
    \end{array}
-
-.. todo:: nicer formatting, add prose intuition?
 
 
 .. _relaxed-trace:
