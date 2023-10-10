@@ -43,7 +43,7 @@ Preliminary Definitions
    \suspensionact(\u32, \AWOKEN~\reg[\u32])     & = & \AWOKEN~\reg[\u32] \\
    \suspensionact(\u32, \ATIMEOUT~\reg[\u32])   & = & \ATIMEOUT~\reg[\u32] \\
    \suspensionact(\u32, \ANOTIFY~\reg[\u32]~\u32'~\u32'')     & = & \ANOTIFY~\reg[\u32]~\u32'~\u32'' \\
-   \suspensionact(\u32, \act)     & = & \epsilon \qquad \otherwise \\
+   \suspensionact(\u32, \act)     & = & \epsilon \qquad (\otherwise) \\
    &&\\
    \readact(\ARD_{\ord}~\loc~\byte^\ast~\NOTEARS^?)    & = & \byte^\ast \\
    \readact(\ARMW~\loc~{\byte_1}^\ast~{\byte_2}^\ast)  & = & {\byte_1}^\ast \\
