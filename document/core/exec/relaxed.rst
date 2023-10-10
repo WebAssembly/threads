@@ -9,7 +9,7 @@ The execution of a WebAssembly program gives rise to a :ref:`trace <relaxed-trac
 .. note::
    A relaxed memory model is necessary to describe the behaviour of programs exhibiting *shared memory concurrency*.
    WebAssembly's relaxed memory model is heavily based on those of C/C++11 and JavaScript.
-   The relaxed memory model decribed here is derived from the following article: [#cite-oopsla2019]_.
+   The relaxed memory model described here is derived from the following article: [#cite-oopsla2019]_.
 
 
 .. _relaxed-aux:
