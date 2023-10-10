@@ -84,18 +84,14 @@
 
           <div class="body" role="main">
             
-  <div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>add index entries</p>
-</div>
-<section id="relaxed-memory-model">
+  <section id="relaxed-memory-model">
 <span id="relaxed"></span><span id="index-0"></span><h1>Relaxed Memory Model<a class="headerlink" href="#relaxed-memory-model" title="Permalink to this headline">¶</a></h1>
 <p>The execution of a WebAssembly program gives rise to a <a class="reference internal" href="#relaxed-trace"><span class="std std-ref">trace</span></a> of events. WebAssembly’s relaxed memory model constrains the observable behaviours of the program’s execution by defining a <a class="reference internal" href="#relaxed-consistent"><span class="std std-ref">consistency</span></a> condition on the trace of events.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>A relaxed memory model is necessary to describe the behaviour of programs exhibiting <em>shared memory concurrency</em>.
 WebAssembly’s relaxed memory model is heavily based on those of C/C++11 and JavaScript.
-The relaxed memory model decribed here is derived from the following article: <a class="footnote-reference brackets" href="#cite-oopsla2019" id="id2">1</a>.</p>
+The relaxed memory model decribed here is derived from the following article: <a class="footnote-reference brackets" href="#cite-oopsla2019" id="id1">1</a>.</p>
 </div>
 <section id="preliminary-definitions">
 <span id="relaxed-aux"></span><h2>Preliminary Definitions<a class="headerlink" href="#preliminary-definitions" title="Permalink to this headline">¶</a></h2>
@@ -154,14 +150,14 @@ The relaxed memory model decribed here is derived from the following article: <a
 \qquad \href{../exec/runtime.html#syntax-act}{\mathit{act}}_3^\ast~\href{../exec/runtime.html#syntax-act}{\mathit{act}}'~\href{../exec/runtime.html#syntax-act}{\mathit{act}}_4^\ast~\href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}}~\href{../exec/runtime.html#syntax-time}{\mathit{time}}'_p~\href{../exec/runtime.html#syntax-time}{\mathit{time}}') &amp; = &amp; \mathit{func}(\href{../exec/runtime.html#syntax-act}{\mathit{act}},\href{../exec/runtime.html#syntax-act}{\mathit{act}}') \\
   &amp;&amp; (\mathrel{\mbox{if}}~\href{../exec/relaxed.html#relaxed-aux}{\mathrm{loc}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}}) = \href{../exec/relaxed.html#relaxed-aux}{\mathrm{loc}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}}') = \href{../exec/runtime.html#syntax-reg}{\mathit{reg}}[\href{../syntax/values.html#syntax-int}{\mathit{u32}}])  \\
 \end{array}\end{split}\]</div>
-<div class="admonition-todo admonition" id="id3">
+<div class="admonition-todo admonition" id="id2">
 <p class="admonition-title">Todo</p>
 <p>nicer formatting, add prose intuition?</p>
 </div>
 </section>
 <section id="traces">
 <span id="relaxed-trace"></span><h2>Traces<a class="headerlink" href="#traces" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="id4">
+<div class="admonition-todo admonition" id="id3">
 <p class="admonition-title">Todo</p>
 <p>novel notation here?</p>
 </div>
@@ -177,7 +173,7 @@ The relaxed memory model decribed here is derived from the following article: <a
 </section>
 <section id="consistency">
 <span id="relaxed-consistent"></span><h2>Consistency<a class="headerlink" href="#consistency" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="id5">
+<div class="admonition-todo admonition" id="id4">
 <p class="admonition-title">Todo</p>
 <p>add prose intuition</p>
 </div>
@@ -294,7 +290,7 @@ The relaxed memory model decribed here is derived from the following article: <a
   \vdash_{\href{../exec/runtime.html#syntax-reg}{\mathit{reg}}}^i \href{../exec/runtime.html#syntax-evt}{\mathit{evt}}^n~\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}_N~\href{../exec/relaxed.html#relaxed-trace}{\mathit{tr}}~\href{../exec/relaxed.html#relaxed-consistent}{\mathrel{\mbox{suspensions-consistent-with}}}(\href{../exec/runtime.html#syntax-time}{\mathit{time}}^m~\href{../exec/relaxed.html#relaxed-aux}{\mathrm{time}}_p^n(\href{../exec/runtime.html#syntax-evt}{\mathit{evt}}^n))
 }\end{split}\]</div>
 <dl class="footnote brackets">
-<dt class="label" id="cite-oopsla2019"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dt class="label" id="cite-oopsla2019"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
 <dd><p>The semantics of the relaxed memory model is derived from the following article:
 Conrad Watt, Andreas Rossberg, Jean Pichon-Pharabod. <a class="reference external" href="https://dl.acm.org/citation.cfm?id=3360559">Weakening WebAssembly</a>. Proceedings of the ACM on Programming Languages (OOPSLA 2019). ACM 2019.</p>
 </dd>
