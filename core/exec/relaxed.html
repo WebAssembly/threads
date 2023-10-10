@@ -91,7 +91,7 @@
 <p class="admonition-title">Note</p>
 <p>A relaxed memory model is necessary to describe the behaviour of programs exhibiting <em>shared memory concurrency</em>.
 WebAssembly’s relaxed memory model is heavily based on those of C/C++11 and JavaScript.
-The relaxed memory model decribed here is derived from the following article: <a class="footnote-reference brackets" href="#cite-oopsla2019" id="id1">1</a>.</p>
+The relaxed memory model described here is derived from the following article: <a class="footnote-reference brackets" href="#cite-oopsla2019" id="id1">1</a>.</p>
 </div>
 <section id="preliminary-definitions">
 <span id="relaxed-aux"></span><h2>Preliminary Definitions<a class="headerlink" href="#preliminary-definitions" title="Permalink to this headline">¶</a></h2>
@@ -144,20 +144,20 @@ The relaxed memory model decribed here is derived from the following article: <a
 \href{../exec/relaxed.html#relaxed-aux}{\mathrm{tearfree}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}})    &amp; = &amp; \top \qquad (\mathrel{\mbox{otherwise}}) \\
 &amp;&amp;\\
 \href{../exec/relaxed.html#relaxed-aux}{\mathrm{id}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}})     &amp; = &amp; \href{../exec/runtime.html#syntax-act}{\mathit{act}} \\
+\end{array}\end{split}\]</div>
+<p>The above operations on <a class="reference internal" href="runtime.html#syntax-act"><span class="std std-ref">actions</span></a> are raised to operations on <a class="reference internal" href="runtime.html#syntax-evt"><span class="std std-ref">events</span></a>, indexed by <a class="reference internal" href="runtime.html#syntax-reg"><span class="std std-ref">region</span></a>.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{rcl}
 \mathit{func}_{\href{../exec/runtime.html#syntax-reg}{\mathit{reg}}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}}_1^\ast~\href{../exec/runtime.html#syntax-act}{\mathit{act}}~\href{../exec/runtime.html#syntax-act}{\mathit{act}}_2^\ast~\href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}}~\href{../exec/runtime.html#syntax-time}{\mathit{time}}_p~\href{../exec/runtime.html#syntax-time}{\mathit{time}}) &amp; = &amp; \mathit{func}(\href{../exec/runtime.html#syntax-act}{\mathit{act}}) \\
   &amp;&amp;  (\mathrel{\mbox{if}}~\href{../exec/relaxed.html#relaxed-aux}{\mathrm{loc}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}}) = \href{../exec/runtime.html#syntax-reg}{\mathit{reg}}[\href{../syntax/values.html#syntax-int}{\mathit{u32}}])  \\
 \mathit{func}_{\href{../exec/runtime.html#syntax-reg}{\mathit{reg}}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}}_1^\ast~\href{../exec/runtime.html#syntax-act}{\mathit{act}}~\href{../exec/runtime.html#syntax-act}{\mathit{act}}_2^\ast~\href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}}~\href{../exec/runtime.html#syntax-time}{\mathit{time}}_p~\href{../exec/runtime.html#syntax-time}{\mathit{time}},  \quad &amp;&amp;\\
 \qquad \href{../exec/runtime.html#syntax-act}{\mathit{act}}_3^\ast~\href{../exec/runtime.html#syntax-act}{\mathit{act}}'~\href{../exec/runtime.html#syntax-act}{\mathit{act}}_4^\ast~\href{../exec/runtime.html#syntax-time}{\mathbin{\mathsf{at}}}~\href{../exec/runtime.html#syntax-time}{\mathit{time}}'_p~\href{../exec/runtime.html#syntax-time}{\mathit{time}}') &amp; = &amp; \mathit{func}(\href{../exec/runtime.html#syntax-act}{\mathit{act}},\href{../exec/runtime.html#syntax-act}{\mathit{act}}') \\
   &amp;&amp; (\mathrel{\mbox{if}}~\href{../exec/relaxed.html#relaxed-aux}{\mathrm{loc}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}}) = \href{../exec/relaxed.html#relaxed-aux}{\mathrm{loc}}(\href{../exec/runtime.html#syntax-act}{\mathit{act}}') = \href{../exec/runtime.html#syntax-reg}{\mathit{reg}}[\href{../syntax/values.html#syntax-int}{\mathit{u32}}])  \\
 \end{array}\end{split}\]</div>
-<div class="admonition-todo admonition" id="id2">
-<p class="admonition-title">Todo</p>
-<p>nicer formatting, add prose intuition?</p>
-</div>
 </section>
 <section id="traces">
 <span id="relaxed-trace"></span><h2>Traces<a class="headerlink" href="#traces" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="id3">
+<div class="admonition-todo admonition" id="id2">
 <p class="admonition-title">Todo</p>
 <p>novel notation here?</p>
 </div>
