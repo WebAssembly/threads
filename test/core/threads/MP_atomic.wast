@@ -38,7 +38,7 @@
 (wait $T2)
 
 (module $Check
-  (memory (import "mem" "shared") 1 1 shared)
+  (memory (import "Mem" "shared") 1 1 shared)
 
   (func (export "check") (result i32)
     (local i32 i32)
