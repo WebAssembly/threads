@@ -1,6 +1,7 @@
 (module $Mem
   (memory (export "shared") 1 1 shared)
 )
+(register "mem_1")
 
 (thread $T1 (shared (module $Mem))
   (register "mem" $Mem)
@@ -28,7 +29,20 @@
 (wait $T2)
 
 
+(module (memory (import "mem_1" "shared") 1 1 shared))
+
 (assert_unlinkable
   (module (memory (import "mem" "shared") 1 1 shared))
   "unknown import"
 )
+
+(register "mem" $Mem)
+
+(thread $T3
+  (assert_unlinkable
+    (module (memory (import "mem" "shared") 1 1 shared))
+    "unknown import"
+  )
+)
+
+(wait $T3)

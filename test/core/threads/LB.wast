@@ -1,6 +1,7 @@
 (module $Mem
   (memory (export "shared") 1 1 shared)
 )
+(register "mem")
 
 (thread $T1 (shared (module $Mem))
   (register "mem" $Mem)

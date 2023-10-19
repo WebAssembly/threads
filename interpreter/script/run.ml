@@ -250,13 +250,19 @@ let string_of_nan = function
   | CanonicalNan -> "nan:canonical"
   | ArithmeticNan -> "nan:arithmetic"
 
-let type_of_result r =
-  match r with
+let rec type_of_result r =
+  match r.it with
   | NumResult (NumPat n) -> Types.NumType (Values.type_of_num n.it)
   | NumResult (NanPat n) -> Types.NumType (Values.type_of_num n.it)
   | VecResult (VecPat _) -> Types.VecType Types.V128Type
   | RefResult (RefPat r) -> Types.RefType (Values.type_of_ref r.it)
   | RefResult (RefTypePat t) -> Types.RefType t
+  | EitherResult rs ->
+    let ts = List.map type_of_result rs in
+    List.hd ts
+    (* TODO: once we have BotT back
+    List.fold_left (fun t1 t2 -> if t1 = t2 then t1 else BotT) (List.hd ts) ts
+    *)
 
 let string_of_num_pat (p : num_pat) =
   match p with
@@ -276,11 +282,13 @@ let string_of_ref_pat (p : ref_pat) =
   | RefPat r -> Values.string_of_ref r.it
   | RefTypePat t -> Types.string_of_refed_type t
 
-let string_of_result r =
-  match r with
+let rec string_of_result r =
+  match r.it with
   | NumResult np -> string_of_num_pat np
   | VecResult vp -> string_of_vec_pat vp
   | RefResult rp -> string_of_ref_pat rp
+  | EitherResult rs ->
+    "(" ^ String.concat " | " (List.map string_of_result rs) ^ ")"
 
 let string_of_results = function
   | [r] -> string_of_result r
@@ -449,12 +457,13 @@ let assert_ref_pat r p =
   | ExternRef _, RefTypePat Types.ExternRefType -> true
   | _ -> false
 
-let assert_pat v r =
+let rec assert_pat v r =
   let open Values in
-  match v, r with
+  match v, r.it with
   | Num n, NumResult np -> assert_num_pat n np
   | Vec v, VecResult vp -> assert_vec_pat v vp
   | Ref r, RefResult rp -> assert_ref_pat r rp
+  | _, EitherResult rs -> List.exists (assert_pat v) rs
   | _, _ -> false
 
 let assert_result at got expect =
@@ -523,7 +532,7 @@ let run_assertion c ass : assertion option =
     if act.it <> Eval then trace ("Asserting return...");
     (match run_action c act with
     | None -> Some (AssertReturn (Eval @@ ass.at, rs) @@ ass.at)
-    | Some got_vs -> assert_result ass.at got_vs (List.map (fun v -> v.it) rs); None
+    | Some got_vs -> assert_result ass.at got_vs rs; None
     )
 
   | AssertTrap (act, re) ->

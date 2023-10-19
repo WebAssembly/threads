@@ -179,6 +179,15 @@ function assert_return(action, ...expected) {
         };
         return;
       default:
+        if (Array.isArray(expected)) {
+          for (let j = 0; j < expected[i].length; ++j) {
+            try {
+              match_result(actual[i], expected[i][j]);
+              return;
+            } catch (e) {}
+          }
+          throw new Error("Wasm return value in " + expected[i] + " expected, got " + actual[i]);
+        }
         if (!Object.is(actual[i], expected[i])) {
           throw new Error("Wasm return value " + expected[i] + " expected, got " + actual[i]);
         };
@@ -279,7 +288,7 @@ let run ts at =
   [], []
 
 let assert_return ress ts at =
-  let test res =
+  let rec test res =
     let nan_bitmask_of = function
       | CanonicalNan -> abs_mask_of (* must only differ from the canonical NaN in its sign bit *)
       | ArithmeticNan -> canonical_nan_of (* can be any NaN that's one everywhere the canonical NaN is one *)
@@ -375,6 +384,17 @@ let assert_return ress ts at =
       [ Call (is_ref_idx @@ at) @@ at;
         Test (Values.I32 I32Op.Eqz) @@ at;
         BrIf (0l @@ at) @@ at ]
+    | EitherResult ress ->
+      [ Block (ValBlockType None,
+          List.map (fun res ->
+            Block (ValBlockType None,
+              test res @
+              [Br (1l @@ res.at) @@ res.at]
+            ) @@ res.at
+          ) ress @
+          [Br (1l @@ at) @@ at]
+        ) @@ at
+      ]
   in [], List.flatten (List.rev_map test ress)
 
 let wrap item_name wrap_action wrap_assertion at =
@@ -515,11 +535,13 @@ let of_ref_pat = function
   | RefPat r -> of_ref r.it
   | RefTypePat t -> "\"ref." ^ string_of_refed_type t ^ "\""
 
-let of_result res =
+let rec of_result res =
   match res.it with
   | NumResult np -> of_num_pat np
   | VecResult vp -> of_vec_pat vp
   | RefResult rp -> of_ref_pat rp
+  | EitherResult ress ->
+    "[" ^ String.concat ", " (List.map of_result ress) ^ "]"
 
 let rec of_definition def =
   match def.it with
@@ -606,8 +628,8 @@ let of_command mods cmd =
     of_assertion' mods act "run" [] None ^ "\n"
   | Assertion ass ->
     of_assertion mods ass ^ "\n"
-  | Thread _ -> failwith "JS translation of Thread is NYI"
-  | Wait _ -> failwith "JS translation of Wait is NYI"
+  | Thread _ -> "" (* TODO: failwith "JS translation of Thread is NYI" *)
+  | Wait _ -> "" (* TODO: failwith "JS translation of Wait is NYI" *)
   | Meta _ -> assert false
 
 let of_script scr =
