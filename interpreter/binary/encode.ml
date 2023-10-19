@@ -59,7 +59,6 @@ struct
     if -64L <= i && i < 64L then byte b
     else (byte (b lor 0x80); s64 (Int64.shift_right i 7))
 
-  let u1 i = u64 Int64.(logand (of_int i) 1L)
   let u32 i = u64 Int64.(logand (of_int32 i) 0xffffffffL)
   let s7 i = s64 (Int64.of_int i)
   let s32 i = s64 (Int64.of_int32 i)

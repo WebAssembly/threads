@@ -37,7 +37,7 @@ let print (FuncType (_, out)) vs =
   List.map default_value out
 
 
-let lookup name t =
+let lookup' name t =
   match Utf8.encode name, t with
   | "print", _ -> ExternFunc (func print (FuncType ([], [])))
   | "print_i32", _ -> ExternFunc (func print (FuncType ([NumType I32Type], [])))
@@ -55,3 +55,6 @@ let lookup name t =
   | "table", _ -> ExternTable table
   | "memory", _ -> ExternMemory memory
   | _ -> raise Not_found
+
+let lookup name t =
+  try Some (lookup' name t) with Not_found -> None

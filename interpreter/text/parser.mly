@@ -240,6 +240,7 @@ let inline_type_explicit (c : context) x ft at =
 %token ASSERT_MALFORMED ASSERT_INVALID ASSERT_UNLINKABLE
 %token ASSERT_RETURN ASSERT_TRAP ASSERT_EXHAUSTION
 %token<Script.nan> NAN
+%token EITHER
 %token INPUT OUTPUT
 %token EOF
 
@@ -1107,11 +1108,13 @@ result :
   | literal_ref { RefResult (RefPat ($1 @@ at ())) @@ at () }
   | LPAR REF_FUNC RPAR { RefResult (RefTypePat FuncRefType) @@ at () }
   | LPAR REF_EXTERN RPAR { RefResult (RefTypePat ExternRefType) @@ at () }
-  | LPAR VEC_CONST VEC_SHAPE numpat_list RPAR {
-    if V128.num_lanes $3 <> List.length $4 then
-      error (at ()) "wrong number of lane literals";
-    VecResult (VecPat (Values.V128 ($3, List.map (fun lit -> lit $3) $4))) @@ at ()
-  }
+  | LPAR VEC_CONST VEC_SHAPE numpat_list RPAR
+    { if V128.num_lanes $3 <> List.length $4 then
+        error (at ()) "wrong number of lane literals";
+      VecResult (VecPat (Values.V128 ($3, List.map (fun lit -> lit $3) $4))) @@ at ()
+    }
+  | LPAR EITHER result result_list RPAR
+    { EitherResult ($3 :: $4) @@ at () }
 
 result_list :
   | /* empty */ { [] }
