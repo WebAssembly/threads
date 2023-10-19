@@ -309,7 +309,7 @@ and context =
   threads : task Map.t ref;
   modules : Ast.module_ Map.t ref;
   instances : Instance.module_inst Map.t ref;
-  registry : Instance.module_inst Map.t ref;
+  registry : Import.registry;
   tasks : task list ref;
   config : Eval.config ref;
   thread : Eval.thread_id;
@@ -320,7 +320,7 @@ let context_for config thread =
     threads = ref Map.empty;
     modules = ref Map.empty;
     instances = ref Map.empty;
-    registry = ref Map.empty;
+    registry = Import.registry ();
     tasks = ref [];
     config;
     thread;
@@ -330,8 +330,8 @@ let context () =
   let t, ec = Eval.spawn Eval.empty_config in
   context_for (ref ec) t
 
-let local c =
-  {(context_for c.config c.thread) with tasks = c.tasks}
+let spawn c t =
+  {(context_for c.config t) with tasks = c.tasks}
 
 let bind map x_opt y =
   let map' =
@@ -351,11 +351,6 @@ let lookup_script c = lookup "script" c.scripts
 let lookup_thread c = lookup "thread" c.threads
 let lookup_module c = lookup "module" c.modules
 let lookup_instance c = lookup "module" c.instances
-
-let lookup_registry c module_name item_name _t =
-  match Instance.export (Map.find module_name !(c.registry)) item_name with
-  | Some ext -> ext
-  | None -> raise Not_found
 
 
 (* Running *)
@@ -508,7 +503,7 @@ let run_assertion c ass : assertion option =
     let m = run_definition c def in
     if not !Flags.unchecked then Valid.check_module m;
     (match
-      let imports = Import.link m in
+      let imports = Import.link c.registry m in
       c.config := snd (Eval.init !(c.config) c.thread m imports)
     with
     | exception (Import.Unknown (_, msg) | Eval.Link (_, msg)) ->
@@ -520,7 +515,7 @@ let run_assertion c ass : assertion option =
     trace "Asserting trap...";
     let m = run_definition c def in
     if not !Flags.unchecked then Valid.check_module m;
-    let imports = Import.link m in
+    let imports = Import.link c.registry m in
     c.config := snd (Eval.init !(c.config) c.thread m imports);
     Some (AssertTrap (Eval @@ ass.at, re) @@ ass.at)
 
@@ -565,7 +560,7 @@ let rec run_command c cmd : command list =
     bind c.modules x_opt m;
     if !Flags.dry then [] else begin
       trace "Initializing...";
-      let imports = Import.link m in
+      let imports = Import.link c.registry m in
       let inst, config' = Eval.init !(c.config) c.thread m imports in
       bind c.instances x_opt inst;
       c.config := config';
@@ -576,8 +571,8 @@ let rec run_command c cmd : command list =
     if !Flags.dry then [] else begin
       trace ("Registering module \"" ^ Ast.string_of_name name ^ "\"...");
       let inst = lookup_instance c x_opt cmd.at in
-      c.registry := Map.add (Utf8.encode name) inst !(c.registry);
-      Import.register name (lookup_registry c (Utf8.encode name));
+      Import.register c.registry name
+        (fun name _et -> Instance.export inst name);
       []
     end
 
@@ -597,7 +592,7 @@ let rec run_command c cmd : command list =
 
   | Thread (x_opt, xs, cmds) ->
     let thread, config' = Eval.spawn !(c.config) in
-    let task = {context = {(local c) with thread}; script = ref cmds} in
+    let task = {context = spawn c thread; script = ref cmds} in
     List.iter (fun x ->
       if not !Flags.dry then begin
       let inst = lookup_instance c (Some x) x.at in
