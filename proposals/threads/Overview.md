@@ -16,7 +16,7 @@ mutex is unlocked. If its value is 1, the mutex is locked.
 ```wasm
 (module
   ;; Import 1 page (64Kib) of shared memory.
-  (import "env" "memory" (memory 1 1 shared))
+  (import "env" "memory" (memory (shared 1 1)))
 
   ;; Try to lock a mutex at the given address.
   ;; Returns 1 if the mutex was successfully locked, and 0 otherwise.
