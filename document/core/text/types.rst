@@ -87,7 +87,7 @@ Memory Types
    \begin{array}{llclll@{\qquad\qquad}l}
    \production{memory type} & \Tmemtype &::=&
      \X{lim}{:}\Tlimits &\Rightarrow& \X{lim}~\UNSHARED \\ &&|&
-     \text{(}~\text{shared}~~\X{lim}{:}\Tlimits~~\text{)} &\Rightarrow& \X{lim}~\SHARED \\
+     \X{lim}{:}\Tlimits~~\text{shared} &\Rightarrow& \X{lim}~\SHARED \\
    \end{array}
 
 
