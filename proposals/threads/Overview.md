@@ -321,7 +321,7 @@ address. If the values are not equal, no value is stored. In either case, the
 | Name | Load (as `loaded`) | Compare `expected` with `loaded` | Conditionally Store `replacement` | Return `loaded` |
 | ---- | ---- | ---- | ---- | ---- |
 | `i32.atomic.rmw8.cmpxchg_u` | 1 byte | `expected` wrapped from i32 to i8, 8-bit compare equal | wrapped from i32 to i8, store 1 byte | zero-extended from i8 to i32 |
-| `i32.atomic.rmw16.cmpxchg_u` | 2 bytes | `expected` wrapped from i32 to i16, 16-bit compare equal | wrapped from i32 to i16, store 2 bytes | zero-extended from i8 to i32 |
+| `i32.atomic.rmw16.cmpxchg_u` | 2 bytes | `expected` wrapped from i32 to i16, 16-bit compare equal | wrapped from i32 to i16, store 2 bytes | zero-extended from i16 to i32 |
 | `i32.atomic.rmw.cmpxchg` | 4 bytes | 32-bit compare equal | store 4 bytes | as i32 |
 | `i64.atomic.rmw8.cmpxchg_u` | 1 byte | `expected` wrapped from i64 to i8, 8-bit compare equal | wrapped from i64 to i8, store 1 byte | zero-extended from i8 to i64 |
 | `i64.atomic.rmw16.cmpxchg_u` | 2 bytes | `expected` wrapped from i64 to i16, 16-bit compare equal | wrapped from i64 to i16, store 2 bytes | zero-extended from i16 to i64 |
