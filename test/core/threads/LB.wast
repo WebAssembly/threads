@@ -53,7 +53,7 @@
     ;; allowed results: (L_0 = 0 || L_0 = 1) && (L_1 = 0 || L_1 = 1)
 
     (i32.or (i32.eq (local.get 0) (i32.const 1)) (i32.eq (local.get 0) (i32.const 0)))
-    (i32.or (i32.eq (local.get 1) (i32.const 1)) (i32.eq (local.get 0) (i32.const 0)))
+    (i32.or (i32.eq (local.get 1) (i32.const 1)) (i32.eq (local.get 1) (i32.const 0)))
     (i32.and)
     (return)
   )
