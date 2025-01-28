@@ -46,21 +46,6 @@ $(JSLIB):
 	ln $(BUILDDIR)/$(@:%.js=%.bc.js) $@
 
 
-# Unit tests
-
-UNITTESTDIR =	unittest
-UNITTESTFILES =	$(shell cd $(UNITTESTDIR) > /dev/null; ls *.ml)
-UNITTESTS =	$(UNITTESTFILES:%.ml=%)
-
-.PHONY: unittest
-
-unittest: $(UNITTESTS:%=unittest/%)
-
-unittest/%:
-	dune build $(@F).exe
-	dune exec ./$(@F).exe
-
-
 # Test suite
 
 TESTDIR =	../test/core
@@ -69,7 +54,7 @@ TESTS =		$(TESTFILES:%.wast=%)
 
 .PHONY: test partest quiettest
 
-test: $(NAME) unittest
+test: $(NAME)
 	$(TESTDIR)/run.py --wasm `pwd`/$(NAME) $(if $(JS),--js '$(JS)',)
 
 test/%: $(NAME)
@@ -78,7 +63,7 @@ test/%: $(NAME)
 run/%: $(NAME)
 	./$(NAME) $(TESTDIR)/$*.wast
 
-partest: $(NAME) unittest
+partest: $(NAME)
 	make -j10 quiettest
 
 quiettest: $(TESTS:%=quiettest/%)
