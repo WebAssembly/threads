@@ -158,40 +158,44 @@ function assert_return(action, ...expected) {
     throw new Error(expected.length + " value(s) expected, got " + actual.length);
   }
   for (let i = 0; i < actual.length; ++i) {
-    switch (expected[i]) {
-      case "nan:canonical":
-      case "nan:arithmetic":
-      case "nan:any":
-        // Note that JS can't reliably distinguish different NaN values,
-        // so there's no good way to test that it's a canonical NaN.
-        if (!Number.isNaN(actual[i])) {
-          throw new Error("Wasm return value NaN expected, got " + actual[i]);
-        };
-        return;
-      case "ref.func":
-        if (typeof actual[i] !== "function") {
-          throw new Error("Wasm function return value expected, got " + actual[i]);
-        };
-        return;
-      case "ref.extern":
-        if (actual[i] === null) {
-          throw new Error("Wasm reference return value expected, got " + actual[i]);
-        };
-        return;
-      default:
-        if (Array.isArray(expected)) {
-          for (let j = 0; j < expected[i].length; ++j) {
-            try {
-              match_result(actual[i], expected[i][j]);
-              return;
-            } catch (e) {}
-          }
-          throw new Error("Wasm return value in " + expected[i] + " expected, got " + actual[i]);
+    match_result(actual[i], expected[i]);
+  }
+}
+
+function match_result(actual, expected) {
+  switch (expected) {
+    case "nan:canonical":
+    case "nan:arithmetic":
+    case "nan:any":
+      // Note that JS can't reliably distinguish different NaN values,
+      // so there's no good way to test that it's a canonical NaN.
+      if (!Number.isNaN(actual)) {
+        throw new Error("Wasm return value NaN expected, got " + actual);
+      };
+      return;
+    case "ref.func":
+      if (typeof actual[i] !== "function") {
+        throw new Error("Wasm function return value expected, got " + actual[i]);
+      };
+      return;
+    case "ref.extern":
+      if (actual[i] === null) {
+        throw new Error("Wasm reference return value expected, got " + actual[i]);
+      };
+      return;
+    default:
+      if (Array.isArray(expected)) {
+        for (let i = 0; i < expected.length; ++i) {
+          try {
+            match_result(actual, expected[i]);
+            return;
+          } catch (e) {}
         }
-        if (!Object.is(actual[i], expected[i])) {
-          throw new Error("Wasm return value " + expected[i] + " expected, got " + actual[i]);
-        };
-    }
+        throw new Error("Wasm return value in " + expected + " expected, got " + actual);
+      }
+      if (!Object.is(actual, expected)) {
+        throw new Error("Wasm return value " + expected + " expected, got " + actual);
+      };
   }
 }
 |}
