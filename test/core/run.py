@@ -78,6 +78,8 @@ class RunTests(unittest.TestCase):
 
     # Run original file
     expectedExitCode = 1 if ".fail." in inputFile else 0
+    if expectedExitCode == 1:
+        print("### Expected exit 1; " + inputPath)
     logPath = self._auxFile(outputPath + ".log")
     self._runCommand(('%s "%s"') % (wasmCommand, inputPath), logPath, expectedExitCode)
 

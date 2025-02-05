@@ -201,13 +201,22 @@ function match_result(actual, expected) {
 |}
 
 
+(* Debugging *)
+
+let trace name = if !Flags.trace then print_endline ("--[js] " ^ name)
+
+
 (* Context *)
 
 module NameMap = Map.Make(struct type t = Ast.name let compare = compare end)
 module Map = Map.Make(String)
 
 type exports = extern_type NameMap.t
-type modules = {mutable env : exports Map.t; mutable current : int}
+
+type modules = {mutable env: exports Map.t; mutable current: int}
+type threads = {mods: modules; current: int}
+type context = {mutable thrs: threads list; mutable thr_fresh: int;
+                mutable thrs_writer: (string * string) Map.t}
 
 let exports m : exports =
   List.fold_left
@@ -216,27 +225,94 @@ let exports m : exports =
 
 let modules () : modules = {env = Map.empty; current = 0}
 
-let current_var (mods : modules) = "$" ^ string_of_int mods.current
-let of_var_opt (mods : modules) = function
-  | None -> current_var mods
+let context () : context =
+  let init_mods = modules () in
+  let init_thrs = {mods = init_mods; current = 0} in
+  {thrs = [init_thrs]; thr_fresh = 0; thrs_writer = Map.empty}
+
+let string_of_exports (es: exports) =
+  String.concat ", " (List.map string_of_name (NameMap.bindings es |> List.split |> fst)) ^ "\n"
+
+let string_of_modules (mods: modules) =
+  let es = mods.env in
+  Map.fold (fun n es acc ->
+    acc ^ n ^ " ↦ " ^ string_of_exports es
+  ) es ""
+
+let string_of_context ctx =
+  let thrs_stack = ctx.thrs in
+  let js_writer  = ctx.thrs_writer in
+  "Context:\n" ^
+  String.concat "↑\n" (List.map (fun thrs -> string_of_modules (thrs.mods)) thrs_stack) ^
+  "Js files:\n" ^ String.concat ", " (Map.bindings js_writer |> List.map fst) ^
+  "\n"
+
+
+let module_prefix = "_M"
+let thread_prefix = "_T"
+
+let current_mod_var (mods: modules) =
+  let prefix = module_prefix in
+  "$" ^ prefix ^ string_of_int mods.current
+
+let of_mod_var_opt (mods: modules) = function
+  | None -> current_mod_var mods
+  | Some x -> x.it 
+
+let thrs_of_ctx (ctx: context) = List.hd ctx.thrs
+let mods_of_ctx (ctx: context) = (thrs_of_ctx ctx).mods
+
+
+let current_thr_var (ctx: context) =
+  let current = (List.hd ctx.thrs).current in
+  let prefix = thread_prefix in
+  "$" ^ prefix ^ string_of_int current
+
+let of_thr_var_opt (ctx: context) = function
+  | None -> current_thr_var ctx
   | Some x -> x.it
 
-let bind (mods : modules) x_opt m =
+let bind (ctx: context) x_opt m =
+  let mods = mods_of_ctx ctx in
   let exports = exports m in
   mods.current <- mods.current + 1;
-  mods.env <- Map.add (of_var_opt mods x_opt) exports mods.env;
-  if x_opt <> None then mods.env <- Map.add (current_var mods) exports mods.env
+  mods.env <- Map.add (of_mod_var_opt mods x_opt) exports mods.env;
+  if x_opt <> None then mods.env <- Map.add (current_mod_var mods) exports mods.env
 
-let lookup (mods : modules) x_opt name at =
+let write_thread (ctx: context) x_opt basefile (scr: string) at =
+  let v = current_thr_var ctx in
+  let v' = of_thr_var_opt ctx x_opt in
+  if Map.find_opt v' ctx.thrs_writer <> None then
+    raise (Eval.Crash (at, "Duplicate thread name " ^ v'));
+  let fname = Filename.remove_extension basefile ^ v ^ Filename.extension basefile in
+  let fname' = Filename.remove_extension basefile ^ v' ^ Filename.extension basefile in
+  ctx.thrs_writer <- Map.add v' (fname', scr) ctx.thrs_writer;
+  if x_opt <> None then ctx.thrs_writer <- Map.add v (fname, scr) ctx.thrs_writer
+
+let lookup (mods: modules) x_opt name at =
   let exports =
-    try Map.find (of_var_opt mods x_opt) mods.env with Not_found ->
+    try Map.find (of_mod_var_opt mods x_opt) mods.env with Not_found ->
       raise (Eval.Crash (at, 
         if x_opt = None then "no module defined within script"
-        else "unknown module " ^ of_var_opt mods x_opt ^ " within script"))
+        else "unknown module " ^ of_mod_var_opt mods x_opt ^ " within script"))
   in try NameMap.find name exports with Not_found ->
-    raise (Eval.Crash (at, "unknown export \"" ^
-      string_of_name name ^ "\" within module"))
+    raise (Eval.Crash (at, "unknown name \"" ^
+      string_of_name name ^ "\" within module;\n" ^
+      "  exported names are: " ^ string_of_exports exports))
 
+let enter_thr_scope (ctx: context) =
+  ctx.thr_fresh <- ctx.thr_fresh + 1;
+  let new_thrs = {mods = modules (); current = ctx.thr_fresh} in
+  ctx.thrs <- new_thrs :: ctx.thrs
+
+let leave_thr_scope (ctx: context) =
+  ctx.thrs <- List.tl ctx.thrs
+
+let with_new_thr_scope (ctx: context) (f: context -> 't) : 't =
+  enter_thr_scope ctx;
+  let r = f ctx in
+  leave_thr_scope ctx;
+  r
 
 (* Wrappers *)
 
@@ -556,7 +632,7 @@ let rec of_definition def =
       of_bytes "<malformed quote>"
 
 let of_wrapper mods x_opt name wrap_action wrap_assertion at =
-  let x = of_var_opt mods x_opt in
+  let x = of_mod_var_opt mods x_opt in
   let bs = wrap name wrap_action wrap_assertion at in
   "call(instance(" ^ of_bytes bs ^ ", " ^
     "exports(" ^ x ^ ")), " ^ " \"run\", [])"
@@ -564,7 +640,7 @@ let of_wrapper mods x_opt name wrap_action wrap_assertion at =
 let of_action mods act =
   match act.it with
   | Invoke (x_opt, name, vs) ->
-    "call(" ^ of_var_opt mods x_opt ^ ", " ^ of_name name ^ ", " ^
+    "call(" ^ of_mod_var_opt mods x_opt ^ ", " ^ of_name name ^ ", " ^
       "[" ^ String.concat ", " (List.map of_value vs) ^ "])",
     (match lookup mods x_opt name act.at with
     | ExternFuncType ft when not (is_js_func_type ft) ->
@@ -573,7 +649,7 @@ let of_action mods act =
     | _ -> None
     )
   | Get (x_opt, name) ->
-    "get(" ^ of_var_opt mods x_opt ^ ", " ^ of_name name ^ ")",
+    "get(" ^ of_mod_var_opt mods x_opt ^ ", " ^ of_name name ^ ")",
     (match lookup mods x_opt name act.at with
     | ExternGlobalType gt when not (is_js_global_type gt) ->
       let GlobalType (t, _) = gt in
@@ -612,7 +688,7 @@ let of_assertion mods ass =
   | AssertExhaustion (act, _) ->
     of_assertion' mods act "assert_exhaustion" [] None
 
-let of_command mods cmd =
+let rec of_command base_file (ctx : context) cmd =
   "\n// " ^ Filename.basename cmd.at.left.file ^
     ":" ^ string_of_int cmd.at.left.line ^ "\n" ^
   match cmd.it with
@@ -622,20 +698,41 @@ let of_command mods cmd =
       | Textual m -> m
       | Encoded (_, bs) -> Decode.decode "binary" bs
       | Quoted (_, s) -> unquote (Parse.string_to_module s)
-    in bind mods x_opt (unquote def);
-    "let " ^ current_var mods ^ " = instance(" ^ of_definition def ^ ");\n" ^
+    in bind ctx x_opt (unquote def);
+    "let " ^ current_mod_var (mods_of_ctx ctx) ^ " = instance(" ^ of_definition def ^ ");\n" ^
     (if x_opt = None then "" else
-    "let " ^ of_var_opt mods x_opt ^ " = " ^ current_var mods ^ ";\n")
+    "let " ^ of_mod_var_opt (mods_of_ctx ctx) x_opt ^ " = " ^
+    current_mod_var (mods_of_ctx ctx) ^ ";\n")
   | Register (name, x_opt) ->
-    "register(" ^ of_name name ^ ", " ^ of_var_opt mods x_opt ^ ")\n"
+    "register(" ^ of_name name ^ ", " ^ of_mod_var_opt (mods_of_ctx ctx) x_opt ^ ");\n"
   | Action act ->
-    of_assertion' mods act "run" [] None ^ "\n"
+    of_assertion' (mods_of_ctx ctx) act "run" [] None ^ "\n"
   | Assertion ass ->
-    of_assertion mods ass ^ "\n"
-  | Thread _ -> "" (* TODO: failwith "JS translation of Thread is NYI" *)
-  | Wait _ -> "" (* TODO: failwith "JS translation of Wait is NYI" *)
+    of_assertion (mods_of_ctx ctx) ass ^ "\n"
+  | Thread (x_opt, xs, cmds) ->
+    with_new_thr_scope ctx (fun ctx ->
+      if x_opt = None then failwith "NYI: JS printing can't handle anonymous thread commands";
+      let worker_contents = String.concat "" (List.map (of_command base_file ctx) cmds) in
+      write_thread ctx x_opt base_file worker_contents cmd.at;
+      let worker_file = Filename.remove_extension(base_file) ^
+                        of_thr_var_opt ctx x_opt ^
+                        Filename.extension(base_file) in
+      "let " ^ current_thr_var ctx ^
+      " = thread([" ^
+      String.concat ", " (List.map (fun x -> "[\"" ^ x.it ^ "\", " ^ x.it ^ "]") xs) ^
+      "], \"" ^ worker_file ^
+      "\");\n" ^
+      if x_opt = None then "" else
+        "let " ^ of_thr_var_opt ctx x_opt ^ " = " ^ current_thr_var ctx ^ "\n"
+    )
+  | Wait x_opt ->
+    "wait(" ^ of_thr_var_opt ctx x_opt ^ ");\n"
   | Meta _ -> assert false
 
-let of_script scr =
-  (if !Flags.harness then harness else "") ^
-  String.concat "" (List.map (of_command (modules ())) scr)
+
+let of_script base_file scr =
+  let ctx = context () in
+  let js = (if !Flags.harness then harness else "") ^
+  String.concat "" (List.map (of_command base_file ctx) scr) in
+  let js_workers = ctx.thrs_writer in
+  (js, Map.bindings js_workers |> List.split |> snd)

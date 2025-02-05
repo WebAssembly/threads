@@ -54,7 +54,7 @@
 (env
  (_
   (flags
-   (-w +a-4-27-42-44-45-70 -warn-error +a-3))))
+   (-w +a-4-27-42-44-45-70 -warn-error +a-3-32))))
 
 (rule
  (alias runtest)

@@ -69,13 +69,17 @@ let create_script_file mode file get_script _ =
 
 let create_js_file file get_script _ =
   trace ("Converting (" ^ file ^ ")...");
-  let js = Js.of_script (get_script ()) in
-  let oc = open_out file in
-  try
-    trace "Writing...";
-    output_string oc js;
-    close_out oc
-  with exn -> close_out oc; raise exn
+  let (js, js_workers) = Js.of_script file (get_script ()) in
+  let write_to_file (fname: string) (content: string) =
+    let oc = open_out fname in
+    try
+      trace ("Writing file (" ^ fname ^ ")...");
+      output_string oc content;
+      close_out oc;
+    with exn -> close_out oc; raise exn
+  in
+  write_to_file file js;
+  List.iter (fun (fn, s) -> write_to_file fn s) js_workers
 
 let output_file =
   dispatch_file_ext
