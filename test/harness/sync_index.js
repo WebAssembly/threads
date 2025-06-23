@@ -274,6 +274,16 @@ function run(action) {
     }, "A wast test that runs without any special assertion.");
 }
 
+function thread(parent_scope, filename) {
+
+}
+
+function wait(worker) {
+
+
+}
+
+
 function assert_unlinkable(bytes) {
     let result = instance(bytes, registry, EXPECT_INVALID);
 

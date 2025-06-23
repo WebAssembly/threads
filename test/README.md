@@ -9,11 +9,11 @@ A list of to-do's can be found [here](Todo.md).
 
 ## Multi-stage testing
 
-The wast tests can be converted to JavaScript, and the JavaScript tests
-to HTML tests, using the `build.py` script. It will create a `out/` directory
-(checked in in this repository, to be able to use it from github pages),
-containing subdirectories with expanded tests, as well as a landing page for
-runnning all of them in HTML.
+The wast tests can be converted to JavaScript, and the JavaScript tests to HTML
+tests, using the `build.py` script. Depending on the flags (`--js` and
+`--html`) given to the script, the output files will be written to the relevant
+output directories, including a landing page in `--front <OUT>` for runnning
+all of them in HTML.
 
 The HTML tests are just [Web Platform Tests](http://testthewebforward.org)
 using the
@@ -34,10 +34,16 @@ test) gets its equivalent WPT, to be easily run in browser vendors' automation.
 
 ## Local HTTP serving of the repository
 
-From the root of your clone of this repository:
+From the root of your clone of this repository (with Python2):
 
 ```
 python -m SimpleHTTPServer 8000
 ```
+Or,
+```
+python3 -m http.server 8000
+```
 
-Then open your favorite browser and browse to `http://localhost:8000/test/out`.
+
+
+Then open your favorite browser and browse to `http://localhost:8000/test/<OUT>`.

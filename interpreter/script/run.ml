@@ -69,13 +69,17 @@ let create_script_file mode file get_script _ =
 
 let create_js_file file get_script _ =
   trace ("Converting (" ^ file ^ ")...");
-  let js = Js.of_script (get_script ()) in
-  let oc = open_out file in
-  try
-    trace "Writing...";
-    output_string oc js;
-    close_out oc
-  with exn -> close_out oc; raise exn
+  let (js, js_workers) = Js.of_script file (get_script ()) in
+  let write_to_file (fname: string) (content: string) =
+    let oc = open_out fname in
+    try
+      trace ("Writing file (" ^ fname ^ ")...");
+      output_string oc content;
+      close_out oc;
+    with exn -> close_out oc; raise exn
+  in
+  write_to_file file js;
+  List.iter (fun (fn, s) -> write_to_file fn s) js_workers
 
 let output_file =
   dispatch_file_ext
@@ -250,13 +254,19 @@ let string_of_nan = function
   | CanonicalNan -> "nan:canonical"
   | ArithmeticNan -> "nan:arithmetic"
 
-let type_of_result r =
-  match r with
+let rec type_of_result r =
+  match r.it with
   | NumResult (NumPat n) -> Types.NumType (Values.type_of_num n.it)
   | NumResult (NanPat n) -> Types.NumType (Values.type_of_num n.it)
   | VecResult (VecPat _) -> Types.VecType Types.V128Type
   | RefResult (RefPat r) -> Types.RefType (Values.type_of_ref r.it)
   | RefResult (RefTypePat t) -> Types.RefType t
+  | EitherResult rs ->
+    let ts = List.map type_of_result rs in
+    List.hd ts
+    (* TODO: once we have BotT back
+    List.fold_left (fun t1 t2 -> if t1 = t2 then t1 else BotT) (List.hd ts) ts
+    *)
 
 let string_of_num_pat (p : num_pat) =
   match p with
@@ -276,11 +286,13 @@ let string_of_ref_pat (p : ref_pat) =
   | RefPat r -> Values.string_of_ref r.it
   | RefTypePat t -> Types.string_of_refed_type t
 
-let string_of_result r =
-  match r with
+let rec string_of_result r =
+  match r.it with
   | NumResult np -> string_of_num_pat np
   | VecResult vp -> string_of_vec_pat vp
   | RefResult rp -> string_of_ref_pat rp
+  | EitherResult rs ->
+    "(" ^ String.concat " | " (List.map string_of_result rs) ^ ")"
 
 let string_of_results = function
   | [r] -> string_of_result r
@@ -309,7 +321,7 @@ and context =
   threads : task Map.t ref;
   modules : Ast.module_ Map.t ref;
   instances : Instance.module_inst Map.t ref;
-  registry : Instance.module_inst Map.t ref;
+  registry : Import.registry;
   tasks : task list ref;
   config : Eval.config ref;
   thread : Eval.thread_id;
@@ -320,7 +332,7 @@ let context_for config thread =
     threads = ref Map.empty;
     modules = ref Map.empty;
     instances = ref Map.empty;
-    registry = ref Map.empty;
+    registry = Import.registry ();
     tasks = ref [];
     config;
     thread;
@@ -330,8 +342,8 @@ let context () =
   let t, ec = Eval.spawn Eval.empty_config in
   context_for (ref ec) t
 
-let local c =
-  {(context_for c.config c.thread) with tasks = c.tasks}
+let spawn c t =
+  {(context_for c.config t) with tasks = c.tasks}
 
 let bind map x_opt y =
   let map' =
@@ -351,11 +363,6 @@ let lookup_script c = lookup "script" c.scripts
 let lookup_thread c = lookup "thread" c.threads
 let lookup_module c = lookup "module" c.modules
 let lookup_instance c = lookup "module" c.instances
-
-let lookup_registry c module_name item_name _t =
-  match Instance.export (Map.find module_name !(c.registry)) item_name with
-  | Some ext -> ext
-  | None -> raise Not_found
 
 
 (* Running *)
@@ -454,12 +461,13 @@ let assert_ref_pat r p =
   | ExternRef _, RefTypePat Types.ExternRefType -> true
   | _ -> false
 
-let assert_pat v r =
+let rec assert_pat v r =
   let open Values in
-  match v, r with
+  match v, r.it with
   | Num n, NumResult np -> assert_num_pat n np
   | Vec v, VecResult vp -> assert_vec_pat v vp
   | Ref r, RefResult rp -> assert_ref_pat r rp
+  | _, EitherResult rs -> List.exists (assert_pat v) rs
   | _, _ -> false
 
 let assert_result at got expect =
@@ -508,7 +516,7 @@ let run_assertion c ass : assertion option =
     let m = run_definition c def in
     if not !Flags.unchecked then Valid.check_module m;
     (match
-      let imports = Import.link m in
+      let imports = Import.link c.registry m in
       c.config := snd (Eval.init !(c.config) c.thread m imports)
     with
     | exception (Import.Unknown (_, msg) | Eval.Link (_, msg)) ->
@@ -520,7 +528,7 @@ let run_assertion c ass : assertion option =
     trace "Asserting trap...";
     let m = run_definition c def in
     if not !Flags.unchecked then Valid.check_module m;
-    let imports = Import.link m in
+    let imports = Import.link c.registry m in
     c.config := snd (Eval.init !(c.config) c.thread m imports);
     Some (AssertTrap (Eval @@ ass.at, re) @@ ass.at)
 
@@ -528,7 +536,7 @@ let run_assertion c ass : assertion option =
     if act.it <> Eval then trace ("Asserting return...");
     (match run_action c act with
     | None -> Some (AssertReturn (Eval @@ ass.at, rs) @@ ass.at)
-    | Some got_vs -> assert_result ass.at got_vs (List.map (fun v -> v.it) rs); None
+    | Some got_vs -> assert_result ass.at got_vs rs; None
     )
 
   | AssertTrap (act, re) ->
@@ -565,7 +573,7 @@ let rec run_command c cmd : command list =
     bind c.modules x_opt m;
     if !Flags.dry then [] else begin
       trace "Initializing...";
-      let imports = Import.link m in
+      let imports = Import.link c.registry m in
       let inst, config' = Eval.init !(c.config) c.thread m imports in
       bind c.instances x_opt inst;
       c.config := config';
@@ -576,8 +584,8 @@ let rec run_command c cmd : command list =
     if !Flags.dry then [] else begin
       trace ("Registering module \"" ^ Ast.string_of_name name ^ "\"...");
       let inst = lookup_instance c x_opt cmd.at in
-      c.registry := Map.add (Utf8.encode name) inst !(c.registry);
-      Import.register name (lookup_registry c (Utf8.encode name));
+      Import.register c.registry name
+        (fun name _et -> Instance.export inst name);
       []
     end
 
@@ -597,7 +605,7 @@ let rec run_command c cmd : command list =
 
   | Thread (x_opt, xs, cmds) ->
     let thread, config' = Eval.spawn !(c.config) in
-    let task = {context = {(local c) with thread}; script = ref cmds} in
+    let task = {context = spawn c thread; script = ref cmds} in
     List.iter (fun x ->
       if not !Flags.dry then begin
       let inst = lookup_instance c (Some x) x.at in

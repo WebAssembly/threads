@@ -19,12 +19,19 @@
 let testNum = (function() {
   let count = 1;
   return function() {
-    return `#${count++} `;
+      return `#${count++} `;
   };
 })();
 
-function uniqueTest(func, desc) {
-  test(func, testNum() + desc);
+function testName(id = undefined) {
+  if (typeof id === "undefined")
+    return testNum();
+  else
+    return testNum() + "(" + id + ") ";
+}
+
+function uniqueTest(func, id, desc) {
+  test(func, testName(id) + desc);
 }
 
 // WPT's assert_throw uses a list of predefined, hardcoded known errors. Since
@@ -74,6 +81,11 @@ function eq_funcref(x, y) {
 // Default imports.
 var registry = {};
 
+// List of workers. Each element is of the form
+// {worker: Worker, executed: bool}
+// true result means success and false means failure.
+var worker_arr = [];
+
 // All tests run asynchronously and return their results as promises. To ensure
 // that all tests execute in the correct order, we chain the promises together
 // so that a test is only executed when all previous tests have finished their
@@ -81,7 +93,7 @@ var registry = {};
 let chain = Promise.resolve();
 
 // Resets the registry between two different WPT tests.
-function reinitializeRegistry() {
+function reinitializeRegistry(id = undefined) {
   if (typeof WebAssembly === "undefined") return;
 
   chain = chain.then(_ => {
@@ -117,13 +129,25 @@ function reinitializeRegistry() {
     registry = new Proxy({ spectest }, handler);
   });
 
+  // Called at the end of the generated js test file to make sure that all
+  // the workers are properly terminated.
+  chain = chain.then(_ => {
+    worker_arr.forEach((elem, idx) => {
+      if (elem.executed === false) {
+        elem.worker.terminate();
+        console.log(`kill potentially unfinished worker ${idx}.`)
+      }
+    });
+    worker_arr = [];
+  })
+
   // This function is called at the end of every generated js test file. By
   // adding the chain as a promise_test here we make sure that the WPT harness
   // waits for all tests in the chain to finish.
-  promise_test(_ => chain, testNum() + "Reinitialize the default imports");
+    promise_test(_ => chain, testName(id) + "Reinitialize the default imports");
 }
 
-reinitializeRegistry();
+reinitializeRegistry(self.id);
 
 /* WAST POLYFILL *************************************************************/
 
@@ -140,6 +164,7 @@ function binary(bytes) {
  * Returns a compiled module, or throws if there was an error at compilation.
  */
 function module(bytes, valid = true) {
+  const id = self.id;
   const test = valid
     ? "Test that WebAssembly compilation succeeds"
     : "Test that WebAssembly compilation fails";
@@ -149,13 +174,13 @@ function module(bytes, valid = true) {
 
   uniqueTest(_ => {
     assert_equals(valid, validated);
-  }, test);
+  }, id, test);
 
   chain = chain.then(_ => WebAssembly.compile(buffer)).then(
     module => {
       uniqueTest(_ => {
         assert_true(valid, loc);
-      }, test);
+      }, id, test);
       return module;
     },
     error => {
@@ -164,7 +189,7 @@ function module(bytes, valid = true) {
           !valid,
           `WebAssembly.compile failed unexpectedly with ${error} at {loc}`
         );
-      }, test);
+      }, id, test);
     }
   );
   return chain;
@@ -177,6 +202,7 @@ function assert_invalid(bytes) {
 const assert_malformed = assert_invalid;
 
 function instance(bytes, imports, valid = true) {
+  const id = self.id;
   const test = valid
     ? "Test that WebAssembly instantiation succeeds"
     : "Test that WebAssembly instantiation fails";
@@ -190,7 +216,7 @@ function instance(bytes, imports, valid = true) {
       pair => {
         uniqueTest(_ => {
           assert_true(valid, loc);
-        }, test);
+        }, id, test);
         return pair.instance;
       },
       error => {
@@ -199,7 +225,7 @@ function instance(bytes, imports, valid = true) {
             !valid,
             `unexpected instantiation error, observed ${error} ${loc}`
           );
-        }, test);
+        }, id, test);
         return error;
       }
     );
@@ -219,12 +245,13 @@ function call(instance, name, args) {
 }
 
 function run(action) {
+  const id = self.id;
   const test = "Run a WebAssembly test without special assertions";
   const loc = new Error().stack.toString().replace("Error", "");
   chain = Promise.all([chain, action()])
     .then(
       _ => {
-        uniqueTest(_ => {}, test);
+        uniqueTest(_ => {}, id, test);
       },
       error => {
         uniqueTest(_ => {
@@ -232,7 +259,7 @@ function run(action) {
             false,
             `unexpected runtime error, observed ${error} ${loc}`
           );
-        }, "run");
+        }, id, "run");
       }
     )
     // Clear all exceptions, so that subsequent tests get executed.
@@ -240,6 +267,7 @@ function run(action) {
 }
 
 function assert_trap(action) {
+  const id = self.id;
   const test = "Test that a WebAssembly code traps";
   const loc = new Error().stack.toString().replace("Error", "");
   chain = Promise.all([chain, action()])
@@ -247,7 +275,7 @@ function assert_trap(action) {
       result => {
         uniqueTest(_ => {
           assert_true(false, loc);
-        }, test);
+        }, id, test);
       },
       error => {
         uniqueTest(_ => {
@@ -255,7 +283,7 @@ function assert_trap(action) {
             error instanceof WebAssembly.RuntimeError,
             `expected runtime error, observed ${error} ${loc}`
           );
-        }, test);
+        }, id, test);
       }
     )
     // Clear all exceptions, so that subsequent tests get executed.
@@ -263,6 +291,7 @@ function assert_trap(action) {
 }
 
 function assert_return(action, ...expected) {
+  const id = self.id;
   const test = "Test that a WebAssembly code returns a specific result";
   const loc = new Error().stack.toString().replace("Error", "");
   chain = Promise.all([action(), chain])
@@ -279,25 +308,9 @@ function assert_return(action, ...expected) {
             throw new Error(expected.length + " value(s) expected, got " + actual.length);
           }
           for (let i = 0; i < actual.length; ++i) {
-            switch (expected[i]) {
-              case "nan:canonical":
-              case "nan:arithmetic":
-              case "nan:any":
-                // Note that JS can't reliably distinguish different NaN values,
-                // so there's no good way to test that it's a canonical NaN.
-                assert_true(Number.isNaN(actual[i]), `expected NaN, observed ${actual[i]}.`);
-                return;
-              case "ref.func":
-                assert_true(typeof actual[i] === "function", `expected Wasm function, got ${actual[i]}`);
-                return;
-              case "ref.extern":
-                assert_true(actual[i] !== null, `expected Wasm reference, got ${actual[i]}`);
-                return;
-              default:
-                assert_equals(actual[i], expected[i], loc);
-            }
+            match_result(actual[i], expected[i]);
           }
-        }, test);
+        }, id, test);
       },
       error => {
         uniqueTest(_ => {
@@ -305,12 +318,47 @@ function assert_return(action, ...expected) {
             false,
             `unexpected runtime error, observed ${error} ${loc}`
           );
-        }, test);
+        }, id, test);
       }
     )
     // Clear all exceptions, so that subsequent tests get executed.
     .catch(_ => {});
 }
+
+function match_result(actual, expected, inner=false) {
+  var res = false;
+  switch (expected) {
+    case "nan:canonical":
+    case "nan:arithmetic":
+    case "nan:any":
+      // Note that JS can't reliably distinguish different NaN values,
+      // so there's no good way to test that it's a canonical NaN.
+      res = Number.isNaN(actual);
+      assert_true(res || inner, "Wasm return value NaN expected, got " + actual);
+      return res;
+    case "ref.func":
+      res = (typeof actual[i] === "function");
+      assert_true(res || inner, "Wasm function return value expected, got " + actual);
+      return res;
+    case "ref.extern":
+      res = (actual !== null);
+      assert_true(res || inner, "Wasm reference return value expected, got " + actual);
+      return res;
+    default:
+      if (Array.isArray(expected)) {
+        for (let i = 0; i < expected.length; ++i) {
+          res ||= match_result(actual, expected[i], true);
+        }
+        assert_true(res, "Wasm return value in " + expected + " expected, got " + actual);
+        return res;
+      } else {
+        res = Object.is(actual, expected);
+        assert_true(res || inner, "Wasm return value " + expected + " expected, got " + actual);
+        return res;
+      }
+  }
+}
+
 
 let StackOverflow;
 try {
@@ -322,6 +370,7 @@ try {
 }
 
 function assert_exhaustion(action) {
+  const id = self.id;
   const test = "Test that a WebAssembly code exhauts the stack space";
   const loc = new Error().stack.toString().replace("Error", "");
   chain = Promise.all([action(), chain])
@@ -329,7 +378,7 @@ function assert_exhaustion(action) {
       _ => {
         uniqueTest(_ => {
           assert_true(false, loc);
-        }, test);
+        }, id, test);
       },
       error => {
         uniqueTest(_ => {
@@ -337,7 +386,7 @@ function assert_exhaustion(action) {
             error instanceof StackOverflow,
             `expected runtime error, observed ${error} ${loc}`
           );
-        }, test);
+        }, id, test);
       }
     )
     // Clear all exceptions, so that subsequent tests get executed.
@@ -345,9 +394,10 @@ function assert_exhaustion(action) {
 }
 
 function assert_unlinkable(bytes) {
+  const id = self.id;
   const test = "Test that a WebAssembly module is unlinkable";
   const loc = new Error().stack.toString().replace("Error", "");
-  instance(bytes, registry, EXPECT_INVALID)
+  instance(bytes, chain.then(_ => registry), EXPECT_INVALID)
     .then(
       result => {
         uniqueTest(_ => {
@@ -355,12 +405,12 @@ function assert_unlinkable(bytes) {
             result instanceof WebAssembly.LinkError,
             `expected link error, observed ${result} ${loc}`
           );
-        }, test);
+        }, id, test);
       },
       _ => {
         uniqueTest(_ => {
           assert_true(false, loc);
-        }, test);
+        }, id, test);
       }
     )
     // Clear all exceptions, so that subsequent tests get executed.
@@ -368,9 +418,10 @@ function assert_unlinkable(bytes) {
 }
 
 function assert_uninstantiable(bytes) {
+  const id = self.id;
   const test = "Test that a WebAssembly module is uninstantiable";
   const loc = new Error().stack.toString().replace("Error", "");
-  instance(bytes, registry, EXPECT_INVALID)
+  instance(bytes, chain.then(_ => registry), EXPECT_INVALID)
     .then(
       result => {
         uniqueTest(_ => {
@@ -378,12 +429,12 @@ function assert_uninstantiable(bytes) {
             result instanceof WebAssembly.RuntimeError,
             `expected link error, observed ${result} ${loc}`
           );
-        }, test);
+        }, id, test);
       },
       _ => {
         uniqueTest(_ => {
           assert_true(false, loc);
-        }, test);
+        }, id, test);
       }
     )
     // Clear all exceptions, so that subsequent tests get executed.
@@ -391,6 +442,7 @@ function assert_uninstantiable(bytes) {
 }
 
 function register(name, instance) {
+  const id = self.id;
   const test =
     "Test that the exports of a WebAssembly module can be registered";
   const loc = new Error().stack.toString().replace("Error", "");
@@ -403,7 +455,7 @@ function register(name, instance) {
       _ => {
         uniqueTest(_ => {
           assert_true(false, loc);
-        }, test);
+        }, id, test);
       }
     )
     // Clear all exceptions, so that subsequent tests get executed.
@@ -411,6 +463,7 @@ function register(name, instance) {
 }
 
 function get(instance, name) {
+  const id = self.id;
   const test = "Test that an export of a WebAssembly instance can be acquired";
   const loc = new Error().stack.toString().replace("Error", "");
   chain = Promise.all([instance, chain]).then(
@@ -421,9 +474,102 @@ function get(instance, name) {
     _ => {
       uniqueTest(_ => {
         assert_true(false, loc);
-      }, test);
+      }, id, test);
     }
   );
   return chain;
 }
 
+function thread(parent_scope, filename) {
+  const id = self.id;
+  const loc = new Error().stack.toString().replace("Error", "");
+  chain = chain.then(_ => {
+    return Promise.all(
+      // parent_scope is a list with each element [name, Promise(instance)]
+      // For each element, create a promise cloning only the shared memories of the instance:
+      parent_scope.map(elt => {
+        let [name, instance] = elt
+        return instance.then(inst => {
+          let inst_exports = {exports: {}}  // The API requires this nested structure.
+          Object.keys(inst.exports).forEach(k => {
+            if (inst.exports[k].buffer instanceof SharedArrayBuffer) {
+              inst_exports.exports[k] = inst.exports[k]
+            };
+          });
+          return [name, inst_exports];
+        });
+      })
+    )}).then(scope => {
+      // scope is a list of [name, exports]
+      var worker_path = "./js/harness/async_worker.js";
+      // use absolute path so that nested thread workers can still find the file.
+      if (typeof window !== "undefined") {
+          worker_path = window.location.pathname + "js/harness/async_worker.js";
+      } else if (location instanceof WorkerLocation) {
+          worker_path = location.pathname;
+      } else {
+        uniqueTest(_ => { assert_true(false, loc); }, id, "Unknown location type: " + location)
+      }
+      const worker = new Worker(worker_path);
+      fetch_tests_from_worker(worker);
+      let worker_index = worker_arr.length;
+      worker_arr.push({worker: worker, executed: false});
+      worker.onmessage = (event => {
+        switch (event.data.type) {
+        case "done":
+          worker_arr[worker_index].executed = true;
+          console.log(`Worker ${worker_index} is done, very quickly.`)
+          break;
+        case "failed":
+          worker_arr[worker_index].executed = true;
+          uniqueTest(_ => { assert_true(false, event.data.loc); },
+                     id, filename + ": " + event.data.name);
+        }
+      });
+      worker.onerror = (err) => {
+        uniqueTest(_ => { assert_true(false, loc); }, id, filename + ": " + err);
+        console.log(`Worker ${worker_index} errored out due to `, err)
+      }
+      worker.postMessage({scope: scope, filename: filename});
+      return worker_index;
+  })
+  return chain;
+}
+
+function wait(widx_prom) {
+  const id = self.id;
+  const test = "Test that the result of a thread execution can be waited on";
+  const loc = new Error().stack.toString().replace("Error", "");
+  chain = Promise.all([widx_prom, chain]).then(
+    values => {
+      let worker_index = values[0];
+      return new Promise((resolve, reject) => {
+        let worker = worker_arr[worker_index].worker;
+        if (worker_arr[worker_index].executed === true) {
+          console.log(`Worker ${worker_index} already finished.`)
+          // fetch_tests_from_worker(worker);
+          // console.log("fetch tests from worker ", worker_index);
+          resolve();
+        } else {
+          // we need to wait for the message to execute and report back
+          console.log(`Wait for worker ${worker_index} to finish.`)
+          worker.onmessage = (event => {
+            // if the worker sends `done' or `failed' back, we mark it as resolved
+            if (event.data.type === "done" || event.data.type === "failed") {
+              worker_arr[worker_index].executed = true;
+              console.log(`Worker ${worker_index} is now done, finally.`)
+              // fetch_tests_from_worker(worker);
+              // console.log("fetch tests from worker ", worker_index);
+              resolve();
+            }
+          })
+          ;
+        }})
+    },
+    err => {
+      console.log("wait error ", err);
+      uniqueTest(_ => { assert_true(false, loc); }, id, test);
+    })
+    // Clear all exceptions, so that subsequent tests get executed.
+    .catch(_ => {});
+}

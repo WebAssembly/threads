@@ -1,11 +1,12 @@
 (module $Mem
   (memory (export "shared") 1 1 shared)
 )
+(register "mem")
 
 (thread $T1 (shared (module $Mem))
   (register "mem" $Mem)
   (module
-    (memory (import "mem" "shared") 1 10 shared)
+    (memory (import "mem" "shared") 1 1 shared)
     (func (export "run")
       (i32.atomic.store (i32.const 0) (i32.const 42))
       (i32.atomic.store (i32.const 4) (i32.const 1))

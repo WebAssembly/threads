@@ -24,14 +24,16 @@ arguments = parser.parse_args()
 sys.argv = sys.argv[:1]
 
 main_test_files = glob.glob(os.path.join(inputDir, "*.wast"))
-# SIMD test files are in a subdirectory.
+# Test files in subdirectories
 simd_test_files = glob.glob(os.path.join(inputDir, "simd", "*.wast"))
+threads_test_files = glob.glob(os.path.join(inputDir, "threads", "*.wast"))
+all_test_files = main_test_files + simd_test_files + threads_test_files
 
 wasmCommand = arguments.wasm
 jsCommand = arguments.js
 generateJsOnly = arguments.generate_js_only
 outputDir = arguments.out
-inputFiles = arguments.file if arguments.file else main_test_files + simd_test_files
+inputFiles = arguments.file if arguments.file else all_test_files
 
 if not os.path.exists(wasmCommand):
   sys.stderr.write("""\
@@ -76,6 +78,8 @@ class RunTests(unittest.TestCase):
 
     # Run original file
     expectedExitCode = 1 if ".fail." in inputFile else 0
+    if expectedExitCode == 1:
+        print("### Expected exit 1; " + inputPath)
     logPath = self._auxFile(outputPath + ".log")
     self._runCommand(('%s "%s"') % (wasmCommand, inputPath), logPath, expectedExitCode)
 
