@@ -563,7 +563,8 @@ Note that shared linear memory without an explicit maximum size is not
 permitted. This allows the embedder to reserve enough virtual memory for the
 maximum size so the base address of the linear memory does not have to change.
 Modifying the base address would require suspending all threads, which is
-burdensome.
+burdensome. Note also that in this proposal only memories are permitted to be marked as shared.
+For the behaviour of shared tables, see the [Shared-Everything Threads][] follow-up proposal.
 
 The [instruction syntax][] is modified as follows:
 
@@ -691,6 +692,7 @@ instr ::= ...
 [JavaScript API]: https://github.com/WebAssembly/design/blob/master/JS.md
 [WebAssembly.Memory]: https://github.com/WebAssembly/design/blob/master/JS.md#webassemblymemory-constructor
 [WebAssembly.Memory.prototype.grow]: https://github.com/WebAssembly/design/blob/master/JS.md#webassemblymemoryprototypegrow
+[Shared-Everything Threads]: https://github.com/WebAssembly/shared-everything-threads
 [`HasProperty`]: https://tc39.github.io/ecma262/#sec-hasproperty
 [`ToBoolean`]: https://tc39.github.io/ecma262/#sec-toboolean
 [`Get`]: https://tc39.github.io/ecma262/#sec-get-o-p
