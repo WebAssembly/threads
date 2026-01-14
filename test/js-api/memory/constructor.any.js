@@ -67,6 +67,10 @@ test(() => {
 }, "Initial value exceeds maximum");
 
 test(() => {
+  assert_throws(new TypeError(), () => new WebAssembly.Memory({ "initial": 10, "shared": true }));
+}, "Shared memory without maximum");
+
+test(() => {
   const proxy = new Proxy({}, {
     has(o, x) {
       assert_unreached(`Should not call [[HasProperty]] with ${x}`);
@@ -120,6 +124,47 @@ test(() => {
   ]);
 }, "Order of evaluation for descriptor");
 
+test(t => {
+  const order = [];
+
+  new WebAssembly.Memory({
+    get maximum() {
+      order.push("maximum");
+      return {
+        valueOf() {
+          order.push("maximum valueOf");
+          return 1;
+        },
+      };
+    },
+
+    get initial() {
+      order.push("initial");
+      return {
+        valueOf() {
+          order.push("initial valueOf");
+          return 1;
+        },
+      };
+    },
+
+    get shared() {
+      order.push("shared");
+      return {
+        valueOf: t.unreached_func("should not call shared valueOf"),
+      };
+    },
+  });
+
+  assert_array_equals(order, [
+    "initial",
+    "initial valueOf",
+    "maximum",
+    "maximum valueOf",
+    "shared",
+  ]);
+}, "Order of evaluation for descriptor (with shared)");
+
 test(() => {
   const argument = { "initial": 0 };
   const memory = new WebAssembly.Memory(argument);
@@ -137,3 +182,9 @@ test(() => {
   const memory = new WebAssembly.Memory(argument, {});
   assert_Memory(memory, { "size": 0 });
 }, "Stray argument");
+
+test(() => {
+  const argument = { "initial": 4, "maximum": 10, shared: true };
+  const memory = new WebAssembly.Memory(argument);
+  assert_Memory(memory, { "size": 4, "shared": true });
+}, "Shared memory");
