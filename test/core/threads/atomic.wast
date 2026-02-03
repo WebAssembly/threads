@@ -437,129 +437,412 @@
 (assert_trap (invoke "i64.atomic.rmw16.cmpxchg_u" (i32.const 1) (i64.const 0) (i64.const 0)) "unaligned atomic")
 (assert_trap (invoke "i64.atomic.rmw32.cmpxchg_u" (i32.const 1) (i64.const 0) (i64.const 0)) "unaligned atomic")
 
-;; Alignment hint is lower than the natural alignment. Execution will trap even if the address being read is aligned.
+;; non-natural alignment
 
-(module
-  (memory 1 1 shared)
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
 
-  (func (export "i32.atomic.load") (param $addr i32) (result i32) (i32.atomic.load align=1 (local.get $addr)))
-  (func (export "i64.atomic.load") (param $addr i32) (result i64) (i64.atomic.load align=1 (local.get $addr)))
-  (func (export "i32.atomic.load8_u") (param $addr i32) (result i32) (i32.atomic.load8_u align=1 (local.get $addr)))
-  (func (export "i32.atomic.load16_u") (param $addr i32) (result i32) (i32.atomic.load16_u align=1 (local.get $addr)))
-  (func (export "i64.atomic.load8_u") (param $addr i32) (result i64) (i64.atomic.load8_u align=1 (local.get $addr)))
-  (func (export "i64.atomic.load16_u") (param $addr i32) (result i64) (i64.atomic.load16_u align=1 (local.get $addr)))
-  (func (export "i64.atomic.load32_u") (param $addr i32) (result i64) (i64.atomic.load32_u align=1 (local.get $addr)))
-
-  (func (export "i32.atomic.store") (param $addr i32) (param $value i32) (i32.atomic.store align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.store") (param $addr i32) (param $value i64) (i64.atomic.store align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.store8") (param $addr i32) (param $value i32) (i32.atomic.store8 align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.store16") (param $addr i32) (param $value i32) (i32.atomic.store16 align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.store8") (param $addr i32) (param $value i64) (i64.atomic.store8 align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.store16") (param $addr i32) (param $value i64) (i64.atomic.store16 align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.store32") (param $addr i32) (param $value i64) (i64.atomic.store32 align=1 (local.get $addr) (local.get $value)))
-
-  (func (export "i32.atomic.rmw.add") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.add align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw.add") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.add align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw8.add_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw8.add_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw16.add_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.add_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw8.add_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw8.add_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw16.add_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.add_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw32.add_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.add_u align=1 (local.get $addr) (local.get $value)))
-
-  (func (export "i32.atomic.rmw.sub") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.sub align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw.sub") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.sub align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw8.sub_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw8.sub_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw16.sub_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.sub_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw8.sub_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw8.sub_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw16.sub_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.sub_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw32.sub_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.sub_u align=1 (local.get $addr) (local.get $value)))
-
-  (func (export "i32.atomic.rmw.and") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.and align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw.and") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.and align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw8.and_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw8.and_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw16.and_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.and_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw8.and_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw8.and_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw16.and_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.and_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw32.and_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.and_u align=1 (local.get $addr) (local.get $value)))
-
-  (func (export "i32.atomic.rmw.or") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.or align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw.or") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.or align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw8.or_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw8.or_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw16.or_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.or_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw8.or_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw8.or_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw16.or_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.or_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw32.or_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.or_u align=1 (local.get $addr) (local.get $value)))
-
-  (func (export "i32.atomic.rmw.xor") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.xor align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw.xor") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.xor align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw8.xor_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw8.xor_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw16.xor_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.xor_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw8.xor_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw8.xor_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw16.xor_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.xor_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw32.xor_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.xor_u align=1 (local.get $addr) (local.get $value)))
-
-  (func (export "i32.atomic.rmw.xchg") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.xchg align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw.xchg") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.xchg align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw8.xchg_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw8.xchg_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i32.atomic.rmw16.xchg_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.xchg_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw8.xchg_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw8.xchg_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw16.xchg_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.xchg_u align=1 (local.get $addr) (local.get $value)))
-  (func (export "i64.atomic.rmw32.xchg_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.xchg_u align=1 (local.get $addr) (local.get $value)))
-
-  (func (export "i32.atomic.rmw.cmpxchg") (param $addr i32) (param $expected i32) (param $value i32) (result i32) (i32.atomic.rmw.cmpxchg align=1 (local.get $addr) (local.get $expected) (local.get $value)))
-  (func (export "i64.atomic.rmw.cmpxchg") (param $addr i32) (param $expected i64) (param $value i64) (result i64) (i64.atomic.rmw.cmpxchg align=1 (local.get $addr) (local.get $expected) (local.get $value)))
-  (func (export "i32.atomic.rmw8.cmpxchg_u") (param $addr i32) (param $expected i32) (param $value i32) (result i32) (i32.atomic.rmw8.cmpxchg_u align=1 (local.get $addr) (local.get $expected) (local.get $value)))
-  (func (export "i32.atomic.rmw16.cmpxchg_u") (param $addr i32) (param $expected i32) (param $value i32) (result i32) (i32.atomic.rmw16.cmpxchg_u align=1 (local.get $addr) (local.get $expected) (local.get $value)))
-  (func (export "i64.atomic.rmw8.cmpxchg_u") (param $addr i32) (param $expected i64) (param $value i64) (result i64) (i64.atomic.rmw8.cmpxchg_u align=1 (local.get $addr) (local.get $expected) (local.get $value)))
-  (func (export "i64.atomic.rmw16.cmpxchg_u") (param $addr i32) (param $expected i64) (param $value i64) (result i64) (i64.atomic.rmw16.cmpxchg_u align=1 (local.get $addr) (local.get $expected) (local.get $value)))
-  (func (export "i64.atomic.rmw32.cmpxchg_u") (param $addr i32) (param $expected i64) (param $value i64) (result i64) (i64.atomic.rmw32.cmpxchg_u align=1 (local.get $addr) (local.get $expected) (local.get $value)))
+    (func (export "i32.atomic.load") (param $addr i32) (result i32) (i32.atomic.load align=1 (local.get $addr)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
 )
 
-(assert_trap (invoke "i32.atomic.load" (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.load" (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.load16_u" (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.load16_u" (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.load32_u" (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.store" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.store" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.store16" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.store16" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.store32" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw.add" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw.add" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw16.add_u" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw16.add_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw32.add_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw.sub" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw.sub" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw16.sub_u" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw16.sub_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw32.sub_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw.and" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw.and" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw16.and_u" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw16.and_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw32.and_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw.or" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw.or" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw16.or_u" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw16.or_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw32.or_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw.xor" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw.xor" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw16.xor_u" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw16.xor_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw32.xor_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw.xchg" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw.xchg" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw16.xchg_u" (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw16.xchg_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw32.xchg_u" (i32.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw.cmpxchg" (i32.const 0) (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw.cmpxchg" (i32.const 0) (i64.const 0)  (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i32.atomic.rmw16.cmpxchg_u" (i32.const 0) (i32.const 0) (i32.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw16.cmpxchg_u" (i32.const 0) (i64.const 0) (i64.const 0)) "unaligned atomic")
-(assert_trap (invoke "i64.atomic.rmw32.cmpxchg_u" (i32.const 0) (i64.const 0) (i64.const 0)) "unaligned atomic")
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.load") (param $addr i32) (result i64) (i64.atomic.load align=1 (local.get $addr)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.load16_u") (param $addr i32) (result i32) (i32.atomic.load16_u align=1 (local.get $addr)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.load16_u") (param $addr i32) (result i64) (i64.atomic.load16_u align=1 (local.get $addr)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.load32_u") (param $addr i32) (result i64) (i64.atomic.load32_u align=1 (local.get $addr)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.store") (param $addr i32) (param $value i32) (i32.atomic.store align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.store") (param $addr i32) (param $value i64) (i64.atomic.store align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.store16") (param $addr i32) (param $value i32) (i32.atomic.store16 align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.store16") (param $addr i32) (param $value i64) (i64.atomic.store16 align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.store32") (param $addr i32) (param $value i64) (i64.atomic.store32 align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw.add") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.add align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw.add") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.add align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw16.add_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.add_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw16.add_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.add_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw32.add_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.add_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw.sub") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.sub align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw.sub") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.sub align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw16.sub_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.sub_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw16.sub_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.sub_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw32.sub_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.sub_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw.and") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.and align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw.and") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.and align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw16.and_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.and_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw16.and_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.and_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw32.and_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.and_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw.or") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.or align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw.or") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.or align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw16.or_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.or_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw16.or_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.or_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw32.or_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.or_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw.xor") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.xor align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw.xor") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.xor align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw16.xor_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.xor_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw16.xor_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.xor_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw32.xor_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.xor_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw.xchg") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw.xchg align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw.xchg") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw.xchg align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw16.xchg_u") (param $addr i32) (param $value i32) (result i32) (i32.atomic.rmw16.xchg_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw16.xchg_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw16.xchg_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw32.xchg_u") (param $addr i32) (param $value i64) (result i64) (i64.atomic.rmw32.xchg_u align=1 (local.get $addr) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw.cmpxchg") (param $addr i32) (param $expected i32) (param $value i32) (result i32) (i32.atomic.rmw.cmpxchg align=1 (local.get $addr) (local.get $expected) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw.cmpxchg") (param $addr i32) (param $expected i64) (param $value i64) (result i64) (i64.atomic.rmw.cmpxchg align=1 (local.get $addr) (local.get $expected) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i32.atomic.rmw16.cmpxchg_u") (param $addr i32) (param $expected i32) (param $value i32) (result i32) (i32.atomic.rmw16.cmpxchg_u align=1 (local.get $addr) (local.get $expected) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw16.cmpxchg_u") (param $addr i32) (param $expected i64) (param $value i64) (result i64) (i64.atomic.rmw16.cmpxchg_u align=1 (local.get $addr) (local.get $expected) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
+
+(assert_invalid 
+  (module
+    (memory 1 1 shared)
+
+    (func (export "i64.atomic.rmw32.cmpxchg_u") (param $addr i32) (param $expected i64) (param $value i64) (result i64) (i64.atomic.rmw32.cmpxchg_u align=1 (local.get $addr) (local.get $expected) (local.get $value)))
+  )
+  "atomic memory instruction's alignment must equal the instruction's natural alignment"
+)
 
 
 ;; wait/notify
