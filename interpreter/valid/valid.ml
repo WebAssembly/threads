@@ -189,7 +189,9 @@ let check_vec_binop binop at =
       error at "invalid lane index"
   | _ -> ()
 
-let check_memop (c : context) (memop : ('t, 's) memop) ty_size get_sz at ~(isAtomic : bool) =
+type mem_mode = NonAtomic | Atomic
+
+let check_memop (mode : mem_mode) (c : context) (memop : ('t, 's) memop) ty_size get_sz at =
   let _mt = memory c (0l @@ at) in
   let size =
     match get_sz memop.pack with
@@ -197,11 +199,12 @@ let check_memop (c : context) (memop : ('t, 's) memop) ty_size get_sz at ~(isAto
     | Some sz ->
       check_pack sz (ty_size memop.ty) at;
       packed_size sz
-  in
-  require (1 lsl memop.align <= size) at
-    "alignment must not be larger than natural";
-  if isAtomic then
-    require (1 lsl memop.align == size) at "atomic memory instruction's alignment must equal the instruction's natural alignment"
+  in match mode with
+    | NonAtomic ->
+        require (1 lsl memop.align <= size) at
+          "alignment must not be larger than natural";
+    | Atomic ->
+        require (1 lsl memop.align == size) at "atomic memory instruction's alignment must equal the instruction's natural alignment"
 
 
 (*
@@ -356,29 +359,29 @@ let rec check_instr (c : context) (e : instr) (s : infer_result_type) : op_type 
     [] --> []
 
   | Load memop ->
-    check_memop ~isAtomic:false c memop num_size (Lib.Option.map fst) e.at;
+    check_memop NonAtomic c memop num_size (Lib.Option.map fst) e.at;
     [NumType I32Type] --> [NumType memop.ty]
 
   | Store memop ->
-    check_memop ~isAtomic:false c memop num_size (fun sz -> sz) e.at;
+    check_memop NonAtomic c memop num_size (fun sz -> sz) e.at;
     [NumType I32Type; NumType memop.ty] --> []
 
   | VecLoad memop ->
-    check_memop ~isAtomic:false c memop vec_size (Lib.Option.map fst) e.at;
+    check_memop NonAtomic c memop vec_size (Lib.Option.map fst) e.at;
     [NumType I32Type] --> [VecType memop.ty]
 
   | VecStore memop ->
-    check_memop ~isAtomic:false c memop vec_size (fun _ -> None) e.at;
+    check_memop NonAtomic c memop vec_size (fun _ -> None) e.at;
     [NumType I32Type; VecType memop.ty] --> []
 
   | VecLoadLane (memop, i) ->
-    check_memop ~isAtomic:false c memop vec_size (fun sz -> Some sz) e.at;
+    check_memop NonAtomic c memop vec_size (fun sz -> Some sz) e.at;
     require (i < vec_size memop.ty / packed_size memop.pack) e.at
       "invalid lane index";
     [NumType I32Type; VecType memop.ty] -->  [VecType memop.ty]
 
   | VecStoreLane (memop, i) ->
-    check_memop ~isAtomic:false c memop vec_size (fun sz -> Some sz) e.at;
+    check_memop NonAtomic c memop vec_size (fun sz -> Some sz) e.at;
     require (i < vec_size memop.ty / packed_size memop.pack) e.at
       "invalid lane index";
     [NumType I32Type; VecType memop.ty] -->  []
@@ -516,23 +519,23 @@ let rec check_instr (c : context) (e : instr) (s : infer_result_type) : op_type 
       "invalid lane index";
     [t; NumType t2] --> [t]
   | MemoryAtomicWait atomicop -> 
-    check_memop ~isAtomic:true c atomicop num_size (fun sz -> sz) e.at;
+    check_memop Atomic c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type; NumType atomicop.ty; NumType I64Type] --> [NumType I32Type]
   | MemoryAtomicNotify atomicop ->
-    check_memop ~isAtomic:true c atomicop num_size (fun sz -> sz) e.at;
+    check_memop Atomic c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type; NumType I32Type] --> [NumType I32Type]
   | AtomicFence -> [] --> []
   | AtomicLoad atomicop -> 
-    check_memop ~isAtomic:true c atomicop num_size (fun sz -> sz) e.at;
+    check_memop Atomic c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type] --> [NumType atomicop.ty]
   | AtomicStore atomicop ->
-    check_memop ~isAtomic:true c atomicop num_size (fun sz -> sz) e.at;
+    check_memop Atomic c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type; NumType atomicop.ty] --> []
   | AtomicRmw (rmwop, atomicop) -> 
-    check_memop ~isAtomic:true c atomicop num_size (fun sz -> sz) e.at;
+    check_memop Atomic c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type; NumType atomicop.ty] --> [NumType atomicop.ty]
   | AtomicRmwCmpXchg atomicop ->
-    check_memop ~isAtomic: true c atomicop num_size (fun sz -> sz) e.at;
+    check_memop Atomic c atomicop num_size (fun sz -> sz) e.at;
     [NumType I32Type; NumType atomicop.ty; NumType atomicop.ty] --> [NumType atomicop.ty]
 
 and check_seq (c : context) (s : infer_result_type) (es : instr list)
