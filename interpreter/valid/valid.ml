@@ -199,12 +199,14 @@ let check_memop (mode : mem_mode) (c : context) (memop : ('t, 's) memop) ty_size
     | Some sz ->
       check_pack sz (ty_size memop.ty) at;
       packed_size sz
-  in match mode with
-    | NonAtomic ->
-        require (1 lsl memop.align <= size) at
-          "alignment must not be larger than natural";
-    | Atomic ->
-        require (1 lsl memop.align == size) at "atomic memory instruction's alignment must equal the instruction's natural alignment"
+  in
+  match mode with
+  | NonAtomic ->
+    require (1 lsl memop.align <= size) at
+      "alignment must not be larger than natural";
+  | Atomic ->
+    require (1 lsl memop.align = size) at
+      "atomic alignment must be natural"
 
 
 (*
