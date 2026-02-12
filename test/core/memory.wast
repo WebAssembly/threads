@@ -5,14 +5,12 @@
 (module (memory 0 0))
 (module (memory 0 1))
 (module (memory 1 256))
+(module definition (memory 65536))
 (module (memory 0 65536))
 (module (memory 0 0 shared))
 (module (memory 1 2 shared))
 
 (assert_invalid (module (memory 1 shared)) "shared memory must have maximum")
-
-(assert_invalid (module (memory 0) (memory 0)) "multiple memories")
-(assert_invalid (module (memory (import "spectest" "memory") 0) (memory 0)) "multiple memories")
 
 (module (memory (data)) (func (export "memsize") (result i32) (memory.size)))
 (assert_return (invoke "memsize") (i32.const 0))
@@ -57,40 +55,53 @@
 )
 (assert_invalid
   (module (memory 65537))
-  "memory size must be at most 65536 pages (4GiB)"
+  "memory size"
 )
 (assert_invalid
   (module (memory 2147483648))
-  "memory size must be at most 65536 pages (4GiB)"
+  "memory size"
 )
 (assert_invalid
   (module (memory 4294967295))
-  "memory size must be at most 65536 pages (4GiB)"
+  "memory size"
 )
 (assert_invalid
   (module (memory 0 65537))
-  "memory size must be at most 65536 pages (4GiB)"
+  "memory size"
 )
 (assert_invalid
   (module (memory 0 2147483648))
-  "memory size must be at most 65536 pages (4GiB)"
+  "memory size"
 )
 (assert_invalid
   (module (memory 0 4294967295))
-  "memory size must be at most 65536 pages (4GiB)"
+  "memory size"
 )
 
-(assert_malformed
-  (module quote "(memory 0x1_0000_0000)")
-  "i32 constant out of range"
+(assert_invalid
+  (module (memory 0x1_0000_0000))
+  "memory size"
 )
-(assert_malformed
-  (module quote "(memory 0x1_0000_0000 0x1_0000_0000)")
-  "i32 constant out of range"
+(assert_invalid
+  (module (memory 0x1_0000_0000 0x1_0000_0000))
+  "memory size"
 )
-(assert_malformed
-  (module quote "(memory 0 0x1_0000_0000)")
-  "i32 constant out of range"
+(assert_invalid
+  (module (memory 0 0x1_0000_0000))
+  "memory size"
+)
+
+(assert_invalid
+  (module (memory (import "M" "m") 0x1_0000_0000))
+  "memory size"
+)
+(assert_invalid
+  (module (memory (import "M" "m") 0x1_0000_0000 0x1_0000_0000))
+  "memory size"
+)
+(assert_invalid
+  (module (memory (import "M" "m") 0 0x1_0000_0000))
+  "memory size"
 )
 
 (module
@@ -140,44 +151,44 @@
 
   ;; Sign and zero extending memory loads
   (func (export "i32_load8_s") (param $i i32) (result i32)
-	(i32.store8 (i32.const 8) (local.get $i))
-	(i32.load8_s (i32.const 8))
+    (i32.store8 (i32.const 8) (local.get $i))
+    (i32.load8_s (i32.const 8))
   )
   (func (export "i32_load8_u") (param $i i32) (result i32)
-	(i32.store8 (i32.const 8) (local.get $i))
-	(i32.load8_u (i32.const 8))
+    (i32.store8 (i32.const 8) (local.get $i))
+    (i32.load8_u (i32.const 8))
   )
   (func (export "i32_load16_s") (param $i i32) (result i32)
-	(i32.store16 (i32.const 8) (local.get $i))
-	(i32.load16_s (i32.const 8))
+    (i32.store16 (i32.const 8) (local.get $i))
+    (i32.load16_s (i32.const 8))
   )
   (func (export "i32_load16_u") (param $i i32) (result i32)
-	(i32.store16 (i32.const 8) (local.get $i))
-	(i32.load16_u (i32.const 8))
+    (i32.store16 (i32.const 8) (local.get $i))
+    (i32.load16_u (i32.const 8))
   )
   (func (export "i64_load8_s") (param $i i64) (result i64)
-	(i64.store8 (i32.const 8) (local.get $i))
-	(i64.load8_s (i32.const 8))
+    (i64.store8 (i32.const 8) (local.get $i))
+    (i64.load8_s (i32.const 8))
   )
   (func (export "i64_load8_u") (param $i i64) (result i64)
-	(i64.store8 (i32.const 8) (local.get $i))
-	(i64.load8_u (i32.const 8))
+    (i64.store8 (i32.const 8) (local.get $i))
+    (i64.load8_u (i32.const 8))
   )
   (func (export "i64_load16_s") (param $i i64) (result i64)
-	(i64.store16 (i32.const 8) (local.get $i))
-	(i64.load16_s (i32.const 8))
+    (i64.store16 (i32.const 8) (local.get $i))
+    (i64.load16_s (i32.const 8))
   )
   (func (export "i64_load16_u") (param $i i64) (result i64)
-	(i64.store16 (i32.const 8) (local.get $i))
-	(i64.load16_u (i32.const 8))
+    (i64.store16 (i32.const 8) (local.get $i))
+    (i64.load16_u (i32.const 8))
   )
   (func (export "i64_load32_s") (param $i i64) (result i64)
-	(i64.store32 (i32.const 8) (local.get $i))
-	(i64.load32_s (i32.const 8))
+    (i64.store32 (i32.const 8) (local.get $i))
+    (i64.load32_s (i32.const 8))
   )
   (func (export "i64_load32_u") (param $i i64) (result i64)
-	(i64.store32 (i32.const 8) (local.get $i))
-	(i64.load32_u (i32.const 8))
+    (i64.store32 (i32.const 8) (local.get $i))
+    (i64.load32_u (i32.const 8))
   )
 )
 
@@ -244,3 +255,28 @@
   "(import \"\" \"\" (memory $foo 1))"
   "(import \"\" \"\" (memory $foo 1))")
   "duplicate memory")
+
+;; Test that exporting random globals does not change a memory's semantics.
+
+(module
+  (memory (export "memory") 1 1)
+
+  ;; These should not change the behavior of memory accesses.
+  (global (export "__data_end") i32 (i32.const 10000))
+  (global (export "__stack_top") i32 (i32.const 10000))
+  (global (export "__heap_base") i32 (i32.const 10000))
+
+  (func (export "load") (param i32) (result i32)
+    (i32.load8_u (local.get 0))
+  )
+)
+
+;; None of these memory accesses should trap.
+(assert_return (invoke "load" (i32.const 0)) (i32.const 0))
+(assert_return (invoke "load" (i32.const 10000)) (i32.const 0))
+(assert_return (invoke "load" (i32.const 20000)) (i32.const 0))
+(assert_return (invoke "load" (i32.const 30000)) (i32.const 0))
+(assert_return (invoke "load" (i32.const 40000)) (i32.const 0))
+(assert_return (invoke "load" (i32.const 50000)) (i32.const 0))
+(assert_return (invoke "load" (i32.const 60000)) (i32.const 0))
+(assert_return (invoke "load" (i32.const 65535)) (i32.const 0))

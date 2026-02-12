@@ -9,6 +9,8 @@ Execution
    conventions
    runtime
    numerics
+   types
+   values
    instructions
    modules
    relaxed

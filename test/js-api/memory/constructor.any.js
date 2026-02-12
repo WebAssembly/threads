@@ -83,6 +83,8 @@ test(() => {
         case "initial":
         case "maximum":
           return 0;
+        case "address":
+          return "i32";
         default:
           return undefined;
       }
@@ -114,9 +116,21 @@ test(() => {
         },
       };
     },
+
+    get address() {
+      order.push("address");
+      return {
+        toString() {
+          order.push("address toString");
+          return "i32";
+        },
+      };
+    },
   });
 
   assert_array_equals(order, [
+    "address",
+    "address toString",
     "initial",
     "initial valueOf",
     "maximum",
@@ -188,3 +202,32 @@ test(() => {
   const memory = new WebAssembly.Memory(argument);
   assert_Memory(memory, { "size": 4, "shared": true });
 }, "Shared memory");
+
+test(() => {
+  const argument = { "initial": 1 };
+  const memory = new WebAssembly.Memory(argument);
+  assert_Memory(memory, { "size": 1, "address": "i32" });
+}, "Memory with address parameter omitted");
+
+test(() => {
+  const argument = { "initial": 1, "address": "i32" };
+  const memory = new WebAssembly.Memory(argument);
+  assert_Memory(memory, { "size": 1, "address": "i32" });
+}, "Memory with i32 address constructor");
+
+test(() => {
+  const argument = { "initial": "3" };
+  const memory = new WebAssembly.Memory(argument);
+  assert_Memory(memory, { "size": 3 });
+}, "Memory with string value for initial");
+
+
+test(() => {
+  const argument = { "initial": true };
+  const memory = new WebAssembly.Memory(argument);
+  assert_Memory(memory, { "size": 1 });
+}, "Memory with boolean value for initial");
+
+test(() => {
+  assert_throws_js(TypeError, () => new WebAssembly.Memory({ "initial": 1, "address": "none" }));
+}, "Unknown memory address");

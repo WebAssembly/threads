@@ -59,6 +59,15 @@ const EXPECT_INVALID = false;
 
 /* DATA **********************************************************************/
 
+let hostrefs = {};
+let hostsym = Symbol("hostref");
+function hostref(s) {
+  if (! (s in hostrefs)) hostrefs[s] = {[hostsym]: s};
+  return hostrefs[s];
+}
+function eq_ref(x, y) {
+  return x === y ? 1 : 0;
+}
 let externrefs = {};
 let externsym = Symbol("externref");
 function externref(s) {
@@ -98,6 +107,8 @@ function reinitializeRegistry(id = undefined) {
 
   chain = chain.then(_ => {
     let spectest = {
+      hostref: hostref,
+      eq_ref: eq_ref,
       externref: externref,
       is_externref: is_externref,
       is_funcref: is_funcref,
@@ -112,8 +123,8 @@ function reinitializeRegistry(id = undefined) {
       print_f64: console.log.bind(console),
       global_i32: 666,
       global_i64: 666n,
-      global_f32: 666,
-      global_f64: 666,
+      global_f32: 666.6,
+      global_f64: 666.6,
       table: new WebAssembly.Table({
         initial: 10,
         maximum: 20,
@@ -163,11 +174,11 @@ function binary(bytes) {
 /**
  * Returns a compiled module, or throws if there was an error at compilation.
  */
-function module(bytes, valid = true) {
+function module(bytes, source, valid = true) {
   const id = self.id;
-  const test = valid
-    ? "Test that WebAssembly compilation succeeds"
-    : "Test that WebAssembly compilation fails";
+  const test = `${ valid ? "Test that WebAssembly compilation succeeds" :
+                "Test that WebAssembly compilation fails"} (${source})`;
+
   const loc = new Error().stack.toString().replace("Error", "");
   let buffer = binary(bytes);
   let validated = WebAssembly.validate(buffer);
@@ -181,6 +192,7 @@ function module(bytes, valid = true) {
       uniqueTest(_ => {
         assert_true(valid, loc);
       }, id, test);
+      module.source = source;
       return module;
     },
     error => {
@@ -195,29 +207,36 @@ function module(bytes, valid = true) {
   return chain;
 }
 
-function assert_invalid(bytes) {
-  module(bytes, EXPECT_INVALID);
+function assert_invalid(bytes, source) {
+  module(bytes, source, EXPECT_INVALID);
 }
 
 const assert_malformed = assert_invalid;
 
-function instance(bytes, imports, valid = true) {
+function assert_invalid_custom(bytes, source) {
+  module(bytes, source);
+}
+
+const assert_malformed_custom = assert_invalid_custom;
+
+function instance(module, imports, valid = true) {
   const id = self.id;
-  const test = valid
+  let test = valid
     ? "Test that WebAssembly instantiation succeeds"
     : "Test that WebAssembly instantiation fails";
   const loc = new Error().stack.toString().replace("Error", "");
-  chain = Promise.all([imports, chain])
+  chain = Promise.all([module, imports, chain])
     .then(values => {
-      let imports = values[0] ? values[0] : registry;
-      return WebAssembly.instantiate(binary(bytes), imports);
+      let imports = values[1] ? values[1] : registry;
+      test += ` (${values[0].source})`;
+      return WebAssembly.instantiate(values[0], imports);
     })
     .then(
-      pair => {
+      inst => {
         uniqueTest(_ => {
           assert_true(valid, loc);
         }, id, test);
-        return pair.instance;
+        return inst;
       },
       error => {
         uniqueTest(_ => {
@@ -244,9 +263,9 @@ function call(instance, name, args) {
   });
 }
 
-function run(action) {
+function run(action, source) {
   const id = self.id;
-  const test = "Run a WebAssembly test without special assertions";
+  const test = `Run a WebAssembly test without special assertions (${source})`;
   const loc = new Error().stack.toString().replace("Error", "");
   chain = Promise.all([chain, action()])
     .then(
@@ -266,9 +285,9 @@ function run(action) {
     .catch(_ => {});
 }
 
-function assert_trap(action) {
+function assert_trap(action, source) {
   const id = self.id;
-  const test = "Test that a WebAssembly code traps";
+  const test = `Test that a WebAssembly code traps (${source})`;
   const loc = new Error().stack.toString().replace("Error", "");
   chain = Promise.all([chain, action()])
     .then(
@@ -290,9 +309,29 @@ function assert_trap(action) {
     .catch(_ => {});
 }
 
-function assert_return(action, ...expected) {
+function assert_exception(action, source) {
   const id = self.id;
-  const test = "Test that a WebAssembly code returns a specific result";
+  const test = `Test that a WebAssembly code throws an exception (${source})`;
+  const loc = new Error().stack.toString().replace("Error", "");
+  chain = Promise.all([chain, action()])
+    .then(
+      result => {
+        uniqueTest(_ => {
+          assert_true(false, loc);
+        }, test);
+      },
+      error => {
+        uniqueTest(_ => {
+          // Pass
+        }, test);
+      }
+    )
+    // Clear all exceptions, so that subsequent tests get executed.
+    .catch(_ => {});
+}
+
+function assert_return(action, source, ...expected) {
+  const test = `Test that a WebAssembly code returns a specific result (${source})`;
   const loc = new Error().stack.toString().replace("Error", "");
   chain = Promise.all([action(), chain])
     .then(
@@ -357,6 +396,40 @@ function match_result(actual, expected, inner=false) {
         return res;
       }
   }
+  // TODO port this over
+            // let actual_i;
+            // try { actual_i = "" + actual[i] } catch (e) { actual_i = typeof actual[i] }
+            // switch (expected[i]) {
+            //   case "nan:canonical":
+            //   case "nan:arithmetic":
+            //   case "nan:any":
+            //     // Note that JS can't reliably distinguish different NaN values,
+            //     // so there's no good way to test that it's a canonical NaN.
+            //     assert_true(Number.isNaN(actual[i]), `expected NaN, observed ${actual_i}.`);
+            //     return;
+            //   case "ref.i31":
+            //     assert_true(typeof actual[i] === "number" && (actual[i] & 0x7fffffff) === actual[i], `expected Wasm i31, got ${actual_i}`);
+            //     return;
+            //   case "ref.any":
+            //   case "ref.eq":
+            //   case "ref.struct":
+            //   case "ref.array":
+            //     // For now, JS can't distinguish exported Wasm GC values,
+            //     // so we only test for object.
+            //     assert_true(typeof actual[i] === "object", `expected Wasm GC object, got ${actual_i}`);
+            //     return;
+            //   case "ref.func":
+            //     assert_true(typeof actual[i] === "function", `expected Wasm function, got ${actual_i}`);
+            //     return;
+            //   case "ref.extern":
+            //     assert_true(actual[i] !== null, `expected Wasm reference, got ${actual_i}`);
+            //     return;
+            //   case "ref.null":
+            //     assert_true(actual[i] === null, `expected Wasm null reference, got ${actual_i}`);
+            //     return;
+            //   default:
+            //     assert_equals(actual[i], expected[i], loc);
+            // }
 }
 
 
@@ -371,7 +444,7 @@ try {
 
 function assert_exhaustion(action) {
   const id = self.id;
-  const test = "Test that a WebAssembly code exhauts the stack space";
+  const test = "Test that a WebAssembly code exhausts the stack space";
   const loc = new Error().stack.toString().replace("Error", "");
   chain = Promise.all([action(), chain])
     .then(

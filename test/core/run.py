@@ -12,30 +12,59 @@ import sys
 
 ownDir = os.path.dirname(os.path.abspath(sys.argv[0]))
 inputDir = ownDir
+interpDir = os.path.join(os.path.dirname(os.path.dirname(ownDir)), 'interpreter')
 outputDir = os.path.join(inputDir, "_output")
+opts = ""
+
+mainTestFiles = glob.glob(os.path.join(inputDir, "*.wast"))
+otherTestFiles = glob.glob(os.path.join(inputDir, "[a-z]*/*.wast"))
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--wasm", metavar="<wasm-command>", default=os.path.join(os.getcwd(), "wasm"))
+parser.add_argument("--wasm", metavar="<wasm-command>", default=os.path.join(interpDir, "wasm"))
 parser.add_argument("--js", metavar="<js-command>")
 parser.add_argument("--generate-js-only", action='store_true')
+parser.add_argument("--failfast", action='store_true')
 parser.add_argument("--out", metavar="<out-dir>", default=outputDir)
+parser.add_argument("--opts", metavar="<options>", default=opts)
 parser.add_argument("file", nargs='*')
 arguments = parser.parse_args()
 sys.argv = sys.argv[:1]
 
 main_test_files = glob.glob(os.path.join(inputDir, "*.wast"))
+<<<<<<< HEAD
 # Test files in subdirectories
 simd_test_files = glob.glob(os.path.join(inputDir, "simd", "*.wast"))
 threads_test_files = glob.glob(os.path.join(inputDir, "threads", "*.wast"))
 all_test_files = main_test_files + simd_test_files + threads_test_files
+=======
+# Other test files are in subdirectories
+simd_test_files = glob.glob(os.path.join(inputDir, "simd", "*.wast"))
+relaxed_simd_test_files = glob.glob(os.path.join(inputDir, "relaxed-simd", "*.wast"))
+gc_test_files = glob.glob(os.path.join(inputDir, "gc", "*.wast"))
+memory64_test_files = glob.glob(os.path.join(inputDir, "memory64", "*.wast"))
+multi_memory_test_files = glob.glob(os.path.join(inputDir, "multi-memory", "*.wast"))
+exception_test_files = glob.glob(os.path.join(inputDir, "exception", "*.wast"))
+bulk_memory_test_files = glob.glob(os.path.join(inputDir, "bulk-memory", "*.wast"))
+all_test_files = \
+  main_test_files + \
+  simd_test_files + \
+  relaxed_simd_test_files + \
+  gc_test_files + \
+  memory64_test_files + \
+  multi_memory_test_files + \
+  exception_test_files + \
+  bulk_memory_test_files
+>>>>>>> spec/main
 
-wasmCommand = arguments.wasm
+
+wasmExec = arguments.wasm
+wasmCommand = wasmExec + " " + arguments.opts
 jsCommand = arguments.js
 generateJsOnly = arguments.generate_js_only
 outputDir = arguments.out
 inputFiles = arguments.file if arguments.file else all_test_files
 
-if not os.path.exists(wasmCommand):
+if not os.path.exists(wasmExec):
   sys.stderr.write("""\
 Error: The executable '%s' does not exist.
 Provide the correct path with the '--wasm' flag.
@@ -49,7 +78,10 @@ class RunTests(unittest.TestCase):
   def _runCommand(self, command, logPath, expectedExitCode = 0):
     with open(logPath, 'w+') as out:
       exitCode = subprocess.call(command, shell=True, stdout=out, stderr=subprocess.STDOUT)
-      self.assertEqual(expectedExitCode, exitCode, "failed with exit code %i (expected %i) for %s" % (exitCode, expectedExitCode, command))
+    with open(logPath) as out:
+      log = out.read()
+    msg = "failed with exit code %i (expected %i)\nCommand:\n  %s\nLog:\n%s"
+    self.assertEqual(expectedExitCode, exitCode, msg % (exitCode, expectedExitCode, command, log))
 
   def _auxFile(self, path):
     if os.path.exists(path):
@@ -62,7 +94,7 @@ class RunTests(unittest.TestCase):
         with open(actualFile) as actual:
           expectText = expect.read()
           actualText = actual.read()
-          self.assertEqual(expectText, actualText)
+      self.assertEqual(expectText, actualText)
 
   def _runTestFile(self, inputPath):
     dir, inputFile = os.path.split(inputPath)
@@ -113,8 +145,13 @@ class RunTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
   os.makedirs(outputDir, exist_ok=True)
+=======
+  if not os.path.exists(outputDir):
+    os.makedirs(outputDir, exist_ok=True)
+>>>>>>> spec/main
   for fileName in inputFiles:
     testName = 'test ' + os.path.basename(fileName)
     setattr(RunTests, testName, lambda self, file=fileName: self._runTestFile(file))
-  unittest.main()
+  unittest.main(failfast=arguments.failfast)

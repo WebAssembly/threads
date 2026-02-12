@@ -14,6 +14,9 @@ INTERPRETER_DIR = os.path.join(SCRIPT_DIR, '..', 'interpreter')
 WASM_EXEC = os.path.join(INTERPRETER_DIR, 'wasm')
 
 WAST_TESTS_DIR = os.path.join(SCRIPT_DIR, 'core')
+WAST_TEST_SUBDIRS = [os.path.basename(d) for d in
+                     filter(os.path.isdir,
+                            glob.glob(os.path.join(WAST_TESTS_DIR, '*')))]
 HARNESS_DIR = os.path.join(SCRIPT_DIR, 'harness')
 
 HARNESS_FILES = ['testharness.js', 'testharnessreport.js', 'testharness.css']
@@ -68,32 +71,17 @@ def convert_wast_to_js(out_js_dir, infile_pat, shuffle):
 
     inputs = []
 
-    test_directories = ['.', 'simd', 'threads']
-    if infile_pat is not None:
-        test_directories = ['.']
-    else:
-        infile_pat = '*.wast'
-
-    wast_files = []
-    wast_files_in_d = []  # to keep sortedness of files, as glob doesn't guarantee order.
-
-    for d in test_directories:
-        for wast_file in glob.glob(os.path.join(WAST_TESTS_DIR, d, infile_pat)):
-            wast_files_in_d.append(wast_file)
-        wast_files_in_d.sort()
-        wast_files = wast_files + wast_files_in_d
-        wast_files_in_d = []
-
-    if (shuffle):
-        random.shuffle(wast_files)
-
-    for wast_file in wast_files:
+    for wast_file in glob.glob(os.path.join(WAST_TESTS_DIR, '**/*.wast'),
+                               recursive = True):
         # Don't try to compile tests that are supposed to fail.
         if '.fail.' in wast_file:
             continue
 
+        js_subdir = os.path.basename(os.path.dirname(wast_file))
+        if js_subdir == 'core':
+            js_subdir = ''
         js_filename = os.path.basename(wast_file) + '.js'
-        js_file = os.path.join(out_js_dir, js_filename)
+        js_file = os.path.join(out_js_dir, js_subdir, js_filename)
         inputs.append((wast_file, js_file))
 
     pool = mp.Pool(processes=8)
@@ -132,10 +120,9 @@ HTML_HEADER = """<!doctype html>
     </head>
     <body>
 
-        <meta name="timeout" content="long">
-        <script src={WPT_PREFIX}/testharness.js></script>
-        <script src={WPT_PREFIX}/testharnessreport.js></script>
-        <script src={PREFIX}/{JS_HARNESS}></script>
+        <script src="{WPT_PREFIX}/testharness.js"></script>
+        <script src="{WPT_PREFIX}/testharnessreport.js"></script>
+        <script src="{PREFIX}/{JS_HARNESS}"></script>
 
         <div id=log></div>
 """
@@ -161,6 +148,8 @@ def wrap_single_test(js_file):
 
 def build_html_js(out_dir, infile_pat, shuffle):
     ensure_empty_dir(out_dir)
+    for d in WAST_TEST_SUBDIRS:
+        ensure_empty_dir(os.path.join(out_dir, d))
     copy_harness_files(out_dir, True)
 
     tests = convert_wast_to_js(out_dir, infile_pat, shuffle)
@@ -170,21 +159,26 @@ def build_html_js(out_dir, infile_pat, shuffle):
 
 def build_html_from_js(tests, html_dir, use_sync):
     for js_file in tests:
-        js_filename = os.path.basename(js_file)
-        html_filename = js_filename + '.html'
-        html_file = os.path.join(html_dir, html_filename)
+        subdir = os.path.basename(os.path.dirname(js_file))
+        js_prefix = '../js'
+        if subdir == 'js':
+            subdir = ''
+            js_prefix = './js'
+        js_filename = os.path.join(js_prefix, subdir, os.path.basename(js_file))
+        html_filename = os.path.basename(js_file) + '.html'
+        html_file = os.path.join(html_dir, subdir, html_filename)
         js_harness = "sync_index.js" if use_sync else "async_index.js"
-        js_worker = "sync_worker.js" if use_sync else "async_worker.js"
+        harness_dir = os.path.join(js_prefix, 'harness')
+
         with open(html_file, 'w+') as f:
-            content = HTML_HEADER.replace('{PREFIX}', './js/harness') \
-                                 .replace('{WPT_PREFIX}', './js/harness') \
-                                 .replace('{JS_HARNESS}', js_harness) \
-                                 .replace('{JS_WORKER}', js_worker)
-            content += "        <script src=./js/{SCRIPT}></script>".replace('{SCRIPT}', js_filename)
+            content = HTML_HEADER.replace('{PREFIX}', harness_dir) \
+                                 .replace('{WPT_PREFIX}', '/resources') \
+                                 .replace('{JS_HARNESS}', js_harness)
+            content += '        <script src="' + js_filename + '"></script>'
             content += HTML_BOTTOM
             f.write(content)
 
-def build_html(html_dir, js_dir, infile_pat, shuffle, use_sync):
+def build_html(html_dir, use_sync):
     print("Building HTML tests...")
 
     js_html_dir = os.path.join(html_dir, 'js')
@@ -294,11 +288,15 @@ if __name__ == '__main__':
 
     if js_dir is not None:
         ensure_empty_dir(js_dir)
-        build_js(js_dir, infile_pat, shuffle)
+        for d in WAST_TEST_SUBDIRS:
+            ensure_empty_dir(os.path.join(js_dir, d))
+        build_js(js_dir)
 
     if html_dir is not None:
         ensure_empty_dir(html_dir)
-        build_html(html_dir, js_dir, infile_pat, shuffle, args.use_sync)
+        for d in WAST_TEST_SUBDIRS:
+            ensure_empty_dir(os.path.join(html_dir, d))
+        build_html(html_dir, args.use_sync)
 
     if front_dir is not None:
         ensure_empty_dir(front_dir)

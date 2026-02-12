@@ -15,12 +15,18 @@ The text format defines modules in S-expression syntax. Moreover, it is generali
 
 ## Building
 
-You'll need OCaml 4.12 or higher. Instructions for installing a recent version of OCaml on multiple platforms are available [here](https://ocaml.org/docs/install.html). On most platforms, the recommended way is through [OPAM](https://ocaml.org/docs/install.html#OPAM).
+You'll need OCaml 4.12 or higher. Instructions for installing a recent version of OCaml on multiple platforms are available [here](https://ocaml.org/docs/installing-ocaml). On most platforms, the recommended way is through [Opam](https://ocaml.org/docs/installing-ocaml#install-opam).
+
+You'll also need to install the dune build system. See the [installation instructions](https://github.com/ocaml/dune#installation-1).
+
+And you need to install the [Menhir](https://gallium.inria.fr/~fpottier/menhir/) parser generator:
+```
+opam install menhir
+```
 
 You'll also need to install the dune build system. See the [installation instructions](https://github.com/ocaml/dune#installation-1).
 
 Once you have OCaml, simply do
-
 ```
 make
 ```
@@ -179,17 +185,43 @@ float:  <num>.<num>?(e|E <num>)? | 0x<hexnum>.<hexnum>?(p|P <num>)?
 name:   $(<letter> | <digit> | _ | . | + | - | * | / | \ | ^ | ~ | = | < | > | ! | ? | @ | # | $ | % | & | | | : | ' | `)+
 string: "(<char> | \n | \t | \\ | \' | \" | \<hex><hex> | \u{<hex>+})*"
 
+num: <int> | <float>
+var: <nat> | <name>
+
+unop:  ctz | clz | popcnt | ...
+binop: add | sub | mul | ...
+relop: eq | ne | lt | ...
+sign:  s | u
+offset: offset=<nat>
+align: align=(1|2|4|8|...)
+cvtop: trunc | extend | wrap | ...
+castop: data | array | i31
+externop: internalize | externalize
+
 num_type: i32 | i64 | f32 | f64
 vec_type: v128
 vec_shape: i8x16 | i16x8 | i32x4 | i64x2 | f32x4 | f64x2 | v128
-ref_kind: func | extern
-ref_type: funcref | externref
+heap_type: any | eq | i31 | data | array | func | extern | none | nofunc | noextern | <var> | (rtt <var>)
+ref_type:
+  ( ref null? <heap_type> )
+  ( rtt <var> )               ;; = (ref (rtt <var>))
+  anyref                      ;; = (ref null any)
+  eqref                       ;; = (ref null eq)
+  i31ref                      ;; = (ref i31)
+  dataref                     ;; = (ref null data)
+  arrayref                    ;; = (ref null array)
+  funcref                     ;; = (ref null func)
+  externref                   ;; = (ref null extern)
+  nullref                     ;; = (ref null none)
+  nullfuncref                 ;; = (ref null nofunc)
+  nullexternref               ;; = (ref null noextern)
 val_type: <num_type> | <vec_type> | <ref_type>
 block_type : ( result <val_type>* )*
 func_type:   ( type <var> )? <param>* <result>*
 global_type: <val_type> | ( mut <val_type> )
 table_type:  <nat> <nat>? <ref_type>
 memory_type: <nat> <nat>?
+tag_type: ( type <var> )? <param>*
 
 num: <int> | <float>
 var: <nat> | <name>
@@ -202,7 +234,6 @@ sign:  s | u
 offset: offset=<nat>
 align: align=(1|2|4|8|...)
 cvtop: trunc | extend | wrap | ...
-
 vecunop: abs | neg | ...
 vecbinop: add | sub | min_<sign> | ...
 vecternop: bitselect
@@ -218,6 +249,7 @@ expr:
   ( loop <name>? <block_type> <instr>* )
   ( if <name>? <block_type> ( then <instr>* ) ( else <instr>* )? )
   ( if <name>? <block_type> <expr>+ ( then <instr>* ) ( else <instr>* )? ) ;; = <expr>+ (if <name>? <block_type> (then <instr>*) (else <instr>*)?)
+  ( try_table <name>? <block_type>  <catch>* <instr>* )
 
 instr:
   <expr>
@@ -226,18 +258,29 @@ instr:
   loop <name>? <block_type> <instr>* end <name>?                     ;; = (loop <name>? <block_type> <instr>*)
   if <name>? <block_type> <instr>* end <name>?                       ;; = (if <name>? <block_type> (then <instr>*))
   if <name>? <block_type> <instr>* else <name>? <instr>* end <name>? ;; = (if <name>? <block_type> (then <instr>*) (else <instr>*))
+  try_table <name>? <block_type> <catch>* <instr>* end <name>?       ;; = (try_table <name>? <block_type> <catch>* <instr>*)
 
 op:
   unreachable
   nop
+  drop
+  select
   br <var>
   br_if <var>
   br_table <var>+
-  return
+  br_on_null <var>
+  br_on_non_null <var>
+  br_on_cast <var> <ref_type> <ref_type>
+  br_on_cast_fail <var> <ref_type> <ref_type> 
   call <var>
-  call_indirect <var>? <func_type>
-  drop
-  select
+  call_ref <var>
+  call_indirect <var>? (type <var>)? <func_type>
+  return
+  return_call <var>
+  return_call_ref <var>
+  return_call_indirect <var>? (type <var>)? <func_type>
+  throw <tag_type>
+  throw_ref
   local.get <var>
   local.set <var>
   local.tee <var>
@@ -263,9 +306,26 @@ op:
   memory.copy
   memory.init <var>
   data.drop <var>
-  ref.null <ref_kind>
-  ref.is_null <ref_kind>
+  ref.null <heap_type>
   ref.func <var>
+  ref.is_null
+  ref_as_non_null
+  ref.test <var>
+  ref.cast <var>
+  ref.eq
+  i31.new
+  i31.get_<sign>
+  struct.new(_<default>)? <var>
+  struct.get(_<sign>)? <var> <var>
+  struct.set <var> <var>
+  array.new(_<default>)? <var>
+  array.new_fixed <var> <nat>
+  array.new_elem <var> <var>
+  array.new_data <var> <var>
+  array.get(_<sign>)? <var>
+  array.set <var>
+  array.len <var>
+  extern.<externop>
   <num_type>.const <num>
   <num_type>.<unop>
   <num_type>.<binop>
@@ -284,6 +344,12 @@ op:
   <vec_shape>.splat
   <vec_shape>.extract_lane(_<sign>)? <nat>
   <vec_shape>.replace_lane <nat>
+
+catch:
+  catch <var> <var>
+  catch_ref <var> <var>
+  catch_all <var>
+  catch_all_ref <var>
 
 func:    ( func <name>? <func_type> <local>* <instr>* )
          ( func <name>? ( export <string> ) <...> )                         ;; = (export <string> (func <N>)) (func <name>? <...>)
@@ -366,8 +432,9 @@ In order to be able to check and run modules for testing purposes, the S-express
 script: <cmd>*
 
 cmd:
-  <module>                                   ;; define, validate, and initialize module
-  ( register <string> <name>? )              ;; register module for imports
+  <module>                                   ;; define, validate, and possibly instantiate module
+  <instance>
+  ( register <string> <name>? )              ;; register module instance for imports
   <action>                                   ;; perform action and print results
   <assertion>                                ;; assert result of an action
   <meta>                                     ;; meta command
@@ -376,6 +443,10 @@ module:
   ...
   ( module <name>? binary <string>* )        ;; module in binary format (may be malformed)
   ( module <name>? quote <string>* )         ;; module quoted in text (may be malformed)
+  ( module definition <name>? binary ... )   ;; uninstantiated module
+
+instance:
+  ( module instance <name>? <name>? )        ;; instantiate latter module to former instance
 
 action:
   ( invoke <name>? <string> <const>* )       ;; invoke function export
@@ -385,23 +456,28 @@ const:
   ( <num_type>.const <num> )                 ;; number value
   ( <vec_type> <vec_shape> <num>+ )          ;; vector value
   ( ref.null <ref_kind> )                    ;; null reference
-  ( ref.extern <nat> )                       ;; host reference
+  ( ref.host <nat> )                         ;; host reference
+  ( ref.extern <nat> )                       ;; external host reference
 
 assertion:
-  ( assert_return <action> <result>* )       ;; assert action has expected results
+  ( assert_return <action> <result_pat>* )   ;; assert action has expected results
+  ( assert_exception <action> )              ;; assert action throws an exception
   ( assert_trap <action> <failure> )         ;; assert action traps with given failure string
   ( assert_exhaustion <action> <failure> )   ;; assert action exhausts system resources
   ( assert_malformed <module> <failure> )    ;; assert module cannot be decoded with given failure string
   ( assert_invalid <module> <failure> )      ;; assert module is invalid with given failure string
-  ( assert_unlinkable <module> <failure> )   ;; assert module fails to link
-  ( assert_trap <module> <failure> )         ;; assert module traps on instantiation
+  ( assert_unlinkable <instance> <failure> ) ;; assert module fails to link
+  ( assert_trap <instance> <failure> )       ;; assert module traps on instantiation
 
-result:
-  <const>
+result_pat:
   ( <num_type>.const <num_pat> )
   ( <vec_type>.const <vec_shape> <num_pat>+ )
-  ( ref.extern )
+  ( ref )
+  ( ref.null )
   ( ref.func )
+  ( ref.extern )
+  ( ref.<castop> )
+  ( either <result_pat>+ )                   ;; alternative results
 
 num_pat:
   <num>                                      ;; literal result
@@ -417,9 +493,17 @@ Commands are executed in sequence. Commands taking an optional module name refer
 
 After a module is _registered_ under a string name it is available for importing in other modules.
 
+The failure string in assertions exists for documentation purposes.
+The reference interpreter itself checks that the string is a prefix of the actual error message it generates.
+
 The script format supports additional syntax for defining modules.
 A module of the form `(module binary <string>*)` is given in binary form and will be decoded from the (concatenation of the) strings.
 A module of the form `(module quote <string>*)` is given in textual form and will be parsed from the (concatenation of the) strings. In both cases, decoding/parsing happens when the command is executed, not when the script is parsed, so that meta commands like `assert_malformed` can be used to check expected errors.
+
+Usually, a module declaration implicitly instantiates the module,
+that is, it defines both a module and an instance (of the same name).
+Instantiation can be suppressed by adding the keyword `definition`.
+A module declared as a definition only can then be instantiated explicitly, and multiple times, using the separate form `(module instance <inst_var> <module_name>)`.
 
 There are also a number of meta commands.
 The `script` command is a simple mechanism to name sub-scripts themselves. This is mainly useful for converting scripts with the `output` command. Commands inside a `script` will be executed normally, but nested meta are expanded in place (`input`, recursively) or elided (`output`) in the named script.
@@ -428,6 +512,7 @@ The `input` and `output` meta commands determine the requested file format from 
 
 The interpreter supports a "dry" mode (flag `-d`), in which modules are only validated. In this mode, all actions and assertions are ignored.
 It also supports an "unchecked" mode (flag `-u`), in which module definitions are not validated before use.
+In that mode, execution may fail with a "crash" error message.
 
 
 ### Spectest host module
@@ -435,14 +520,14 @@ It also supports an "unchecked" mode (flag `-u`), in which module definitions ar
 When running scripts, the interpreter predefines a simple host module named `"spectest"` that has the following module type:
 ```
 (module
-  (global (export "global_i32") i32)
-  (global (export "global_i64") i64)
-  (global (export "global_f32") f32)
-  (global (export "global_f64") f64)
+  (global (export "global_i32") i32)      ;; value 666
+  (global (export "global_i64") i64)      ;; value 666
+  (global (export "global_f32") f32)      ;; value 666.6
+  (global (export "global_f64") f64)      ;; value 666.6
 
-  (table (export "table") 10 20 funcref)
+  (table (export "table") 10 20 funcref)  ;; null-initialized
 
-  (memory (export "memory") 1 2)
+  (memory (export "memory") 1 2)          ;; zero-initialized
 
   (func (export "print"))
   (func (export "print_i32") (param i32))
@@ -473,24 +558,33 @@ cmd:
 
 module:
   ( module <name>? binary <string>* )        ;; module in binary format (may be malformed)
+  ( module definition <name>? binary ... )   ;; uninstantiated module
+
+instance:
+  ( module instance <name>? <name>? )        ;; instantiate latter module to former instance
 
 action:
-  ( invoke <name>? <string> <expr>* )        ;; invoke function export
+  ( invoke <name>? <string> <const>* )       ;; invoke function export
   ( get <name>? <string> )                   ;; get global export
 
 assertion:
-  ( assert_return <action> <result>* )       ;; assert action has expected results
+  ( assert_return <action> <result_pat>* )   ;; assert action has expected results
+  ( assert_exception <action> )              ;; assert action throws an exception
   ( assert_trap <action> <failure> )         ;; assert action traps with given failure string
   ( assert_exhaustion <action> <failure> )   ;; assert action exhausts system resources
   ( assert_malformed <module> <failure> )    ;; assert module cannot be decoded with given failure string
   ( assert_invalid <module> <failure> )      ;; assert module is invalid with given failure string
-  ( assert_unlinkable <module> <failure> )   ;; assert module fails to link
-  ( assert_trap <module> <failure> )         ;; assert module traps on instantiation
+  ( assert_unlinkable <instance> <failure> ) ;; assert module fails to link
+  ( assert_trap <instance> <failure> )       ;; assert module traps on instantiation
 
-result:
+result_pat:
   ( <num_type>.const <num_pat> )
-  ( ref.extern )
+  ( ref )
+  ( ref.null )
   ( ref.func )
+  ( ref.extern )
+  ( ref.<castop> )
+  ( either <result_pat>+ )                   ;; alternative results
 
 num_pat:
   <value>                                    ;; literal result

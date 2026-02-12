@@ -2,12 +2,12 @@ name: CI for interpreter & tests
 
 on:
   push:
-    branches: [ main ]
-    paths: [ interpreter/**, test/** ]
+    branches: [ main, wasm-3.0 ]
+    paths: [ .github/**, interpreter/**, test/** ]
 
   pull_request:
-    branches: [ main ]
-    paths: [ interpreter/**, test/** ]
+    branches: [ main, wasm-3.0 ]
+    paths: [ .github/**, interpreter/**, test/** ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -17,11 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 4.12.x
+          ocaml-compiler: 4.14.x
       - name: Setup OCaml tools
         run: opam install --yes ocamlfind.1.9.5 js_of_ocaml.4.0.0 js_of_ocaml-ppx.4.0.0
       - name: Build interpreter
