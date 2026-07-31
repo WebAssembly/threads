@@ -3,10 +3,9 @@
 This page describes a proposal for the post-MVP
 [threads feature :atom_symbol:][future threads].
 
-This proposal adds a new shared linear memory type and some new operations for
-atomic memory access. The responsibility of creating and joining threads is
-deferred to the embedder.
+Introduces concurrent execution capabilities by adding a new shared linear memory type and a suite of atomic memory operations. Rather than dictating how threads are spawned or joined within WebAssembly itself, the proposal intentionally defers thread management to the host environment—such as Web Workers in a JavaScript browser context. This design allows multiple execution agents to simultaneously access and modify the same linear memory block, enabling true parallel processing for computationally heavy WebAssembly applications.
 
+To ensure safe data manipulation across these shared environments, the feature includes new atomic instructions for loads, stores, read-modify-write sequences, and compare-exchange operations. Additionally, it provides low-level synchronization primitives like `memory.atomic.wait` and `memory.atomic.notify`. These tools allow developers to implement robust locking mechanisms (such as mutexes) and coordinate between threads directly within WebAssembly, preventing race conditions without incurring the overhead of repeatedly calling out to the host embedder.
 ## Example
 
 Here is an example of a naive mutex implemented in WebAssembly. It uses one
