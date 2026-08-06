@@ -924,7 +924,7 @@ class WasmModuleBuilder {
             section.emit_u8(imp.mutable);
           } else if (imp.kind == kExternalMemory) {
             var has_max = (typeof imp.maximum) != "undefined";
-            var is_shared = (typeof imp.shared) != "undefined";
+            var is_shared = !!imp.shared;
             if (is_shared) {
               section.emit_u8(has_max ? 3 : 2); // flags
             } else {
@@ -979,7 +979,7 @@ class WasmModuleBuilder {
       binary.emit_section(kMemorySectionCode, section => {
         section.emit_u8(1);  // one memory entry
         const has_max = wasm.memory.max !== undefined;
-        const is_shared = wasm.memory.shared !== undefined;
+        const is_shared = !!wasm.memory.shared;
         // Emit flags (bit 0: reszeable max, bit 1: shared memory)
         if (is_shared) {
           section.emit_u8(has_max ? kSharedHasMaximumFlag : 2);
