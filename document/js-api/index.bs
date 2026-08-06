@@ -710,6 +710,9 @@ To create a resizable memory buffer we perform the same steps as above, but also
     1. Assert: |map|[|memaddr|] [=map/exists=].
     1. Let |memory| be |map|[|memaddr|].
     1. Let |buffer| be |memory|.\[[BufferObject]].
+    1. If [$IsSharedArrayBuffer$](|buffer|) is true,
+        1. Let |block| be a [=Shared Data Block=] which is [=identified with=] the underlying memory of |memaddr|.
+        1. If |buffer|.\[[ArrayBufferByteLength]] is equal to the length of |block|, return.
     1. If [$IsFixedLengthArrayBuffer$](|buffer|) is true,
         1. If [$IsSharedArrayBuffer$](|buffer|) is false,
             1. Perform [=!=] [$DetachArrayBuffer$](|buffer|, "WebAssembly.Memory").
@@ -730,8 +733,11 @@ To create a resizable memory buffer we perform the same steps as above, but also
     1. Let |store| be [=mem_grow=](|store|, |memaddr|, |delta|).
     1. If |store| is [=error=], throw a {{RangeError}} exception.
     1. Set the [=surrounding agent=]'s [=associated store=] to |store|.
-    1. [=Refresh the memory buffer=] of |memaddr|.
+    1. Let <var ignore>limits</var> |share| be [=mem_type=](|store|, |memaddr|).
+    1. If |share| is unshared, [=refresh the Memory buffer=] of |memaddr|.
     1. Return |ret|.
+
+    Note: For shared memories, the refresh is deferred until the next access to the {{buffer}} property. This is a non-observable performance optimization.
 </div>
 
 <div algorithm=dom-Memory-grow>
@@ -747,7 +753,11 @@ Immediately after a WebAssembly [=memory.grow=] instruction executes, perform th
         1. Let |frame| be the [=current frame=].
         1. Assert: due to validation, |frame|.[=frame/module=].[=moduleinst/memaddrs=][0] exists.
         1. Let |memaddr| be the memory address |frame|.[=frame/module=].[=moduleinst/memaddrs=][0].
-        1. [=Refresh the memory buffer=] of |memaddr|.
+        1. Let |store| be the [=surrounding agent=]'s [=associated store=].
+        1. Let <var ignore>limits</var> |share| be [=mem_type=](|store|, |memaddr|).
+        1. If |share| is unshared, [=refresh the Memory buffer=] of |memaddr|.
+
+    Note: For shared memories, the refresh is deferred until the next access to the {{buffer}} property. This is a non-observable performance optimization.
 </div>
 
 <div algorithm=dom-Memory-toFixedLengthBuffer>
@@ -762,6 +772,7 @@ Immediately after a WebAssembly [=memory.grow=] instruction executes, perform th
             1. Set **this**.\[[BufferObject]] to |fixedBuffer|.
             1. Return |fixedBuffer|.
     1. Otherwise,
+        1. [=Refresh the Memory buffer=] of |memaddr|.
         1. Let |map| be the [=surrounding agent=]'s associated [=Memory object cache=].
         1. Assert: |map|[|memaddr|] [=map/exists=].
         1. Let |newMemory| be |map|[|memaddr|].
@@ -827,11 +838,12 @@ Immediately after a WebAssembly [=memory.grow=] instruction executes, perform th
 Note: (TODO) Check the error case of memory.grow on the Wasm side.
 
 <div algorithm>
-    The getter of the <dfn attribute for="Memory">buffer</dfn> attribute of {{Memory}} perfoms the following steps:
+    The getter of the <dfn attribute for="Memory">buffer</dfn> attribute of {{Memory}} performs the following steps:
 
     1. Let |memaddr| be **this**.\[[Memory]].
     1. Let |block| be a [=Data Block=] which is [=identified with=] the underlying memory of |memaddr|.
     1. If |block| is a [=Shared Data Block=],
+        1. [=Refresh the Memory buffer=] of |memaddr|.
         1. Let |map| be the [=surrounding agent=]'s associated [=Memory object cache=].
         1. Assert: |map|[|memaddr|] [=map/exists=].
         1. Let |newMemory| be |map|[|memaddr|].
