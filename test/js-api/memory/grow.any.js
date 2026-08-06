@@ -187,3 +187,40 @@ test(() => {
   assert_equals(newArray[0], 1, "new first element");
 
 }, "Growing shared memory does not detach old buffer");
+
+test(() => {
+  const argument = { "initial": 1 };
+  const memory = new WebAssembly.Memory(argument);
+  const oldMemory = memory.buffer;
+
+  const result = memory.grow(0);
+  assert_equals(result, 1);
+
+  const newMemory = memory.buffer;
+  assert_not_equals(oldMemory, newMemory, "Buffer identity must NOT be preserved on grow(0)");
+  assert_ArrayBuffer(oldMemory, { "detached": true }, "Buffer must be detached on grow(0)");
+}, "Growing non-shared memory by 0 does change the buffer");
+
+test(() => {
+  const argument = { "initial": 1, "maximum": 2, "shared": true };
+  const memory = new WebAssembly.Memory(argument);
+  const oldMemory = memory.buffer;
+
+  const result = memory.grow(0);
+  assert_equals(result, 1);
+
+  const newMemory = memory.buffer;
+  assert_equals(oldMemory, newMemory, "Buffer identity must be preserved on grow(0) for shared memory");
+}, "Growing shared memory by 0 does not change the buffer");
+
+
+test(() => {
+  const memory1 = new WebAssembly.Memory({ "initial": 1, "shared": true, "maximum": 2 });
+  const memory2 = new WebAssembly.Memory({ "initial": 1, "shared": true, "maximum": 2 });
+  const buffer1 = memory1.buffer;
+  const buffer2 = memory2.buffer;
+
+  memory1.grow(1);
+  assert_not_equals(buffer1, memory1.buffer);
+  assert_equals(buffer2, memory2.buffer, "Unrelated memory's buffer must be preserved");
+}, "Growing one shared memory does not affect unrelated shared memory");
